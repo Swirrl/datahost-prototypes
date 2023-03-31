@@ -1,0 +1,4 @@
+{:tpximpact.catql/schema {:sdl-resource "catql/catalog.graphql"}
+ :tpximpact.catql/service {:schema #ig/ref :tpximpact.catql/schema}
+ :tpximpact.catql/runnable-service {:service #ig/ref :tpximpact.catql/service} ;; Could probably combine these two components
+ }

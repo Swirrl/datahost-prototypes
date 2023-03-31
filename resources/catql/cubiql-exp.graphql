@@ -1,0 +1,312 @@
+################################################################################
+# THE NO-RUNTIME-SCHEMA-GENERATION SCHEMA
+################################################################################
+#
+# An example GraphQL schema modelling an RDF datacube.
+#
+# The primary constraint driving this schemas design is that it
+# requires no runtime / dynamic schema generation at all.
+#
+# This means that we can support this schema without any additional
+# intent capture, and that we don't require any process to keep the
+# API service in sync with PMD.
+#
+# Hence we could build this ontop of our existing SPARQL database
+#
+# Though we will suffer from the kinds of performance problems that we
+# currently do. Indeed, performance on a SPARQL database will likely
+# be slightly worse than with a hand rolled API, because of how
+# graphql resolvers work. Some of these performance problems due to
+# the nature of resolvers may be mitigated through caching and graphql
+# N+1 techniques (dataloaders/batching etc...) but the fundamental
+# limitations of SPARQL will remain.
+#
+################################################################################
+
+directive @href(
+  uri: String!
+) on FIELD_DEFINITION | OBJECT
+
+scalar ID
+scalar URL
+scalar LangTag
+scalar DateTime
+
+#scalar CURI
+
+
+interface Endpoint {
+  endpoint_id: String!
+  # ... various other drafter/endpoint style properties e.g.
+  # modified_at, created_at, version etc...
+}
+
+type CubeEndpoint implements Endpoint {
+  endpoint_id: String!
+  """
+  Find a datacube by its ID
+  """
+  datacube(id: ID!): DataCube
+}
+
+interface Labelled {
+  """
+  This RDF resources label.
+  """
+  label: String
+}
+
+interface Described {
+  """
+  This resources rdfs:description.
+  """
+  description: String
+}
+
+interface ComponentProperty {
+  id: ID!
+  value_id: ID!
+}
+
+type DimensionProperty implements ComponentProperty {
+  id: ID!
+  value_id: ID!
+}
+
+type MeasureProperty {
+  id: ID!
+  value: Float
+}
+
+type AttributeProperty {
+  id: ID!
+  value_id: ID!
+}
+
+type Code implements Labelled & Node {
+  id: ID!
+  label: String
+  notation: String
+  narrowers: [ID]
+}
+
+type Codelist implements Labelled & Node {
+  id: ID!
+  label: String
+  codes: [Code]
+}
+
+interface CodedProperty {
+  codelist : Codelist
+}
+
+type DimensionComponent implements Labelled & Node & CodedProperty {
+  id: ID!
+  label: String
+  codelist : Codelist
+}
+
+type MeasureComponent implements Labelled & Node {
+  id: ID!
+  label: String
+}
+
+type AttributeComponent implements Labelled & Node {
+  id: ID!
+  label: String
+  required: Boolean
+}
+
+type DataStructureDefinition {
+  dimension(id: ID): DimensionComponent
+  dimensions: [DimensionComponent]
+
+  measure(id: ID): MeasureComponent
+  measures: [MeasureComponent]
+
+  attribute(id: ID): AttributeComponent
+  attributes: [AttributeComponent]
+}
+
+interface Literal {
+  datatype_id : ID!
+  value : String!
+}
+
+type DataLiteral implements Literal {
+  datatype_id : ID!
+  value : String!
+}
+
+type LangString implements Literal {
+  datatype_id: ID!
+  lang_tag: LangTag!
+  value: String!
+}
+
+"""
+This interface is essentially the same as PropertyPathManyValueOrigin
+except all of the corresponding fields return just a single value.
+
+Implementations of this type may either raise an error or return null
+if for some reason there were many values, or they may implement a
+determinisitic means of selecting a single value from the many values
+they had.
+"""
+
+interface PropertyPathSingleValueOrigin {
+  """
+  Takes an array of ID's representing a property
+  path ending with an RDF datatype Literal, and
+  returns the Literal.
+  """
+  property_path_boolean(path:[ID!]!): Boolean
+  property_path_float(path:[ID!]!): Float
+  property_path_int(path:[ID!]!): Int
+  property_path_lang_string(path:[ID!]! lang_tag:LangTag!): LangString
+  property_path_literal(path:[ID!]!): Literal
+  property_path_string(path:[ID!]! lang_tag:LangTag): String
+  property_path_datetime(path:[ID!]!): DateTime
+
+
+  """
+  Takes an array of URI's representing a property
+  path ending with a resource URI, and
+  returns the final URI identifier.
+  """
+  property_path_uri(path:[ID!]!): ID
+
+}
+
+"""
+This interface supports all the same accessors as
+PropertyPathSingleValueOrigin except the accessors here
+all return arrays and potentially many values.
+
+Types implementing this interface act as an origin from
+which you can explore the Linked Data Graph.  Each of these
+accessors take a path of predicate URIs as an argument and will
+attempt to return an array of corresponding values of the designated
+type.
+
+Desired types are where possible filtered and cast to the type indicated
+by the final slug of the field name.  Note sometimes the casting
+maybe lossy, e.g. integers may overflow etc.  If you wish to avoid this you
+can use property_path_literals field, though note you will then
+be responsible for parsing the string representation of the value into
+an appropriate type yourself.
+"""
+
+interface PropertyPathManyValueOrigin {
+  """
+  Return the values at the end of path as an array of booleans.
+  """
+  property_path_booleans(path:[ID!]!): [Boolean!]
+  """
+  Return the values at the end of path as an array of floats.
+  """
+  property_path_floats(path:[ID!]!): [Float!]
+
+  """
+  Return the values at the end of path as an array of integers.
+  """
+  property_path_ints(path:[ID!]!): [Int!]
+
+  """
+  Returns an array of LangString object's corresponding to the path,
+  filtered by an optional lang_tag.
+  """
+  property_path_lang_strings(path:[ID!]! lang_tag:LangTag!): [LangString!]
+  """
+  Return the values at the end of path, as a Literal.
+  """
+  property_path_literals(path:[ID!]!): [Literal!]
+  """
+  Return potentially many Strings given a property path.  If lang_tag is
+  specified they will be filtered to that language.  If xsd is set to
+  true only xsd strings (non langstrings) will be returned.
+  """
+  property_path_strings(path:[ID!]! lang_tag:LangTag xsd: Boolean = false): [String!]
+
+
+  property_path_datetime(path:[ID!]!): [DateTime!]
+  """
+  Return potentially many URIs given a property path.
+  """
+  property_path_uris(path:[ID!]!): [ID!]
+}
+
+type GenericObservation implements Node & PropertyPathSingleValueOrigin {
+  attribute_value(attribute: ID!): ID!
+  attributes: [AttributeProperty]
+  dimension_value(dimension: ID!): ID!
+  dimensions: [DimensionProperty]
+  measure_value(measure: ID!): Float!
+  measures: [MeasureProperty]
+
+  property_path_uri(path: [ID!]!): ID
+
+  property_path_boolean(path:[ID!]!): Boolean
+  property_path_float(path:[ID!]!): Float
+  property_path_int(path:[ID!]!): Int
+  property_path_lang_string(path:[ID!]! lang_tag:LangTag!): LangString
+  property_path_literal(path:[ID!]!): Literal
+  property_path_string(path:[ID!]! lang_tag:LangTag): String
+  property_path_datetime(path:[ID!]!): DateTime
+
+  #property_path_value(path: [URI!]!): Literal
+  id: ID!
+}
+
+input DimVal {
+  dim_id: ID!
+  dim_vals: [ID!]!
+}
+
+"""
+A Linked Data Cube
+"""
+type DataCube implements Node & Labelled & Described {
+  id: ID!
+  label: String
+  description: String
+  """
+  Get information on the structure of this datacube.  In particular
+  the reference data it uses in the form of its dimensions, measures and attributes.
+  """
+  structure: DataStructureDefinition
+  """
+  Lookup all/many observations, and provide optional filters.
+  """
+  observations(filters:[DimVal]): [GenericObservation]
+  """
+  Lookup a single observation by URI.
+  """
+  observation(id:ID): GenericObservation
+}
+
+input PrefixDef {
+  prefix: String!
+  base_uri: URL!
+}
+
+################################################################################
+# Caching:  https://graphql.org/learn/global-object-identification/
+################################################################################
+
+# An object with a Globally Unique ID
+interface Node {
+  """
+  The identifier of this RDF resource (a URI).
+  """
+  id: ID!
+}
+
+# Root type
+"""
+Cubiql 2 root query
+"""
+type Query {
+  node(id: ID!): Node
+  endpoint(endpoint_id: String = "https://beta.gss-data.org.uk/sparql" prefixes:[PrefixDef]): CubeEndpoint
+}

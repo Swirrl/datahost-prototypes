@@ -1,0 +1,37 @@
+{:paths ["resources" "src"]
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        com.walmartlabs/lacinia-pedestal {:mvn/version "1.1"}
+        com.walmartlabs/lacinia {:mvn/version "1.2"}
+        integrant/integrant {:mvn/version "0.8.0"}
+        meta-merge/meta-merge {:mvn/version "1.0.0"}
+        grafter/vocabularies {:mvn/version "0.3.9"}
+        ;;swirrl/csv2rdf {:mvn/version "0.5.0"}
+        io.github.swirrl/grafter.repository {:mvn/version "3.0.0"}
+        com.yetanalytics/flint {:mvn/version "0.2.1"
+                                :exclusions [org.clojure/clojure
+                                             org.clojure/clojurescript]}
+        org.clojure/tools.logging {:mvn/version "1.2.4"}
+        org.apache.logging.log4j/log4j-api {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-core {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.20.0"} ; Redirect all SLF4J logs over the log4j2 backend
+
+        snowball-stemmer/snowball-stemmer {:mvn/version "0.1.1"}}
+
+ :aliases
+ {:run {:main-opts ["-m" "tpximpact.catql"]}
+  :run-x {:ns-default tpximpact.catql
+          :exec-fn inner-main
+          :exec-args {:name "Clojure"}}
+
+  :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}
+                 io.github.seancorfield/build-clj
+                 {:git/tag "v0.9.2" :git/sha "9c9f078"}
+
+                 io.github.juxt/pack.alpha {:git/sha "3e3b3f67b8c3d456c7dfb212691fb5161110722d"}}
+          :ns-default build}
+  :dev {:extra-paths ["env/dev/src" "env/dev/resources" "test"]
+        :extra-deps {integrant/repl {:mvn/version "0.3.2"}
+                     org.clojure/test.check {:mvn/version "1.1.1"}
+                     io.github.cognitect-labs/test-runner
+                     {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+        :jvm-opts ["-Dclojure.tools.logging.factory=clojure.tools.logging.impl/log4j2-factory"]}}}
