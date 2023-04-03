@@ -373,8 +373,7 @@
 (comment
 
 
-
-
+  ;; Eval this form to start at a REPL
   (do
 
     (ig/halt! sys)
@@ -382,5 +381,6 @@
     (def sys (start-system
               (load-configs ["catql/base-system.edn"])))
     )
+
 
   :end)
