@@ -13,7 +13,7 @@ clojure -M:run
 ## Dev
 
 Start a REPL switch to the namespace `tpximpact.catql` and evaluate
-the [rich comment block at the bottom of the file](https://github.com/Swirrl/catql-prototype/blob/c51460d8c1a9e3ff53f12627ab48aae40fa10e64/src/tpximpact/catql.clj#L378-L384).
+the [rich comment block at the bottom of the file](https://github.com/Swirrl/catql-prototype/blob/86741df6d849573df2801859880da9433e0e71af/src/tpximpact/catql.clj#L374-L380).
 
 
 
