@@ -107,9 +107,8 @@
   (s/keys :req-un [::sdl-resource]))
 
 
-(defmethod ig/init-key ::service [_ {:keys [schema join? port] :or {join? false port 8888}}]
-  (-> (lp/default-service schema nil)
-      (assoc :io.pedestal.http/port port)))
+(defmethod ig/init-key ::service [_ {:keys [schema] :as opts}]
+  (lp/default-service schema opts))
 
 ;; This is an adapted service map, that can be started and stopped.
 ;; From the REPL you can call http/start and http/stop on this service:
@@ -381,6 +380,7 @@
     (ig/halt! sys)
 
     (def sys (start-system
-              (load-configs ["catql/base-system.edn"]))))
+              (load-configs ["catql/base-system.edn"])))
+    )
 
   :end)
