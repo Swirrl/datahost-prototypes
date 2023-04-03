@@ -89,7 +89,7 @@
 (comment
   (def repo (repo/sparql-repo "https://beta.gss-data.org.uk/sparql"))
 
-  (query repo (-all-datasets default-catalog))
+  (query repo (-all-datasets {} default-catalog))
 
   :end)
 
@@ -352,9 +352,6 @@
 
 (defmethod ig/init-key ::schema [_ {:keys [sdl-resource]}]
   (load-schema sdl-resource))
-
-(derive :swirrl.cubiql-2.static/schema :swirrl.cubiql-2/schema)
-
 
 (defn -main [& args]
   (println "starting")
