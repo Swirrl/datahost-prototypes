@@ -51,18 +51,22 @@
                              :CatalogSearchResult/publishers]} catalog-uri]
   `{:prefixes ~default-prefixes
     :select :*
-    :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ?id]
+    :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
             ~@(constrain-ds-by-pred :dcterms/publisher publishers)
             ~@(constrain-ds-by-pred :dcterms/creator creators)
             ~@(constrain-ds-by-pred :dcat/theme themes)
-            {?id {:dcterms/title #{?title}
-                  :rdfs/label #{?label}
-                  :dcterms/modified #{?modified}}}
+            {~'?id {:dcterms/title #{~'?title}
+                    :rdfs/label #{~'?label}
+                    :dcterms/modified #{~'?modified}
+                    }}
             [:optional [[~'?id :dcterms/description ~'?description]]]
             [:optional [[~'?id :rdfs/comment ~'?comment]]]
-            [:optional [{?id {:dcterms/publisher #{?publisher}}}]]
-            [:optional [{?id {:dcat/theme #{?theme}}}]]
-            [:optional [{?id {:dcterms/creator #{?creator}}}]]
+
+            ;;;;;;;;;;;;;;;;;;;;
+            [:optional [{~'?id {:dcterms/publisher #{?publisher}}}]]
+            [:optional [{~'?id {:dcat/theme #{?theme}}}]]
+            [:optional [{~'?id {:dcterms/creator #{?creator}}}]]
+            ;;;;;;;;;;;;;;;;;;;;
 
             [:optional [{?id {:dcterms/issued #{?issued}}}]]]})
 
@@ -227,7 +231,6 @@
 
 (defn datasets-resolver [{:keys [::repo :CatalogSearchResult/search-string] :as context} _args {catalog-uri :id :as _value}]
   (let [results (query repo (-all-datasets context catalog-uri))]
-    ;;(sc.api/spy)
     (filter-results context results)))
 
 
@@ -237,6 +240,7 @@
                           :themes "ThemeFacet"})
 
 (defn constrain-by-facet [context facet-k values]
+  ;; use gensym (assuming we're not projecting)
   (let [facet-var (symbol (str "?" (name facet-k) "_constraint"))
         facet-label-var (symbol (str "?" (name facet-k) "_label"))
         pred (get facet-k->pred facet-k)]
@@ -261,32 +265,32 @@
             #_~@(when (seq datasets)
                   [[:values {'?id datasets}]])
 
-            ~@(constrain-by-facet context :themes themes)
-            ~@(constrain-by-facet context :publishers publishers)
-            ~@(constrain-by-facet context :creators creators)
+            ;; ~@(constrain-by-facet context :themes themes)
+            ;; ~@(constrain-by-facet context :publishers publishers)
+            ;; ~@(constrain-by-facet context :creators creators)
 
             [:optional [[~'?id :dcterms/publisher ~'?publisher]
-                        [~'?publisher :rdfs/label ~'?publisher_label]]]
+                        ;; [~'?publisher :rdfs/label ~'?publisher_label]
+                        ]]
             [:optional [[~'?id :dcat/theme ~'?theme]
-                        [~'?theme :rdfs/label ~'?theme_label]]]
-
+                        ;; [~'?theme :rdfs/label ~'?theme_label]
+                        ]]
             [:optional [[~'?id :dcterms/creator ~'?theme]
-                        [~'?creator :rdfs/label ~'?creator_label]]]]})
+                        ;; [~'?creator :rdfs/label ~'?creator_label]
+                        ]]]})
 
 (defn make-facet [facet-k results]
-  (->> results
-       (group-by facet-k)
-       (map (fn [[k col]]
-              (let [v (first col)
-                    label (get v (keyword (str (name facet-k) "_label")))
-                    facet-type (str (str/capitalize (subs (name facet-k) 0 (dec (count (name facet-k))))) "Facet")]
-
-                (schema/tag-with-type
-                                   {:id k
-                                    :label label
-                                    :count -10 ;; TODO count facet
-                                    }
-                                   facet-type))))))
+  (let [facet-type (str (str/capitalize (name facet-k)) "Facet")]
+    (->> results
+         (group-by facet-k)
+         (map (fn [[facet-id col]]
+                (when facet-id
+                  (schema/tag-with-type
+                   {:id facet-id
+                     ;; :label label
+                    :count (count col)}
+                   facet-type))))
+         (remove nil?))))
 
 (defn facets-resolver [{:keys [::repo
                                :CatalogSearchResult/search-string
@@ -302,11 +306,10 @@
                                                                                   :CatalogSearchResult/themes
                                                                                   :CatalogSearchResult/creators
                                                                                   #_:CatalogSearchResult/search-string])))]
-
-
-    {:creators (make-facet :creators results)
-     :publishers (make-facet :publishers results)
-     :themes (make-facet :themes results)}))
+    (sc.api/spy)
+    {:creators (make-facet :creator results)
+     :publishers (make-facet :publisher results)
+     :themes (make-facet :theme results)}))
 
 (defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
                                                                        themes :themes
@@ -373,7 +376,6 @@
 
   ;; Eval this form to start at a REPL
   (do
-
     (ig/halt! sys)
 
     (def sys (start-system

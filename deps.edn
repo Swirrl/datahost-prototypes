@@ -68,7 +68,8 @@
 
          }
 
-  :dev {:extra-paths ["test"]
+  :dev {:extra-paths ["env/dev/src" "env/dev/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}
-                     org.clojure/test.check {:mvn/version "1.1.1"}}
+                     org.clojure/test.check {:mvn/version "1.1.1"}
+                     vvvvalvalval/scope-capture {:mvn/version "0.3.3"}}
         :jvm-opts ["-Dclojure.tools.logging.factory=clojure.tools.logging.impl/log4j2-factory"]}}}
