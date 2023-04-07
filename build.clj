@@ -47,8 +47,8 @@
       ;; but alas, that is a lie.
       ;; https://github.com/juxt/pack.alpha/issues/101
 
-      ;; :to-registry-username "_json_key"
-      ;; :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
+      :to-registry-username "_json_key"
+      :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
 
       })))
 
