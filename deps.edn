@@ -28,24 +28,27 @@
                             "-Dcom.sun.management.jmxremote.authenticate=false"
                             "-Dcom.sun.management.jmxremote.port=3007"
                             "-Dlog4j2.formatMsgNoLookups=true"
-                            "-Dlog4j.configurationFile=log4j2.xml"
-                            ]
+                            "-Dlog4j.configurationFile=log4j2.xml"]
 
                  :main-opts ["-m" "tpximpact.catql"]}
 
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}
-                 io.github.seancorfield/build-clj
-                 {:git/tag "v0.9.2" :git/sha "9c9f078"}
+                 io.github.seancorfield/build-clj {:git/tag "v0.9.2" :git/sha "9c9f078"}
 
-                 io.github.juxt/pack.alpha {:git/sha "cbcbb7bd2602fcec39706e50bc11dd075cc5b5f6"}
+                 io.github.juxt/pack.alpha {:git/sha "843475881c5b3ba1a2c9f102f6f5f86f3293a574"}
+                 com.google.cloud.tools/jib-core {:mvn/version "0.23.0"}
                  ;;io.github.juxt/pack.alpha {:git/sha "3e3b3f67b8c3d456c7dfb212691fb5161110722d"}
 
                  ;;io.github.swirrl/pack.alpha {:git/sha "4d835ce4794b103fca5f0c1b5fbdfca903947241"}
                  }
           :ns-default build}
-  :dev {:extra-paths ["env/dev/src" "env/dev/resources" "test"]
+
+  :test {:extra-paths ["test"]
+         :extra-deps {lambdaisland/kaocha {:mvn/version "1.82.1306"}}
+         :exec-fn kaocha.runner/exec-fn
+         :exec-args {}}
+
+  :dev {:extra-paths ["test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}
-                     org.clojure/test.check {:mvn/version "1.1.1"}
-                     io.github.cognitect-labs/test-runner
-                     {:git/tag "v0.5.1" :git/sha "dfb30dd"}}
+                     org.clojure/test.check {:mvn/version "1.1.1"}}
         :jvm-opts ["-Dclojure.tools.logging.factory=clojure.tools.logging.impl/log4j2-factory"]}}}
