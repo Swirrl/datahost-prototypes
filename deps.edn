@@ -44,9 +44,19 @@
           :ns-default build}
 
   :test {:extra-paths ["test"]
-         :extra-deps {lambdaisland/kaocha {:mvn/version "1.82.1306"}}
+         :extra-deps {lambdaisland/kaocha {:mvn/version "1.82.1306"}
+                      lambdaisland/kaocha-junit-xml {:mvn/version "1.17.101"}}
          :exec-fn kaocha.runner/exec-fn
-         :exec-args {}}
+         :exec-args {:tests [{:id :unit
+                              :test-paths ["test"]
+                              :source-paths ["src"]}]
+                     :plugins [:kaocha.plugin/profiling :kaocha.plugin/junit-xml]
+                     :kaocha.plugin.junit-xml/target-file "test-results/kaocha/results.xml"
+                     :reporter kaocha.report/documentation
+
+                     }
+
+         }
 
   :dev {:extra-paths ["test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}
