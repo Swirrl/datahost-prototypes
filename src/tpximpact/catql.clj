@@ -17,7 +17,8 @@
             [clojure.set :as set]
             [tpximpact.rdf :as cqlrdf]
             [stemmer.snowball :as stem]
-            [io.pedestal.http :as http])
+            [io.pedestal.http :as http]
+            [dev :as dev])
   (:import [java.net URI])
   (:gen-class))
 
@@ -122,25 +123,6 @@
 
 (defmethod ig/halt-key! ::runnable-service [_ server]
   (http/stop server))
-
-
-(defn load-system-config [config]
-  (if config
-    (-> config
-        slurp
-        ig/read-string)
-    {}))
-
-(defn load-configs [configs]
-  (->> configs
-       (map (comp load-system-config io/resource))
-       (apply mm/meta-merge)))
-
-(defn start-system [config]
-  (-> config
-      (doto
-       (ig/load-namespaces))
-      ig/init))
 
 (defn- make-prefix-map [custom-prefixes]
   (let [custom-prefixes (zipmap (map :prefix custom-prefixes) (map (comp str :base_uri) custom-prefixes))]
@@ -356,31 +338,13 @@
   (load-schema sdl-resource))
 
 (defn -main [& args]
-  (let [config (load-configs ["catql/base-system.edn"
-                              ;; env.edn contains environment specific
-                              ;; overrides to the base-system.edn and
-                              ;; is set on classpath depending on env.
-                              "catql/env.edn"
-                              ])
+  (let [config (dev/load-configs ["catql/base-system.edn"
+                                 ;; env.edn contains environment specific
+                                 ;; overrides to the base-system.edn and
+                                 ;; is set on classpath depending on env.
+                                 "catql/env.edn"
+                                 ])
 
-        sys (start-system config)]
+        sys (dev/start-system config)]
 
     (log/info "System started")))
-
-
-
-
-
-(comment
-
-
-  ;; Eval this form to start at a REPL
-  (do
-    (ig/halt! sys)
-
-    (def sys (start-system
-              (load-configs ["catql/base-system.edn"])))
-    )
-
-
-  :end)
