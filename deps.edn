@@ -19,9 +19,6 @@
 
  :aliases
  {:run {:main-opts ["-m" "tpximpact.catql"]}
-  :run-x {:ns-default tpximpact.catql
-          :exec-fn inner-main
-          :exec-args {:name "Clojure"}}
 
   :catql/docker {:extra-paths ["env/docker/resources"]
                  :jvm-opts ["-Xmx4g"
