@@ -1,8 +1,7 @@
 (ns tpximpact.catql
-
   (:require [grafter-2.rdf4j.repository :as repo]
+            [clojure.tools.logging :as log]
             [com.yetanalytics.flint :as f]
-
             [com.walmartlabs.lacinia :as lacinia]
             [com.walmartlabs.lacinia.parser.schema :as parser]
             [com.walmartlabs.lacinia.executor :as executor]
@@ -10,11 +9,9 @@
             [com.walmartlabs.lacinia.schema :as schema]
             [com.walmartlabs.lacinia.util :as util]
             [com.walmartlabs.lacinia.pedestal2 :as lp]
-
             [clojure.spec.alpha :as s]
             [integrant.core :as ig]
             [meta-merge.core :as mm]
-
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.set :as set]
@@ -357,7 +354,6 @@
   (load-schema sdl-resource))
 
 (defn -main [& args]
-  (println "Starting")
   (let [config (load-configs ["catql/base-system.edn"
                               ;; env.edn contains environment specific
                               ;; overrides to the base-system.edn and
@@ -367,7 +363,7 @@
 
         sys (start-system config)]
 
-    (println "System started")))
+    (log/info "System started")))
 
 
 
