@@ -77,7 +77,7 @@
   (with-open [conn (repo/->connection repo)]
     (let [sparql (f/format-query query-data
                                  :pretty? true)]
-      (println sparql)
+      (log/info sparql)
       (into [] (repo/query conn sparql)))))
 
 
@@ -100,7 +100,6 @@
 (s/def ::sdl-resource string?)
 
 (defmethod ig/pre-init-spec ::schema [k]
-  (println "checking " k)
   (s/keys :req-un [::sdl-resource]))
 
 
@@ -114,7 +113,7 @@
         server (-> service
                    http/create-server
                    http/start)]
-    (println (str "CatQL running: http://" host ":" port "/"))
+    (log/info (str "CatQL running: http://" host ":" port "/"))
     server))
 
 (defmethod ig/halt-key! ::runnable-service [_ server]
