@@ -15,7 +15,7 @@
 (defn tag [s]
   (when s (str/replace s #"[^a-zA-Z0-9_.-]" "_")))
 
-(def repo "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/swirrl")
+(def repo "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public")
 
 (defn docker [opts]
   (let [tags (->> ["rev-parse HEAD"
