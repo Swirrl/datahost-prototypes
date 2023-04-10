@@ -19,7 +19,7 @@
 
 (defn docker [opts]
   (let [tags (->> ["rev-parse HEAD"
-                   "describe --tags"
+                   "describe --tags --always"
                    "branch --show-current"]
                   (map #(tag (b/git-process {:git-args %})))
                   (remove nil?))
