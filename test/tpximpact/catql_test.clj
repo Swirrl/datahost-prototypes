@@ -2,7 +2,8 @@
   (:require
    [clojure.test :refer :all]
    [clojure.walk :as walk]
-   [com.walmartlabs.lacinia :as lacinia]))
+   [com.walmartlabs.lacinia :as lacinia]
+   [tpximpact.catql :as sut]))
 
 (defn simplify
     "Converts all ordered maps nested within the map into standard hash
@@ -24,7 +25,7 @@
 
 (defn execute
   ([schema q]
-   (execute schema q {} context nil))
+   (execute schema q {} nil nil))
   ([schema q vars context]
    (execute schema q vars context nil))
   ([schema q vars context options]

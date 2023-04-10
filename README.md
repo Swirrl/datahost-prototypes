@@ -2,6 +2,26 @@
 
 Prototype of a basic graphql catalog service
 
+## Builds
+
+We deploy docker containers to [our public GCP hosted container registry(https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/public/catql?project=swirrl-devops-infrastructure-1):
+
+If the tests pass images are built and tagged with the following tags:
+
+- The name of the branch (branch name tags will be mutated to track passing CI builds from the branch)
+- The full commit sha of the passing build
+- The names of any commit tags (or a unique abreviated commit sha if there isn't one)
+
+This means that the latest `main` version can be found at:
+
+`europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/catql:main`
+
+## Deployment
+
+We currently deploy the CI built containers to [`idp-graphql-prototype`](https://console.cloud.google.com/compute/instancesDetail/zones/europe-west2-c/instances/idp-graphql-prototype?project=ons-pilot) a GCP instance via a [GCP container optimised image](https://cloud.google.com/container-optimized-os/docs).  This means we only need to ship containers and can avoid managing the O/S layer.
+
+The deployed system currently uses the [ONS beta's SPARQL endpoint](https://beta.gss-data.org.uk/sparql).
+
 ## Usage
 
 To start the app locally:
@@ -35,14 +55,6 @@ e.g.
 
 Start a REPL switch to the namespace `tpximpact.catql` and evaluate
 the [rich comment block at the bottom of the file](https://github.com/Swirrl/catql-prototype/blob/86741df6d849573df2801859880da9433e0e71af/src/tpximpact/catql.clj#L374-L380).
-
-
-
-
-
-
-
-
 
 ## License
 

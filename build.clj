@@ -15,11 +15,11 @@
 (defn tag [s]
   (when s (str/replace s #"[^a-zA-Z0-9_.-]" "_")))
 
-(def repo "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/swirrl")
+(def repo "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public")
 
 (defn docker [opts]
   (let [tags (->> ["rev-parse HEAD"
-                   "describe --tags"
+                   "describe --tags --always"
                    "branch --show-current"]
                   (map #(tag (b/git-process {:git-args %})))
                   (remove nil?))
@@ -30,25 +30,21 @@
       ;; tags the image with latest, even when we specify additional tags. So
       ;; choose a tag arbitrarily to be part of the :image-name, and then
       ;; provide the rest in :tags.
-      :image-name (str repo "/catql:" (first tags))#_(if (= :docker image-type)
-                    (str "catql:" (first tags))
-                    (str repo "/catql:" (first tags)))
+      :image-name (str repo "/catql:" (first tags))
       :tags (set (rest tags))
       :image-type image-type
-      ;;:include {"/app/config" ["./resources/drafter-auth0.edn"]}
 
-      ;;:base-image "gcr.io/distroless/java17-debian11:nonroot-arm64"
-      :base-image "eclipse-temurin:17"
-      ;;:base-image "gcr.io/distroless/java17-debian11"
+      :base-image "eclipse-temurin:17" ;; An openJDK 17 base docker provided by https://github.com/adoptium/containers#containers
+
       :platforms #{:linux/amd64 :linux/arm64}
+
       ;; NOTE Not as documented!
       ;; The docstring states that these should be
       ;;     :to-registry {:username ... :password ...}
       ;; but alas, that is a lie.
       ;; https://github.com/juxt/pack.alpha/issues/101
-
-      ;; :to-registry-username "_json_key"
-      ;; :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
+      :to-registry-username "_json_key"
+      :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
 
       })))
 

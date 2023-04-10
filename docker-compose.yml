@@ -1,8 +1,8 @@
 version: "3.9"
 services:
   catql:
-    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/swirrl/catql:main"
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/catql:main"
     #platform: linux/arm64/v8
     #platform: linux/amd64
     ports:
-      - "8888:8888"
+      - "8888:80"

@@ -113,10 +113,11 @@
 ;; This is an adapted service map, that can be started and stopped.
 ;; From the REPL you can call http/start and http/stop on this service:
 (defmethod ig/init-key ::runnable-service [_ {:keys [service]}]
-  (let [server (-> service
+  (let [{:io.pedestal.http/keys [host port]} service
+        server (-> service
                    http/create-server
                    http/start)]
-    (println "Cubiql running: http://localhost:8888/ide")
+    (println (str "CatQL running: http://" host ":" port "/"))
     server))
 
 (defmethod ig/halt-key! ::runnable-service [_ server]
@@ -124,9 +125,11 @@
 
 
 (defn load-system-config [config]
-  (-> config
-      slurp
-      ig/read-string))
+  (if config
+    (-> config
+        slurp
+        ig/read-string)
+    {}))
 
 (defn load-configs [configs]
   (->> configs
@@ -354,14 +357,17 @@
   (load-schema sdl-resource))
 
 (defn -main [& args]
-  (println "starting")
-  (let [config (load-configs ["catql/base-system.edn"])
+  (println "Starting")
+  (let [config (load-configs ["catql/base-system.edn"
+                              ;; env.edn contains environment specific
+                              ;; overrides to the base-system.edn and
+                              ;; is set on classpath depending on env.
+                              "catql/env.edn"
+                              ])
 
         sys (start-system config)]
 
-    (println "System started")
-    )
-  )
+    (println "System started")))
 
 
 
