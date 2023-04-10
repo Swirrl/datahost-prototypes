@@ -1,6 +1,14 @@
 {:paths ["resources" "src"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         com.walmartlabs/lacinia-pedestal {:mvn/version "1.1"}
+
+        ;;; begin com.walmartlabs/lacinia-pedestal
+        io.pedestal/pedestal.service {:mvn/version "0.5.11-beta-1"}
+        io.pedestal/pedestal.jetty {:mvn/version "0.5.11-beta-1"}
+        ;;; end com.walmartlabs/lacinia-pedestal
+
+
+        ;;io.pedestal/pedestal {:mvn/version "0.5.11-beta-1"}
         com.walmartlabs/lacinia {:mvn/version "1.2.1"}
         integrant/integrant {:mvn/version "0.8.0"}
         meta-merge/meta-merge {:mvn/version "1.0.0"}
