@@ -247,9 +247,9 @@
             #_~@(when (seq datasets)
                   [[:values {'?id datasets}]])
 
-            ;; ~@(constrain-by-facet context :themes themes)
-            ;; ~@(constrain-by-facet context :publishers publishers)
-            ;; ~@(constrain-by-facet context :creators creators)
+            ~@(constrain-by-facet context :themes themes)
+            ~@(constrain-by-facet context :publishers publishers)
+            ~@(constrain-by-facet context :creators creators)
 
             [:optional [[~'?id :dcterms/publisher ~'?publisher]
                         ;; [~'?publisher :rdfs/label ~'?publisher_label]
@@ -282,13 +282,11 @@
                        _args
                        {catalog-uri :id :as _value}]
 
-
   (let [results (query repo
                        (-all-facets context default-catalog (select-keys context [:CatalogSearchResult/publishers
                                                                                   :CatalogSearchResult/themes
                                                                                   :CatalogSearchResult/creators
                                                                                   #_:CatalogSearchResult/search-string])))]
-    (sc.api/spy)
     {:creators (make-facet :creator results)
      :publishers (make-facet :publisher results)
      :themes (make-facet :theme results)}))
