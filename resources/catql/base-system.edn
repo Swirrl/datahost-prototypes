@@ -1,5 +1,9 @@
 {:tpximpact.catql/schema {:sdl-resource "catql/catalog.graphql"}
  :tpximpact.catql/service {:schema #ig/ref :tpximpact.catql/schema
-                           :host "0.0.0.0"}
+                           :host "localhost"
+                           :port 8888
+                           :ide-path "/ide"
+                           :default-asset-path "/assets/graphiql"
+                           :default-subscriptions-path "/ws"}
  :tpximpact.catql/runnable-service {:service #ig/ref :tpximpact.catql/service} ;; Could probably combine these two components
  }
