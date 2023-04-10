@@ -4,7 +4,7 @@ Prototype of a basic graphql catalog service
 
 ## Builds
 
-We deploy docker containers to [our public GCP hosted container registry(https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/public/catql?project=swirrl-devops-infrastructure-1):
+[Our CircleCI instance](https://app.circleci.com/pipelines/github/Swirrl/catql-prototype) runs the tests and deploys docker containers to [our public GCP hosted container registry](https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/public/catql?project=swirrl-devops-infrastructure-1):
 
 If the tests pass images are built and tagged with the following tags:
 
