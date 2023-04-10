@@ -2,6 +2,20 @@
 
 Prototype of a basic graphql catalog service
 
+## Builds
+
+We deploy docker containers to [our GCP hosted container registry(https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/swirrl/catql?project=swirrl-devops-infrastructure-1):
+
+If the tests pass images are built and tagged with the following tags:
+
+- The name of the branch (branch name tags will be mutated to track passing CI builds from the branch)
+- The commit sha of the passing build
+- The names of any commit tags
+
+This means that the latest `main` version can be found at:
+
+`europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/swirrl/catql:main`
+
 ## Usage
 
 To start the app locally:
