@@ -101,11 +101,9 @@
             ]})
 
 (defn apply-facet-filter? [facet-id constraint-values context col]
-  (if
+  (boolean
    (and (seq (search/filter-results context col))
-        (constraint-values facet-id))
-    (do (println "search?" (search/filter-results context col)) 1)
-    0))
+        (constraint-values facet-id))))
 
 (defn make-facet [context constraint results]
   (let [facet-type (-> constraint name drop-last str/join str/capitalize (str "Facet"))
@@ -118,7 +116,7 @@
                   (schema/tag-with-type
                    {:id facet-id
                     :label "TODO: fetch labels"
-                    :count (apply-facet-filter? facet-id constraint-values context col)}
+                    :enabled (apply-facet-filter? facet-id constraint-values context col)}
                    facet-type))))
          (remove nil?)
          )))
