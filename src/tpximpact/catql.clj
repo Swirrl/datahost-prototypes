@@ -118,15 +118,12 @@
                     :label "TODO: fetch labels"
                     :enabled (apply-facet-filter? facet-id constraint-values context col)}
                    facet-type))))
-         (remove nil?)
-         )))
+         (remove nil?))))
 
 (defn facets-resolver [{:keys [::repo] :as context}
                        _args
                        {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-facets context catalog-uri))
-        ]
-    (sc.api/spy)
+  (let [results (query repo (-all-facets context catalog-uri))]
     {:creators (make-facet context :CatalogSearchResult/creators results)
      :publishers (make-facet context :CatalogSearchResult/publishers results)
      :themes (make-facet context :CatalogSearchResult/themes results)}))

@@ -61,7 +61,7 @@ type Dataset implements Node & Labelled & Described {
   modified: DateTime
   issued: DateTime
   publisher: String!
-  theme: [String]!
+  theme: String!
   creator: String!
 }
 
