@@ -1,25 +1,23 @@
 (ns tpximpact.catql
-  (:require [grafter-2.rdf4j.repository :as repo]
-            [clojure.tools.logging :as log]
-            [com.yetanalytics.flint :as f]
-            [com.walmartlabs.lacinia :as lacinia]
-            [com.walmartlabs.lacinia.parser.schema :as parser]
-            [com.walmartlabs.lacinia.executor :as executor]
-            [com.walmartlabs.lacinia.resolve :as resolve]
-            [com.walmartlabs.lacinia.schema :as schema]
-            [com.walmartlabs.lacinia.util :as util]
-            [com.walmartlabs.lacinia.pedestal2 :as lp]
-            [clojure.spec.alpha :as s]
-            [integrant.core :as ig]
-            [meta-merge.core :as mm]
-            [clojure.java.io :as io]
-            [clojure.string :as str]
-            [clojure.set :as set]
-            [tpximpact.rdf :as cqlrdf]
-            [stemmer.snowball :as stem]
-            [io.pedestal.http :as http]
-            [dev :as dev])
-  (:import [java.net URI])
+  (:require
+   [clojure.java.io :as io]
+   [clojure.spec.alpha :as s]
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [com.walmartlabs.lacinia.parser.schema :as parser]
+   [com.walmartlabs.lacinia.pedestal2 :as lp]
+   [com.walmartlabs.lacinia.resolve :as resolve]
+   [com.walmartlabs.lacinia.schema :as schema]
+   [com.walmartlabs.lacinia.util :as util]
+   [com.yetanalytics.flint :as f]
+   [grafter-2.rdf4j.repository :as repo]
+   [integrant.core :as ig]
+   [io.pedestal.http :as http]
+   [tpximpact.rdf :as cqlrdf]
+   [tpximpact.catql.search :as search]
+   [dev :as dev])
+  (:import
+   [java.net URI])
   (:gen-class))
 
 (def default-prefixes {:dcat (URI. "http://www.w3.org/ns/dcat#")
@@ -35,16 +33,17 @@
 
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
 
-(def facet-k->pred {:publishers :dcterms/publisher
-                    :creators :dcterms/creator
-                    :themes :dcat/theme})
+(defn query [repo query-data]
+  (with-open [conn (repo/->connection repo)]
+    (let [sparql (f/format-query query-data :pretty? true)]
+      (log/info sparql)
+      (into [] (repo/query conn sparql)))))
 
-(defn constrain-ds-by-pred [pred values]
-  (let [facet-var (symbol (str "?" (name pred)))]
+(defn constrain-by-pred [pred values]
+  (let [facet-var (gensym "?")]
     (if (seq values)
       [[:values {facet-var values}]
        ['?id pred facet-var]]
-
       [['?id pred facet-var]])))
 
 (defn -all-datasets [{:keys [:CatalogSearchResult/themes
@@ -53,46 +52,95 @@
   `{:prefixes ~default-prefixes
     :select :*
     :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
-            ~@(constrain-ds-by-pred :dcterms/publisher publishers)
-            ~@(constrain-ds-by-pred :dcterms/creator creators)
-            ~@(constrain-ds-by-pred :dcat/theme themes)
+            ~@(constrain-by-pred :dcterms/publisher publishers)
+            ~@(constrain-by-pred :dcterms/creator creators)
+            ~@(constrain-by-pred :dcat/theme themes)
             {~'?id {:dcterms/title #{~'?title}
                     :rdfs/label #{~'?label}
-                    :dcterms/modified #{~'?modified}
-                    }}
+                    :dcterms/modified #{~'?modified}}}
             [:optional [[~'?id :dcterms/description ~'?description]]]
             [:optional [[~'?id :rdfs/comment ~'?comment]]]
+            [:optional [{~'?id {:dcterms/publisher #{~'?publisher}}}]]
+            [:optional [{~'?id {:dcat/theme #{~'?theme}}}]]
+            [:optional [{~'?id {:dcterms/creator #{~'?creator}}}]]
+            [:optional [{~'?id {:dcterms/issued #{~'?issued}}}]]]})
 
-            ;;;;;;;;;;;;;;;;;;;;
-            [:optional [{~'?id {:dcterms/publisher #{?publisher}}}]]
-            [:optional [{~'?id {:dcat/theme #{?theme}}}]]
-            [:optional [{~'?id {:dcterms/creator #{?creator}}}]]
-            ;;;;;;;;;;;;;;;;;;;;
+(defn datasets-resolver [{:keys [::repo] :as context} _args {catalog-uri :id :as _value}]
+  (let [results (query repo (-all-datasets context catalog-uri))]
+    (search/filter-results context results)))
 
-            [:optional [{?id {:dcterms/issued #{?issued}}}]]]})
+
+(defn -all-facets [{:keys [:CatalogSearchResult/search-string
+                           :CatalogSearchResult/publishers
+                           :CatalogSearchResult/themes
+                           :CatalogSearchResult/creators] :as context} catalog-uri]
+  `{:prefixes ~default-prefixes
+    :select :*
+    :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
+            {~'?id {:dcterms/title #{~'?title}
+                    :rdfs/label #{~'?label}
+                    :dcterms/modified #{~'?modified}}}
+            ;; ~@(constrain-by-pred :dcterms/publisher publishers)
+            ;; ~@(constrain-by-pred :dcterms/creator creators)
+            ;; ~@(constrain-by-pred :dcat/theme themes)
+
+            [:optional [[~'?id :dcterms/description ~'?description]]]
+            [:optional [{~'?id {:dcterms/publisher #{~'?publishers}}}]]
+            [:optional [{~'?id {:dcat/theme #{~'?themes}}}]]
+            [:optional [{~'?id {:dcterms/creator #{~'?creators}}}]]
+
+            ;; [:optional [[~'?id :dcterms/publisher ~'?publisher]
+            ;;             ;; [~'?publisher :rdfs/label ~'?publisher_label]
+            ;;             ]]
+            ;; [:optional [[~'?id :dcat/theme ~'?theme]
+            ;;             ;; [~'?theme :rdfs/label ~'?theme_label]
+            ;;             ]]
+            ;; [:optional [[~'?id :dcterms/creator ~'?theme]
+            ;;             ;; [~'?creator :rdfs/label ~'?creator_label]
+            ;;             ]]
+            ]})
+
+(defn apply-facet-filter? [facet-id constraint-values context col]
+  (if
+   (and (seq (search/filter-results context col))
+        (constraint-values facet-id))
+    (do (println "search?" (search/filter-results context col)) 1)
+    0))
+
+(defn make-facet [context constraint results]
+  (let [facet-type (-> constraint name drop-last str/join str/capitalize (str "Facet"))
+        constraint-values (set (constraint context))
+        result-key (-> constraint name keyword)]
+    (->> results
+         (group-by result-key)
+         (map (fn [[facet-id col]]
+                (when facet-id
+                  (schema/tag-with-type
+                   {:id facet-id
+                    :label "TODO: fetch labels"
+                    :count (apply-facet-filter? facet-id constraint-values context col)}
+                   facet-type))))
+         (remove nil?)
+         )))
+
+(defn facets-resolver [{:keys [::repo] :as context}
+                       _args
+                       {catalog-uri :id :as _value}]
+  (let [results (query repo (-all-facets context catalog-uri))
+        ]
+    (sc.api/spy)
+    {:creators (make-facet context :CatalogSearchResult/creators results)
+     :publishers (make-facet context :CatalogSearchResult/publishers results)
+     :themes (make-facet context :CatalogSearchResult/themes results)}))
 
 (comment
-
   (f/format-query (-all-datasets {:CatalogSearchResult/publishers [(URI. "http://publisher")]} default-catalog)
                   :pretty? true)
-
   :end)
-
-(defn query [repo query-data]
-  (with-open [conn (repo/->connection repo)]
-    (let [sparql (f/format-query query-data
-                                 :pretty? true)]
-      (log/info sparql)
-      (into [] (repo/query conn sparql)))))
-
-
-
 
 (comment
   (def repo (repo/sparql-repo "https://beta.gss-data.org.uk/sparql"))
-
   (query repo (-all-datasets {} default-catalog))
-
   :end)
 
 
@@ -100,13 +148,10 @@
 ;; GraphQL
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-
 (s/def ::sdl-resource string?)
 
 (defmethod ig/pre-init-spec ::schema [k]
   (s/keys :req-un [::sdl-resource]))
-
 
 (defmethod ig/init-key ::service [_ {:keys [schema] :as opts}]
   (lp/default-service schema opts))
@@ -130,34 +175,15 @@
 
 (def valid-repo? #{"https://beta.gss-data.org.uk/sparql"})
 
-
-(defn endpoint-resolver [context {:keys [endpoint_id prefixes] :as args} value]
+(defn endpoint-resolver [_context {:keys [endpoint_id prefixes] :as _args} _value]
   (let [endpoint {:endpoint_id endpoint_id}
         prefix-map (make-prefix-map prefixes)]
-
     (if (valid-repo? endpoint_id)
       (resolve/with-context endpoint {::repo (repo/sparql-repo endpoint_id)
                                       ::prefixes prefix-map})
       (resolve/with-error {} {:message (str "Invalid endpoint '" endpoint_id "'")}))
     ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
     ))
-
-
-(defprotocol CuriToURI
-  (->uri [t context]))
-
-(extend-protocol CuriToURI
-  clojure.lang.Keyword
-  (->uri [_ context]
-    :id))
-
-(deftype CuriOrURI [v]
-  CuriToURI
-  (->uri [_ context]
-    (cqlrdf/curi->uri context v))
-  Object
-  (toString [_]
-    v))
 
 (defn catalog-query* [catalog]
   `{:prefixes ~default-prefixes
@@ -169,127 +195,6 @@
 (defn catalog-resolver [{:keys [::repo ::prefixes] :as _context} {:keys [id] :as _args} _value]
   (let [catalog (->uri id prefixes)] ;; TODO fix prefixes here to use flint format
     (first (query repo (catalog-query* catalog)))))
-
-(def snowball (stem/stemmer :english))
-
-(defn clean-chars [s]
-  (str/replace s #"[.-:(),&\-£'`“”]" ""))
-
-(def stopwords (-> (->> "./catql/stopwords-en.txt"
-                        io/resource
-                        io/reader
-                        line-seq
-                        (map clean-chars)
-                        set)))
-
-(defn tokenise
-  "Crude tokeniser to tokenise a string into snowball stems.
-
-  Always returns a set of tokens, or the empty set."
-  [s]
-  (let [lower-case (fnil str/lower-case "")]
-    (-> (->> (-> s
-                 lower-case
-                 (str/split #"\p{Space}+"))
-             (map clean-chars)
-             (remove stopwords)
-             (map snowball)
-             set)
-        (disj ""))))
-
-(defn filter-results [{:keys [:CatalogSearchResult/search-string] :as context} results]
-  (let [search-tokens (tokenise search-string)]
-    (->> results
-         (filter (fn [{:keys [title description]}]
-                   (let [data-tokens (tokenise (str title " " description))]
-                     ;; or
-                     #_(boolean (seq (set/intersection data-tokens search-tokens)))
-
-                     ;; and
-                     (= search-tokens
-                        (set/intersection data-tokens search-tokens))))))))
-
-
-
-(defn datasets-resolver [{:keys [::repo :CatalogSearchResult/search-string] :as context} _args {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-datasets context catalog-uri))]
-    (filter-results context results)))
-
-
-
-(def facet-k->facet-type {:publishers "PublisherFacet"
-                          :creators "CreatorFacet"
-                          :themes "ThemeFacet"})
-
-(defn constrain-by-facet [context facet-k values]
-  ;; use gensym (assuming we're not projecting)
-  (let [facet-var (symbol (str "?" (name facet-k) "_constraint"))
-        facet-label-var (symbol (str "?" (name facet-k) "_label"))
-        pred (get facet-k->pred facet-k)]
-    (-> [[:values {facet-var (if (seq values)
-                               values
-                               [nil])}]
-         ['?id pred facet-var]]
-        #_(cond->
-            (executor/selects-field? context
-                                  (keyword (facet-k->facet-type facet-k)
-                                           "label"))
-          (conj [:optional [[facet-var :rdfs/label facet-label-var]]])))))
-
-(defn -all-facets [context catalog-uri {:keys [:CatalogSearchResult/datasets
-                                               :CatalogSearchResult/search-string
-                                               :CatalogSearchResult/publishers
-                                               :CatalogSearchResult/themes
-                                               :CatalogSearchResult/creators] :as constraints}]
-  `{:prefixes ~default-prefixes
-    :select-distinct ~['?id '?publisher '?publisher_label '?creator '?creator_label '?theme '?theme_label]
-    :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
-            #_~@(when (seq datasets)
-                  [[:values {'?id datasets}]])
-
-            ~@(constrain-by-facet context :themes themes)
-            ~@(constrain-by-facet context :publishers publishers)
-            ~@(constrain-by-facet context :creators creators)
-
-            [:optional [[~'?id :dcterms/publisher ~'?publisher]
-                        ;; [~'?publisher :rdfs/label ~'?publisher_label]
-                        ]]
-            [:optional [[~'?id :dcat/theme ~'?theme]
-                        ;; [~'?theme :rdfs/label ~'?theme_label]
-                        ]]
-            [:optional [[~'?id :dcterms/creator ~'?theme]
-                        ;; [~'?creator :rdfs/label ~'?creator_label]
-                        ]]]})
-
-(defn make-facet [facet-k results]
-  (let [facet-type (str (str/capitalize (name facet-k)) "Facet")]
-    (->> results
-         (group-by facet-k)
-         (map (fn [[facet-id col]]
-                (when facet-id
-                  (schema/tag-with-type
-                   {:id facet-id
-                     ;; :label label
-                    :count (count col)}
-                   facet-type))))
-         (remove nil?))))
-
-(defn facets-resolver [{:keys [::repo
-                               :CatalogSearchResult/search-string
-                               :CatalogSearchResult/themes
-                               :CatalogSearchResult/creators
-                               :CatalogSearchResult/publishers] :as context}
-                       _args
-                       {catalog-uri :id :as _value}]
-
-  (let [results (query repo
-                       (-all-facets context default-catalog (select-keys context [:CatalogSearchResult/publishers
-                                                                                  :CatalogSearchResult/themes
-                                                                                  :CatalogSearchResult/creators
-                                                                                  #_:CatalogSearchResult/search-string])))]
-    {:creators (make-facet :creator results)
-     :publishers (make-facet :publisher results)
-     :themes (make-facet :theme results)}))
 
 (defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
                                                                        themes :themes
@@ -309,7 +214,7 @@
 
                                           ;; These can be CURI's or URI's however we can't handle them here
                                           ;; because we need access to the context.
-                                          :ID {:parse #(CuriOrURI. %)
+                                          :ID {:parse #(cqlrdf/CuriOrURI. %)
                                                :serialize str}
 
                                           :LangTag {:parse identity

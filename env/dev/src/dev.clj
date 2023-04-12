@@ -8,9 +8,11 @@
 (require 'sc.api)
 
 (defn load-system-config [config]
-  (-> config
-      slurp
-      ig/read-string))
+  (if config
+    (-> config
+        slurp
+        ig/read-string)
+    {}))
 
 (defn load-configs [configs]
   (->> configs
