@@ -1,8 +1,5 @@
 (ns dev
   (:require
-   [clojure.java.io :as io]
-   [integrant.core :as ig]
-   [meta-merge.core :as mm]
    [tpximpact.catql :as main]))
 
 ;; require scope capture as a side effect

@@ -13,6 +13,7 @@
    [grafter-2.rdf4j.repository :as repo]
    [integrant.core :as ig]
    [io.pedestal.http :as http]
+   [meta-merge.core :as mm]
    [tpximpact.rdf :as cqlrdf]
    [tpximpact.catql.search :as search])
   (:import
