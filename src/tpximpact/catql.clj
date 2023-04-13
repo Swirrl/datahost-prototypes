@@ -14,8 +14,7 @@
    [integrant.core :as ig]
    [io.pedestal.http :as http]
    [tpximpact.rdf :as cqlrdf]
-   [tpximpact.catql.search :as search]
-   [dev :as dev])
+   [tpximpact.catql.search :as search])
   (:import
    [java.net URI]
    [tpximpact.rdf CuriOrURI])
@@ -236,14 +235,32 @@
 (defmethod ig/init-key ::schema [_ {:keys [sdl-resource]}]
   (load-schema sdl-resource))
 
+(defn load-system-config [config]
+  (if config
+    (-> config
+        slurp
+        ig/read-string)
+    {}))
+
+(defn load-configs [configs]
+  (->> configs
+       (map (comp load-system-config io/resource))
+       (apply mm/meta-merge)))
+
+(defn start-system [config]
+  (-> config
+      (doto
+       (ig/load-namespaces))
+      ig/init))
+
 (defn -main [& args]
-  (let [config (dev/load-configs ["catql/base-system.edn"
+  (let [config (load-configs ["catql/base-system.edn"
                                  ;; env.edn contains environment specific
                                  ;; overrides to the base-system.edn and
                                  ;; is set on classpath depending on env.
                                  "catql/env.edn"
                                  ])
 
-        sys (dev/start-system config)]
+        sys (start-system config)]
 
     (log/info "System started")))
