@@ -17,7 +17,8 @@
    [tpximpact.catql.search :as search]
    [dev :as dev])
   (:import
-   [java.net URI])
+   [java.net URI]
+   [tpximpact.rdf CuriOrURI])
   (:gen-class))
 
 (def default-prefixes {:dcat (URI. "http://www.w3.org/ns/dcat#")
@@ -188,7 +189,7 @@
             [:optional [{~catalog {:rdfs/label #{?label}}}]]]})
 
 (defn catalog-resolver [{:keys [::repo ::prefixes] :as _context} {:keys [id] :as _args} _value]
-  (let [catalog (->uri id prefixes)] ;; TODO fix prefixes here to use flint format
+  (let [catalog (cqlrdf/->uri id prefixes)] ;; TODO fix prefixes here to use flint format
     (first (query repo (catalog-query* catalog)))))
 
 (defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
@@ -196,7 +197,7 @@
                                                                        creators :creators
                                                                        publishers :publishers}
                               {:keys [id] :as catalog-value}]
-  (let [coerce-uri #(->uri % prefixes)]
+  (let [coerce-uri #(cqlrdf/->uri % prefixes)]
     (resolve/with-context {:id id} {:CatalogSearchResult/search-string search-string
                                     :CatalogSearchResult/themes (map coerce-uri themes)
                                     :CatalogSearchResult/creators (map coerce-uri creators)
