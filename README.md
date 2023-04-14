@@ -1,6 +1,9 @@
 # catql
 
-Prototype of a basic graphql catalog service
+Prototype of a basic graphql catalog service.
+
+Please see our [usage guide](./doc/guide.md) for information on the
+rationale and how to query through this proof of concept service.
 
 ## Builds
 
