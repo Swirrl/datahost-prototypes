@@ -171,15 +171,15 @@
 
 (def valid-repo? #{"https://beta.gss-data.org.uk/sparql"})
 
-(defn endpoint-resolver [_context {:keys [endpoint_id prefixes] :as _args} _value]
-  (let [endpoint {:endpoint_id endpoint_id}
+(defn endpoint-resolver [_context {:keys [draftset_id prefixes] :as _args} _value]
+    ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
+  (let [endpoint_id draftset_id
+        endpoint {:endpoint_id endpoint_id}
         prefix-map (make-prefix-map prefixes)]
     (if (valid-repo? endpoint_id)
       (resolve/with-context endpoint {::repo (repo/sparql-repo endpoint_id)
                                       ::prefixes prefix-map})
-      (resolve/with-error {} {:message (str "Invalid endpoint '" endpoint_id "'")}))
-    ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
-    ))
+      (resolve/with-error {} {:message (str "Invalid endpoint '" endpoint_id "'")}))))
 
 (defn catalog-query* [catalog]
   `{:prefixes ~default-prefixes

@@ -36,13 +36,13 @@ scalar DateTime
 
 
 interface Endpoint {
-  endpoint_id: String!
+  draftset_id: String!
   # ... various other drafter/endpoint style properties e.g.
   # modified_at, created_at, version etc...
 }
 
 type CubeEndpoint implements Endpoint {
-  endpoint_id: String!
+  draftset_id: String!
   """
   Find a datacube by its ID
   """
@@ -308,5 +308,5 @@ Cubiql 2 root query
 """
 type Query {
   node(id: ID!): Node
-  endpoint(endpoint_id: String = "https://beta.gss-data.org.uk/sparql" prefixes:[PrefixDef]): CubeEndpoint
+  endpoint(draftset_id: String = "https://beta.gss-data.org.uk/sparql" prefixes:[PrefixDef]): CubeEndpoint
 }
