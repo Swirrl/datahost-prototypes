@@ -152,6 +152,12 @@
 (defmethod ig/init-key ::service [_ {:keys [schema] :as opts}]
   (lp/default-service schema opts))
 
+(defmethod ig/pre-init-spec ::drafter-base-uri [_]
+  string?)
+
+(defmethod ig/init-key ::drafter-base-uri [_ val]
+  val)
+
 ;; This is an adapted service map, that can be started and stopped.
 ;; From the REPL you can call http/start and http/stop on this service:
 (defmethod ig/init-key ::runnable-service [_ {:keys [service]}]
@@ -169,17 +175,15 @@
   (let [custom-prefixes (zipmap (map :prefix custom-prefixes) (map (comp str :base_uri) custom-prefixes))]
     (merge cqlrdf/default-prefixes custom-prefixes)))
 
-(def valid-repo? #{"https://beta.gss-data.org.uk/sparql"})
-
-(defn endpoint-resolver [_context {:keys [draftset_id prefixes] :as _args} _value]
+(defn endpoint-resolver [{:keys [drafter-base-uri] :as _context} {:keys [draftset_id prefixes] :as _args} _value]
     ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
-  (let [endpoint_id draftset_id
+  (let [endpoint_id (if draftset_id
+                      (throw (ex-info "The draftset_id parameter is not supported yet" {:type ::unsupported-parameter}))
+                      (str drafter-base-uri "/v1/sparql/live"))
         endpoint {:endpoint_id endpoint_id}
         prefix-map (make-prefix-map prefixes)]
-    (if (valid-repo? endpoint_id)
-      (resolve/with-context endpoint {::repo (repo/sparql-repo endpoint_id)
-                                      ::prefixes prefix-map})
-      (resolve/with-error {} {:message (str "Invalid endpoint '" endpoint_id "'")}))))
+    (resolve/with-context endpoint {::repo (repo/sparql-repo endpoint_id)
+                                    ::prefixes prefix-map})))
 
 (defn catalog-query* [catalog]
   `{:prefixes ~default-prefixes
@@ -203,38 +207,41 @@
                                     :CatalogSearchResult/creators (map coerce-uri creators)
                                     :CatalogSearchResult/publishers (map coerce-uri publishers)})))
 
-(defn load-schema [sdl-resource]
-    (-> (parser/parse-schema (slurp (io/resource sdl-resource)))
-        (util/inject-scalar-transformers {:URL {:parse #(java.net.URI. %)
-                                                :serialize str}
+(defn load-schema [{:keys [sdl-resource drafter-base-uri]}]
+  (-> (parser/parse-schema (slurp (io/resource sdl-resource)))
+      (util/inject-scalar-transformers {:URL {:parse #(java.net.URI. %)
+                                              :serialize str}
 
                                           ;; These can be CURI's or URI's however we can't handle them here
                                           ;; because we need access to the context.
-                                          :ID {:parse #(cqlrdf/CuriOrURI. %)
-                                               :serialize str}
+                                        :ID {:parse #(cqlrdf/CuriOrURI. %)
+                                             :serialize str}
 
-                                          :LangTag {:parse identity
-                                                    :serialize identity}
+                                        :LangTag {:parse identity
+                                                  :serialize identity}
 
-                                          :DateTime {:parse str
-                                                     :serialize str}})
+                                        :DateTime {:parse str
+                                                   :serialize str}})
 
-        (util/inject-resolvers {:Query/endpoint endpoint-resolver
+      (util/inject-resolvers {:Query/endpoint (fn [context args value]
+                                                (endpoint-resolver (assoc context
+                                                                          :drafter-base-uri drafter-base-uri)
+                                                                   args
+                                                                   value))
 
-                                :DataEndpoint/catalog catalog-resolver
-                                :Catalog/catalog_query catalog-query-resolver
+                              :DataEndpoint/catalog catalog-resolver
+                              :Catalog/catalog_query catalog-query-resolver
 
-                                :CatalogSearchResult/datasets datasets-resolver
-                                :CatalogSearchResult/facets facets-resolver
+                              :CatalogSearchResult/datasets datasets-resolver
+                              :CatalogSearchResult/facets facets-resolver})
 
-                                })
-        (schema/compile {:default-field-resolver schema/default-field-resolver
-                         :apply-field-directives (fn [field-def resolver-f]
+      (schema/compile {:default-field-resolver schema/default-field-resolver
+                       :apply-field-directives (fn [field-def resolver-f]
                                                    ;;(sc.api/spy)
-                                                   nil)})))
+                                                 nil)})))
 
-(defmethod ig/init-key ::schema [_ {:keys [sdl-resource]}]
-  (load-schema sdl-resource))
+(defmethod ig/init-key ::schema [_ opts]
+  (load-schema opts))
 
 (defn load-system-config [config]
   (if config

@@ -137,5 +137,5 @@ Cubiql 2 root query
 """
 type Query {
   node(id: ID!): Node
-  endpoint(draftset_id: String = "https://beta.gss-data.org.uk/sparql" prefixes:[PrefixDef]): DataEndpoint
+  endpoint(draftset_id: String prefixes:[PrefixDef]): DataEndpoint
 }

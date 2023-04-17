@@ -1,4 +1,8 @@
-{:tpximpact.catql/schema {:sdl-resource "catql/catalog.graphql"}
+{:tpximpact.catql/schema {:sdl-resource "catql/catalog.graphql"
+                          :drafter-base-uri #ig/ref :tpximpact.catql/drafter-base-uri}
+
+ :tpximpact.catql/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
+
  :tpximpact.catql/service {:schema #ig/ref :tpximpact.catql/schema
                            :host "localhost"
                            :port 8888
