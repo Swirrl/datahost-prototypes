@@ -66,7 +66,7 @@ type Dataset implements Node & Labelled & Described {
 }
 
 interface Endpoint {
-  draftset_id: String!
+  endpoint_id: String!
   # ... various other drafter/endpoint style properties e.g.
   # modified_at, created_at, version etc...
 }
@@ -123,7 +123,7 @@ type Catalog implements Node & Labelled {
 }
 
 type DataEndpoint implements Endpoint {
-  draftset_id: String!
+  endpoint_id: String!
   """
   Find a catalog by its ID
   """

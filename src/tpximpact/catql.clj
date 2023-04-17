@@ -179,7 +179,7 @@
     ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
   (let [endpoint_id (if draftset_id
                       (throw (ex-info "The draftset_id parameter is not supported yet" {:type ::unsupported-parameter}))
-                      (str drafter-base-uri "/v1/sparql/live"))
+                      (str drafter-base-uri "v1/sparql/live"))
         endpoint {:endpoint_id endpoint_id}
         prefix-map (make-prefix-map prefixes)]
     (resolve/with-context endpoint {::repo (repo/sparql-repo endpoint_id)

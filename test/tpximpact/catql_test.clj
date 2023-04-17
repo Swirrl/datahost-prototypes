@@ -36,11 +36,12 @@
 
 
 (deftest a-test
-  (let [schema (sut/load-schema "catql/catalog.graphql")]
+  (let [schema (sut/load-schema {:sdl-resource "catql/catalog.graphql"
+                                 :drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"})]
     (testing "Basic Queries"
       (is (= {:data
               {:endpoint
-               {:endpoint_id "https://beta.gss-data.org.uk/sparql"
+               {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live"
                 :catalog {:label "Datasets"}}}}
              (execute schema "
 query testQuery {
@@ -52,24 +53,11 @@ query testQuery {
    }
 }")))
 
-      (is (= {:data
-              {:endpoint
-               {:endpoint_id "https://beta.gss-data.org.uk/sparql",
-                :catalog {:label "Datasets"}}}}
 
-             (execute schema "
-query testQuery {
-   endpoint(endpoint_id:\"https://beta.gss-data.org.uk/sparql\",prefixes:{prefix: \"foo\" base_uri:\"http://foo.com/\"}) {
-     endpoint_id
-     catalog(id: \"http://gss-data.org.uk/catalog/datasets\") {
-       label
-     }
-   }
-}")))
 
       (is (= {:data
               {:endpoint
-               {:endpoint_id "https://beta.gss-data.org.uk/sparql",
+               {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live",
                 :catalog
                 {:catalog_query
                  {:datasets
@@ -108,6 +96,4 @@ query testQuery {
      }
    }
 }")
-                   (get-in [:data :endpoint :catalog :catalog_query :datasets])))))
-
-      )))
+                   (get-in [:data :endpoint :catalog :catalog_query :datasets]))))))))
