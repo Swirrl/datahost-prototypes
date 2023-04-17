@@ -192,8 +192,11 @@
             [:optional [{~catalog {:dcterms/title #{?title}}}]]
             [:optional [{~catalog {:rdfs/label #{?label}}}]]]})
 
-(defn catalog-resolver [{:keys [::repo ::prefixes] :as _context} {:keys [id] :as _args} _value]
-  (let [catalog (cqlrdf/->uri id prefixes)] ;; TODO fix prefixes here to use flint format
+(defn catalog-resolver [default-catalog-id
+                        {:keys [::repo ::prefixes] :as _context}
+                        {:keys [id] :as _args} _value]
+  ;; TODO fix prefixes here to use flint format
+  (let [catalog (cqlrdf/->uri (or id default-catalog-id) prefixes)]
     (first (query repo (catalog-query* catalog)))))
 
 (defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
@@ -231,7 +234,7 @@
                                                                    args
                                                                    value))
 
-                              :DataEndpoint/catalog catalog-resolver
+                              :DataEndpoint/catalog (partial catalog-resolver default-catalog-id)
                               :Catalog/catalog_query catalog-query-resolver
 
                               :CatalogSearchResult/datasets datasets-resolver
@@ -242,8 +245,11 @@
                                                    ;;(sc.api/spy)
                                                  nil)})))
 
-(defmethod ig/init-key ::schema [_ opts]
-  (load-schema opts))
+(defmethod ig/init-key ::schema [_ {:keys [sdl-resource default-catalog-id]}]
+  (load-schema sdl-resource default-catalog-id))
+
+(defmethod ig/init-key ::const [_ v] v)
+(derive ::default-catalog ::const)
 
 (defn load-system-config [config]
   (if config

@@ -43,6 +43,11 @@
   (->uri [_ context]
     :id))
 
+(extend-protocol CuriToURI
+  java.lang.String
+  (->uri [t context]
+    (curi->uri context t)))
+
 (deftype CuriOrURI [v]
   CuriToURI
   (->uri [_ context]
