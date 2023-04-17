@@ -118,14 +118,14 @@ type Catalog implements Node & Labelled {
     themes:[ID!],
     creators:[ID!],
     publishers:[ID!]
-  ): CatalogSearchResult
+ ): CatalogSearchResult
 
 }
 
 type DataEndpoint implements Endpoint {
   endpoint_id: String!
   """
-  Find a datacube by its ID
+  Find a catalog by its ID
   """
   catalog(id: ID!): Catalog
 }
@@ -136,6 +136,17 @@ type DataEndpoint implements Endpoint {
 Cubiql 2 root query
 """
 type Query {
+  """
+  NOTE: This is Not yet implemented.
+
+  But this is here to support the [global object identification](https://graphql.org/learn/global-object-identification/) pattern.
+  """
   node(id: ID!): Node
-  endpoint(endpoint_id: String = "https://beta.gss-data.org.uk/sparql" prefixes:[PrefixDef]): DataEndpoint
+
+  """
+  Queries within this field occur against the specified endpoint, by default that endpoint is the configured public/live site.
+
+  Though not yet supported the plan is if a Drafter `draftset_id` argument is passed that draftset will be used and otherwise the public/live endpoint.
+  """
+  endpoint(draftset_id: String prefixes:[PrefixDef]): DataEndpoint
 }
