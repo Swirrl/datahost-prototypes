@@ -1,8 +1,10 @@
 (ns tpximpact.catql-test
   (:require
+   [clojure.java.io :as io]
    [clojure.test :refer :all]
    [clojure.walk :as walk]
    [com.walmartlabs.lacinia :as lacinia]
+   [grafter-2.rdf4j.repository :as repo]
    [tpximpact.catql :as sut]))
 
 (defn simplify
@@ -34,10 +36,11 @@
        (dissoc :extensions))))
 
 
-
 (deftest a-test
   (let [schema (sut/load-schema {:sdl-resource "catql/catalog.graphql"
-                                 :drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"})]
+                                 :drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
+                                 :repo-constructor (constantly
+                                                    (repo/fixture-repo (io/resource "fixture-data.ttl")))})]
     (testing "Basic Queries"
       (is (= {:data
               {:endpoint
@@ -52,8 +55,6 @@ query testQuery {
      }
    }
 }")))
-
-
 
       (is (= {:data
               {:endpoint

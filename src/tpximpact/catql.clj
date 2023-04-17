@@ -175,14 +175,14 @@
   (let [custom-prefixes (zipmap (map :prefix custom-prefixes) (map (comp str :base_uri) custom-prefixes))]
     (merge cqlrdf/default-prefixes custom-prefixes)))
 
-(defn endpoint-resolver [{:keys [drafter-base-uri] :as _context} {:keys [draftset_id prefixes] :as _args} _value]
+(defn endpoint-resolver [{:keys [drafter-base-uri repo-constructor] :as _context} {:keys [draftset_id prefixes] :as _args} _value]
     ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
   (let [endpoint_id (if draftset_id
                       (throw (ex-info "The draftset_id parameter is not supported yet" {:type ::unsupported-parameter}))
                       (str drafter-base-uri "v1/sparql/live"))
         endpoint {:endpoint_id endpoint_id}
         prefix-map (make-prefix-map prefixes)]
-    (resolve/with-context endpoint {::repo (repo/sparql-repo endpoint_id)
+    (resolve/with-context endpoint {::repo (repo-constructor endpoint_id)
                                     ::prefixes prefix-map})))
 
 (defn catalog-query* [catalog]
@@ -207,7 +207,8 @@
                                     :CatalogSearchResult/creators (map coerce-uri creators)
                                     :CatalogSearchResult/publishers (map coerce-uri publishers)})))
 
-(defn load-schema [{:keys [sdl-resource drafter-base-uri]}]
+(defn load-schema
+  [{:keys [sdl-resource drafter-base-uri repo-constructor] :or {repo-constructor repo/sparql-repo}}]
   (-> (parser/parse-schema (slurp (io/resource sdl-resource)))
       (util/inject-scalar-transformers {:URL {:parse #(java.net.URI. %)
                                               :serialize str}
@@ -225,7 +226,8 @@
 
       (util/inject-resolvers {:Query/endpoint (fn [context args value]
                                                 (endpoint-resolver (assoc context
-                                                                          :drafter-base-uri drafter-base-uri)
+                                                                          :drafter-base-uri drafter-base-uri
+                                                                          :repo-constructor repo-constructor)
                                                                    args
                                                                    value))
 
