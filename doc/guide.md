@@ -95,6 +95,10 @@ We plan to eventually support queries like this, which will ask the
 same question of the appropriate draftset, at which point you will
 also be able to access appropriate metadata from the draft.
 
+Though be aware that we may wish to make some breaking schema changes
+around this
+([#18](https://github.com/Swirrl/catql-prototype/issues/18)).
+
 ```graphql
 {
   endpoint(draftset_id: "3703f62a-7c33-4d89-be60-d47aedbb9d1f") {
@@ -234,7 +238,7 @@ GraphQL queries must be wrapped into a JSON object conforming to the
 [GraphQL over HTTP](https://graphql.github.io/graphql-over-http/draft/)
 specification.
 
-Essentially they must be wrapped into a json object with at a minimum
+Essentially they must be wrapped into a JSON object with at a minimum
 a `query` key:
 
 ```
@@ -254,3 +258,60 @@ curl 'http://graphql-prototype.gss-data.org.uk/api' \
   }
 }"}'
 ```
+
+### Parameterised Queries
+
+A common use case is to have a static shape of query, which needs
+parameterised by one or more query variables. This can be done by
+supplying additional query variables as JSON.
+
+Firstly we need to name the query and provide the parameters it takes.
+We use define the `$query_string` variable with the type `String`, and
+we bind this to the appropriate part of our schema:
+
+```graphql
+query textQuery($query_string: String) {
+  endpoint {
+    catalog(id: "http://gss-data.org.uk/catalog/datasets") {
+      id
+      catalog_query(search_string: $query_string) {
+        datasets {
+          id
+          label
+          publisher
+        }
+      }
+    }
+  }
+}
+```
+
+We can then supply this parameter in an accompanying JSON map
+
+```json
+{"query_string": "rain"}
+```
+
+In the GraphQL over HTTP specification, this map is then supplied
+under the top level `variables` key:
+
+```
+curl 'http://graphql-prototype.gss-data.org.uk/api' \
+  -X POST \
+  -H 'content-type: application/json' \
+  --data '{"query": "{
+  endpoint {
+    catalog(id:\"http://gss-data.org.uk/catalog/datasets\") {
+      catalog_query(search_string: \"climate change\") {
+        datasets {
+          id
+          title
+        }
+      }
+    }
+  }
+}"}'
+```
+
+For more information on [parameterised queries see the GraphQL
+tutorial](https://graphql.org/learn/queries/#variables).
