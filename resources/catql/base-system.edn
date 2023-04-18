@@ -1,7 +1,8 @@
 {:tpximpact.catql/schema {:sdl-resource "catql/catalog.graphql"
-                          :default-catalog-id #ig/ref :tpximpact.catql/default-catalog
+                          :default-catalog-id #ig/ref :tpximpact.catql/default-catalog-id
                           :drafter-base-uri #ig/ref :tpximpact.catql/drafter-base-uri}
 
+ :tpximpact.catql/default-catalog-id "http://gss-data.org.uk/catalog/datasets"
  :tpximpact.catql/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
 
  :tpximpact.catql/service {:schema #ig/ref :tpximpact.catql/schema
@@ -11,4 +12,4 @@
                            :default-asset-path "/assets/graphiql"
                            :default-subscriptions-path "/ws"}
  :tpximpact.catql/runnable-service {:service #ig/ref :tpximpact.catql/service} ;; Could probably combine these two components
- :tpximpact.catql/default-catalog "http://gss-data.org.uk/catalog/datasets"}
+ }
