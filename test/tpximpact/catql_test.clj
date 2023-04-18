@@ -36,18 +36,20 @@
        (dissoc :extensions))))
 
 
-(deftest a-test
+(deftest queries-test
   (let [schema (sut/load-schema {:sdl-resource "catql/catalog.graphql"
                                  :drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
                                  :default-catalog-id "http://gss-data.org.uk/catalog/datasets"
                                  :repo-constructor (constantly
                                                     (repo/fixture-repo (io/resource "fixture-data.ttl")))})]
-    (testing "Basic Queries"
-      (is (= {:data
-              {:endpoint
-               {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live"
-                :catalog {:label "Datasets"}}}}
-             (execute schema "
+    (testing "Catalog Queries"
+      (testing "Basic Catalog Field Queries"
+        (testing "with default endpoint"
+          (is (= {:data
+                  {:endpoint
+                   {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live"
+                    :catalog {:label "Datasets"}}}}
+                 (execute schema "
 query testQuery {
    endpoint {
      endpoint_id
@@ -55,21 +57,54 @@ query testQuery {
        label
      }
    }
-}")))
+}"))))
+        (testing "with default catalog"
+          (is (= {:data
+                  {:endpoint
+                   {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live"
+                    :catalog {:id "http://gss-data.org.uk/catalog/datasets"
+                              :label "Datasets"}}}}
+                 (execute schema "
+query testQuery {
+   endpoint {
+     endpoint_id
+     catalog {
+       id
+       label
+     }
+   }
+}"))))
+        (testing "with supplied catalog URI"
+          (is (= {:data
+                  {:endpoint
+                   {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live"
+                    :catalog {:id "http://gss-data.org.uk/catalog/datasets"
+                              :label "Datasets"}}}}
+                 (execute schema "
+query testQuery {
+   endpoint {
+     endpoint_id
+     catalog(id: \"http://gss-data.org.uk/catalog/datasets\") {
+       id
+       label
+     }
+   }
+}")))))
 
-      (is (= {:data
-              {:endpoint
-               {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live",
-                :catalog
-                {:catalog_query
-                 {:datasets
-                  [{:id
-                    "http://gss-data.org.uk/data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services-catalog-entry"}
-                   {:id
-                    "http://gss-data.org.uk/data/gss_data/trade/ons-international-trade-in-services-catalog-entry"}
-                   {:id
-                    "http://gss-data.org.uk/data/gss_data/trade/ons-international-trade-in-services-by-subnational-areas-of-the-uk-catalog-entry"}]}}}}}
-             (execute schema "
+      (testing "Text search"
+        (is (= {:data
+                {:endpoint
+                 {:endpoint_id "https://idp-beta-drafter.publishmydata.com/v1/sparql/live",
+                  :catalog
+                  {:catalog_query
+                   {:datasets
+                    [{:id
+                      "http://gss-data.org.uk/data/gss_data/trade/dcms-sectors-economic-estimates-year-trade-in-services-catalog-entry"}
+                     {:id
+                      "http://gss-data.org.uk/data/gss_data/trade/ons-international-trade-in-services-catalog-entry"}
+                     {:id
+                      "http://gss-data.org.uk/data/gss_data/trade/ons-international-trade-in-services-by-subnational-areas-of-the-uk-catalog-entry"}]}}}}}
+               (execute schema "
 query testQuery {
    endpoint {
      endpoint_id
@@ -81,11 +116,12 @@ query testQuery {
        }
      }
    }
-}")))
+}"))))
 
-      (is (<= 100
-              (count
-               (-> (execute schema "
+      (testing "Unconstrained query"
+        (is (<= 100
+                (count
+                 (-> (execute schema "
 query testQuery {
    endpoint {
      endpoint_id
@@ -98,4 +134,4 @@ query testQuery {
      }
    }
 }")
-                   (get-in [:data :endpoint :catalog :catalog_query :datasets]))))))))
+                     (get-in [:data :endpoint :catalog :catalog_query :datasets])))))))))
