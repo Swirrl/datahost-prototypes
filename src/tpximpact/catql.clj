@@ -152,11 +152,17 @@
 (defmethod ig/init-key ::service [_ {:keys [schema] :as opts}]
   (lp/default-service schema opts))
 
+(defmethod ig/init-key ::const [_ v] v)
+
 (defmethod ig/pre-init-spec ::drafter-base-uri [_]
   string?)
 
-(defmethod ig/init-key ::drafter-base-uri [_ val]
-  val)
+(derive ::drafter-base-uri ::const)
+
+(defmethod ig/pre-init-spec ::default-catalog-id [_]
+  string?)
+
+(derive ::default-catalog-id ::const)
 
 ;; This is an adapted service map, that can be started and stopped.
 ;; From the REPL you can call http/start and http/stop on this service:
@@ -192,8 +198,10 @@
             [:optional [{~catalog {:dcterms/title #{?title}}}]]
             [:optional [{~catalog {:rdfs/label #{?label}}}]]]})
 
-(defn catalog-resolver [{:keys [::repo ::prefixes] :as _context} {:keys [id] :as _args} _value]
-  (let [catalog (cqlrdf/->uri id prefixes)] ;; TODO fix prefixes here to use flint format
+(defn catalog-resolver [{:keys [::repo ::prefixes ::default-catalog-id] :as _context}
+                        {:keys [id] :as _args} _value]
+  ;; TODO fix prefixes here to use flint format
+  (let [catalog (cqlrdf/->uri (or id default-catalog-id) prefixes)]
     (first (query repo (catalog-query* catalog)))))
 
 (defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
@@ -208,7 +216,8 @@
                                     :CatalogSearchResult/publishers (map coerce-uri publishers)})))
 
 (defn load-schema
-  [{:keys [sdl-resource drafter-base-uri repo-constructor] :or {repo-constructor repo/sparql-repo}}]
+  [{:keys [sdl-resource drafter-base-uri repo-constructor default-catalog-id]
+    :or {repo-constructor repo/sparql-repo}}]
   (-> (parser/parse-schema (slurp (io/resource sdl-resource)))
       (util/inject-scalar-transformers {:URL {:parse #(java.net.URI. %)
                                               :serialize str}
@@ -231,7 +240,11 @@
                                                                    args
                                                                    value))
 
-                              :DataEndpoint/catalog catalog-resolver
+                              :DataEndpoint/catalog (fn [context args value]
+                                                      (catalog-resolver (assoc context
+                                                                               ::default-catalog-id default-catalog-id)
+                                                                        args
+                                                                        value))
                               :Catalog/catalog_query catalog-query-resolver
 
                               :CatalogSearchResult/datasets datasets-resolver

@@ -127,7 +127,7 @@ type DataEndpoint implements Endpoint {
   """
   Find a catalog by its ID
   """
-  catalog(id: ID!): Catalog
+  catalog(id: ID): Catalog
 }
 
 
