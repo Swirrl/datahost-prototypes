@@ -5,7 +5,7 @@ This is a guide and introduction to querying the
 [new prototype GraphQL service](http://graphql-prototype.gss-data.org.uk/ide).
 
 **This document contains example queries, with links which will demonstrate
-them in the GraphiQL development environment.**
+them in the GraphiQL playground environment.**
 
 ## Rationale
 
@@ -39,7 +39,7 @@ We also believe the schema can be evolved in the future to support
 other needs such as querying and filtering datasets. For the time
 being these use cases are left out.
 
-## Using GraphiQL to build queries
+## Using the GraphiQL playground to build queries
 
 We provide a GraphiQL environment to assist in the creation of GraphQL
 queries, conforming to our schema at the following address:
