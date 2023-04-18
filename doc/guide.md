@@ -4,6 +4,9 @@ This is a guide and introduction to querying the
 [`beta.gss-data.org.uk`](https://beta.gss-data.org.uk/) site with a
 [new prototype GraphQL service](http://graphql-prototype.gss-data.org.uk/ide).
 
+**This document contains example queries, with links which will demonstrate
+them in the GraphiQL development environment.**
+
 ## Rationale
 
 This proof of concept prototype exists primarily to prove the
