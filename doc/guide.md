@@ -15,13 +15,14 @@ following concepts:
 1. That GraphQL can serve as an easier and more familiar way for
    developers to access some of the data we hold. For targetted use
    cases.
-2. That GraphQL schema can serve as a better interface to the data
-   than SPARQL, which is more aligned and optimised towards user and
-   platform needs. SPARQL is an incredibly flexible query language,
-   but that flexibility brings a performance cost, as SPARQL has to
-   target all possible use cases, where as a given GraphQL schema can
-   target and optimise performance for specific needs. We can hide
-   optimised services behind GraphQL schema/resolvers.
+2. That GraphQL schema can serve as a better interface to the data 
+   than SPARQL for some use cases, and be more easily aligned and 
+   optimised towards user and platform needs. SPARQL is an incredibly 
+   flexible query language, but that generality brings a performance 
+   cost, as SPARQL has to target all possible use cases, where as a 
+   given GraphQL schema can target and optimise performance for 
+   specific needs. We can then hide optimised services behind GraphQL 
+   schema/resolvers.  
 3. That we can seamlessly bridge the divide between Linked Data and
    GraphQL.
 
