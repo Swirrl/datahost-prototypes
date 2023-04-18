@@ -68,6 +68,7 @@ The simplest 'useful' query we currently support is:
   }
 }
 ```
+[Load Query into GraphiQL](http://graphql-prototype.gss-data.org.uk/ide?query=%7B%0A%20%20endpoint%20%7B%0A%20%20%20%20catalog%20%7B%0A%20%20%20%20%20%20id%0A%20%20%20%20%20%20label%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D%0A)
 
 This returns some basic metadata about the default catalog, if you're
 not familiar with GraphQL you will notice that the shape of the query
@@ -130,6 +131,7 @@ their `id`/`uri` and `title`:
   }
 }
 ```
+[Load Query into GraphIQL](http://graphql-prototype.gss-data.org.uk/ide?query=%7B%0A%20%20endpoint%20%7B%0A%20%20%20%20catalog%20%7B%0A%20%20%20%20%20%20catalog_query%20%7B%0A%20%20%20%20%20%20%20%20datasets%20%7B%0A%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20title%0A%20%20%20%20%20%20%20%20%20%20%23%20%3C--%20Put%20cursor%20to%20the%20left%20of%20this%20and%20press%20%60CTRL-%3Cspace%3E%60%20to%20auto%20complete%20additional%20metadata%20fields%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D)
 
 Be sure to note that if in GraphiQL you put the cursor at the
 appropriate point, you can complete additional metadata fields such as
@@ -163,6 +165,7 @@ This is easily done by providing a `search_string` argument to the
   }
 }
 ```
+[Load Query into GraphIQL](http://graphql-prototype.gss-data.org.uk/ide?query=%7B%0A%20%20endpoint%20%7B%0A%20%20%20%20catalog%20%7B%0A%20%20%20%20%20%20catalog_query(search_string%3A%20%22climate%20change%22)%20%7B%0A%20%20%20%20%20%20%20%20datasets%20%7B%0A%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20title%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D)
 
 The prototype currently implements this with a basic snowball token
 stemmer over the `title` and `description` fields, there is currently
@@ -216,6 +219,7 @@ like in the UI:
   }
 }
 ```
+[Load Query into GraphIQL](http://graphql-prototype.gss-data.org.uk/ide?query=%7B%0A%20%20endpoint%20%7B%0A%20%20%20%20catalog%20%7B%0A%20%20%20%20%20%20catalog_query(search_string%3A%22climate%20change%22)%20%7B%0A%20%20%20%20%20%20%20%20datasets%20%7B%0A%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20title%0A%20%20%20%20%20%20%20%20%20%20publisher%0A%20%20%20%20%20%20%20%20%20%20creator%0A%20%20%20%20%20%20%20%20%20%20theme%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20facets%20%7B%0A%20%20%20%20%20%20%20%20%20%20themes%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20%20%20label%0A%20%20%20%20%20%20%20%20%20%20%20%20enabled%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20publishers%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20%20%20label%0A%20%20%20%20%20%20%20%20%20%20%20%20enabled%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20creators%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20%20%20label%0A%20%20%20%20%20%20%20%20%20%20%20%20enabled%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D)
 
 The `facets` fields, `themes`, `publishers`, `creators`, will each
 return information on the `enabled` state of all available facets,
@@ -229,6 +233,45 @@ selections that only result in data. For example given a query on
 the `balance of payments` as selecting it in combination with a
 `climate change` search string would, (for the purposes of this
 example at least) be a dead end selection with no results.
+
+A query for "climate change" within the energy theme facet would then look like this:
+
+```graphql
+{
+  endpoint {
+    catalog {
+      catalog_query(search_string:"climate change"
+      						  themes:["http://gss-data.org.uk/def/gdp#energy"]) {
+        datasets {
+          id
+          title
+          publisher
+          creator
+          theme
+        }
+        facets {
+          themes {
+            id
+            label
+            enabled
+          }
+          publishers {
+            id
+            label
+            enabled
+          }
+          creators {
+            id
+            label
+            enabled
+          }
+        }
+      }
+    }
+  }
+}
+```
+
 
 ### Querying programmatically
 
@@ -315,3 +358,20 @@ curl 'http://graphql-prototype.gss-data.org.uk/api' \
 
 For more information on [parameterised queries see the GraphQL
 tutorial](https://graphql.org/learn/queries/#variables).
+
+
+### Unsupported Features
+
+The following features are currently unsupported, but could be
+supported in future iterations of the prototype or a production
+implementation of it:
+
+- Faceted search result sparseness detection
+- Sorting results
+  - by relevance
+  - by modified time
+  - by title
+- Paginated results
+- [Global Object Identification](https://graphql.org/learn/global-object-identification/)
+- [Querying arbitrary RDF metadata](https://github.com/Swirrl/catql-prototype/issues/16)
+- Dynamically building a JSON-LD context for GraphQL results
