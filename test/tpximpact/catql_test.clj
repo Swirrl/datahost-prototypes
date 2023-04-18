@@ -39,6 +39,7 @@
 (deftest a-test
   (let [schema (sut/load-schema {:sdl-resource "catql/catalog.graphql"
                                  :drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
+                                 :default-catalog-id "http://gss-data.org.uk/catalog/datasets"
                                  :repo-constructor (constantly
                                                     (repo/fixture-repo (io/resource "fixture-data.ttl")))})]
     (testing "Basic Queries"
@@ -50,7 +51,7 @@
 query testQuery {
    endpoint {
      endpoint_id
-     catalog(id: \"http://gss-data.org.uk/catalog/datasets\") {
+     catalog {
        label
      }
    }
@@ -72,7 +73,7 @@ query testQuery {
 query testQuery {
    endpoint {
      endpoint_id
-     catalog(id: \"http://gss-data.org.uk/catalog/datasets\") {
+     catalog {
        catalog_query(search_string: \"international trade services\") {
          datasets {
            id
@@ -88,7 +89,7 @@ query testQuery {
 query testQuery {
    endpoint {
      endpoint_id
-     catalog(id: \"http://gss-data.org.uk/catalog/datasets\") {
+     catalog {
        catalog_query {
          datasets {
            id
