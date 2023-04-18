@@ -2,7 +2,7 @@
 
 This is a guide and introduction to querying the
 [`beta.gss-data.org.uk`](https://beta.gss-data.org.uk/) site with a
-new prototype GraphQL service.
+[new prototype GraphQL service](http://graphql-prototype.gss-data.org.uk/ide).
 
 ## Rationale
 
