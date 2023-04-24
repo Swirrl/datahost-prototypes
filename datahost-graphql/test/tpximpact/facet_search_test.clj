@@ -91,7 +91,72 @@ query testQuery {
                     "https://www.gov.uk/government/organisations/hm-revenue-customs"]
                    (->> (h/facets-enabled result :publishers)
                         (map :id))))
+
             (is (= ["https://www.gov.uk/government/organisations/department-for-digital-culture-media-sport"
                     "https://www.gov.uk/government/organisations/hm-revenue-customs"]
+                   (->> (h/facets-enabled result :creators)
+                        (map :id)))))))
+
+      (testing "with multiple facets constrained"
+        (let [result (h/execute schema "
+query testQuery {
+  endpoint {
+    catalog {
+      id
+      catalog_query(themes: [\"http://gss-data.org.uk/def/gdp#climate-change\"]
+                    publishers: [\"https://www.gov.uk/government/organisations/met-office\"]) {
+        datasets {
+          id
+          theme
+          publisher
+        }
+        facets {
+          themes {
+            id
+            enabled
+          }
+          creators {
+            id
+            label
+          }
+          publishers {
+            id
+            enabled
+          }
+        }
+      }
+    }
+  }
+}
+")]
+          (testing "datasets are filtered by both facets"
+            (is (= 6 (count (h/result-datasets result))))
+            (is (= ["http://gss-data.org.uk/def/gdp#climate-change"]
+                   (->> result h/result-datasets (map :theme) distinct)))
+            (is (= ["https://www.gov.uk/government/organisations/met-office"]
+                   (->> result h/result-datasets (map :publisher) distinct))))
+
+          (testing "other selections within one facet are constrained by the other"
+            ;; themes that the met office publishes
+            (is (= ["http://gss-data.org.uk/def/gdp#climate-change"
+                    "https://www.ons.gov.uk/economy/environmentalaccounts"]
+                   (->> (h/facets-enabled result :themes)
+                        (map :id))))
+
+            ;; publishers that publish to the climate change theme
+            (is (= ["https://www.gov.uk/government/organisations/department-for-business-energy-and-industrial-strategy"
+                    "https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs"
+                    "https://www.gov.uk/government/organisations/met-office"
+                    "https://www.gov.uk/government/organisations/ministry-of-housing-communities-and-local-government"
+                    "https://www.gov.uk/government/organisations/forest-research"
+                    "https://www.gov.uk/government/organisations/department-for-levelling-up-housing-and-communities"
+                    "https://www.gov.uk/government/organisations/welsh-government"
+                    "https://www.gov.uk/government/organisations/department-for-energy-security-and-net-zero"]
+                   (->> (h/facets-enabled result :publishers)
+                        (map :id))))
+
+            ;; creators of datasets published by the met office to the climate change theme
+            (is (= ["https://www.gov.uk/government/organisations/the-meteorological-office"
+                    "https://www.gov.uk/government/organisations/met-office"]
                    (->> (h/facets-enabled result :creators)
                         (map :id))))))))))
