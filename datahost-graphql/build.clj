@@ -30,7 +30,7 @@
       ;; tags the image with latest, even when we specify additional tags. So
       ;; choose a tag arbitrarily to be part of the :image-name, and then
       ;; provide the rest in :tags.
-      :image-name (str repo "/catql:" (first tags))
+      :image-name (str repo "/datahost-graphql:" (first tags))
       :tags (set (rest tags))
       :image-type image-type
 
