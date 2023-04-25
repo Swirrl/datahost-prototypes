@@ -23,7 +23,7 @@ jobs:
           project-dir: datahost-graphql
           path: datahost-graphql/test-results
 
-  deploy:
+  deploy-graphql-service:
     docker:
       - image: cimg/clojure:1.11.1
         auth:
@@ -51,7 +51,7 @@ workflows:
           filters:  # required since `deploy` has tag filters AND requires `test`
             tags:
               only: /.*/
-      - deploy:
+      - deploy-graphql-service:
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
@@ -62,4 +62,4 @@ workflows:
             # branches:
             #   ignore: /.*/
           requires:
-            - test
+            - test-graphql-service
