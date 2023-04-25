@@ -16,10 +16,12 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Test"
-          command: "clojure -X:test"
+          name: "Test GraphQL Service"
+          command: "cd datahost-graphql && clojure -X:test"
+          project-dir: datahost-graphql
       - store_test_results:
-          path: test-results
+          project-dir: datahost-graphql
+          path: datahost-graphql/test-results
 
   deploy:
     docker:
@@ -33,7 +35,8 @@ jobs:
       - checkout
       - run:
           name: "Deploy docker image to registry"
-          command: "clojure -T:build docker :image-type :registry"
+          command: "cd datahost-graphql && clojure -T:build docker :image-type :registry"
+          project-dir: datahost-graphql
 
 
 # Invoke jobs via workflows
