@@ -1,5 +1,5 @@
-(ns tpximpact.rdf
-  (:import [java.net URI]))
+(ns tpximpact.datahost-graphql.rdf
+  (:import (java.net URI)))
 
 (def default-prefixes {:owl "http://www.w3.org/2002/07/owl#"
                        :qb "http://purl.org/linked-data/cube#"

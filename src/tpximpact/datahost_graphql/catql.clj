@@ -1,4 +1,4 @@
-(ns tpximpact.catql
+(ns tpximpact.datahost-graphql.catql
   (:require
    [clojure.java.io :as io]
    [clojure.spec.alpha :as s]
@@ -14,11 +14,11 @@
    [integrant.core :as ig]
    [io.pedestal.http :as http]
    [meta-merge.core :as mm]
-   [tpximpact.rdf :as cqlrdf]
-   [tpximpact.catql.search :as search])
+   [tpximpact.datahost-graphql.rdf :as cqlrdf]
+   [tpximpact.datahost-graphql.catql.search :as search])
   (:import
-   [java.net URI]
-   [tpximpact.rdf CuriOrURI])
+    [java.net URI]
+    (tpximpact.datahost_graphql.rdf CuriOrURI))
   (:gen-class))
 
 (def default-prefixes {:dcat (URI. "http://www.w3.org/ns/dcat#")
@@ -224,7 +224,7 @@
 
                                           ;; These can be CURI's or URI's however we can't handle them here
                                           ;; because we need access to the context.
-                                        :ID {:parse #(cqlrdf/CuriOrURI. %)
+                                        :ID {:parse #(CuriOrURI. %)
                                              :serialize str}
 
                                         :LangTag {:parse identity
@@ -235,8 +235,8 @@
 
       (util/inject-resolvers {:Query/endpoint (fn [context args value]
                                                 (endpoint-resolver (assoc context
-                                                                          :drafter-base-uri drafter-base-uri
-                                                                          :repo-constructor repo-constructor)
+                                                                     :drafter-base-uri drafter-base-uri
+                                                                     :repo-constructor repo-constructor)
                                                                    args
                                                                    value))
 

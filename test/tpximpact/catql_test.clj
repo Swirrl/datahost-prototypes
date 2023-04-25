@@ -5,7 +5,7 @@
    [clojure.walk :as walk]
    [com.walmartlabs.lacinia :as lacinia]
    [grafter-2.rdf4j.repository :as repo]
-   [tpximpact.catql :as sut]))
+   [tpximpact.datahost-graphql.catql :as sut]))
 
 (defn simplify
     "Converts all ordered maps nested within the map into standard hash

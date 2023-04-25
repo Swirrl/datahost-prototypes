@@ -1,4 +1,4 @@
-(ns tpximpact.catql.search
+(ns tpximpact.datahost-graphql.catql.search
   (:require
    [clojure.java.io :as io]
    [clojure.set :as set]
