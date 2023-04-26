@@ -1,7 +1,7 @@
 (ns dev
   (:require
    [integrant.core :as ig]
-   [tpximpact.catql :as main]))
+   [tpximpact.datahost.ldapi :as main]))
 
 ;; require scope capture as a side effect
 (require 'sc.api)

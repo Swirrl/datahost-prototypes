@@ -112,7 +112,7 @@
     (b/uber {:basis basis
              :class-dir class-dir
              :uber-file uberjar-file
-             :main 'tpximpact.catql})))
+             :main 'tpximpact.datahost.ldapi})))
 
 
 
