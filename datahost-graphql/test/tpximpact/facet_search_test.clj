@@ -3,7 +3,8 @@
    [clojure.test :refer :all]
    [tpximpact.test-helpers :as h]))
 
-(deftest facet-search-test
+(deftest ^{:kaocha/pending "https://github.com/Swirrl/catql-prototype/issues/8"}
+  facet-search-test
   (let [schema (h/catql-schema)]
     (testing "Faceted queries"
       (testing "with no facet constraints applied"
