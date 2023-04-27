@@ -3,11 +3,11 @@
             [clojure.string :as str]
             [juxt.pack.api :as pack]))
 
-(def lib 'tpximpact/catql)
+(def lib 'tpximpact/ldapi)
 (def version (format "2.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
-(def jar-file (format "target/catql-%s.jar" version))
-(def uberjar-file (format "target/catql-%s-standalone.jar" version))
+(def jar-file (format "target/ldapi-%s.jar" version))
+(def uberjar-file (format "target/ldapi-%s-standalone.jar" version))
 
 ;; A tag name must be valid ASCII and may contain lowercase and uppercase
 ;; letters, digits, underscores, periods and dashes

@@ -1,7 +1,7 @@
 (ns user)
 
 (defn help []
-  (println "Welcome to catql")
+  (println "Welcome to ldapi")
   (println)
   (println "Available commands are:")
   (println)
