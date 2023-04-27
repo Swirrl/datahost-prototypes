@@ -1,4 +1,4 @@
-(ns tpximpact.catql-test
+(ns tpximpact.ldapi-test
   (:require
     [clojure.test :refer :all]
     [clj-http.client :as http]
@@ -11,7 +11,7 @@
                                     ;; env.edn contains environment specific
                                     ;; overrides to the base-system.edn and
                                     ;; is set on classpath depending on env.
-                                    "catql/env.edn"])
+                                    "ldapi/env.edn"])
           sys (sut/start-system config)]
       (try
         (let [response (http/get "http://localhost:3400/")]

@@ -2,7 +2,7 @@
 <!-- Watch config file for changes every 5 seconds -->
 <Configuration status="info">
   <Appenders>
-    <File name="file-log" fileName="test-results/catql.log"
+    <File name="file-log" fileName="test-results/ldapi.log"
           append="false">
       <PatternLayout pattern="%-5p %20.20c{1} :: %m%n"/>
     </File>

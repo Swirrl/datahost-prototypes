@@ -53,10 +53,10 @@
       ig/init))
 
 (defn -main [& _args]
-  (let [config (load-configs ["catql/base-system.edn"
+  (let [config (load-configs ["ldapi/base-system.edn"
                               ;; env.edn contains environment specific
                               ;; overrides to the base-system.edn and
                               ;; is set on classpath depending on env.
-                              "catql/env.edn"])
+                              "ldapi/env.edn"])
         sys (start-system config)]
     (log/info "System started")))
