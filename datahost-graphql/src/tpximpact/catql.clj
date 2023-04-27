@@ -252,7 +252,6 @@
 
       (schema/compile {:default-field-resolver schema/default-field-resolver
                        :apply-field-directives (fn [field-def resolver-f]
-                                                   ;;(sc.api/spy)
                                                  nil)})))
 
 (defmethod ig/init-key ::schema [_ opts]

@@ -56,8 +56,15 @@ e.g.
 
 ## Dev
 
-Start a REPL switch to the namespace `tpximpact.catql` and evaluate
-the [rich comment block at the bottom of the file](https://github.com/Swirrl/catql-prototype/blob/86741df6d849573df2801859880da9433e0e71af/src/tpximpact/catql.clj#L374-L380).
+Start a REPL and from the user namespace first run:
+
+```clojure
+(dev)
+```
+
+Then use `(start!)` and `(reset!)` to start and restart the service against a local copy of static fixture data from the REPL.
+
+If you want to run against the live / beta site you can run `(start-live!)` and `(reset-live!)` respectively.
 
 To run tests run:
 
