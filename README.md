@@ -1,4 +1,6 @@
-# Prototypes
+# Datahost
+
+## Prototypes
 
 This monorepo contains prototypes for both the Datahost GraphQL Service and Datahost LD API Service. 
 
