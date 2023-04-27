@@ -1,10 +1,11 @@
-/target
-/classes
+.DS_Store
+/*target
+/*classes
 /checkouts
 *.jar
 *.class
 /.calva/output-window/
-/.cpcache
+.cpcache
 /.lein-*
 /.lsp/sqlite*.db
 /.nrepl-history
@@ -13,4 +14,7 @@
 /.socket-repl-port
 .hgignore
 .hg/
-/test-results/
+*/test-results/
+*.idea
+*.iml
+*.swp

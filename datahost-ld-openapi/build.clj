@@ -25,12 +25,12 @@
                   (remove nil?))
         image-type (get opts :image-type :docker)]
     (pack/docker
-     {:basis (b/create-basis {:project "deps.edn" :aliases [:catql/docker]})
+     {:basis (b/create-basis {:project "deps.edn" :aliases [:datahost-ld-openapi/docker]})
       ;; If we don't include a tag in the :image-name, then pack implicitly
       ;; tags the image with latest, even when we specify additional tags. So
       ;; choose a tag arbitrarily to be part of the :image-name, and then
       ;; provide the rest in :tags.
-      :image-name (str repo "/catql:" (first tags))
+      :image-name (str repo "/datahost-ld-openapi:" (first tags))
       :tags (set (rest tags))
       :image-type image-type
 
@@ -59,7 +59,7 @@
   [_opts]
   (let [basis (b/create-basis {:project "deps.edn" :aliases [:skinny]})]
     (pack/skinny {:basis basis
-                  :path "target/catql.jar"
+                  :path "target/datahost-ld-openapi.jar"
                   :path-coerce :jar
                   :libs "target/lib"
                   :lib-coerce :jar})))
@@ -112,7 +112,7 @@
     (b/uber {:basis basis
              :class-dir class-dir
              :uber-file uberjar-file
-             :main 'tpximpact.catql})))
+             :main 'tpximpact.datahost.ldapi})))
 
 
 

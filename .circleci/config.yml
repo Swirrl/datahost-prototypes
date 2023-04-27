@@ -5,7 +5,7 @@ version: 2.1
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  test:
+  test-graphql-service:
     docker:
       - image: cimg/clojure:1.11.1
         auth:
@@ -16,24 +16,54 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Test"
-          command: "clojure -X:test"
+          name: "Test GraphQL Service"
+          command: "cd datahost-graphql && clojure -X:test"
+          project-dir: datahost-graphql
       - store_test_results:
-          path: test-results
+          project-dir: datahost-graphql
+          path: datahost-graphql/test-results
 
-  deploy:
+  test-ld-openapi-service:
     docker:
       - image: cimg/clojure:1.11.1
         auth:
           username: $DOCKERHUB_USERNAME # can specify string literal values
           password: $DOCKERHUB_PASSWORD # or project environment variable reference
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run:
+          name: "Test GraphQL Service"
+          command: "cd datahost-ld-openapi && clojure -X:test"
+          project-dir: datahost-ld-openapi
+      - store_test_results:
+          project-dir: datahost-ld-openapi
+          path: datahost-ld-openapi/test-results
+
+  deploy-graphql-service:
+    docker:
+      - image: cimg/clojure:1.11.1
+        auth:
+          username: $DOCKERHUB_USERNAME # can specify string literal values
+          password: $DOCKERHUB_PASSWORD # or project environment variable reference
     steps:
       - checkout
       - run:
           name: "Deploy docker image to registry"
-          command: "clojure -T:build docker :image-type :registry"
+          command: "cd datahost-graphql && clojure -T:build docker :image-type :registry"
+          project-dir: datahost-graphql
+
+  deploy-ld-openapi-service:
+    docker:
+      - image: cimg/clojure:1.11.1
+        auth:
+          username: $DOCKERHUB_USERNAME # can specify string literal values
+          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+    steps:
+      - checkout
+      - run:
+          name: "Deploy docker image to registry"
+          command: "cd datahost-ld-openapi && clojure -T:build docker :image-type :registry"
+          project-dir: datahost-ld-openapi
 
 
 # Invoke jobs via workflows
@@ -41,14 +71,21 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - test:
+      - test-graphql-service:
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
           filters:  # required since `deploy` has tag filters AND requires `test`
             tags:
               only: /.*/
-      - deploy:
+      - test-ld-openapi-service:
+          context:
+            - swirrl-s3-jars-consumer
+            - swirrl-dockerhub-consumer
+          filters: # required since `deploy` has tag filters AND requires `test`
+            tags:
+              only: /.*/
+      - deploy-graphql-service:
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
@@ -59,4 +96,16 @@ workflows:
             # branches:
             #   ignore: /.*/
           requires:
-            - test
+            - test-graphql-service
+      - deploy-ld-openapi-service:
+          context:
+            - swirrl-s3-jars-consumer
+            - swirrl-dockerhub-consumer
+            - gcp-artifact-registry
+          filters:
+            tags:
+              only: /^v.*/
+            # branches:
+            #   ignore: /.*/
+          requires:
+            - test-ld-openapi-service
