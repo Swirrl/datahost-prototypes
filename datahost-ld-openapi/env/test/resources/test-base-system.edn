@@ -3,9 +3,9 @@
 
  :tpximpact.datahost.ldapi/api-handler {}
 
- :tpximpact.datahost.ldapi/runnable-service {:host "localhost"
-                                             :port 3400
-                                             :handler #ig/ref :tpximpact.datahost.ldapi/api-handler
-                                             :ide-path "/ld-api"
-                                             :default-subscriptions-path "/ws"}
+ :tpximpact.datahost.ldapi.jetty/runnable-service {:host "localhost"
+                                                   :port 3400
+                                                   :handler #ig/ref :tpximpact.datahost.ldapi/api-handler
+                                                   :ide-path "/ld-api"
+                                                   :default-subscriptions-path "/ws"}
  }
