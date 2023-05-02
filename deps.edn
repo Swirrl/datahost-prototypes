@@ -1,0 +1,52 @@
+{:deps {
+        ;; pinned common versions for the monorepo
+        org.clojure/clojure {:mvn/version "1.11.1"}
+
+        ring/ring-core {:mvn/version "1.7.1"}
+        ring/ring-jetty-adapter {:mvn/version "1.7.1"}
+
+        integrant/integrant {:mvn/version "0.8.0"}
+        meta-merge/meta-merge {:mvn/version "1.0.0"}
+        grafter/vocabularies {:mvn/version "0.3.9"}
+
+        io.github.swirrl/grafter.repository {:mvn/version "3.0.0"}
+        com.yetanalytics/flint {:mvn/version "0.2.1"
+                                :exclusions [org.clojure/clojure
+                                             org.clojure/clojurescript]}
+
+        org.clojure/tools.logging {:mvn/version "1.2.4"}
+        org.apache.logging.log4j/log4j-api {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-core {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
+        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.20.0"} ; Redirect all SLF4J logs over the log4j2 backend
+        org.apache.logging.log4j/log4j-layout-template-json {:mvn/version "2.20.0"}
+        }
+
+ :aliases {
+           :openapi {:extra-deps {datahost/datahost-ld-openapi {:local/root "datahost-ld-openapi"}}}
+           :graphql {:extra-deps {datahost/datahost-ld-openapi {:local/root "datahost-graphql"}}}
+
+           :test-runner {:extra-deps {lambdaisland/kaocha {:mvn/version "1.82.1306"}
+                                      lambdaisland/kaocha-junit-xml {:mvn/version "1.17.101"}}
+                         :exec-fn kaocha.runner/exec-fn
+                         :exec-args {:tests [{:id :unit}]
+                                     :plugins [:kaocha.plugin/profiling :kaocha.plugin/junit-xml]
+                                     :reporter kaocha.report/documentation
+                                     }}
+
+           :ld-openapi-test {:extra-paths ["datahost-ld-openapi/test" "datahost-ld-openapi/test"
+                                           "datahost-ld-openapi/env/test/resources" "datahost-ld-openapi/resources"]
+                             :extra-deps {datahost/datahost-ld-openapi {:local/root "datahost-ld-openapi"}}
+                             :exec-args {:tests [{:test-paths ["datahost-ld-openapi/test"]
+                                                  :source-paths ["datahost-ld-openapi/src"]}]
+                                         :kaocha.plugin.junit-xml/target-file "test-results/ld-openapi/kaocha/results.xml"
+                                         }}
+
+           :graphql-test {:extra-paths ["datahost-graphql/test" "datahost-graphql/test"
+                                        "datahost-graphql/env/test/resources" "datahost-graphql/resources"]
+                          :extra-deps {datahost/datahost-graphql {:local/root "datahost-graphql"}}
+                          :exec-args {:tests [{:test-paths ["datahost-graphql/test"]
+                                               :source-paths ["datahost-graphql/src"]}]
+                                      :kaocha.plugin.junit-xml/target-file "test-results/graphql/kaocha/results.xml"
+                                      }}
+           }
+ }

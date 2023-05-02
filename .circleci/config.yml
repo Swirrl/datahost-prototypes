@@ -17,11 +17,9 @@ jobs:
       - checkout
       - run:
           name: "Test GraphQL Service"
-          command: "cd datahost-graphql && clojure -X:test"
-          project-dir: datahost-graphql
+          command: "clojure -X:test-runner:graphql-test"
       - store_test_results:
-          project-dir: datahost-graphql
-          path: datahost-graphql/test-results
+          path: test-results/graphql
 
   test-ld-openapi-service:
     docker:
@@ -33,11 +31,9 @@ jobs:
       - checkout
       - run:
           name: "Test GraphQL Service"
-          command: "cd datahost-ld-openapi && clojure -X:test"
-          project-dir: datahost-ld-openapi
+          command: "clojure -X:test-runner:ld-openapi-test"
       - store_test_results:
-          project-dir: datahost-ld-openapi
-          path: datahost-ld-openapi/test-results
+          path: test-results/ld-openapi
 
   deploy-graphql-service:
     docker:

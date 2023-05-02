@@ -1,5 +1,6 @@
 {:paths ["resources" "src"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+ :deps {datahost/datahost {:local/root "../"}
+        ;org.clojure/clojure {:mvn/version "1.11.1"}
         com.walmartlabs/lacinia-pedestal {:mvn/version "1.1"}
 
         ;;; begin com.walmartlabs/lacinia-pedestal
@@ -7,24 +8,10 @@
         io.pedestal/pedestal.jetty {:mvn/version "0.5.11-beta-1"}
         ;;; end com.walmartlabs/lacinia-pedestal
 
-
-
-
         ;;io.pedestal/pedestal {:mvn/version "0.5.11-beta-1"}
         com.walmartlabs/lacinia {:mvn/version "1.2.1"}
-        integrant/integrant {:mvn/version "0.8.0"}
-        meta-merge/meta-merge {:mvn/version "1.0.0"}
-        grafter/vocabularies {:mvn/version "0.3.9"}
+
         ;;swirrl/csv2rdf {:mvn/version "0.5.0"}
-        io.github.swirrl/grafter.repository {:mvn/version "3.0.0"}
-        com.yetanalytics/flint {:mvn/version "0.2.1"
-                                :exclusions [org.clojure/clojure
-                                             org.clojure/clojurescript]}
-        org.clojure/tools.logging {:mvn/version "1.2.4"}
-        org.apache.logging.log4j/log4j-api {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-core {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.20.0"} ; Redirect all SLF4J logs over the log4j2 backend
-        org.apache.logging.log4j/log4j-layout-template-json {:mvn/version "2.20.0"}
 
         snowball-stemmer/snowball-stemmer {:mvn/version "0.1.1"}}
 
@@ -53,20 +40,13 @@
                  }
           :ns-default build}
 
-  :test {:extra-paths ["test" "env/test/resources"]
-         :extra-deps {lambdaisland/kaocha {:mvn/version "1.82.1306"}
-                      lambdaisland/kaocha-junit-xml {:mvn/version "1.17.101"}}
-         :exec-fn kaocha.runner/exec-fn
-         :exec-args {:tests [{:id :unit
-                              :test-paths ["test"]
-                              :source-paths ["src"]}]
-                     :plugins [:kaocha.plugin/profiling :kaocha.plugin/junit-xml]
-                     :kaocha.plugin.junit-xml/target-file "test-results/kaocha/results.xml"
-                     :reporter kaocha.report/documentation
-
-                     }
-
-         }
+  :ld-openapi-test {:extra-paths ["datahost-ld-openapi/test" "datahost-ld-openapi/test"
+                                  "datahost-ld-openapi/env/test/resources" "datahost-ld-openapi/resources"]
+                    :extra-deps {datahost/datahost-ld-openapi {:local/root "datahost-ld-openapi"}}
+                    :exec-args {:tests [{:test-paths ["datahost-ld-openapi/test"]
+                                         :source-paths ["datahost-ld-openapi/src"]}]
+                                :kaocha.plugin.junit-xml/target-file "test-results/ld-openapi/kaocha/results.xml"
+                                }}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}
