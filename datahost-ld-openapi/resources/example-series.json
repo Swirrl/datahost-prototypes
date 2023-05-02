@@ -1,0 +1,3 @@
+{"@context":["https://publishmydata.com/def/datahost/context",
+             {"@base": "http://example.org/data/"}],
+ "dcterms:title": "Example Series"}
