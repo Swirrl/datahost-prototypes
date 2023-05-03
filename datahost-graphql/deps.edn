@@ -1,5 +1,5 @@
 {:paths ["resources" "src"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+ :deps {datahost/shared {:local/root "../shared-deps"}
         com.walmartlabs/lacinia-pedestal {:mvn/version "1.1"}
 
         ;;; begin com.walmartlabs/lacinia-pedestal
@@ -7,25 +7,7 @@
         io.pedestal/pedestal.jetty {:mvn/version "0.5.11-beta-1"}
         ;;; end com.walmartlabs/lacinia-pedestal
 
-
-
-
-        ;;io.pedestal/pedestal {:mvn/version "0.5.11-beta-1"}
         com.walmartlabs/lacinia {:mvn/version "1.2.1"}
-        integrant/integrant {:mvn/version "0.8.0"}
-        meta-merge/meta-merge {:mvn/version "1.0.0"}
-        grafter/vocabularies {:mvn/version "0.3.9"}
-        ;;swirrl/csv2rdf {:mvn/version "0.5.0"}
-        io.github.swirrl/grafter.repository {:mvn/version "3.0.0"}
-        com.yetanalytics/flint {:mvn/version "0.2.1"
-                                :exclusions [org.clojure/clojure
-                                             org.clojure/clojurescript]}
-        org.clojure/tools.logging {:mvn/version "1.2.4"}
-        org.apache.logging.log4j/log4j-api {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-core {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.20.0"} ; Redirect all SLF4J logs over the log4j2 backend
-        org.apache.logging.log4j/log4j-layout-template-json {:mvn/version "2.20.0"}
-
         snowball-stemmer/snowball-stemmer {:mvn/version "0.1.1"}}
 
  :aliases
@@ -48,7 +30,6 @@
                  io.github.juxt/pack.alpha {:git/sha "802b3d6347376db51093d122eb4b8cf8a7bbd7cf"}
                  com.google.cloud.tools/jib-core {:mvn/version "0.23.0"}
                  ;;io.github.juxt/pack.alpha {:git/sha "3e3b3f67b8c3d456c7dfb212691fb5161110722d"}
-
                  ;;io.github.swirrl/pack.alpha {:git/sha "4d835ce4794b103fca5f0c1b5fbdfca903947241"}
                  }
           :ns-default build}

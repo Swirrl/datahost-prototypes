@@ -1,27 +1,13 @@
 {:paths ["resources" "src"]
- :deps {org.clojure/clojure {:mvn/version "1.11.1"}
-
-        ring/ring-core {:mvn/version "1.7.1"}
-        ring/ring-jetty-adapter {:mvn/version "1.7.1"}
+ :deps {datahost/shared {:local/root "../shared-deps"}
 
         clj-http/clj-http {:mvn/version "3.12.3"}
-
-        integrant/integrant {:mvn/version "0.8.0"}
-        meta-merge/meta-merge {:mvn/version "1.0.0"}
-        grafter/vocabularies {:mvn/version "0.3.9"}
         io.github.swirrl/grafter.repository {:mvn/version "3.0.0"}
 
         com.yetanalytics/flint {:mvn/version "0.2.1"
                                 :exclusions [org.clojure/clojure
                                              org.clojure/clojurescript]}
-
-        org.clojure/tools.logging {:mvn/version "1.2.4"}
-        org.apache.logging.log4j/log4j-api {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-core {:mvn/version "2.20.0"} ; Import log4j2 as the logging backend
-        org.apache.logging.log4j/log4j-slf4j-impl {:mvn/version "2.20.0"} ; Redirect all SLF4J logs over the log4j2 backend
-        org.apache.logging.log4j/log4j-layout-template-json {:mvn/version "2.20.0"}
-
-        snowball-stemmer/snowball-stemmer {:mvn/version "0.1.1"}}
+        }
 
  :aliases
  {:run {:main-opts ["-m" "tpximpact.datahost.ldapi"]}
