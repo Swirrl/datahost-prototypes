@@ -5,7 +5,8 @@
 
 
 (defmacro with-system [system-binding & body]
-  `(let [config# (ldapi-system/load-configs ["test-base-system.edn"
+  `(let [config# (ldapi-system/load-configs ["ldapi/base-system.edn"
+                                             "test-system.edn"
                                              ;; env.edn contains environment specific
                                              ;; overrides to the base-system.edn and
                                              ;; is set on classpath depending on env.
