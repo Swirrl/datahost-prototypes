@@ -32,7 +32,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Test GraphQL Service"
+          name: "Test LD Open API Service"
           command: "cd datahost-ld-openapi && clojure -X:test"
           project-dir: datahost-ld-openapi
       - store_test_results:
