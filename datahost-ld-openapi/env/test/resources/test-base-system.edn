@@ -8,4 +8,6 @@
                                                    :handler #ig/ref :tpximpact.datahost.ldapi/api-handler
                                                    :ide-path "/ld-api"
                                                    :default-subscriptions-path "/ws"}
+
+ :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "/tmp/ld-test-db"}
  }

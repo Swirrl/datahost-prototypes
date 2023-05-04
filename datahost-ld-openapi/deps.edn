@@ -3,6 +3,7 @@
 
         clj-http/clj-http {:mvn/version "3.12.3"}
         io.github.swirrl/grafter.repository {:mvn/version "3.0.0"}
+        dev.weavejester/medley {:mvn/version "1.7.0"}
 
         com.yetanalytics/flint {:mvn/version "0.2.1"
                                 :exclusions [org.clojure/clojure
