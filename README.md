@@ -10,6 +10,6 @@ This monorepo contains prototypes for both the Datahost GraphQL Service and Data
 
 ## License
 
-Copyright © 2023 TPXimpact Ltd
+Copyright © 2023 TPXimpact Data Ltd
 
 Distributed under the Eclipse Public License version 1.0.
