@@ -16,5 +16,4 @@
                           '[[?datasets a :dcat/Catalog]
                             [?datasets :rdfs/label ?label]]]]}
             results (sut/eager-query repo (fl/format-query qry :pretty? true))]
-        (clojure.pprint/pprint results)
         (is (= "Datasets" (-> results first :label)))))))
