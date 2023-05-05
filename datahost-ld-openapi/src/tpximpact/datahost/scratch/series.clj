@@ -7,7 +7,7 @@
             [malli.core :as m]
             [malli.error :as me]
             [malli.util :as mu]
-            )
+            [duratom.core :as db])
   (:import [java.net URI]
            [com.github.jsonldjava.core JsonLdProcessor RDFDatasetUtils JsonLdTripleCallback]
            [com.github.jsonldjava.utils JsonUtils]))
@@ -194,6 +194,19 @@
                             )]
        final-doc))))
 
+
+(comment
+
+  (def db (db/duratom :local-file
+                      :file-path ".datahostdb.edn"
+                      :commit-mode :sync
+                      :init {}))
+
+  (swap! db assoc "some-other-path" {"some" "jsonld"})
+
+  (db/destroy db)
+
+  )
 
 
 
