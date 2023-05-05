@@ -56,7 +56,7 @@
 
 (deftest normalise-series-test
   (testing "Invalid cases"
-    (testing "Missing key detail :slug"
+    (testing "Missing key detail :series-slug"
 
       (is (thrown? ExceptionInfo
                    (normalise-series {}
@@ -68,18 +68,18 @@
                                      {"@id" "my-dataset-series"}))))
 
     (is (thrown? ExceptionInfo
-                 (normalise-series {:slug "my-dataset-series"}
+                 (normalise-series {:series-slug "my-dataset-series"}
                                    {"@context" ["https://publishmydata.com/def/datahost/context"
                                                 {"@base" "https://different.base/is/invalid/"}]})))
     (is (thrown? clojure.lang.ExceptionInfo
-                 (normalise-series {:slug "my-dataset-series"}
+                 (normalise-series {:series-slug "my-dataset-series"}
                                    {"@context" ["https://publishmydata.com/def/datahost/context",
                                                 {"@base" "https://example.org/data/"}],
                                     "@id" "https://example.org/data/my-dataset-series"}))
         "@id usage in the series document is (for now) restricted to be in slugised form only"))
 
   (testing "Valid cases"
-    (let [returned-value (normalise-series {:slug "my-dataset-series"}
+    (let [returned-value (normalise-series {:series-slug "my-dataset-series"}
                                            {"@id" "my-dataset-series"})]
       (is (= {"@id" "my-dataset-series"
               "@context" ["https://publishmydata.com/def/datahost/context"
@@ -87,10 +87,10 @@
               "dh:base-entity" "https://example.org/data/my-dataset-series/"}
              returned-value))
 
-      (is (canonicalisation-idempotent? {:slug "my-dataset-series"} returned-value)))
+      (is (canonicalisation-idempotent? {:series-slug "my-dataset-series"} returned-value)))
 
     (testing "with title metadata"
-      (let [ednld (normalise-series {:slug "my-dataset-series"}
+      (let [ednld (normalise-series {:series-slug "my-dataset-series"}
                                     {"@context" ["https://publishmydata.com/def/datahost/context"
                                                  {"@base" "https://example.org/data/"}]
                                      "dcterms:title" "My Dataset Series"})]

@@ -102,7 +102,7 @@
    (m/comparator-schemas)
    (m/base-schemas)
    (m/type-schemas)
-   {:slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
+   {:series-slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
                                 #"^[a-z,A-Z,\-,0-9]+$"]]
     :url-string (m/-simple-schema {:type :url-string :pred
                                    (fn [x]
@@ -113,12 +113,12 @@
                                                  false))))})}))
 
 (def SeriesApiParams [:map
-                      [:slug :slug-string]
+                      [:series-slug :series-slug-string]
                       [:title {:optional true} :string]
                       [:description {:optional true} :string]])
 
 (def SeriesJsonLdInput [:map
-                        ["@id" :slug-string]
+                        ["@id" :series-slug-string]
                         ["dh:base-entity" :url-string]])
 
 (comment
@@ -127,25 +127,25 @@
               {:registry registry})
 
   (m/validate SeriesApiParams
-              {:slug "my-dataset-series" :title "foo"}
+              {:series-slug "my-dataset-series" :title "foo"}
               {:registry registry})
 
   (me/humanize (m/explain SeriesApiParams
-                          {:slug "foo-bar" :title "foo"}
+                          {:series-slug "foo-bar" :title "foo"}
                           {:registry registry}))
   )
 
-(defn validate-id [{:keys [slug] :as _api-params} cleaned-doc]
+(defn validate-id [{:keys [series-slug] :as _api-params} cleaned-doc]
   (let [id-in-doc (get cleaned-doc "@id")]
     (cond
       (nil? id-in-doc) cleaned-doc
 
-      (= slug id-in-doc) cleaned-doc
+      (= series-slug id-in-doc) cleaned-doc
 
       :else (throw
              (ex-info "@id should for now be expressed as a slugged style suffix, and if present match that supplied as the API slug."
                       {:supplied-id id-in-doc
-                       :expected-id slug})))))
+                       :expected-id series-slug})))))
 
 (defn validate-series-context [ednld]
   (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
@@ -159,7 +159,7 @@
     (update ednld "@context" normalise-context)))
 
 
-;; PUT /data/:slug
+;; PUT /data/:series-slug
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
   returns a normalised EDN form of the JSON-LD, with the API
@@ -167,7 +167,7 @@
   normalised."
   ([api-params]
    (normalise-series api-params nil))
-  ([{:keys [slug] :as api-params} doc]
+  ([{:keys [series-slug] :as api-params} doc]
    (let [jsonld-doc (into {} (load-jsonld doc))]
 
      (when-not (m/validate SeriesApiParams api-params {:registry registry})
@@ -189,8 +189,8 @@
 
            final-doc (assoc validated-doc
                             ;; add any managed params
-                            "@id" slug
-                            "dh:base-entity" (str ld-root slug "/") ;; coin base-entity to serve as the @base for nested resources
+                            "@id" series-slug
+                            "dh:base-entity" (str ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
                             )]
        final-doc))))
 
@@ -230,7 +230,7 @@
 
   (ednld->rdf data)
 
-  (create-series {:slug "my-dataset-series"
+  (create-series {:series-slug "my-dataset-series"
                   :title "new title"
                   :description "blah blah"}
                  (io/file "./resources/example-series.json"))
