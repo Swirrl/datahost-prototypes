@@ -63,7 +63,14 @@
     (is (thrown? ExceptionInfo
                  (normalise-series {:slug "my-dataset-series"}
                                    {"@context" ["https://publishmydata.com/def/datahost/context"
-                                                {"@base" "https://different.base/is/invalid/"}]}))))
+                                                {"@base" "https://different.base/is/invalid/"}]})))
+    (is (thrown? clojure.lang.ExceptionInfo
+                 (normalise-series {:slug "my-dataset-series"}
+                                   {"@context" ["https://publishmydata.com/def/datahost/context",
+                                                {"@base" "https://example.org/data/"}],
+                                    "@id" "https://example.org/data/my-dataset-series"}))
+        "@id usage in the series document is (for now) restricted to be in slugised form only"))
+
 
   (testing "Valid cases"
     (let [returned-value (normalise-series {:slug "my-dataset-series"}
@@ -82,12 +89,7 @@
                                              {"@base" "https://example.org/data/"}]
                                  "dcterms:title" "My Dataset Series"}))))
 
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (normalise-series {:slug "my-dataset-series"}
-                                   {"@context" ["https://publishmydata.com/def/datahost/context",
-                                                {"@base" "https://example.org/data/"}],
-                                    "@id" "https://example.org/data/my-dataset-series"}))
-        "@id usage in the series document is (for now) restricted to be in slugised form only")
+
 
     ;; TODO add RDFization tests
     ))
