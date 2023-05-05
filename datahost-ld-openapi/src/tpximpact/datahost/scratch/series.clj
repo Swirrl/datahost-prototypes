@@ -2,7 +2,12 @@
   (:require [clojure.java.io :as io]
             [grafter-2.rdf4j.io :as rio]
             [clojure.set :as set]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [clojure.walk :as walk]
+            [malli.core :as m]
+            [malli.error :as me]
+            [malli.util :as mu]
+            )
   (:import [java.net URI]
            [com.github.jsonldjava.core JsonLdProcessor RDFDatasetUtils JsonLdTripleCallback]
            [com.github.jsonldjava.utils JsonUtils]))
@@ -12,14 +17,24 @@
   it.  It should have a trailing slash."
   (URI. "https://example.org/data/"))
 
-
 (def default-catalog-uri (URI. "https://example.org/data/catalog"))
 
 (def file-store (io/file "./tmp"))
 
+(defn- ->edn-data
+  "Convert mutable java data, as returned by the JSON-LD parser into
+  immutable clojure data structures, so we can work with it without
+  surprises."
+  [java-data]
+  (walk/prewalk (fn [f]
+                  (cond
+                     (instance? java.util.HashMap f) (into {} f)
+                     (instance? java.util.ArrayList f) (into [] f)
+                     :else f))
+                 java-data))
 
 (defn load-jsonld [jsonld-file]
-  (JsonUtils/fromReader (io/reader jsonld-file)))
+  (->edn-data (JsonUtils/fromReader (io/reader jsonld-file))))
 
 (defn ednld->rdf
   "Takes a JSON-LD map as an EDN datastructure and converts it into RDF
@@ -53,8 +68,8 @@
 (defn valid-slug? [slug]
   ;; TODO add more slug rules around valid character ranges e.g.
   ;; exclude _ but allow -'s etc...
-  (or (str/starts-with? slug "/")
-      (str/ends-with? slug "/")))
+  (not (or (str/starts-with? slug "/")
+           (str/ends-with? slug "/"))))
 
 (defn calculate-base-entity
   "Calculate the base-entity for the release (and elements beneath it in
@@ -63,7 +78,7 @@
   NOTE: this is subtly different to the @base IRI for the series
   document which here is set to the ld-root with a trailing '/'."
   [slug]
-  (when (valid-slug? slug)
+  (when-not (valid-slug? slug)
     (throw (ex-info "slug must not start or end in a '/'" {:type :invalid-arguments})))
   (str ld-root slug "/"))
 
@@ -77,8 +92,74 @@
 
         :else (throw (ex-info "Invalid @context" {:supplied-context context
                                                   :valid-context normalised-context})))
+
+      ;; return normalised-context if none provided
       normalised-context)))
 
+(def registry
+  (merge
+   (m/class-schemas)
+   (m/comparator-schemas)
+   (m/base-schemas)
+   (m/type-schemas)
+   {:slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
+                                #"^[a-z,A-Z,\-,0-9]+$"]]
+    :url-string (m/-simple-schema {:type :url-string :pred
+                                   (fn [x]
+                                     (and (string? x)
+                                          (try (URI. x)
+                                               true
+                                               (catch Exception ex
+                                                 false))))})}))
+
+(def SeriesApiParams [:map
+                      [:slug :slug-string]
+                      [:title {:optional true} :string]
+                      [:description {:optional true} :string]])
+
+(def SeriesJsonLdInput [:map
+                        ["@id" :slug-string]
+                        ["dh:base-entity" :url-string]])
+
+(comment
+  (m/validate SeriesJsonLdInput {"@id" "foo-bar"
+                                 "dh:base-entity" "http://foo"}
+              {:registry registry})
+
+  (m/validate SeriesApiParams
+              {:slug "my-dataset-series" :title "foo"}
+              {:registry registry})
+
+  (me/humanize (m/explain SeriesApiParams
+                          {:slug "foo-bar" :title "foo"}
+                          {:registry registry}))
+  )
+
+(defn validate-id [{:keys [slug] :as _api-params} cleaned-doc]
+  (let [id-in-doc (get cleaned-doc "@id")]
+    (cond
+      (nil? id-in-doc) cleaned-doc
+
+      (= slug id-in-doc) cleaned-doc
+
+      :else (throw
+             (ex-info "@id should for now be expressed as a slugged style suffix, and if present match that supplied as the API slug."
+                      {:supplied-id id-in-doc
+                       :expected-id slug})))))
+
+(defn validate-series-context [ednld]
+  (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
+    (if (= (str ld-root) base-in-doc)
+      (update ednld "@context" normalise-context)
+      (throw (ex-info
+              (str "@base for the dataset-series must currently be set to the linked-data root '" ld-root "'")
+              {:type :validation-error
+               :expected-value (str ld-root)
+               :actual-value base-in-doc})))
+    (update ednld "@context" normalise-context)))
+
+
+;; PUT /data/:slug
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
   returns a normalised EDN form of the JSON-LD, with the API
@@ -87,31 +168,36 @@
   ([api-params]
    (normalise-series api-params nil))
   ([{:keys [slug] :as api-params} doc]
-   (let [jsonld-doc (into {} (load-jsonld doc))
-         merged-doc (merge (set/rename-keys api-params
-                                            {:title "dcterms:title"
-                                             :description "dcterms:description"})
-                           jsonld-doc)
-         cleaned-doc (-> merged-doc
-                         (dissoc-by-key keyword?)
-                         normalise-context)
+   (let [jsonld-doc (into {} (load-jsonld doc))]
 
-         validated-doc (let [id-in-doc (get cleaned-doc "@id")]
-                         (cond
-                           (nil? id-in-doc) cleaned-doc
+     (when-not (m/validate SeriesApiParams api-params {:registry registry})
+       (throw (ex-info "Invalid API parameters"
+                       {:type :validation-error
+                        :validation-error (-> (m/explain SeriesApiParams api-params {:registry registry})
+                                              (me/humanize))})))
 
-                           (= slug id-in-doc) cleaned-doc
+     (let [merged-doc (merge (set/rename-keys api-params
+                                              {:title "dcterms:title"
+                                               :description "dcterms:description"})
+                             jsonld-doc)
+           cleaned-doc (-> merged-doc
+                           (dissoc-by-key keyword?)
+                           #_(update "@context" normalise-context))
 
-                           :else (throw
-                                  (ex-info "@id should for now be expressed as a slugged style suffix" {:supplied-id id-in-doc
-                                                                                                        :expected-id slug}))))
+           validated-doc (-> (validate-id api-params cleaned-doc)
+                             (validate-series-context))
 
-         final-doc (assoc validated-doc
-                          "@id" slug
-                          "dh:base-entity" (str ld-root slug "/") ;; coin base-entity to serve as the @base for nested resources
-                          )]
-     final-doc)))
+           final-doc (assoc validated-doc
+                            ;; add any managed params
+                            "@id" slug
+                            "dh:base-entity" (str ld-root slug "/") ;; coin base-entity to serve as the @base for nested resources
+                            )]
+       final-doc))))
 
+
+
+
+;; POST /data/:series-slug/:release-slug
 
 (comment
 

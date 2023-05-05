@@ -24,15 +24,18 @@
   (let [expected-context ["https://publishmydata.com/def/datahost/context"
                           {"@base" "https://example.org/data/"}]]
 
-    (is (= expected-context
-           (normalise-context {})))
+    (testing "An empty @context is normalised"
+      (is (= expected-context
+             (normalise-context {}))))
 
-    (is (= expected-context
-           (normalise-context {"@context" "https://publishmydata.com/def/datahost/context"})))
+    (testing "A declared context of 'https://publishmydata.com/def/datahost/context' is normalised"
+      (is (= expected-context
+             (normalise-context {"@context" "https://publishmydata.com/def/datahost/context"}))))
 
-    (is (= expected-context
-           (normalise-context {"@context" ["https://publishmydata.com/def/datahost/context",
-                                           {"@base" "https://example.org/data/"}]})))))
+    (testing "A normalised context is idempotent to itself"
+      (is (= expected-context
+             (normalise-context {"@context" ["https://publishmydata.com/def/datahost/context",
+                                             {"@base" "https://example.org/data/"}]}))))))
 
 
 
@@ -40,19 +43,13 @@
   (sut/normalise-series api-params
                         (coerce-test-json json-ld)))
 
-(m/=> normalise-series [:=> [:cat
-                             [:map
-                              [:slug :string]]
-                             [:map]]
-                        [:map
-                         ["@id" sut/valid-slug?]
-                         ["dh:base-entity" ]]])
-
-
+(defn canonicalisation-idempotent? [api-params jsonld]
+  (let [canonicalised-form (normalise-series api-params jsonld)]
+    (= canonicalised-form (normalise-series api-params canonicalised-form))))
 
 (deftest normalise-series-test
   (testing "Invalid cases"
-    (testing "Missing key details"
+    (testing "Missing key detail :slug"
 
       (is (thrown? ExceptionInfo
                    (normalise-series {}
@@ -61,15 +58,23 @@
       ;; Invalid for PUT as slug will be part of URI
       (is (thrown? ExceptionInfo
                    (normalise-series {}
-                                     {"@id" "my-dataset-series"}))
-          )
+                                     {"@id" "my-dataset-series"}))))
 
-      ))
+    (is (thrown? ExceptionInfo
+                 (normalise-series {:slug "my-dataset-series"}
+                                   {"@context" ["https://publishmydata.com/def/datahost/context"
+                                                {"@base" "https://different.base/is/invalid/"}]}))))
 
   (testing "Valid cases"
+    (let [returned-value (normalise-series {:slug "my-dataset-series"}
+                                           {"@id" "my-dataset-series"})]
+      (is (= {"@id" "my-dataset-series"
+              "@context" ["https://publishmydata.com/def/datahost/context"
+                          {"@base" "https://example.org/data/"}]
+              "dh:base-entity" "https://example.org/data/my-dataset-series/"}
+             returned-value))
 
-    (normalise-series {:slug "my-dataset-series"}
-                      {"@id" "my-dataset-series"})
+      (is (canonicalisation-idempotent? {:slug "my-dataset-series"} returned-value)))
 
     (is (not (empty?
               (normalise-series {:slug "my-dataset-series"}
@@ -82,4 +87,7 @@
                                    {"@context" ["https://publishmydata.com/def/datahost/context",
                                                 {"@base" "https://example.org/data/"}],
                                     "@id" "https://example.org/data/my-dataset-series"}))
-        "@id usage in document is (for now) restricted to be slugised form only")))
+        "@id usage in the series document is (for now) restricted to be in slugised form only")
+
+    ;; TODO add RDFization tests
+    ))
