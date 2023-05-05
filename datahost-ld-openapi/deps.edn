@@ -50,5 +50,7 @@
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}
                      org.clojure/test.check {:mvn/version "1.1.1"}
+                     grafter/matcha.alpha {:mvn/version "0.4.0"}
+                     grafter/vocabularies {:mvn/version "0.3.9"}
                      vvvvalvalval/scope-capture {:mvn/version "0.3.3"}}
         :jvm-opts ["-Dclojure.tools.logging.factory=clojure.tools.logging.impl/log4j2-factory"]}}}
