@@ -1,4 +1,5 @@
 (ns dev
+  (:refer-clojure :exclude [reset!])
   (:require
    [clojure.java.io :as io]
    [grafter-2.rdf4j.repository :as repo]
