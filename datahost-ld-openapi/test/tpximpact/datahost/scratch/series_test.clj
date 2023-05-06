@@ -1,9 +1,6 @@
 (ns tpximpact.datahost.scratch.series-test
   (:require [clojure.java.io :as io]
             [clojure.data.json :as json]
-            [grafter-2.rdf4j.io :as rio]
-            [clojure.set :as set]
-            [clojure.string :as str]
             [clojure.test :refer [testing is deftest with-test]]
             [tpximpact.datahost.scratch.series :as sut]
             [malli.core :as m]

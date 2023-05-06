@@ -1,9 +1,11 @@
 (ns tpximpact.datahost.scratch.series
   (:require [clojure.java.io :as io]
+            [ring.util.response :as resp]
             [grafter-2.rdf4j.io :as rio]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
+            [integrant.core :as ig]
             [malli.core :as m]
             [malli.error :as me]
             [malli.util :as mu]
@@ -168,7 +170,7 @@
   ([api-params]
    (normalise-series api-params nil))
   ([{:keys [series-slug] :as api-params} doc]
-   (let [jsonld-doc (into {} (load-jsonld doc))]
+   (let [jsonld-doc doc #_(into {} (load-jsonld doc))]
 
      (when-not (m/validate SeriesApiParams api-params {:registry registry})
        (throw (ex-info "Invalid API parameters"
@@ -194,6 +196,22 @@
                             )]
        final-doc))))
 
+(defn- api-ok-response [body]
+  (-> (resp/response (or body {}))
+      (resp/status 200)))
+
+(defn get-series [opts {{:keys [series-slug]} :path-params :as _request}]
+  (api-ok-response {"slug" series-slug}))
+
+(defn put-series [opts {{:keys [series-slug]} :path-params :as request}]
+  (let [normalised (normalise-series {:series-slug series-slug} (:body-params request))]
+    (api-ok-response normalised)))
+
+(defmethod ig/init-key ::get-series-handler [_ opts]
+  (partial get-series opts))
+
+(defmethod ig/init-key ::put-series-handler [_ opts]
+  (partial put-series opts))
 
 (comment
 
@@ -207,7 +225,6 @@
   (db/destroy db)
 
   )
-
 
 
 ;; POST /data/:series-slug/:release-slug

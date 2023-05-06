@@ -45,6 +45,11 @@
        :headers {"Content-Type" "text/plain"}
        :body (-> results first :label)})))
 
+
+(defmethod ig/init-key ::at-context [_ _]
+  (keyword "@context"))
+
+
 (defn load-system-config [config]
   (if config
     (-> config
