@@ -33,7 +33,7 @@ jobs:
       - checkout
       - run:
           name: "Test LD Open API Service"
-          command: "cd datahost-ld-openapi && clojure -X:test"
+          command: "cd datahost-ld-openapi && clojure -X:dev:test"
           project-dir: datahost-ld-openapi
       - store_test_results:
           project-dir: datahost-ld-openapi

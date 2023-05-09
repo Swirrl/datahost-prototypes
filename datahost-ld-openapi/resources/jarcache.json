@@ -1,0 +1,7 @@
+[
+  {
+      "Content-Location": "https://publishmydata.com/def/datahost/context",
+      "X-Classpath": "jsonld-context.json",
+      "Content-Type": "application/ld+json"
+  }
+]

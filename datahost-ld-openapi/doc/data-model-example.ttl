@@ -1,0 +1,154 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix datahost: <https://publishmydata.com/def/datahost/> .
+@prefix example: <http://www.example.org/> .
+
+
+# Some background catalog metadata
+example:datasets
+    a dcat:Catalog ;
+    rdfs:label "Datasets" .
+
+# We assume our API is mounted on a base of `/data`
+
+# PUT       : /data/life-expectancy
+# CONTROLLER: /data/:series-slug
+#
+# The process of putting a DatasetSeries/BaseURI creates a REST
+# 'store' archetype, against which further operations can be run.
+#
+# The fact that the PUT document is a datahost:Cube means we know what
+# archetype, and lifecycle patterns to apply to it.
+
+@base <http://www.example.org/life-expectancy> .
+
+
+</>
+    a dcat:DatasetSeries, datahost:DatasetIdentity, datahost:Cube ;
+    dcterms:title "Life Expectancy" ;
+    dcterms:issued "T1" ; # Added as managed metadata.  Would fail if a user supplied it. This predicate will exist on most managed entities.
+    dcat:inCatalog example:datasets ; # Added as managed data
+    datahost:base "http://www.example.org/life-expectancy"
+    .
+
+# PUT       : ./release/2023
+# CONTROLLER: /data/:series/release/:release-slug
+<./release/2023>
+    a datahost:Release ;
+    dcterms:issued "T2" ;
+    dcterms:title "2023" ;
+    dcat:inSeries </> ; # 1. # Managed/created metadata should also probably subproperty this to be more specific e.g. datahost:isReleaseOf
+    .
+
+# Note because of 1. we can now infer/add the following triple to our DatasetSeries, as 'managed metadata'
+# </> dcat:seriesMember <./release/2023> .
+
+# POST      : ./schema/2023
+# CONTROLLER: /data/:series/release/:release-slug
+
+<./schema/2023>
+    a datahost:TableSchema ; # TODO details TBD by datahost Schema work
+    dcterms:issued "T3" ;
+    datahost:appliesToRelease <./release/2023> ; # TODO come up with a better name for an @reverse of an underlying datahost:hasSchema predicate.
+    appropriate-csvw:modeling-of-dialect "UTF-8,RFC4180"
+    .
+
+# Appending a ChangeSet
+#
+# First PRG pattern to create a new ChangeSet:
+#
+# POST      : /data/life-expectancy/changesets
+# CONTROLLER: /data/:series/changesets
+# Server responds:
+#
+# 303 /data/life-expectancy/release/2023/changesets/:auto-increment-changeset-id
+#
+# API call then creates this resource in the database:
+</data/life-expectancy/changesets/1>
+    a datahost:ChangeSet,
+      datahost:InitialChangeSet ; # only on the first changeset in the sequence
+    # datahost:previousChangeSet </data/life-expectancy/data/0> # in the case of subsequent changesets ;
+    dcterms:issued "T4"
+    .
+
+# Now we have a changeset we can create our individual changes
+# (appends/deletes/corrections) within it:
+# POST/DELETE data to create individual commits within changeset:
+#
+# POST /data/life-expectancy/changesets/1
+# BODY (csv data):
+# W06000022,2004-01-01T00:00:00/P3Y,Female,80.7
+# W06000022,2004-01-01T00:00:00/P3Y,Male,78.3
+#
+# 303 /data/life-expectancy/changesets/1/commits/:auto-increment-commit-id
+#
+# DELETE's will look the same as POSTS just with the HTTP verb replaced
+
+# GET /data/life-expectancy/release/2023 Accept: application/json+ld
+#
+# {"@id": "/data/life-expectancy/release/1",
+#  "@type": "datahost:Release"
+#  "dcterms:title": "2023",
+#  "rdfs:label": "Life Expectancy : 2023",
+#  "datahost:changes":[ # todo insert changeset here that contains commits
+#                       {"@id": "/data/life-expectancy/changesets/1/1",
+#                       "@type": "datahost:Append"
+#                       "datahost:append": "/data/life-expectancy/changesets/1/1.csv",
+#                       "dcterms:description": "Initial load of observations"}]}
+#
+# NOTE: The .csv linked here should probably be in our extended append-only log format?!
+#       Could do content/neg or profile negotation to request the 'users' supplied representation,
+#       but we should canonicalise internally to store the log format schema.
+#
+#       See also: https://www.w3.org/TR/dx-prof-conneg/
+
+# Close a ChangeSet
+#
+# First PRG pattern to create a new ChangeSet:
+#
+# PUT : /data/life-expectancy/changesets/close
+# CONTROLLER: /data/:series/changesets/close
+
+# Open a closed Changeset
+#
+# PUT : /data/life-expectancy/changesets/open
+# CONTROLLER: /data/:series/changesets/open
+
+
+
+
+
+
+# GET /data/life-expectancy/release/2023 Accept: text/csv
+#
+# 303 /data/life-expectancy/release/2023.csv
+# GET /data/life-expectancy/release/2023.csv
+#
+# W06000022,2004-01-01T00:00:00/P3Y,Female,80.7
+# W06000022,2004-01-01T00:00:00/P3Y,Male,78.3
+#
+
+# GET /data/life-expectancy/release/2023 Accept: application/csvm+json
+#
+# 302 /data/life-expectancy/release/2023.csv-metadata.json
+# GET /data/life-expectancy/release/2023.csv-metadata.json
+#
+# {
+#  "@context": "http://www.w3.org/ns/csvw",
+#  "url": "2023.csv"
+# }
+
+
+
+
+#
+#
+
+
+
+#
+# From here you can PUT arbitrary metadata on the Changeset:
+#
+# PUT /data/life-expectancy/data/1 arbitrary RDF metadata for rdfs:comment / dcterms:description etc.
+#
