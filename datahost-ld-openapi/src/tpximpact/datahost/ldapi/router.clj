@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.scratch.router
+(ns tpximpact.datahost.ldapi.router
   (:require [reitit.ring :as ring]
             [integrant.core :as ig]
             [reitit.coercion.malli :as mc]
