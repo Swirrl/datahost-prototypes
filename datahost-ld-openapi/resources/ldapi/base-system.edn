@@ -18,7 +18,7 @@
 
  :tpximpact.datahost.scratch.router/router
  {:api-route-data
-  [["/data" ;{:middleware [[:wrap-auth]]}
+  [["/data"                                                 ;{:middleware [[:wrap-auth]]}
     ["/:series-slug" {:get {:summary "Blah blah summary"
                             :description "description here"
                             :handler #ig/ref :tpximpact.datahost.scratch.series/get-series-handler
@@ -26,12 +26,13 @@
                       :put {:summary "Blah series PUT summary"
                             :description "Description of series PUT here"
                             :handler #ig/ref :tpximpact.datahost.scratch.series/put-series-handler
-                            :parameters {:body [:maybe
-                                                [:map
-                                                 ;; "@context"
-                                                 [#ig/ref :tpximpact.datahost.ldapi/at-context [:or map? vector? string?]]
-                                                 ]]
+                            :parameters {:body
+                                         [:maybe
+                                          [:map
+                                           ["dcterms:title" string?]
+                                           ["@context"
+                                            [:or
+                                             [:tuple :string [:map-of :string :string]]]]]]
                                          }
-                            }
-                      }]]]}
+                            }}]]]}
  }
