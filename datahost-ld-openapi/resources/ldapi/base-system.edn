@@ -5,33 +5,11 @@
 
  :tpximpact.datahost.ldapi.jetty/runnable-service {:host "localhost"
                                                    :port 3000
-                                                   :handler #ig/ref :tpximpact.datahost.ldapi.router/router
+                                                   :handler #ig/ref :tpximpact.datahost.ldapi.router/handler
                                                    :ide-path "/ld-api"
                                                    :default-subscriptions-path "/ws"}
 
  :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "/tmp/ld-dev-db"}
 
- :tpximpact.datahost.scratch.series/get-series-handler {}
- :tpximpact.datahost.scratch.series/put-series-handler {}
-
- :tpximpact.datahost.ldapi/at-context {}
-
- :tpximpact.datahost.ldapi.router/router
- {:api-route-data
-  [["/data" ;{:middleware [[:wrap-auth]]}
-    ["/:series-slug" {:get {:summary "Blah blah summary"
-                            :description "description here"
-                            :handler #ig/ref :tpximpact.datahost.scratch.series/get-series-handler
-                            }
-                      :put {:summary "Blah series PUT summary"
-                            :description "Description of series PUT here"
-                            :handler #ig/ref :tpximpact.datahost.scratch.series/put-series-handler
-                            :parameters {:body [:maybe
-                                                [:map
-                                                 ;; "@context"
-                                                 [#ig/ref :tpximpact.datahost.ldapi/at-context [:or map? vector? string?]]
-                                                 ]]
-                                         }
-                            }
-                      }]]]}
+ :tpximpact.datahost.ldapi.router/handler {}
  }
