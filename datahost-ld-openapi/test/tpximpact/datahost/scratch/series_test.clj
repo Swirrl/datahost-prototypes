@@ -1,17 +1,14 @@
 (ns tpximpact.datahost.scratch.series-test
-  (:require [clojure.java.io :as io]
-            [clojure.data.json :as json]
-            [clojure.test :refer [testing is deftest with-test]]
-            [tpximpact.datahost.scratch.series :as sut]
-            [malli.core :as m]
-            [malli.instrument :as mi]
-            [grafter.matcha.alpha :as matcha]
-            [grafter.vocabularies.dcterms :refer [dcterms:title]])
-  (:import [java.net URI]
-           [java.io StringReader]
-           [com.github.jsonldjava.core JsonLdProcessor RDFDatasetUtils JsonLdTripleCallback]
-           [com.github.jsonldjava.utils JsonUtils]
-           [clojure.lang ExceptionInfo]))
+  (:require
+   [clojure.data.json :as json]
+   [clojure.test :refer [deftest is testing]]
+   [grafter.matcha.alpha :as matcha]
+   [grafter.vocabularies.dcterms :refer [dcterms:title]]
+   [tpximpact.datahost.scratch.series :as sut])
+  (:import
+   (clojure.lang ExceptionInfo)
+   (java.io StringReader)
+   (java.net URI)))
 
 (defn- coerce-test-json [json-as-edn]
   (StringReader. (json/write-str json-as-edn)))
