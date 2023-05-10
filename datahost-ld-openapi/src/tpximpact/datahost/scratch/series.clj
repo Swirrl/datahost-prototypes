@@ -4,6 +4,8 @@
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
+            [clojure.tools.logging :as log]
+            [integrant.core :as ig]
             [malli.core :as m]
             [malli.error :as me]
             [malli.util :as mu]
@@ -158,6 +160,17 @@
                :actual-value base-in-doc})))
     (update ednld "@context" normalise-context)))
 
+(defn merge-params-with-doc [{:keys [series-slug] :as api-params} jsonld-doc]
+  (let [merged-doc (merge (set/rename-keys api-params
+                                           {:title "dcterms:title"
+                                            :description "dcterms:description"})
+                          jsonld-doc)
+        cleaned-doc (-> merged-doc
+                        (dissoc-by-key keyword?)
+                        #_(update "@context" normalise-context))
+
+        ]
+    cleaned-doc))
 
 ;; PUT /data/:series-slug
 (defn normalise-series
@@ -168,7 +181,7 @@
   ([api-params]
    (normalise-series api-params nil))
   ([{:keys [series-slug] :as api-params} doc]
-   (let [jsonld-doc (into {} (load-jsonld doc))]
+   (let [jsonld-doc doc #_(into {} (load-jsonld doc))]
 
      (when-not (m/validate SeriesApiParams api-params {:registry registry})
        (throw (ex-info "Invalid API parameters"
@@ -176,13 +189,7 @@
                         :validation-error (-> (m/explain SeriesApiParams api-params {:registry registry})
                                               (me/humanize))})))
 
-     (let [merged-doc (merge (set/rename-keys api-params
-                                              {:title "dcterms:title"
-                                               :description "dcterms:description"})
-                             jsonld-doc)
-           cleaned-doc (-> merged-doc
-                           (dissoc-by-key keyword?)
-                           #_(update "@context" normalise-context))
+     (let [cleaned-doc (merge-params-with-doc api-params doc)
 
            validated-doc (-> (validate-id api-params cleaned-doc)
                              (validate-series-context))
@@ -194,20 +201,49 @@
                             )]
        final-doc))))
 
-
 (comment
-
   (def db (db/duratom :local-file
                       :file-path ".datahostdb.edn"
                       :commit-mode :sync
                       :init {}))
+
+  (defn update-series [old-series {:keys [api-params jsonld-doc] :as _new-series}]
+    (log/info "Updating series " (:series-slug api-params))
+    (normalise-series api-params jsonld-doc))
+
+  (defn create-series [api-params jsonld-doc]
+    (log/info "Updating series " (:series-slug api-params))
+    (normalise-series api-params jsonld-doc))
+
+  (defn put-db [db {:keys [api-params jsonld-doc] :as new-series}]
+    (let [k (str (.getPath ld-root) (:series-slug api-params))]
+      (if-let [old-series (get db k)]
+        (update db k update-series new-series)
+        (assoc db k (normalise-series api-params jsonld-doc)))))
+
+  (let [db (atom {})]
+
+    (swap! db put-db {:api-params {:series-slug "my-dataset-series"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
+
+    (swap! db put-db {:api-params {:series-slug "my-other-series"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
+    (swap! db put-db {:api-params {:series-slug "my-other-series" :title "my title"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
+    #_(swap! db put-db {:api-params {:series-slug "my-dataset-series"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
+
+    db)
+
+  )
+
+
+
+(comment
+
+
 
   (swap! db assoc "some-other-path" {"some" "jsonld"})
 
   (db/destroy db)
 
   )
-
 
 
 ;; POST /data/:series-slug/:release-slug

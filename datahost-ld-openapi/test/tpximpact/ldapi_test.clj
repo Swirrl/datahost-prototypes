@@ -7,6 +7,6 @@
 (deftest service-sanity-test
   (th/with-system sys
     (testing "LD API service starts and handles query requests to the datastore"
-      (let [response (http/get "http://localhost:3400/")]
+      (let [response (http/get "http://localhost:3400/triplestore-query")]
         (is (= (:status response) 200))
         (is (= (:body response) "Datasets"))))))
