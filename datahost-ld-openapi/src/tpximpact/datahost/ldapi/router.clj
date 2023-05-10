@@ -11,7 +11,9 @@
    [reitit.ring.middleware.parameters :as parameters]
    [reitit.interceptor.sieppari :as sieppari]
    [reitit.swagger :as swagger]
-   [reitit.swagger-ui :as swagger-ui])
+   [reitit.swagger-ui :as swagger-ui]
+   [com.yetanalytics.flint :as fl]
+   [tpximpact.datahost.ldapi.native-datastore :as datastore])
   (:require [reitit.ring :as ring]
             [reitit.coercion.malli]
             [reitit.openapi :as openapi]
@@ -24,19 +26,34 @@
             [reitit.ring.middleware.exception :as exception]
             [reitit.ring.middleware.multipart :as multipart]
             [reitit.ring.middleware.parameters :as parameters]
-    ;       [reitit.ring.middleware.dev :as dev]
-    ;       [reitit.ring.spec :as spec]
-    ;       [spec-tools.spell :as spell]
+            ;;[reitit.ring.middleware.dev :as dev]
+            ;;[reitit.ring.spec :as spec]
+            ;;[spec-tools.spell :as spell]
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]
             [malli.util :as mu]))
 
+(defn query-example [triplestore request]
+    ;; temporary code to facilitate end-to-end service wire up
+    (let [qry {:prefixes {:dcat "<http://www.w3.org/ns/dcat#>"
+                          :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}
+               :select '[?label ?g]
+               :where [[:graph datastore/background-data-graph
+                        '[[?datasets a :dcat/Catalog]
+                          [?datasets :rdfs/label ?label]]]]}
 
+          results (datastore/eager-query triplestore (fl/format-query qry :pretty? true))]
+      {:status 200
+       :headers {"Content-Type" "text/plain"}
+       :body (-> results first :label)}))
 
-(defn router []
+(defn router [triplestore]
   (ring/router
-   [["/openapi.json"
+   [["/triplestore-query" ;; TODO remove this route when we have real ones using the triplestore
+     {:get {:nodoc true}
+      :handler #(query-example triplestore %)}]
+    ["/openapi.json"
      {:get {:no-doc true
             :openapi {:openapi "3.0.0"
                       :info {:title "Prototype OpenData API"
@@ -117,11 +134,10 @@
                         ;; multipart
                         multipart/multipart-middleware]}}))
 
-
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [api-route-data] ::ring/keys [opts default-handlers handlers]}]
+  [_ {:keys [api-route-data triplestore] ::ring/keys [opts default-handlers handlers]}]
   (ring/ring-handler
-   (router)
+   (router triplestore)
    (ring/routes
     (swagger-ui/create-swagger-ui-handler
      {:path "/"

@@ -1,8 +1,6 @@
 {:tpximpact.datahost.ldapi/default-catalog-id "http://gss-data.org.uk/catalog/datasets"
  :tpximpact.datahost.ldapi/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
 
- :tpximpact.datahost.ldapi/api-handler {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo}
-
  :tpximpact.datahost.ldapi.jetty/runnable-service {:host "localhost"
                                                    :port 3000
                                                    :handler #ig/ref :tpximpact.datahost.ldapi.router/handler
@@ -11,5 +9,5 @@
 
  :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "/tmp/ld-dev-db"}
 
- :tpximpact.datahost.ldapi.router/handler {}
+ :tpximpact.datahost.ldapi.router/handler {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo}
  }

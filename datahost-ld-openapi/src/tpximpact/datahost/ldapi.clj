@@ -4,9 +4,7 @@
     [clojure.spec.alpha :as s]
     [clojure.tools.logging :as log]
     [integrant.core :as ig]
-    [meta-merge.core :as mm]
-    [com.yetanalytics.flint :as fl]
-    [tpximpact.datahost.ldapi.native-datastore :as datastore])
+    [meta-merge.core :as mm])
   (:import
     [java.net URI])
   (:gen-class))
@@ -29,22 +27,6 @@
   string?)
 
 (derive ::default-catalog-id ::const)
-
-(defmethod ig/init-key ::api-handler [_ {:keys [triplestore] :as _opts}]
-  (fn handler [request]
-    ;; temporary code to facilitate end-to-end service wire up
-    (let [qry {:prefixes {:dcat "<http://www.w3.org/ns/dcat#>"
-                          :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}
-               :select '[?label ?g]
-               :where [[:graph datastore/background-data-graph
-                        '[[?datasets a :dcat/Catalog]
-                          [?datasets :rdfs/label ?label]]]]}
-
-          results (datastore/eager-query triplestore (fl/format-query qry :pretty? true))]
-      {:status 200
-       :headers {"Content-Type" "text/plain"}
-       :body (-> results first :label)})))
-
 
 (defn load-system-config [config]
   (if config
