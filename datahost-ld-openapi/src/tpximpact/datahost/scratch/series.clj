@@ -160,6 +160,17 @@
                :actual-value base-in-doc})))
     (update ednld "@context" normalise-context)))
 
+(defn merge-params-with-doc [{:keys [series-slug] :as api-params} jsonld-doc]
+  (let [merged-doc (merge (set/rename-keys api-params
+                                           {:title "dcterms:title"
+                                            :description "dcterms:description"})
+                          jsonld-doc)
+        cleaned-doc (-> merged-doc
+                        (dissoc-by-key keyword?)
+                        #_(update "@context" normalise-context))
+
+        ]
+    cleaned-doc))
 
 ;; PUT /data/:series-slug
 (defn normalise-series
@@ -178,13 +189,7 @@
                         :validation-error (-> (m/explain SeriesApiParams api-params {:registry registry})
                                               (me/humanize))})))
 
-     (let [merged-doc (merge (set/rename-keys api-params
-                                              {:title "dcterms:title"
-                                               :description "dcterms:description"})
-                             jsonld-doc)
-           cleaned-doc (-> merged-doc
-                           (dissoc-by-key keyword?)
-                           #_(update "@context" normalise-context))
+     (let [cleaned-doc (merge-params-with-doc api-params doc)
 
            validated-doc (-> (validate-id api-params cleaned-doc)
                              (validate-series-context))
