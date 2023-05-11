@@ -1,9 +1,11 @@
 (ns tpximpact.datahost.scratch.model-test
   (:require
-   [clojure.test :as t]
+   [clojure.test :refer [deftest is testing]]
    [clojure.set :as set]
+   [clojure.java.io :as io]
    [clojure.tools.logging :as log]
-   [tpximpact.datahost.scratch.series :as series]))
+   [tpximpact.datahost.scratch.series :as series]
+   [grafter-2.rdf4j.io :as gio]))
 
 (def db (atom {}))
 
@@ -66,7 +68,7 @@
    "@context" ["https://publishmydata.com/def/datahost/context"
                {"@base" "https://example.org/data/my-dataset-series/2018/schema/"}]
    "@id" "2018"
-   "dh:columns": [{"csvw:datatype" "string" ;; should support all/most csvw datatype definitions
+   "dh:columns" [{"csvw:datatype" "string" ;; should support all/most csvw datatype definitions
                    "csvw:name" "sex"
                    "csvw:title" "Sex"
                    "@type" "dh:DimensionColumn" ;; | "dh:MeasureColumn" | "dh:AttributeColumn"
@@ -122,3 +124,7 @@
                                           ])
 
 (defn add-changeset [release {:keys [description append delete]}])
+
+
+(deftest ontology-parses
+  (is (< 0 (count (gio/statements (io/file "./doc/datahost-ontology.ttl"))))))
