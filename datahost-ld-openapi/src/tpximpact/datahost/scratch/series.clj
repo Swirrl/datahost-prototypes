@@ -121,11 +121,11 @@
 
 (def SeriesJsonLdInput [:map
                         ["@id" :series-slug-string]
-                        ["dh:base-entity" :url-string]])
+                        ["dh:baseEntity" :url-string]])
 
 (comment
   (m/validate SeriesJsonLdInput {"@id" "foo-bar"
-                                 "dh:base-entity" "http://foo"}
+                                 "dh:baseEntity" "http://foo"}
               {:registry registry})
 
   (m/validate SeriesApiParams
@@ -197,7 +197,7 @@
            final-doc (assoc validated-doc
                             ;; add any managed params
                             "@id" series-slug
-                            "dh:base-entity" (str ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
+                            "dh:baseEntity" (str ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
                             )]
        final-doc))))
 

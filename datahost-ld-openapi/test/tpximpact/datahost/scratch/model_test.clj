@@ -1,6 +1,7 @@
 (ns tpximpact.datahost.scratch.model-test
   (:require
    [clojure.test :as t]
+   [clojure.set :as set]
    [clojure.tools.logging :as log]
    [tpximpact.datahost.scratch.series :as series]))
 
@@ -23,7 +24,7 @@
 (defn normalise-release [{:keys [series-slug release-slug] :as api-params} jsonld-doc]
   (let [series-path (str (.getPath series/ld-root) series-slug)
         series (get @db series-path)
-        base-entity (get series "dh:base-entity")
+        base-entity (get series "dh:baseEntity")
         _ (assert base-entity "Expected base entity to be set")
         context ["https://publishmydata.com/def/datahost/context"
                  {"@base" base-entity}]]
@@ -51,9 +52,50 @@
 
 (swap! db upsert-release {:series-slug "my-dataset-series" :release-slug "2018"} {"dcterms:title" "my release"})
 
+(let [coercion-properties #{"csvw:null" "csvw:default" "csvw:separator" "csvw:ordered"}
+      transformation-properties #{"csvw:aboutUrl" "csvw:propertyUrl" "csvw:valueUrl" "csvw:virtual" "csvw:suppressOutput"}]
 
-(defn add-schema [release schema]
-  ;; TODO
+
+  (def reserved-schema-properties
+    "These csvw properties are currently intentional unsupported, or may
+  be supported in the future."
+    (set/union coercion-properties transformation-properties)))
+
+(defn normalise-schema [release schema]
+  {"@type" #{"dh:TableSchema" "dh:UserSchema"} ; | dh:RevisionSchema
+   "@context" ["https://publishmydata.com/def/datahost/context"
+               {"@base" "https://example.org/data/my-dataset-series/2018/schema/"}]
+   "@id" "2018"
+   "dh:columns": [{"csvw:datatype" "string" ;; should support all/most csvw datatype definitions
+                   "csvw:name" "sex"
+                   "csvw:title" "Sex"
+                   "@type" "dh:DimensionColumn" ;; | "dh:MeasureColumn" | "dh:AttributeColumn"
+                   ;;"csvw:ordered" false
+                   ;;"csvw:virtual" true
+
+                   ;;"csvw:aboutUrl" "uri-template"
+                   ;;"csvw:propertyUrl" "uri-template"
+                   ;;"csvw:valueUrl" "uri-template"
+
+                   ;;"csvw:required" true
+                   ;;"csvw:separator" ";"
+                   ;;"csvw:suppressOutput" false
+                   ;;"csvw:textDirection" "ltr"
+                   ;;"csvw:transformations" []
+                   ;;
+                   ;;"csvw:default" "default-value"
+                   ;;"csvw:null" "n/a"
+
+
+                   ;;"csvw:lang" "en"
+
+
+                   }]}
+  )
+
+(defn derive-revision-schema
+  "Derive a dh:RevisionSchema from a dh:CubeSchema"
+  [cube-schema]
   )
 
 (def example-changesets [{:description "first changeset"
