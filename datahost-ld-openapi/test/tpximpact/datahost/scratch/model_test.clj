@@ -15,6 +15,8 @@
 
 
 
+(deftest ontology-parses
+  (is (< 0 (count (gio/statements (io/file "./doc/datahost-ontology.ttl"))))))
 
 (defn db->matcha [db]
   (->> db
@@ -31,6 +33,9 @@
 
 
 (deftest loading-data-workflow-with-rdf
+
+  ;; NOTE this is a stateful test with accreting data
+
   (let [db (atom {})] ;; an empty database
     (testing "Constructing the series"
       ;; first make a series
@@ -61,20 +66,11 @@
                                                           :jsonld-doc {"dcterms:title" "2018"}})]
           (is (= start-state end-state))))
 
+      (testing "RDF graph joins up"
+        (let [mdb (db->matcha @db)]
+          (is (matcha/ask [[example:my-release dcat:inSeries example:my-dataset-series]]
+                          mdb))))
 
       (testing "TODO inverse triples see issue: https://github.com/Swirrl/datahost-prototypes/issues/54"
 
-        )
-
-      )))
-
-
-
-
-
-
-
-
-
-(deftest ontology-parses
-  (is (< 0 (count (gio/statements (io/file "./doc/datahost-ontology.ttl"))))))
+        ))))
