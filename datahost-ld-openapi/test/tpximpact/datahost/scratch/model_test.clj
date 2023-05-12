@@ -12,19 +12,6 @@
    [grafter.vocabularies.dcat :refer [dcat:keyword dcat:Dataset dcat]])
   (:import [java.net URI]))
 
-(defn update-series [old-series {:keys [api-params jsonld-doc] :as _new-series}]
-  (log/info "Updating series " (:series-slug api-params))
-  (series/normalise-series api-params jsonld-doc))
-
-(defn create-series [api-params jsonld-doc]
-  (log/info "Updating series " (:series-slug api-params))
-  (series/normalise-series api-params jsonld-doc))
-
-(defn upsert-series [db {:keys [api-params jsonld-doc] :as new-series}]
-  (let [k (str (.getPath series/ld-root) (:series-slug api-params))]
-    (if-let [old-series (get db k)]
-      (update db k update-series new-series)
-      (assoc db k (create-series api-params jsonld-doc)))))
 
 (defn normalise-release [base-entity {:keys [api-params jsonld-doc]}]
   (let [{:keys [series-slug release-slug]} api-params
@@ -70,7 +57,7 @@
   (let [db (atom {})] ;; an empty database
     (testing "Constructing the series"
       ;; first make a series
-      (swap! db upsert-series {:api-params {:series-slug "my-dataset-series" :title "My series"}})
+      (swap! db series/upsert-series {:api-params {:series-slug "my-dataset-series" :title "My series"}})
 
       (is (matcha/ask [[example:my-dataset-series dh:baseEntity ?o]] (db->matcha @db)))
       (is (matcha/ask [[example:my-dataset-series dcterms:title "My series"]] (db->matcha @db)))
@@ -78,7 +65,7 @@
       (testing "idempotent - upserting same request again is equivalent to inserting once"
 
         (let [start-state @db
-              end-state (swap! db upsert-series {:api-params {:series-slug "my-dataset-series" :title "My series"}})]
+              end-state (swap! db series/upsert-series {:api-params {:series-slug "my-dataset-series" :title "My series"}})]
           (is (= start-state end-state)))))
 
     (testing "Constructing a release"
