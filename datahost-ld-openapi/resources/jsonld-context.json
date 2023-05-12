@@ -96,8 +96,9 @@
   "yearMonthDuration": "xsd:yearMonthDuration",
 
 
-  "dh": "https://publishmydata.com/def/datahost/"
+  "dh": "https://publishmydata.com/def/datahost/",
 
+  "dcat:inSeries": {"@type": "@id"}
 
 
 

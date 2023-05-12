@@ -121,11 +121,11 @@
 
 (def SeriesJsonLdInput [:map
                         ["@id" :series-slug-string]
-                        ["dh:base-entity" :url-string]])
+                        ["dh:baseEntity" :url-string]])
 
 (comment
   (m/validate SeriesJsonLdInput {"@id" "foo-bar"
-                                 "dh:base-entity" "http://foo"}
+                                 "dh:baseEntity" "http://foo"}
               {:registry registry})
 
   (m/validate SeriesApiParams
@@ -196,10 +196,45 @@
 
            final-doc (assoc validated-doc
                             ;; add any managed params
+                            "@type" "dh:DatasetSeries"
                             "@id" series-slug
-                            "dh:base-entity" (str ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
+                            "dh:baseEntity" (str ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
                             )]
        final-doc))))
+
+(defn- update-series [old-series {:keys [api-params jsonld-doc] :as _new-series}]
+  (log/info "Updating series " (:series-slug api-params))
+  (normalise-series api-params jsonld-doc))
+
+(defn- create-series [api-params jsonld-doc]
+  (log/info "Updating series " (:series-slug api-params))
+  (normalise-series api-params jsonld-doc))
+
+(defn upsert-series
+  "Takes a derefenced db state map with the shape {path jsonld} and
+  upserts a new dataset series into it.
+
+  Intended usage is via swap!
+
+  ```
+  (swap! db upsert-series {:api-params {:series-slug \"my-dataset-series\"}
+                           :jsonld-doc {}})
+  ```
+
+  An upsert will insert a new series if it isn't there already.
+
+  If the series exists already it will replace the majority of the
+  fields with those newly supplied, but may ignore or manage some
+  fields specially on update.
+
+  For example a `dcterms:issued` time should not change after a
+  document is updated (TODO: https://github.com/Swirrl/datahost-prototypes/issues/57)
+  "
+  [db {:keys [api-params jsonld-doc] :as new-series}]
+  (let [k (str (.getPath ld-root) (:series-slug api-params))]
+    (if-let [_old-series (get db k)]
+      (update db k update-series new-series)
+      (assoc db k (create-series api-params jsonld-doc)))))
 
 (comment
   (def db (db/duratom :local-file
@@ -207,43 +242,20 @@
                       :commit-mode :sync
                       :init {}))
 
-  (defn update-series [old-series {:keys [api-params jsonld-doc] :as _new-series}]
-    (log/info "Updating series " (:series-slug api-params))
-    (normalise-series api-params jsonld-doc))
-
-  (defn create-series [api-params jsonld-doc]
-    (log/info "Updating series " (:series-slug api-params))
-    (normalise-series api-params jsonld-doc))
-
-  (defn put-db [db {:keys [api-params jsonld-doc] :as new-series}]
-    (let [k (str (.getPath ld-root) (:series-slug api-params))]
-      (if-let [old-series (get db k)]
-        (update db k update-series new-series)
-        (assoc db k (normalise-series api-params jsonld-doc)))))
-
   (let [db (atom {})]
 
-    (swap! db put-db {:api-params {:series-slug "my-dataset-series"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
+    (swap! db upsert-series {:api-params {:series-slug "my-dataset-series"}
+                             :jsonld-doc {}})
 
-    (swap! db put-db {:api-params {:series-slug "my-other-series"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
-    (swap! db put-db {:api-params {:series-slug "my-other-series" :title "my title"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
-    #_(swap! db put-db {:api-params {:series-slug "my-dataset-series"} :jsonld-doc (io/resource "./test-inputs/series/empty-1.json")})
-
-    db)
-
-  )
+    (swap! db upsert-series {:api-params {:series-slug "my-other-series"} :jsonld-doc {}})
+    (swap! db upsert-series {:api-params {:series-slug "my-other-series"}
+                             :jsonld-doc {"dcterms:title" "New title"}})
 
 
-
-(comment
-
-
-
-  (swap! db assoc "some-other-path" {"some" "jsonld"})
-
-  (db/destroy db)
+    @db)
 
   )
+
 
 
 ;; POST /data/:series-slug/:release-slug
