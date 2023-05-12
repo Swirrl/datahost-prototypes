@@ -1,7 +1,9 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
+   [com.yetanalytics.flint :as fl]
    [integrant.core :as ig]
    [reitit.dev.pretty :as pretty]
+   [reitit.interceptor.sieppari :as sieppari]
    [reitit.openapi :as openapi]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as coercion]
@@ -9,10 +11,8 @@
    [reitit.ring.middleware.multipart :as multipart]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]
-   [reitit.interceptor.sieppari :as sieppari]
    [reitit.swagger :as swagger]
    [reitit.swagger-ui :as swagger-ui]
-   [com.yetanalytics.flint :as fl]
    [tpximpact.datahost.ldapi.native-datastore :as datastore])
   (:require [reitit.ring :as ring]
             [reitit.coercion.malli]
@@ -32,7 +32,8 @@
             [ring.adapter.jetty :as jetty]
             [muuntaja.core :as m]
             [clojure.java.io :as io]
-            [malli.util :as mu]))
+            [malli.util :as mu]
+            [tpximpact.datahost.ldapi.handlers :as handlers]))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -77,12 +78,7 @@
 * here"
              :parameters {:path {:dataset-series string?}}
              :responses {200 {:body {:name string?, :size int?}}}
-             :handler (fn [{{:keys [dataset-series]} :path-params
-                           {:keys [title description]} :query}]
-                        ;;(sc.api/spy)
-                        {:status 200
-                         :body {:name "foo"
-                                :size 123}})}
+             :handler handlers/get-dataset-series}
        :put {:summary "Create or update metadata on a dataset-series"
 
              :parameters {:path {:dataset-series string?}
@@ -91,19 +87,15 @@
                                            :description "Description for X parameter"
                                            :optional true} string?]
                                   [:description {:optional true} string?]]}
+             :responses {200 {:body {:name string?, :size int?}}}
+             :handler handlers/put-dataset-series}}]]]
 
-             :handler (fn [{{:keys [dataset-series]} :parameters}]
-                        ;;(sc.api/spy)
-                        {:status 200
-                         :body {:name "foo"
-                                :size 123}})}}]]]
-
-   { ;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
+   {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
     ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
     :exception pretty/exception
     :data {:coercion (reitit.coercion.malli/create
-                      { ;; set of keys to include in error messages
+                      {;; set of keys to include in error messages
                        :error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
                        ;; schema identity function (default: close all map schemas)
                        :compile mu/closed-schema
@@ -114,7 +106,7 @@
                        ;; malli options
                        :options nil})
            :muuntaja m/instance
-           :middleware [ ;; swagger & openapi
+           :middleware [;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
                         ;; query-params & form-params
