@@ -9,12 +9,26 @@
 
 
   (def reserved-schema-properties
-    "These csvw properties are currently intentional unsupported, but some may
-  be supported in the future.
+    "These csvw properties are currently intentional unsupported, but
+  some may be supported in the future.
 
   For example we're hoping to automatically define and generate
   aboutUrl's from the CSV when we know the type of all columns in the
-  cube."
+  cube.
+
+  We also currently exclude any CSVW properties to do with coercion
+  because the semantics of coercion are a little fuzzy when a schema
+  is used for both input and output purposes... i.e. are the
+  expectations that we apply the coercion to the input data at
+  ingestion, or leave the data uncoerced and rely on users applying
+  them from the CSVW? The later adds a burden to users, whilst the
+  former means these properties are then redundant at output time.
+
+  For now it seems simpler to avoid the issues and assume we don't do
+  coercion with the schemas as these coercions can also in principle
+  be done upstream.
+
+  "
     (set/union coercion-properties transformation-properties)))
 
 (defn normalise-schema [release schema]

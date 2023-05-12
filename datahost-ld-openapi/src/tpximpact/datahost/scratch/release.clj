@@ -28,3 +28,9 @@
     (if-let [old-release (get db release-path)]
       (update db release-path update-release base-entity new-release)
       (assoc db release-path (normalise-release base-entity new-release)))))
+
+(defn add-schema [release schema]
+  ;; TODO
+  )
+
+(defn add-changeset [release revision {:keys [description append delete]}])
