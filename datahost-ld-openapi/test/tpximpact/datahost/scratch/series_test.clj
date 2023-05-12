@@ -69,6 +69,7 @@
       (is (= {"@id" "my-dataset-series"
               "@context" ["https://publishmydata.com/def/datahost/context"
                           {"@base" "https://example.org/data/"}]
+              "@type" "dh:DatasetSeries"
               "dh:baseEntity" "https://example.org/data/my-dataset-series/"}
              returned-value))
 
@@ -82,9 +83,10 @@
 
         (is (= {"@context"
                 ["https://publishmydata.com/def/datahost/context"
-                 {"@base" "https://example.org/data/"}],
-                "dcterms:title" "My Dataset Series",
-                "@id" "my-dataset-series",
+                 {"@base" "https://example.org/data/"}]
+                "@id" "my-dataset-series"
+                "@type" "dh:DatasetSeries"
+                "dcterms:title" "My Dataset Series"
                 "dh:baseEntity" "https://example.org/data/my-dataset-series/"}
                ednld))
 
