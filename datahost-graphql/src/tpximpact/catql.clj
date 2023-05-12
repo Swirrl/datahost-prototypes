@@ -34,7 +34,10 @@
 
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
 
-(defn query [repo query-data]
+(defn query 
+  "Returns a vector result of a query specified by query-data
+  argument (a SPARQL query as clojure data)."
+  [repo query-data]
   (with-open [conn (repo/->connection repo)]
     (let [sparql (f/format-query query-data :pretty? true)]
       (log/info sparql)
@@ -42,14 +45,19 @@
 
 (defn constrain-by-pred [pred values]
   (let [facet-var (gensym "?")]
+(defn constrain-by-pred
+  "Returns a SPARQL query fragment in clojure data form.
+
+  If values seq is empty, the var will be uncostrained."
+  [pred values]
     (if (seq values)
       [[:values {facet-var values}]
        ['?id pred facet-var]]
       [['?id pred facet-var]])))
 
-(defn -all-datasets [{:keys [:CatalogSearchResult/themes
-                             :CatalogSearchResult/creators
-                             :CatalogSearchResult/publishers]} catalog-uri]
+(defn -all-datasets 
+  "Returns a SPARQL query as clojure form."
+  [{:CatalogSearchResult/keys [themes creators publishers]} catalog-uri]
   `{:prefixes ~default-prefixes
     :select :*
     :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
@@ -106,10 +114,19 @@
    (and (seq (search/filter-results context col))
         (constraint-values facet-id))))
 
-(defn make-facet [context constraint results]
-  (let [facet-type (-> constraint name drop-last str/join str/capitalize (str "Facet"))
+(defn make-facet
+  "Returns a facet map.
+  
+  Arguments:
+  - context - application context (as in Lacinia)
+  - constraint - keyword
+  - results - seq of SPARQL query results"
+  [context constraint results]
+  {:pre [(keyword? constraint)]}
+  (let [constraint-name (name constraint)
+        facet-type (-> constraint-name (subs 0 (dec (count constraint-name))) str/capitalize (str "Facet"))
         constraint-values (set (constraint context))
-        result-key (-> constraint name keyword)]
+        result-key (keyword constraint-name)]
     (->> results
          (group-by result-key)
          (map (fn [[facet-id col]]
@@ -204,11 +221,13 @@
   (let [catalog (cqlrdf/->uri (or id default-catalog-id) prefixes)]
     (first (query repo (catalog-query* catalog)))))
 
-(defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
-                                                                       themes :themes
-                                                                       creators :creators
-                                                                       publishers :publishers}
-                              {:keys [id] :as catalog-value}]
+(defn catalog-query-resolver
+  [{:keys [::repo ::prefixes] :as context} 
+   {search-string :search_string
+    themes :themes
+    creators :creators
+    publishers :publishers}
+   {:keys [id] :as catalog-value}]
   (let [coerce-uri #(cqlrdf/->uri % prefixes)]
     (resolve/with-context {:id id} {:CatalogSearchResult/search-string search-string
                                     :CatalogSearchResult/themes (map coerce-uri themes)
