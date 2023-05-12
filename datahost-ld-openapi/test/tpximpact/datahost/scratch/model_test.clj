@@ -124,30 +124,30 @@
                {"@base" "https://example.org/data/my-dataset-series/2018/schema/"}]
    "@id" "2018"
    "dh:columns" [{"csvw:datatype" "string" ;; should support all/most csvw datatype definitions
-                   "csvw:name" "sex"
-                   "csvw:title" "Sex"
-                   "@type" "dh:DimensionColumn" ;; | "dh:MeasureColumn" | "dh:AttributeColumn"
-                   ;;"csvw:ordered" false
-                   ;;"csvw:virtual" true
+                  "csvw:name" "sex"
+                  "csvw:title" "Sex"
+                  "@type" "dh:DimensionColumn" ;; | "dh:MeasureColumn" | "dh:AttributeColumn"
+                  ;;"csvw:ordered" false
+                  ;;"csvw:virtual" true
 
-                   ;;"csvw:aboutUrl" "uri-template"
-                   ;;"csvw:propertyUrl" "uri-template"
-                   ;;"csvw:valueUrl" "uri-template"
+                  ;;"csvw:aboutUrl" "uri-template"
+                  ;;"csvw:propertyUrl" "uri-template"
+                  ;;"csvw:valueUrl" "uri-template"
 
-                   ;;"csvw:required" true
-                   ;;"csvw:separator" ";"
-                   ;;"csvw:suppressOutput" false
-                   ;;"csvw:textDirection" "ltr"
-                   ;;"csvw:transformations" []
-                   ;;
-                   ;;"csvw:default" "default-value"
-                   ;;"csvw:null" "n/a"
-
-
-                   ;;"csvw:lang" "en"
+                  ;;"csvw:required" true
+                  ;;"csvw:separator" ";"
+                  ;;"csvw:suppressOutput" false
+                  ;;"csvw:textDirection" "ltr"
+                  ;;"csvw:transformations" []
+                  ;;
+                  ;;"csvw:default" "default-value"
+                  ;;"csvw:null" "n/a"
 
 
-                   }]}
+                  ;;"csvw:lang" "en"
+
+
+                  }]}
   )
 
 (defn derive-revision-schema
