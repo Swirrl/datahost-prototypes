@@ -7,7 +7,7 @@ rationale and how to query through this proof of concept service.
 
 ## Builds
 
-[Our CircleCI instance](https://app.circleci.com/pipelines/github/Swirrl/catql-prototype) runs the tests and deploys docker containers to our public [GCP hosted container registry](https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/public/datahost-graphql):
+[Our CircleCI instance](https://app.circleci.com/pipelines/github/Swirrl/datahost-prototypes) runs the tests and deploys docker containers to our public [GCP hosted container registry](https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/public/datahost-graphql):
 
 If the tests pass images are built and tagged with the following tags:
 
