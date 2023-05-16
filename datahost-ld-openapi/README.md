@@ -2,6 +2,20 @@
 
 
 
+## Builds
+
+[Our CircleCI instance](https://app.circleci.com/pipelines/github/Swirrl/datahost-prototypes) runs the tests and deploys docker containers to our public [GCP hosted container registry](https://console.cloud.google.com/artifacts/docker/swirrl-devops-infrastructure-1/europe-west2/public/datahost-ld-openapi):
+
+If the tests pass images are built and tagged with the following tags:
+
+- The name of the branch (branch name tags will be mutated to track passing CI builds from the branch)
+- The full commit sha of the passing build
+- The names of any commit tags (or a unique abreviated commit sha if there isn't one)
+
+This means that the latest `main` version can be found at:
+
+`europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:main`
+
 ## License
 
 Copyright © 2023 TPXimpact Ltd
