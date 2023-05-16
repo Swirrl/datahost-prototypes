@@ -60,14 +60,14 @@
             :handler (openapi/create-openapi-handler)}}]
 
     ["/data" {:tags ["linked data api"]}
-     ["/:dataset-series"
+     ["/:series-slug"
       {:muuntaja json-string-keys-muuntaja-coercer
        :get {:summary "Retrieve metadata for an existing dataset-series"
              :description "blah blah blah. [a link](http://foo.com/)
 * bulleted
 * list
 * here"
-             :parameters {:path {:dataset-series string?}}
+             :parameters {:path {:series-slug string?}}
              :responses {200 {:body {:name string?, :size int?}}}
              :handler handlers/get-dataset-series}
        :put {:summary "Create or update metadata on a dataset-series"
@@ -77,7 +77,7 @@
                                   ["@context" [:or :string
                                                [:tuple :string [:map
                                                                 ["@base" string?]]]]]]]
-                          :path {:dataset-series string?}
+                          :path {:series-slug string?}
                           :query [:map
                                   [:title {:title "X parameter"
                                            :description "Description for X parameter"
