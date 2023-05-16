@@ -17,7 +17,7 @@ If the tests pass images are built and tagged with the following tags:
 
 This means that the latest `main` version can be found at:
 
-`europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/catql:main`
+`europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-graphql:main`
 
 ## Deployment
 
