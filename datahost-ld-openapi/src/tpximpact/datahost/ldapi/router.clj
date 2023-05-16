@@ -13,41 +13,31 @@
    [reitit.ring.middleware.parameters :as parameters]
    [reitit.swagger :as swagger]
    [reitit.swagger-ui :as swagger-ui]
-   [tpximpact.datahost.ldapi.native-datastore :as datastore])
-  (:require [reitit.ring :as ring]
-            [reitit.coercion.malli]
-            [reitit.openapi :as openapi]
-            [reitit.ring.malli]
-            [reitit.swagger :as swagger]
-            [reitit.swagger-ui :as swagger-ui]
-            [reitit.ring.coercion :as coercion]
-            [reitit.dev.pretty :as pretty]
-            [reitit.ring.middleware.muuntaja :as muuntaja]
-            [reitit.ring.middleware.exception :as exception]
-            [reitit.ring.middleware.multipart :as multipart]
-            [reitit.ring.middleware.parameters :as parameters]
-            ;;[reitit.ring.middleware.dev :as dev]
-            ;;[reitit.ring.spec :as spec]
-            ;;[spec-tools.spell :as spell]
-            [ring.adapter.jetty :as jetty]
-            [muuntaja.core :as m]
-            [clojure.java.io :as io]
-            [malli.util :as mu]
-            [tpximpact.datahost.ldapi.handlers :as handlers]))
+   [tpximpact.datahost.ldapi.native-datastore :as datastore]
+   [reitit.coercion.malli :as rcm]
+   [muuntaja.core :as m]
+   [malli.util :as mu]
+   [tpximpact.datahost.ldapi.handlers :as handlers]))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
-    (let [qry {:prefixes {:dcat "<http://www.w3.org/ns/dcat#>"
-                          :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}
-               :select '[?label ?g]
-               :where [[:graph datastore/background-data-graph
-                        '[[?datasets a :dcat/Catalog]
-                          [?datasets :rdfs/label ?label]]]]}
+  (let [qry {:prefixes {:dcat "<http://www.w3.org/ns/dcat#>"
+                        :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}
+             :select '[?label ?g]
+             :where [[:graph datastore/background-data-graph
+                      '[[?datasets a :dcat/Catalog]
+                        [?datasets :rdfs/label ?label]]]]}
 
-          results (datastore/eager-query triplestore (fl/format-query qry :pretty? true))]
-      {:status 200
-       :headers {"Content-Type" "text/plain"}
-       :body (-> results first :label)}))
+        results (datastore/eager-query triplestore (fl/format-query qry :pretty? true))]
+    {:status 200
+     :headers {"Content-Type" "text/plain"}
+     :body (-> results first :label)}))
+
+(def json-string-keys-muuntaja-coercer
+  (m/create
+   (-> m/default-options
+       (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn str})
+       (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn str}))))
 
 (defn router [triplestore]
   (ring/router
@@ -71,7 +61,8 @@
 
     ["/data" {:tags ["linked data api"]}
      ["/:dataset-series"
-      {:get {:summary "Retrieve metadata for an existing dataset-series"
+      {:muuntaja json-string-keys-muuntaja-coercer
+       :get {:summary "Retrieve metadata for an existing dataset-series"
              :description "blah blah blah. [a link](http://foo.com/)
 * bulleted
 * list
@@ -80,8 +71,13 @@
              :responses {200 {:body {:name string?, :size int?}}}
              :handler handlers/get-dataset-series}
        :put {:summary "Create or update metadata on a dataset-series"
-
-             :parameters {:path {:dataset-series string?}
+             :parameters {:body [:maybe
+                                 [:map
+                                  ["dcterms:title" string?]
+                                  ["@context" [:or :string
+                                               [:tuple :string [:map
+                                                                ["@base" string?]]]]]]]
+                          :path {:dataset-series string?}
                           :query [:map
                                   [:title {:title "X parameter"
                                            :description "Description for X parameter"
@@ -94,7 +90,7 @@
     ;;:validate spec/validate ;; enable spec validation for route data
     ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
     :exception pretty/exception
-    :data {:coercion (reitit.coercion.malli/create
+    :data {:coercion (rcm/create
                       {;; set of keys to include in error messages
                        :error-keys #{#_:type :coercion :in :schema :value :errors :humanized #_:transformed}
                        ;; schema identity function (default: close all map schemas)
