@@ -21,6 +21,6 @@
 
     (catch Throwable e
       (let [{:keys [type expected-value actual-value]} (ex-data e)
-            cause (ex-cause e)]
+            message (ex-message e)]
         {:status 500
-         :body (str "error: " (name type))}))))
+         :body (str "Error: " message)}))))
