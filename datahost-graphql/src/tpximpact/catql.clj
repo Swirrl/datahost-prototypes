@@ -1,6 +1,7 @@
 (ns tpximpact.catql
   (:require
    [clojure.java.io :as io]
+   [clojure.set :as set]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [clojure.tools.logging :as log]
@@ -34,22 +35,29 @@
 
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
 
-(defn query [repo query-data]
+(defn query
+  "Returns a vector result of a query specified by query-data
+  argument (a SPARQL query as clojure data)."
+  [repo query-data]
   (with-open [conn (repo/->connection repo)]
     (let [sparql (f/format-query query-data :pretty? true)]
       (log/info sparql)
       (into [] (repo/query conn sparql)))))
 
-(defn constrain-by-pred [pred values]
+(defn constrain-by-pred
+  "Returns a SPARQL query fragment in clojure data form.
+
+  If values seq is empty, the var will be uncostrained."
+  [pred values]
   (let [facet-var (gensym "?")]
     (if (seq values)
       [[:values {facet-var values}]
        ['?id pred facet-var]]
       [['?id pred facet-var]])))
 
-(defn -all-datasets [{:keys [:CatalogSearchResult/themes
-                             :CatalogSearchResult/creators
-                             :CatalogSearchResult/publishers]} catalog-uri]
+(defn -all-datasets 
+  "Returns a SPARQL query as clojure form."
+  [{:CatalogSearchResult/keys [themes creators publishers]} catalog-uri]
   `{:prefixes ~default-prefixes
     :select :*
     :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
@@ -66,9 +74,11 @@
             [:optional [{~'?id {:dcterms/creator #{~'?creator}}}]]
             [:optional [{~'?id {:dcterms/issued #{~'?issued}}}]]]})
 
-(defn datasets-resolver [{:keys [::repo] :as context} _args {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-datasets context catalog-uri))]
-    (search/filter-results context results)))
+(defn datasets-resolver 
+  [{:keys [::repo ::promise<datasets>] :as context} _args {catalog-uri :id :as _value}]
+  (let [results (query repo (-all-datasets context catalog-uri))
+        filtered (search/filter-results context results)]
+    (resolve/deliver! promise<datasets> filtered)))
 
 
 (defn -all-facets [{:keys [:CatalogSearchResult/search-string
@@ -101,35 +111,98 @@
             ;;             ]]
             ]})
 
-(defn apply-facet-filter? [facet-id constraint-values context col]
+(defn apply-facet-filter?               ;TODO: remove?
+  "Should the facet filter be applied?
+  
+  Arguments:
+  - facet-id - an URI
+  - constraint-values - set of URIs (values passed to the query)
+  - context - {:CatalogSearchresult/search-string ...}
+  - col - seq of {:title String, :description String} "
+  [facet-id constraint-values context col]
   (boolean
    (and (seq (search/filter-results context col))
         (constraint-values facet-id))))
 
-(defn make-facet [context constraint results]
-  (let [facet-type (-> constraint name drop-last str/join str/capitalize (str "Facet"))
-        constraint-values (set (constraint context))
-        result-key (-> constraint name keyword)]
-    (->> results
-         (group-by result-key)
-         (map (fn [[facet-id col]]
-                (when facet-id
-                  (schema/tag-with-type
-                   {:id facet-id
-                    :label "TODO: fetch labels"
-                    :enabled (apply-facet-filter? facet-id constraint-values context col)}
-                   facet-type))))
-         (remove nil?))))
+(defn- constraint-type
+  "Returns a string."
+  [constraint-kw]
+  {:pre [(keyword? constraint-kw)]}
+  (let [constraint-name (name constraint-kw)]
+    (-> constraint-name 
+        (subs 0 (dec (count constraint-name)))
+        str/capitalize 
+        (str "Facet"))))
 
-(defn facets-resolver [{:keys [::repo] :as context}
-                       _args
-                       {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-facets context catalog-uri))]
-    {:creators (make-facet context :CatalogSearchResult/creators results)
-     :publishers (make-facet context :CatalogSearchResult/publishers results)
-     :themes (make-facet context :CatalogSearchResult/themes results)}))
+(defn make-facet
+  "Returns a facet map.
+  
+  Arguments:
+  - context - application context (as in Lacinia)
+  - constraint - keyword 
+  - available-ids - set of URIs ocurring in the returned datasets.
+  - indexes - a map of indexes for each facet
+            {:publishers {{:publishers URI} seq<FACET>, ...}
+            as crated by [[clojure.set/index]]."
+  [context constraint available-ids indexes]
+  {:pre [(contains? #{:publishers :creators :themes} constraint)]}
+  (let [other-constraints (dissoc (get-in context [::args :facets]) constraint)]
+    (for [index-entry (dissoc (get indexes constraint) {})
+          :let [facet-id (get (key index-entry) constraint)]]
+      (schema/tag-with-type
+       {:id facet-id
+        :label "TODO: fetch labels"
+        :enabled (or ;;(seq (get-in context [::args :facets] constraint))
+                  (contains? available-ids facet-id)
+                  (boolean (every? seq
+                                   (for [[other-constraint-key values] other-constraints
+                                         constraint-value values]
+                                     (sequence (comp (map other-constraint-key)
+                                                     (filter #(= constraint-value %)))
+                                               (val index-entry))))))}
+       (constraint-type constraint)))))
+
+(defn- datasets-resolver-completion 
+  "Completion fn for datasets promise. To be used from within the facets
+  resolver. Takes a promise to which the value should be delivered. The
+  function returns the same promise."
+  [context promise<facets> facets-results datasets]
+  (let [reducer (fn reducer [triple ds]
+                  (let [extract ((juxt :publisher :creator :theme) ds)
+                        safely-conj (fn [s item]
+                                      (cond-> s
+                                        item (conj item)))]
+                    [(safely-conj (nth triple 0) (nth extract 0))
+                     (safely-conj (nth triple 1) (nth extract 1))
+                     (safely-conj (nth triple 2) (nth extract 2))]))
+        [publishers-ids creators-ids themes-ids] (reduce reducer
+                                                         [#{} #{} #{}]
+                                                         datasets)
+        set<facet> (set facets-results)
+        indexes (into {} (for [facet-g [:publishers :creators :themes]]
+                           [facet-g (set/index set<facet> [facet-g])]))
+        make-facet* (fn make-facet* [kw ids]
+                      (make-facet context kw ids indexes))
+        facets {:publishers (make-facet* :publishers publishers-ids)
+                :creators (make-facet* :creators creators-ids)
+                :themes (make-facet* :themes themes-ids)}]
+    (resolve/deliver! promise<facets> facets)))
+
+(defn facets-resolver
+  [{:keys [::repo ::promise<datasets>] :as context}
+   _args
+   {catalog-uri :id :as _value}]
+  (let [results (query repo (-all-facets context catalog-uri))
+        promise<facets> (resolve/resolve-promise)]
+    (resolve/on-deliver! promise<datasets>
+                         (partial datasets-resolver-completion
+                                  context
+                                  promise<facets>
+                                  results))
+    promise<facets>))
 
 (comment
+
   (f/format-query (-all-datasets {:CatalogSearchResult/publishers [(URI. "http://publisher")]} default-catalog)
                   :pretty? true)
   :end)
@@ -178,10 +251,13 @@
   (http/stop server))
 
 (defn- make-prefix-map [custom-prefixes]
-  (let [custom-prefixes (zipmap (map :prefix custom-prefixes) (map (comp str :base_uri) custom-prefixes))]
+  (let [custom-prefixes (zipmap (map :prefix custom-prefixes) 
+                                (map (comp str :base_uri) custom-prefixes))]
     (merge cqlrdf/default-prefixes custom-prefixes)))
 
-(defn endpoint-resolver [{:keys [drafter-base-uri repo-constructor] :as _context} {:keys [draftset_id prefixes] :as _args} _value]
+(defn endpoint-resolver
+  [{:keys [drafter-base-uri repo-constructor] :as _context} 
+   {:keys [draftset_id prefixes] :as _args} _value]
     ;; TODO endpoint_id becomes the authenticated repo/endpoint we're working against
   (let [endpoint_id (if draftset_id
                       (throw (ex-info "The draftset_id parameter is not supported yet" {:type ::unsupported-parameter}))
@@ -204,16 +280,23 @@
   (let [catalog (cqlrdf/->uri (or id default-catalog-id) prefixes)]
     (first (query repo (catalog-query* catalog)))))
 
-(defn catalog-query-resolver [{:keys [::repo ::prefixes] :as context} {search-string :search_string
-                                                                       themes :themes
-                                                                       creators :creators
-                                                                       publishers :publishers}
-                              {:keys [id] :as catalog-value}]
-  (let [coerce-uri #(cqlrdf/->uri % prefixes)]
-    (resolve/with-context {:id id} {:CatalogSearchResult/search-string search-string
-                                    :CatalogSearchResult/themes (map coerce-uri themes)
-                                    :CatalogSearchResult/creators (map coerce-uri creators)
-                                    :CatalogSearchResult/publishers (map coerce-uri publishers)})))
+(defn catalog-query-resolver
+  [{:keys [::repo ::prefixes] :as context} 
+   {search-string :search_string
+    themes :themes
+    creators :creators
+    publishers :publishers}
+   {:keys [id] :as catalog-value}]
+  (let [coerce-uri #(cqlrdf/->uri % prefixes)
+        [arg-publishers arg-creators arg-themes] (map #(map coerce-uri  %) [publishers creators themes])]
+    (resolve/with-context {:id id} {::promise<datasets> (resolve/resolve-promise)
+                                    ::args {:facets {:publishers arg-publishers 
+                                                     :themes arg-themes
+                                                     :creators arg-creators}}
+                                    :CatalogSearchResult/search-string search-string
+                                    :CatalogSearchResult/themes arg-themes
+                                    :CatalogSearchResult/creators arg-creators
+                                    :CatalogSearchResult/publishers arg-publishers})))
 
 (defn load-schema
   [{:keys [sdl-resource drafter-base-uri repo-constructor default-catalog-id]

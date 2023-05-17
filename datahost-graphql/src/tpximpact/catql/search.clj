@@ -22,15 +22,15 @@
 
   Always returns a set of tokens, or the empty set."
   [s]
-  (let [lower-case (fnil str/lower-case "")]
-    (-> (->> (-> s
-                 lower-case
-                 (str/split #"\p{Space}+"))
-             (map clean-chars)
-             (remove stopwords)
-             (map snowball)
-             set)
-        (disj ""))))
+  (let [lower-case (fnil str/lower-case "")
+        split (-> s
+                  lower-case
+                  (str/split #"\p{Space}+"))
+        result (sequence (comp (map clean-chars)
+                               (remove stopwords)
+                               (map snowball))
+                         split)]
+    (disj (set result) "")))
 
 (defn check-result [search-tokens {:keys [title description]}]
   (let [data-tokens (tokenise (str title " " description))]
