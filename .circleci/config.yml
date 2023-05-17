@@ -48,7 +48,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Deploy docker image to registry"
+          name: "Deploy GraphQL docker image to registry"
           command: "cd datahost-graphql && clojure -T:build docker :image-type :registry"
           project-dir: datahost-graphql
 
@@ -61,7 +61,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Deploy docker image to registry"
+          name: "Deploy Open API docker image to registry"
           command: "cd datahost-ld-openapi && clojure -T:build docker :image-type :registry"
           project-dir: datahost-ld-openapi
 
