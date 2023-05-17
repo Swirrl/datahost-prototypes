@@ -1,8 +1,57 @@
 (ns tpximpact.datahost.scratch.release.schema
-  (:require [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [malli.core :as m]
+            [malli.transform :as mt]))
 
 ;; TODO
 
+(def ^{:spec "https://w3c.github.io/csvw/metadata/#column-name"}
+  uritemplate:variable
+  ;; not a perfect implementation but should be good enough for prototype
+  [:and
+   [:string {:min 1}]
+   [:re #"^[a-z,A-Z,\\%,0-9,_]+$"]])
+
+(def ^{:spec "https://w3c.github.io/csvw/metadata/#built-in-datatypes"}
+  supported-datatypes
+  "We currently just support a subset of CSVW here. Commented out ones
+  are expected on some future timeframe."
+  ["string" "float" "boolean" "integer" "double"
+   #_"anyURI" #_"date" #_"dateTime" #_"dateTimeStamp"
+   #_"duration" #_"dayTimeDuration" #_"yearMonthDuration"
+   #_"time" #_"gDay" #_"gMonthDay" #_"gMonth"
+   #_"gYear" #_"gYearMonth"])
+
+(def dh:ColumnSpec [:map
+                    ["@type" [:enum "dh:DimensionColumn" "dh:MeasureColumn" "dh:AttributeColumn" #_"dh:MaybeRequiredAttribute"]]
+                    ["csvw:datatype" [:enum "string" ]]
+                    ["csvw:name" uritemplate:variable]
+                    ["csvw:titles" [:sequential :string]]])
+
+;;(m/coerce :int "52" mt/string-transformer)
+
+(def dh:TableSchemaSchema [:map
+                           ["@type" [:enum "dh:TableSchema"]]
+                           ["dh:columns" [:sequential dh:ColumnSpec]]])
+
+(comment
+
+  (m/validate dh:TableSchemaSchema {"@type" "dh:TableSchema"
+                                    "dh:columns" [{"csvw:datatype" "string"
+                                                   "csvw:name" "foo_bar"
+                                                   "csvw:titles" ["Foo Bar"]
+                                                   "@type" "dh:DimensionColumn"
+
+
+                                                   }]})
+
+  )
+
+(defn build-malli-table-schema [dh-schema]
+
+
+
+  )
 
 (let [coercion-properties #{"csvw:null" "csvw:default" "csvw:separator" "csvw:ordered"}
       transformation-properties #{"csvw:aboutUrl" "csvw:propertyUrl" "csvw:valueUrl" "csvw:virtual" "csvw:suppressOutput"}]
@@ -38,7 +87,7 @@
    "@id" "2018"
    "dh:columns" [{"csvw:datatype" "string" ;; should support all/most csvw datatype definitions
                   "csvw:name" "sex"
-                  "csvw:title" "Sex"
+                  "csvw:titles" "Sex"
                   "@type" "dh:DimensionColumn" ;; | "dh:MeasureColumn" | "dh:AttributeColumn"
                   ;;"csvw:ordered" false
                   ;;"csvw:virtual" true
