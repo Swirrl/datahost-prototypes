@@ -3,7 +3,7 @@
             [clojure.string :as str]
             [juxt.pack.api :as pack]))
 
-(def lib 'tpximpact/ldapi)
+(def lib 'tpximpact.datahost/ldapi)
 (def version (format "2.0.%s" (b/git-count-revs nil)))
 (def class-dir "target/classes")
 (def jar-file (format "target/ldapi-%s.jar" version))
@@ -25,7 +25,7 @@
                   (remove nil?))
         image-type (get opts :image-type :docker)]
     (pack/docker
-     {:basis (b/create-basis {:project "deps.edn" :aliases [:datahost-ld-openapi/docker]})
+     {:basis (b/create-basis {:project "deps.edn" :aliases [:ldapi/docker]})
       ;; If we don't include a tag in the :image-name, then pack implicitly
       ;; tags the image with latest, even when we specify additional tags. So
       ;; choose a tag arbitrarily to be part of the :image-name, and then
