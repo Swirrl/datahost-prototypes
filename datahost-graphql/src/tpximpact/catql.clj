@@ -34,7 +34,7 @@
 
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
 
-(defn query 
+(defn query
   "Returns a vector result of a query specified by query-data
   argument (a SPARQL query as clojure data)."
   [repo query-data]
@@ -43,8 +43,6 @@
       (log/info sparql)
       (into [] (repo/query conn sparql)))))
 
-(defn constrain-by-pred [pred values]
-  (let [facet-var (gensym "?")]
 (defn constrain-by-pred
   "Returns a SPARQL query fragment in clojure data form.
 
