@@ -14,6 +14,9 @@
   it. It should have a trailing slash."
   (URI. "https://example.org/data/"))
 
+(defn dataset-series-key [series-slug]
+  (str (.getPath ld-root) series-slug))
+
 (def SeriesApiParams [:map
                       [:series-slug :series-slug-string]
                       [:title {:optional true} :string]
@@ -139,7 +142,7 @@
   document is updated (TODO: https://github.com/Swirrl/datahost-prototypes/issues/57)
   "
   [db {:keys [api-params jsonld-doc] :as new-series}]
-  (let [k (str (.getPath ld-root) (:series-slug api-params))]
+  (let [k (dataset-series-key (:series-slug api-params))]
     (if-let [_old-series (get db k)]
       (update db k update-series new-series)
       (assoc db k (create-series api-params jsonld-doc)))))

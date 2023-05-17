@@ -4,14 +4,12 @@
    [tpximpact.datahost.ldapi.db :as db]))
 
 (defn get-dataset-series [{{:keys [series-slug]} :path-params}]
-  ;; (sc.api/spy)
-  {:status 200
-   :body {:name "foo"
-          :size 123}})
+  (let [key (series/dataset-series-key series-slug)
+        jsonld-doc (get @db/db key)]
+    {:status 200
+     :body jsonld-doc}))
 
-(defn put-dataset-series [{:keys [body-params path-params query-params]
-                           {:keys [series-slug]} :path-params
-                           {:keys [title description]} :query-params :as request}]
+(defn put-dataset-series [{:keys [body-params path-params query-params]}]
   (try
     (swap! db/db series/upsert-series {:api-params (merge path-params
                                                           query-params)

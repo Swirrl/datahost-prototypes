@@ -68,22 +68,24 @@
 * list
 * here"
              :parameters {:path {:series-slug string?}}
-             :responses {200 {:body {:name string?, :size int?}}}
+             ;; :responses {200 {:body [:maybe [:map ]]}}
              :handler handlers/get-dataset-series}
        :put {:summary "Create or update metadata on a dataset-series"
-             :parameters {:body [:maybe
-                                 [:map
-                                  ["dcterms:title" string?]
-                                  ["@context" [:or :string
-                                               [:tuple :string [:map
-                                                                ["@base" string?]]]]]]]
+             :parameters {:body [:map]
+                          ;; [:maybe
+                          ;;        [:map
+                          ;;         ["dcterms:title" string?]
+                          ;;         ["@context" [:or :string
+                          ;;                      [:tuple :string [:map
+                          ;;                                       ["@base" string?]]]]]]]
                           :path {:series-slug string?}
-                          :query [:map
-                                  [:title {:title "X parameter"
-                                           :description "Description for X parameter"
-                                           :optional true} string?]
-                                  [:description {:optional true} string?]]}
-             :responses {200 {:body {:name string?, :size int?}}}
+                          ;; :query [:map
+                          ;;         [:title {:title "X parameter"
+                          ;;                  :description "Description for X parameter"
+                          ;;                  :optional true} string?]
+                          ;;         [:description {:optional true} string?]]
+                          }
+             :responses {200 {:body {:status string?}}}
              :handler handlers/put-dataset-series}}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
