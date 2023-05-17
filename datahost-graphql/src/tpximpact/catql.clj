@@ -50,6 +50,7 @@
 
   If values seq is empty, the var will be uncostrained."
   [pred values]
+  (let [facet-var (gensym "?")]
     (if (seq values)
       [[:values {facet-var values}]
        ['?id pred facet-var]]
