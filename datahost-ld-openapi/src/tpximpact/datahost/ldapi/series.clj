@@ -140,7 +140,6 @@
   "
   [db {:keys [api-params jsonld-doc] :as new-series}]
   (let [k (str (.getPath ld-root) (:series-slug api-params))]
-    (sc.api/spy)
     (if-let [_old-series (get db k)]
       (update db k update-series new-series)
       (assoc db k (create-series api-params jsonld-doc)))))

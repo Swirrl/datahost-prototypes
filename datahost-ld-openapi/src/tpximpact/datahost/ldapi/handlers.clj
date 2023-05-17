@@ -3,21 +3,24 @@
    [tpximpact.datahost.ldapi.series :as series]
    [tpximpact.datahost.ldapi.db :as db]))
 
-(defn get-dataset-series [{{:keys [dataset-series]} :path-params}]
+(defn get-dataset-series [{{:keys [series-slug]} :path-params}]
   ;; (sc.api/spy)
   {:status 200
    :body {:name "foo"
           :size 123}})
 
-
-
 (defn put-dataset-series [{:keys [body-params path-params query-params]
-                           {:keys [dataset-series]} :path-params
+                           {:keys [series-slug]} :path-params
                            {:keys [title description]} :query-params :as request}]
-  (let [json-ld-doc body-params]
-    (series/upsert-series @db/db (merge path-params
-                                        query-params
-                                        {:jsonld-doc body-params})))
-  {:status 200
-   :body {:name "foo"
-          :size 123}})
+  (try
+    (swap! db/db series/upsert-series {:api-params (merge path-params
+                                                          query-params)
+                                       :jsonld-doc body-params})
+    {:status 200
+     :body {:status "success"}}
+
+    (catch Throwable e
+      (let [{:keys [type expected-value actual-value]} (ex-data e)
+            cause (ex-cause e)]
+        {:status 500
+         :body (str "error: " (name type))}))))
