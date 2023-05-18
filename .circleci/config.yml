@@ -2,6 +2,11 @@
 # See: https://circleci.com/docs/2.0/configuration-reference
 version: 2.1
 
+orbs:
+  aws-cli: circleci/aws-cli@3.1.5
+  gcp-cli: circleci/gcp-cli@3.1.0
+  terraform: circleci/terraform@3.2.1
+
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
@@ -49,8 +54,13 @@ jobs:
       - checkout
       - run:
           name: "Deploy GraphQL docker image to registry"
-          command: "cd datahost-graphql && clojure -T:build docker :image-type :registry"
+          command: "clojure -T:build docker :image-type :registry > graphql_container_digest"
+          working_directory: datahost-graphql
           project-dir: datahost-graphql
+      - persist_to_workspace:
+          root: datahost-graphql
+          paths:
+            - graphql_container_digest
 
   deploy-ld-openapi-service:
     docker:
@@ -65,6 +75,35 @@ jobs:
           command: "cd datahost-ld-openapi && clojure -T:build docker :image-type :registry"
           project-dir: datahost-ld-openapi
 
+  deploy-graphql-vm:
+    docker:
+      - image: cimg/base:2023.05
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - terraform/install:
+          terraform_version: 1.4.6
+      - aws-cli/setup:
+          role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
+          session-duration: '900'
+      - gcp-cli/setup:
+          version: latest
+          use_oidc: true
+      - run:
+          command: gcloud version
+      - run:
+          command: terraform init
+          working_directory: deploy/terraform/graphql
+      - run:
+          command: terraform get
+          working_directory: deploy/terraform/graphql
+      - run:
+          command: terraform plan -out update.tfplan -var digest=$(cat /tmp/workspace/graphql_container_digest)
+          working_directory: deploy/terraform/graphql
+      - run:
+          command: terraform apply update.tfplan
+          working_directory: deploy/terraform/graphql
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -109,3 +148,8 @@ workflows:
             #   ignore: /.*/
           requires:
             - test-ld-openapi-service
+      - deploy-graphql-vm:
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - deploy-graphql-service
