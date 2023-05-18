@@ -153,3 +153,6 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - deploy-graphql-service
+          filters:
+            branches:
+              only: main
