@@ -11,5 +11,6 @@
                            :ide-path "/ide"
                            :default-asset-path "/assets/graphiql"
                            :default-subscriptions-path "/ws"}
+
  :tpximpact.catql/runnable-service {:service #ig/ref :tpximpact.catql/service} ;; Could probably combine these two components
  }

@@ -33,7 +33,11 @@
                        :xsd (URI. "http://www.w3.org/2001/XMLSchema#")
                        :foaf (URI. "http://xmlns.com/foaf/0.1/")})
 
+
+
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
+
+(defonce facet-labels-store (atom nil))
 
 (defn query
   "Returns a vector result of a query specified by query-data
@@ -47,7 +51,7 @@
 (defn constrain-by-pred
   "Returns a SPARQL query fragment in clojure data form.
 
-  If values seq is empty, the var will be uncostrained."
+  If values seq is empty, the var will be unconstrained."
   [pred values]
   (let [facet-var (gensym "?")]
     (if (seq values)
@@ -81,7 +85,7 @@
     (resolve/deliver! promise<datasets> filtered)))
 
 
-(defn -all-facets [{:keys [:CatalogSearchResult/search-string
+(defn -all-facets-query [{:keys [:CatalogSearchResult/search-string
                            :CatalogSearchResult/publishers
                            :CatalogSearchResult/themes
                            :CatalogSearchResult/creators] :as context} catalog-uri]
@@ -134,13 +138,22 @@
         str/capitalize 
         (str "Facet"))))
 
+(def ^:private constraint->pred
+  {:themes :dcat/theme
+   :creator :dcterms/creator
+   :publishers :dcterms/publisher})
+
+(defn- lookup-facet-label [facet-constraint facet-id]
+  (get (@facet-labels-store (constraint->pred facet-constraint))
+       facet-id))
+
 (defn make-facet
   "Returns a facet map.
   
   Arguments:
   - context - application context (as in Lacinia)
   - constraint - keyword 
-  - available-ids - set of URIs ocurring in the returned datasets.
+  - available-ids - set of URIs occurring in the returned datasets.
   - indexes - a map of indexes for each facet
             {:publishers {{:publishers URI} seq<FACET>, ...}
             as crated by [[clojure.set/index]]."
@@ -151,7 +164,7 @@
           :let [facet-id (get (key index-entry) constraint)]]
       (schema/tag-with-type
        {:id facet-id
-        :label "TODO: fetch labels"
+        :label (lookup-facet-label constraint facet-id)
         :enabled (or ;;(seq (get-in context [::args :facets] constraint))
                   (contains? available-ids facet-id)
                   (boolean (every? seq
@@ -192,7 +205,7 @@
   [{:keys [::repo ::promise<datasets>] :as context}
    _args
    {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-facets context catalog-uri))
+  (let [results (query repo (-all-facets-query context catalog-uri))
         promise<facets> (resolve/resolve-promise)]
     (resolve/on-deliver! promise<datasets>
                          (partial datasets-resolver-completion
@@ -340,6 +353,32 @@
 (defmethod ig/init-key ::schema [_ opts]
   (load-schema opts))
 
+(defn- facet-label-query [pred]
+  {:prefixes default-prefixes
+   :select-distinct '[?facet ?facet_label]
+   :where ['[?catalog_uri (cat :dcat/record :foaf/primaryTopic) ?id]
+           [:optional
+            [['?id pred '?facet]
+             '[?facet :rdfs/label ?facet_label]]]]})
+
+(defn- load-facet-labels! [repo]
+  (let [facet-preds [:dcat/theme :dcterms/publisher :dcterms/creator]]
+    (->> (for [pred facet-preds]
+           [pred (->> (query repo (facet-label-query pred))
+                      (remove empty?)
+                      (map (juxt :facet :facet_label))
+                      (into {}))])
+         (into {}))))
+
+(defn- initialisation-side-effects! [_sys]
+  (when-not @facet-labels-store
+    (reset! facet-labels-store
+            ;; TODO: endpoint repo should probably be injected from conf
+            (try (load-facet-labels! (repo/sparql-repo "https://beta.gss-data.org.uk/sparql"))
+                 (catch Exception ex
+                   (throw (ex-info "Could not load facet labels" {} ex))
+                   {})))))
+
 (defn load-system-config [config]
   (if config
     (-> config
@@ -353,19 +392,18 @@
        (apply mm/meta-merge)))
 
 (defn start-system [config]
-  (-> config
-      (doto
-       (ig/load-namespaces))
-      ig/init))
+  (let [sys (-> config
+                (doto
+                  (ig/load-namespaces))
+                ig/init)]
+    (initialisation-side-effects! sys)
+    sys))
 
 (defn -main [& args]
   (let [config (load-configs ["catql/base-system.edn"
-                                 ;; env.edn contains environment specific
-                                 ;; overrides to the base-system.edn and
-                                 ;; is set on classpath depending on env.
-                                 "catql/env.edn"
-                                 ])
-
+                              ;; env.edn contains environment specific
+                              ;; overrides to the base-system.edn and
+                              ;; is set on classpath depending on env.
+                              "catql/env.edn"])
         sys (start-system config)]
-
     (log/info "System started")))
