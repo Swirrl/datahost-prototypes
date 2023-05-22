@@ -10,11 +10,11 @@
    [com.walmartlabs.lacinia.resolve :as resolve]
    [com.walmartlabs.lacinia.schema :as schema]
    [com.walmartlabs.lacinia.util :as util]
-   [com.yetanalytics.flint :as f]
    [grafter-2.rdf4j.repository :as repo]
    [integrant.core :as ig]
    [io.pedestal.http :as http]
    [meta-merge.core :as mm]
+   [tpximpact.catql.query :as q]
    [tpximpact.rdf :as cqlrdf]
    [tpximpact.catql.search :as search])
   (:import
@@ -22,51 +22,19 @@
    [tpximpact.rdf CuriOrURI])
   (:gen-class))
 
-(def default-prefixes {:dcat (URI. "http://www.w3.org/ns/dcat#")
-                       :dcterms (URI. "http://purl.org/dc/terms/")
-                       :owl (URI. "http://www.w3.org/2002/07/owl#")
-                       :qb (URI. "http://purl.org/linked-data/cube#")
-                       :rdf (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#")
-                       :rdfs (URI. "http://www.w3.org/2000/01/rdf-schema#")
-                       :skos (URI. "http://www.w3.org/2004/02/skos/core#")
-                       :void (URI. "http://rdfs.org/ns/void#")
-                       :xsd (URI. "http://www.w3.org/2001/XMLSchema#")
-                       :foaf (URI. "http://xmlns.com/foaf/0.1/")})
-
-
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
 
 (defonce facet-labels-store (atom nil))
 
-(defn query
-  "Returns a vector result of a query specified by query-data
-  argument (a SPARQL query as clojure data)."
-  [repo query-data]
-  (with-open [conn (repo/->connection repo)]
-    (let [sparql (f/format-query query-data :pretty? true)]
-      (log/info sparql)
-      (into [] (repo/query conn sparql)))))
-
-(defn constrain-by-pred
-  "Returns a SPARQL query fragment in clojure data form.
-
-  If values seq is empty, the var will be unconstrained."
-  [pred values]
-  (let [facet-var (gensym "?")]
-    (if (seq values)
-      [[:values {facet-var values}]
-       ['?id pred facet-var]]
-      [['?id pred facet-var]])))
-
-(defn -all-datasets 
+(defn -all-datasets
   "Returns a SPARQL query as clojure form."
   [{:CatalogSearchResult/keys [themes creators publishers]} catalog-uri]
-  `{:prefixes ~default-prefixes
+  `{:prefixes ~q/default-prefixes
     :select :*
     :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
-            ~@(constrain-by-pred :dcterms/publisher publishers)
-            ~@(constrain-by-pred :dcterms/creator creators)
-            ~@(constrain-by-pred :dcat/theme themes)
+            ~@(q/constrain-by-pred :dcterms/publisher publishers)
+            ~@(q/constrain-by-pred :dcterms/creator creators)
+            ~@(q/constrain-by-pred :dcat/theme themes)
             {~'?id {:dcterms/title #{~'?title}
                     :rdfs/label #{~'?label}
                     :dcterms/modified #{~'?modified}}}
@@ -79,16 +47,15 @@
 
 (defn datasets-resolver 
   [{:keys [::repo ::promise<datasets>] :as context} _args {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-datasets context catalog-uri))
+  (let [results (q/query repo (-all-datasets context catalog-uri))
         filtered (search/filter-results context results)]
     (resolve/deliver! promise<datasets> filtered)))
-
 
 (defn -all-facets-query [{:keys [:CatalogSearchResult/search-string
                            :CatalogSearchResult/publishers
                            :CatalogSearchResult/themes
                            :CatalogSearchResult/creators] :as context} catalog-uri]
-  `{:prefixes ~default-prefixes
+  `{:prefixes ~q/default-prefixes
     :select :*
     :where [[~catalog-uri ~'(cat :dcat/record :foaf/primaryTopic) ~'?id]
             {~'?id {:dcterms/title #{~'?title}
@@ -114,18 +81,6 @@
             ;;             ]]
             ]})
 
-(defn apply-facet-filter?               ;TODO: remove?
-  "Should the facet filter be applied?
-  
-  Arguments:
-  - facet-id - an URI
-  - constraint-values - set of URIs (values passed to the query)
-  - context - {:CatalogSearchresult/search-string ...}
-  - col - seq of {:title String, :description String} "
-  [facet-id constraint-values context col]
-  (boolean
-   (and (seq (search/filter-results context col))
-        (constraint-values facet-id))))
 
 (defn- constraint-type
   "Returns a string."
@@ -204,7 +159,7 @@
   [{:keys [::repo ::promise<datasets>] :as context}
    _args
    {catalog-uri :id :as _value}]
-  (let [results (query repo (-all-facets-query context catalog-uri))
+  (let [results (q/query repo (-all-facets-query context catalog-uri))
         promise<facets> (resolve/resolve-promise)]
     (resolve/on-deliver! promise<datasets>
                          (partial datasets-resolver-completion
@@ -212,17 +167,6 @@
                                   promise<facets>
                                   results))
     promise<facets>))
-
-(comment
-
-  (f/format-query (-all-datasets {:CatalogSearchResult/publishers [(URI. "http://publisher")]} default-catalog)
-                  :pretty? true)
-  :end)
-
-(comment
-  (def repo (repo/sparql-repo "https://beta.gss-data.org.uk/sparql"))
-  (query repo (-all-datasets {} default-catalog))
-  :end)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -249,26 +193,6 @@
 
 (derive ::default-catalog-id ::const)
 
-(def cors-config
-  {:allowed-origins (constantly true)
-   :creds false
-   :max-age (* 60 60 2)         ;; 2 hours
-   :methods "GET, POST, OPTIONS"})
-
-;; This is an adapted service map, that can be started and stopped.
-;; From the REPL you can call http/start and http/stop on this service:
-(defmethod ig/init-key ::runnable-service [_ {:keys [service]}]
-  (let [{:io.pedestal.http/keys [host port]} service
-        server (-> service
-                   (assoc ::http/allowed-origins cors-config)
-                   http/create-server
-                   http/start)]
-    (log/info (str "CatQL running: http://" host ":" port "/"))
-    server))
-
-(defmethod ig/halt-key! ::runnable-service [_ server]
-  (http/stop server))
-
 (defn- make-prefix-map [custom-prefixes]
   (let [custom-prefixes (zipmap (map :prefix custom-prefixes) 
                                 (map (comp str :base_uri) custom-prefixes))]
@@ -287,7 +211,7 @@
                                     ::prefixes prefix-map})))
 
 (defn catalog-query* [catalog]
-  `{:prefixes ~default-prefixes
+  `{:prefixes ~q/default-prefixes
     :select :*
     :where [[:bind [~catalog ?id]]
             [:optional [{~catalog {:dcterms/title #{?title}}}]]
@@ -297,7 +221,7 @@
                         {:keys [id] :as _args} _value]
   ;; TODO fix prefixes here to use flint format
   (let [catalog (cqlrdf/->uri (or id default-catalog-id) prefixes)]
-    (first (query repo (catalog-query* catalog)))))
+    (first (q/query repo (catalog-query* catalog)))))
 
 (defn catalog-query-resolver
   [{:keys [::repo ::prefixes] :as context} 
@@ -360,7 +284,7 @@
   (load-schema opts))
 
 (defn- facet-label-query [pred]
-  {:prefixes default-prefixes
+  {:prefixes q/default-prefixes
    :select-distinct '[?facet ?facet_label]
    :where ['[?catalog_uri (cat :dcat/record :foaf/primaryTopic) ?id]
            [:optional
@@ -370,14 +294,11 @@
 (defn- load-facet-labels! [repo]
   (let [facet-preds [:dcat/theme :dcterms/publisher :dcterms/creator]]
     (->> (for [pred facet-preds]
-           [pred (->> (query repo (facet-label-query pred))
+           [pred (->> (q/query repo (facet-label-query pred))
                       (remove empty?)
                       (map (juxt :facet :facet_label))
                       (into {}))])
          (into {}))))
-
-(defmethod ig/init-key ::sparql-repo [_ {:keys [endpoint]}]
-  (repo/sparql-repo endpoint))
 
 (defmethod ig/init-key ::facet-labels [_ {:keys [sparql-repo]}]
   (reset! facet-labels-store
@@ -385,6 +306,26 @@
                (catch Exception ex
                  (throw (ex-info "Could not load facet labels" {} ex))
                  {}))))
+
+(def cors-config
+  {:allowed-origins (constantly true)
+   :creds false
+   :max-age (* 60 60 2)         ;; 2 hours
+   :methods "GET, POST, OPTIONS"})
+
+;; This is an adapted service map, that can be started and stopped.
+;; From the REPL you can call http/start and http/stop on this service:
+(defmethod ig/init-key ::runnable-service [_ {:keys [service]}]
+  (let [{:io.pedestal.http/keys [host port]} service
+        server (-> service
+                   (assoc ::http/allowed-origins cors-config)
+                   http/create-server
+                   http/start)]
+    (log/info (str "CatQL running: http://" host ":" port "/"))
+    server))
+
+(defmethod ig/halt-key! ::runnable-service [_ server]
+  (http/stop server))
 
 (defn load-system-config [config]
   (if config
