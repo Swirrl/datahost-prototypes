@@ -34,7 +34,6 @@
                        :foaf (URI. "http://xmlns.com/foaf/0.1/")})
 
 
-
 (def default-catalog (URI. "http://gss-data.org.uk/catalog/datasets"))
 
 (defonce facet-labels-store (atom nil))
@@ -315,12 +314,12 @@
   [{:keys [sdl-resource drafter-base-uri repo-constructor default-catalog-id]
     :or {repo-constructor repo/sparql-repo}}]
   (-> (parser/parse-schema (slurp (io/resource sdl-resource)))
-      (util/inject-scalar-transformers {:URL {:parse #(java.net.URI. %)
+      (util/inject-scalar-transformers {:URL {:parse #(URI. %)
                                               :serialize str}
 
                                           ;; These can be CURI's or URI's however we can't handle them here
                                           ;; because we need access to the context.
-                                        :ID {:parse #(cqlrdf/CuriOrURI. %)
+                                        :ID {:parse #(CuriOrURI. %)
                                              :serialize str}
 
                                         :LangTag {:parse identity
@@ -370,14 +369,15 @@
                       (into {}))])
          (into {}))))
 
-(defn- initialisation-side-effects! [_sys]
-  (when-not @facet-labels-store
-    (reset! facet-labels-store
-            ;; TODO: endpoint repo should probably be injected from conf
-            (try (load-facet-labels! (repo/sparql-repo "https://beta.gss-data.org.uk/sparql"))
-                 (catch Exception ex
-                   (throw (ex-info "Could not load facet labels" {} ex))
-                   {})))))
+(defmethod ig/init-key ::sparql-repo [_ {:keys [endpoint]}]
+  (repo/sparql-repo endpoint))
+
+(defmethod ig/init-key ::facet-labels [_ {:keys [sparql-repo]}]
+  (reset! facet-labels-store
+          (try (load-facet-labels! sparql-repo)
+               (catch Exception ex
+                 (throw (ex-info "Could not load facet labels" {} ex))
+                 {}))))
 
 (defn load-system-config [config]
   (if config
@@ -396,7 +396,6 @@
                 (doto
                   (ig/load-namespaces))
                 ig/init)]
-    (initialisation-side-effects! sys)
     sys))
 
 (defn -main [& args]
