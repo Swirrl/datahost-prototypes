@@ -249,11 +249,18 @@
 
 (derive ::default-catalog-id ::const)
 
+(def cors-config
+  {:allowed-origins (constantly true)
+   :creds false
+   :max-age (* 60 60 2)         ;; 2 hours
+   :methods "GET, POST, OPTIONS"})
+
 ;; This is an adapted service map, that can be started and stopped.
 ;; From the REPL you can call http/start and http/stop on this service:
 (defmethod ig/init-key ::runnable-service [_ {:keys [service]}]
   (let [{:io.pedestal.http/keys [host port]} service
         server (-> service
+                   (assoc ::http/allowed-origins cors-config)
                    http/create-server
                    http/start)]
     (log/info (str "CatQL running: http://" host ":" port "/"))
