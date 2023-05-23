@@ -1,0 +1,57 @@
+{"@type" "dh:TableSchema",
+ "@context" ["https://publishmydata.com/def/datahost/context"
+             {"@base" "https://example.org/data/cis/schema/"}],
+ "@id" "2022-01-12",
+ "csvw:dialect": {"header": true},
+ "dh:columns": [
+                {"@type": "dh:DimensionColumn",
+                 "titles": "model_date",
+                 "name": "model_date",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:DimensionColumn",
+                 "titles": "observation_date",
+                 "name": "observation_date",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:DimensionColumn",
+                 "titles": "cis_region",
+                 "name": "cis_region",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:DimensionColumn",
+                 "titles": "virus_variant",
+                 "name": "virus_variant",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:MeasureColumn",
+                 "titles": "infection_rate",
+                 "name": "infection_rate",
+                 "datatype": "decimal",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:AttributeColumn",
+                 "titles": "lower_credible_interval",
+                 "name": "lower_credible_interval",
+                 "datatype": "decimal",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:AttributeColumn",
+                 "titles": "upper_credible_interval",
+                 "name": "upper_credible_interval",
+                 "datatype": "decimal",
+                 "required": true
+                 },
+                {
+                 "@type": "dh:AttributeColumn",
+                 "titles": "marker",
+                 "name": "marker",
+                 "required": false
+                 }
+                ]}

@@ -23,39 +23,61 @@
    #_"gYear" #_"gYearMonth"])
 
 (def dh:ColumnSpec [:map
-                    ["@type" [:enum "dh:DimensionColumn" "dh:MeasureColumn" "dh:AttributeColumn" #_"dh:MaybeRequiredAttribute"]]
-                    ["csvw:datatype" [:enum "string" ]]
+                    ["@type" [:enum {:optional true} "dh:DimensionColumn" "dh:MeasureColumn" "dh:AttributeColumn"
+                              #_"dh:RequiredAttribute" ;; might want to distinguish this too as it's part of QB.  If set it would imply csvw:required.
+                              ;; dh:DimensionColumn and dh:MeasureColumn should also imply csvw:required.
+                              ]]
+                    ["csvw:datatype" [:enum "string"]]
                     ["csvw:name" uritemplate:variable]
-                    ["csvw:titles" [:sequential :string]]])
+                    ["csvw:titles" [:or :string [:sequential :string]]]
+                    ["csvw:required" [:boolean {:default false}]]])
 
 ;;(m/coerce :int "52" mt/string-transformer)
 
 (def dh:TableSchemaSchema [:map
                            ["@type" [:enum "dh:TableSchema"]]
-                           ["dh:columns" [:sequential dh:ColumnSpec]]])
+                           ["dh:columns" [:sequential dh:ColumnSpec]]
+                           ["csvw:dialect" [:map {:default {"header" true}}
+                                            ["header" {:default true} :boolean]]]])
+
+(comment
+  ;; expand defaults
+  (m/decode dh:TableSchemaSchema {} mt/default-value-transformer))
 
 (comment
 
-  (m/validate dh:TableSchemaSchema {"@type" "dh:TableSchema"
-                                    "dh:columns" [{"csvw:datatype" "string"
-                                                   "csvw:name" "foo_bar"
-                                                   "csvw:titles" ["Foo Bar"]
-                                                   "@type" "dh:DimensionColumn"
+  (def example-schema {"@type" "dh:TableSchema"
+                       "dh:columns" [{"csvw:datatype" "string"
+                                      "csvw:name" "foo_bar"
+                                      "csvw:titles" ["Foo Bar"]
+                                      "@type" "dh:DimensionColumn"}]})
 
-
-                                                   }]})
+  (m/validate dh:TableSchemaSchema example-schema)
 
   )
+
+(def csvw-types->malli-types
+  {
+   "string" :string
+   "float" :double ;; Alias to double for now
+   "double" :double
+   "integer" :int ;; Malli :int is actually anything in the range of a Java Long
+   })
+
+(defn build-malli-cell-schema [colspec]
+  (get csvw-types->malli-types (colspec "csvw:datatype") :any))
 
 (defn build-malli-table-schema [dh-schema]
+  (let [colspecs (get-in dh-schema ["dh:columns"])
+        row-schema (->> colspecs
+                        (map build-malli-cell-schema)
+                        (cons :tuple)
+                        (vec))]
 
-
-
-  )
+    [:sequential row-schema]))
 
 (let [coercion-properties #{"csvw:null" "csvw:default" "csvw:separator" "csvw:ordered"}
       transformation-properties #{"csvw:aboutUrl" "csvw:propertyUrl" "csvw:valueUrl" "csvw:virtual" "csvw:suppressOutput"}]
-
 
   (def reserved-schema-properties
     "These csvw properties are currently intentional unsupported, but
@@ -87,7 +109,7 @@
    "@id" "2018"
    "dh:columns" [{"csvw:datatype" "string" ;; should support all/most csvw datatype definitions
                   "csvw:name" "sex"
-                  "csvw:titles" "Sex"
+                  "csvw:titles" ["Sex"]
                   "@type" "dh:DimensionColumn" ;; | "dh:MeasureColumn" | "dh:AttributeColumn"
                   ;;"csvw:ordered" false
                   ;;"csvw:virtual" true
@@ -105,12 +127,8 @@
                   ;;"csvw:default" "default-value"
                   ;;"csvw:null" "n/a"
 
-
-                  ;;"csvw:lang" "en"
-
-
-                  }]}
-  )
+;;"csvw:lang" "en"
+                  }]})
 
 (defn derive-revision-schema
   "Derive a dh:RevisionSchema from a dh:CubeSchema"
