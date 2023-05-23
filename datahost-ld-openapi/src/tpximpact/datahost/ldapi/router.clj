@@ -39,7 +39,7 @@
        (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn str})
        (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn str}))))
 
-(defn router [triplestore]
+(defn router [triplestore db]
   (ring/router
    [["/triplestore-query" ;; TODO remove this route when we have real ones using the triplestore
      {:get {:nodoc true}
@@ -74,11 +74,8 @@
                                       ["dcterms:description" {:optional true} string?]
                                       ["@context" [:or :string
                                                    [:tuple :string [:map
-                                                                    ["@base" string?]]]]]]]}
-                         500 {:body [:map
-                                     [:status [:enum "error"]]
-                                     [:message string?]]}}
-             :handler handlers/get-dataset-series}
+                                                                    ["@base" string?]]]]]]]}}
+             :handler (partial handlers/get-dataset-series db)}
        :put {:summary "Create or update metadata on a dataset-series"
              :parameters {:body [:map]
                           ;; [:maybe
@@ -95,8 +92,11 @@
                                   [:description {:title "Description"
                                                  :description "Description of dataset"
                                                  :optional true} string?]]}
-             :responses {200 {:body {:status string?}}}
-             :handler handlers/put-dataset-series}}]]]
+             :responses {200 {:body {:status [:enum "success"]}}
+                         500 {:body [:map
+                                     [:status [:enum "error"]]
+                                     [:message string?]]}}
+             :handler (partial handlers/put-dataset-series db)}}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -135,9 +135,9 @@
                         multipart/multipart-middleware]}}))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [api-route-data triplestore] ::ring/keys [opts default-handlers handlers]}]
+  [_ {:keys [triplestore db]}]
   (ring/ring-handler
-   (router triplestore)
+   (router triplestore db)
    (ring/routes
     (swagger-ui/create-swagger-ui-handler
      {:path "/"

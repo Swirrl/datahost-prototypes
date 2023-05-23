@@ -1,7 +1,7 @@
 (ns tpximpact.datahost.ldapi.db
-  (:require [duratom.core :as da]))
+  (:require
+   [duratom.core :as da]
+   [integrant.core :as ig]))
 
-(def db (da/duratom :local-file
-                    :file-path ".datahostdb.edn"
-                    :commit-mode :sync
-                    :init {}))
+(defmethod ig/init-key :tpximpact.datahost.ldapi.db/db [_ {:keys [storage-type opts]}]
+  (da/duratom storage-type opts))

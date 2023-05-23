@@ -9,5 +9,10 @@
 
  :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "/tmp/ld-dev-db"}
 
- :tpximpact.datahost.ldapi.router/handler {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo}
- }
+ :tpximpact.datahost.ldapi.router/handler {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
+                                           :db #ig/ref :tpximpact.datahost.ldapi.db/db}
+
+ :tpximpact.datahost.ldapi.db/db {:storage-type :local-file
+                                  :opts {:file-path ".datahostdb.edn"
+                                         :commit-mode :sync
+                                         :init {}}}}

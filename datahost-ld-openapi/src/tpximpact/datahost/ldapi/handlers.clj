@@ -1,17 +1,16 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-   [tpximpact.datahost.ldapi.series :as series]
-   [tpximpact.datahost.ldapi.db :as db]))
+   [tpximpact.datahost.ldapi.series :as series]))
 
-(defn get-dataset-series [{{:keys [series-slug]} :path-params}]
+(defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
   (let [key (series/dataset-series-key series-slug)
-        jsonld-doc (get @db/db key)]
+        jsonld-doc (get @db key)]
     {:status 200
      :body jsonld-doc}))
 
-(defn put-dataset-series [{:keys [body-params path-params query-params]}]
+(defn put-dataset-series [db {:keys [body-params path-params query-params]}]
   (try
-    (swap! db/db series/upsert-series {:api-params (merge path-params
+    (swap! db series/upsert-series {:api-params (merge path-params
                                                           query-params)
                                        :jsonld-doc body-params})
     {:status 200
