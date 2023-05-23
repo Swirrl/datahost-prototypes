@@ -21,7 +21,7 @@ example:datasets
 # The fact that the PUT document is a datahost:Cube means we know what
 # archetype, and lifecycle patterns to apply to it.
 
-@base <http://www.example.org/life-expectancy> .
+@base <http://www.example.org/data/life-expectancy> .
 
 
 </>
@@ -29,7 +29,7 @@ example:datasets
     dcterms:title "Life Expectancy" ;
     dcterms:issued "T1" ; # Added as managed metadata.  Would fail if a user supplied it. This predicate will exist on most managed entities.
     dcat:inCatalog example:datasets ; # Added as managed data
-    datahost:base "http://www.example.org/life-expectancy"
+    datahost:base "http://www.example.org/data/life-expectancy"
     .
 
 # PUT       : ./release/2023
