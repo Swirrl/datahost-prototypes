@@ -2,7 +2,7 @@
   (:require
    [clojure.set :as set]
    [clojure.tools.logging :as log]
-   [tpximpact.datahost.ldapi.util]
+   [tpximpact.datahost.ldapi.util :as util]
    [malli.core :as m]
    [malli.error :as me])
   (:import

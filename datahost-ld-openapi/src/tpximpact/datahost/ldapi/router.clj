@@ -68,7 +68,16 @@
 * list
 * here"
              :parameters {:path {:series-slug string?}}
-             ;; :responses {200 {:body [:maybe [:map ]]}}
+             :responses {200 {:body [:maybe
+                                     [:map
+                                      ["dcterms:title" {:optional true} string?]
+                                      ["dcterms:description" {:optional true} string?]
+                                      ["@context" [:or :string
+                                                   [:tuple :string [:map
+                                                                    ["@base" string?]]]]]]]}
+                         500 {:body [:map
+                                     [:status [:enum "error"]]
+                                     [:message string?]]}}
              :handler handlers/get-dataset-series}
        :put {:summary "Create or update metadata on a dataset-series"
              :parameters {:body [:map]
@@ -79,12 +88,13 @@
                           ;;                      [:tuple :string [:map
                           ;;                                       ["@base" string?]]]]]]]
                           :path {:series-slug string?}
-                          ;; :query [:map
-                          ;;         [:title {:title "X parameter"
-                          ;;                  :description "Description for X parameter"
-                          ;;                  :optional true} string?]
-                          ;;         [:description {:optional true} string?]]
-                          }
+                          :query [:map
+                                  [:title {:title "Title"
+                                           :description "Title of dataset"
+                                           :optional true} string?]
+                                  [:description {:title "Description"
+                                                 :description "Description of dataset"
+                                                 :optional true} string?]]}
              :responses {200 {:body {:status string?}}}
              :handler handlers/put-dataset-series}}]]]
 
