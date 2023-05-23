@@ -1,20 +1,11 @@
 (ns tpximpact.datahost.scratch.series
   (:require [clojure.java.io :as io]
             [grafter-2.rdf4j.io :as rio]
-            [clojure.set :as set]
             [clojure.string :as str]
             [clojure.walk :as walk]
-            [clojure.tools.logging :as log]
-            [integrant.core :as ig]
             [malli.core :as m]
-            [malli.error :as me]
-            [malli.util :as mu]
-            [duratom.core :as db])
-  (:import [java.net URI]
-           [com.github.jsonldjava.core JsonLdProcessor RDFDatasetUtils JsonLdTripleCallback]
-           [com.github.jsonldjava.utils JsonUtils]))
-
-(def default-catalog-uri (URI. "https://example.org/data/catalog"))
+            [malli.error :as me])
+  (:import [com.github.jsonldjava.utils JsonUtils]))
 
 (def file-store (io/file "./tmp"))
 
@@ -33,27 +24,7 @@
 (defn load-jsonld [jsonld-file]
   (->edn-data (JsonUtils/fromReader (io/reader jsonld-file))))
 
-(defn ednld->rdf
-  "Takes a JSON-LD map as an EDN datastructure and converts it into RDF
-  triples.
 
-  NOTE: the implementation is the easiest but worst way to do, but
-  should at least be correct.
-
-  TODO: At some point we should change this to a more direct/better
-  implementation."
-  [edn-ld]
-  (JsonLdProcessor/toRDF edn-ld
-                         (reify
-                           JsonLdTripleCallback
-                           (call [_ dataset]
-                             (let [nquad-string (let [sb (java.lang.StringBuilder.)]
-                                                  (RDFDatasetUtils/toNQuads dataset sb)
-                                                  (str sb))]
-
-                               (tap> nquad-string)
-
-                               (rio/statements (java.io.StringReader. nquad-string) :format :nq))))))
 
 
 

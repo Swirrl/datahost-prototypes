@@ -5,10 +5,13 @@
 (defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
   (let [key (series/dataset-series-key series-slug)
         jsonld-doc (get @db key)]
-    {:status 200
-     :body jsonld-doc}))
+    (if jsonld-doc
+      {:status 200
+       :body jsonld-doc}
+      {:status 404
+       :body "Not found"})))
 
-(defn put-dataset-series [db {:keys [body-params path-params query-params]}]
+(defn put-dataset-series [db {:keys [body-params path-params query-params] :as request}]
   (try
     (swap! db series/upsert-series {:api-params (merge path-params
                                                           query-params)

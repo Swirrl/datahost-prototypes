@@ -74,10 +74,11 @@
                                       ["dcterms:description" {:optional true} string?]
                                       ["@context" [:or :string
                                                    [:tuple :string [:map
-                                                                    ["@base" string?]]]]]]]}}
+                                                                    ["@base" string?]]]]]]]}
+                         404 {:body [:enum "Not found"]}}
              :handler (partial handlers/get-dataset-series db)}
        :put {:summary "Create or update metadata on a dataset-series"
-             :parameters {:body [:map]
+             :parameters {;;:body [:map]
                           ;; [:maybe
                           ;;        [:map
                           ;;         ["dcterms:title" string?]

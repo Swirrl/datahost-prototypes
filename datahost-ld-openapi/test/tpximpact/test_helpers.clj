@@ -1,4 +1,4 @@
-(ns tpximpact.test-helper
+(ns tpximpact.test-helpers
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
             [tpximpact.datahost.ldapi :as ldapi-system]))

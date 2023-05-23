@@ -1,17 +1,45 @@
-(ns tpximpact.datahost.scratch.series-test
+(ns tpximpact.datahost.ldapi.series-test
   (:require
-   [clojure.data.json :as json]
+   [clj-http.client :as http]
    [clojure.test :refer [deftest is testing]]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
-   [tpximpact.datahost.scratch.series :as sut])
+   [tpximpact.datahost.ldapi.series :as sut]
+   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.test-helpers :as th]
+   [clojure.data.json :as json])
   (:import
    (clojure.lang ExceptionInfo)
-   (java.io StringReader)
    (java.net URI)))
 
-(defn- coerce-test-json [json-as-edn]
-  (StringReader. (json/write-str json-as-edn)))
+(deftest round-tripping-series-test
+  (th/with-system sys
+    (testing "A series that does not exist returns 'not found'"
+      (try
+        (http/get "http://localhost:3400/data/does-not-exist")
+
+        (catch Throwable ex
+          (let [{:keys [status body]} (ex-data ex)]
+            (is (= status 404))
+            (is (= body "Not found"))))))
+
+    ;; (testing "A series can be created and retrieved via the API"
+    ;;   (let [response (http/put
+    ;;                   "http://localhost:3400/data/new-series"
+    ;;                   {;;:content-type :json
+    ;;                    :body
+    ;;                    (json/write-str
+    ;;                     {"@context" ["https://publishmydata.com/def/datahost/context",
+    ;;                                  {"@base" "https://example.org/data/"}],
+    ;;                      "dcterms:title" "New title"})
+    ;;                    })]
+    ;;     (is (= (:status response) 200))
+    ;;     (is (= (:body response) {:status "success"})))
+
+    ;;   (let [response (http/get "http://localhost:3400/data/new-series")]
+    ;;     (is (= (:statis response) 200)
+    ;;         (= (:body response) {"@context" "https://example"}))))
+    ))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"
@@ -91,7 +119,7 @@
                ednld))
 
         (testing "as RDF"
-          (let [triples (matcha/index-triples (sut/ednld->rdf ednld))]
+          (let [triples (matcha/index-triples (util/ednld->rdf ednld))]
             (testing "All emitted triples have the same expected subject"
               (is (matcha/ask [[(URI. "https://example.org/data/my-dataset-series") dcterms:title ?o]] triples))
               ;; TODO add some more tests

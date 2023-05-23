@@ -2,8 +2,7 @@
   (:require [clojure.test :refer :all]
             [com.yetanalytics.flint :as fl]
             [tpximpact.datahost.ldapi.native-datastore :as sut]
-            [tpximpact.test-helper :as th]))
-
+            [tpximpact.test-helpers :as th]))
 
 (deftest native-datastore-test
   (testing "Base data is loaded on startup"
