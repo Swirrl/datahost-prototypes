@@ -1,17 +1,17 @@
 (ns tpximpact.datahost.scratch.model-test
   (:require
-   [clojure.test :refer [deftest is testing]]
-   [clojure.set :as set]
    [clojure.java.io :as io]
-   [clojure.tools.logging :as log]
-   [tpximpact.datahost.scratch.series :as series]
-   [tpximpact.datahost.scratch.release :as release]
+   [clojure.test :refer [deftest is testing]]
    [grafter-2.rdf4j.io :as gio]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.core :refer [prefixer]]
-   [grafter.vocabularies.dcterms :refer [dcterms:title dcterms:description]]
-   [grafter.vocabularies.dcat :refer [dcat:keyword dcat:Dataset dcat]])
-  (:import [java.net URI]))
+   [grafter.vocabularies.dcat :refer [dcat]]
+   [grafter.vocabularies.dcterms :refer [dcterms:title]]
+   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.scratch.release :as release]
+   [tpximpact.datahost.ldapi.series :as series])
+  (:import
+   [java.net URI]))
 
 
 
@@ -21,7 +21,7 @@
 (defn db->matcha [db]
   (->> db
        vals
-       (mapcat series/ednld->rdf)
+       (mapcat util/ednld->rdf)
        (matcha/index-triples)))
 
 (def example:my-dataset-series (URI. "https://example.org/data/my-dataset-series"))

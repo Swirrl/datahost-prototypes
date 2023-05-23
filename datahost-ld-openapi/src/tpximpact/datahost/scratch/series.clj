@@ -43,7 +43,8 @@
   [slug]
   (when-not (valid-slug? slug)
     (throw (ex-info "slug must not start or end in a '/'" {:type :invalid-arguments})))
-  (str ld-root slug "/"))
+  ;; (str ld-root slug "/")
+  )
 
 
 
