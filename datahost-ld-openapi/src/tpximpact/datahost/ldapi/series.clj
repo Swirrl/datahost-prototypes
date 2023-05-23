@@ -6,8 +6,7 @@
    [malli.core :as m]
    [malli.error :as me])
   (:import
-   [java.net URI] ;; [com.github.jsonldjava.core JsonLdProcessor RDFDatasetUtils JsonLdTripleCallback]
-   ))
+   [java.net URI]))
 
 (def ld-root
   "For the prototype this item will come from config or be derived from

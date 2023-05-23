@@ -11,16 +11,16 @@
       {:status 404
        :body "Not found"})))
 
-(defn put-dataset-series [db {:keys [body-params path-params query-params] :as request}]
-  (try
-    (swap! db series/upsert-series {:api-params (merge path-params
-                                                          query-params)
-                                       :jsonld-doc body-params})
-    {:status 200
-     :body {:status "success"}}
+(defn put-dataset-series [db {:keys [body-params path-params query-params]}]
+  (let [params (-> query-params (update-keys keyword) (merge path-params))]
+    (try
+      (swap! db series/upsert-series {:api-params params
+                                      :jsonld-doc body-params})
+      {:status 200
+       :body {"status" "success"}}
 
-    (catch Throwable e
-      (let [message (ex-message e)]
-        {:status 500
-         :body {:status "error"
-                :message message}}))))
+      (catch Throwable e
+        (let [message (ex-message e)]
+          {:status 500
+           :body {:status "error"
+                  :message message}})))))

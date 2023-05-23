@@ -33,11 +33,11 @@
      :headers {"Content-Type" "text/plain"}
      :body (-> results first :label)}))
 
-(def json-string-keys-muuntaja-coercer
+(def leave-keys-alone-muuntaja-coercer
   (m/create
    (-> m/default-options
-       (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn str})
-       (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn str}))))
+       (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
+       (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
 
 (defn router [triplestore db]
   (ring/router
@@ -61,7 +61,7 @@
 
     ["/data" {:tags ["linked data api"]}
      ["/:series-slug"
-      {:muuntaja json-string-keys-muuntaja-coercer
+      {:muuntaja leave-keys-alone-muuntaja-coercer
        :get {:summary "Retrieve metadata for an existing dataset-series"
              :description "blah blah blah. [a link](http://foo.com/)
 * bulleted
@@ -78,7 +78,7 @@
                          404 {:body [:enum "Not found"]}}
              :handler (partial handlers/get-dataset-series db)}
        :put {:summary "Create or update metadata on a dataset-series"
-             :parameters {;;:body [:map]
+             :parameters {:body [:maybe [:map]]
                           ;; [:maybe
                           ;;        [:map
                           ;;         ["dcterms:title" string?]
@@ -93,7 +93,8 @@
                                   [:description {:title "Description"
                                                  :description "Description of dataset"
                                                  :optional true} string?]]}
-             :responses {200 {:body {:status [:enum "success"]}}
+             :responses {200 {:body [:map
+                                     ["status" [:enum "success"]]]}
                          500 {:body [:map
                                      [:status [:enum "error"]]
                                      [:message string?]]}}
