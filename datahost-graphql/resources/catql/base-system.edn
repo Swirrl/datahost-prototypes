@@ -1,13 +1,13 @@
-{:tpximpact.catql/schema {:sdl-resource "catql/catalog.graphql"
-                          :default-catalog-id #ig/ref :tpximpact.catql/default-catalog-id
-                          :drafter-base-uri #ig/ref :tpximpact.catql/drafter-base-uri}
+{:tpximpact.catql.schema/schema {:sdl-resource "catql/catalog.graphql"
+                          :default-catalog-id #ig/ref :tpximpact.catql.schema/default-catalog-id
+                          :drafter-base-uri #ig/ref :tpximpact.catql.schema/drafter-base-uri}
 
- :tpximpact.catql/sparql-repo {:endpoint "https://beta.gss-data.org.uk/sparql"}
+ :tpximpact.catql.query/sparql-repo {:endpoint "https://beta.gss-data.org.uk/sparql"}
 
- :tpximpact.catql/default-catalog-id "http://gss-data.org.uk/catalog/datasets"
- :tpximpact.catql/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
+ :tpximpact.catql.schema/default-catalog-id "http://gss-data.org.uk/catalog/datasets"
+ :tpximpact.catql.schema/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
 
- :tpximpact.catql/service {:schema #ig/ref :tpximpact.catql/schema
+ :tpximpact.catql/service {:schema #ig/ref :tpximpact.catql.schema/schema
                            :host "localhost"
                            :port 8888
                            :ide-path "/ide"
@@ -16,5 +16,5 @@
 
  :tpximpact.catql/runnable-service {:service #ig/ref :tpximpact.catql/service} ;; Could probably combine these two components
 
- :tpximpact.catql/facet-labels {:sparql-repo #ig/ref :tpximpact.catql/sparql-repo}
+ :tpximpact.catql.schema/facet-labels {:sparql-repo #ig/ref :tpximpact.catql.query/sparql-repo}
  }
