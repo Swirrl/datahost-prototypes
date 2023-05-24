@@ -177,3 +177,32 @@ query testQuery {
                    (->> (h/facets-enabled result :creators)
                         (map :id)
                         sort)))))))))
+
+
+(def query-no-datasets
+  "Note: Not including 'datasets' field int the query"
+  "
+query testQuery {
+  endpoint {
+    catalog {
+      catalog_query {
+        facets {
+          themes {
+            id
+            enabled
+          }
+          creators {
+            id
+            enabled
+          }
+        }
+      }
+    }
+  }
+}")
+
+(deftest no-datasets-query
+  (let [schema (h/catql-schema)]
+    (testing "Query without 'datasets' doesn't hang."
+      (let [result (h/with-timeout 500 (h/execute schema query-no-datasets))]
+        (is (not= :timeout result))))))

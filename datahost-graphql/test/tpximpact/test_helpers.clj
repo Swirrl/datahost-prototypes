@@ -49,3 +49,11 @@
 
 (defn facets-enabled [result facet-key]
   (->> (facets result facet-key) (filter :enabled)))
+
+(defmacro with-timeout
+  "Tries to return value of expr in within specified timeout (in ms),
+  otherwise returns sentinel `:timeout` value."
+  [timeout-ms expr]
+  `(let [p# (promise)]
+     (future (deliver p# ~expr))
+     (deref p# ~timeout-ms :timeout)))
