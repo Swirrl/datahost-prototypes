@@ -25,8 +25,8 @@ erDiagram
 
     REVISION { 
         int id 
-        string title "optional?"
-        string description "optional?"
+        string title "necessary?"
+        string description "necessary?"
     }
 
     CHANGESET { 
