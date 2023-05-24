@@ -201,7 +201,7 @@ query testQuery {
   }
 }")
 
-(deftest no-datasets-query
+(deftest no-datasets-query-test
   (let [schema (h/catql-schema)]
     (testing "Query without 'datasets' doesn't hang."
       (let [result (h/with-timeout 5000 (h/execute schema query-no-datasets))]
