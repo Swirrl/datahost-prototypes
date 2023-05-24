@@ -125,19 +125,28 @@
   "Completion fn for datasets promise. To be used from within the facets
   resolver. Takes a promise to which the value should be delivered. The
   function returns the same promise."
-  [context promise<facets> facets-results datasets]
-  (let [reducer (fn reducer [triple ds]
-                  (let [extract ((juxt :publisher :creator :theme) ds)
-                        safely-conj (fn [s item]
-                                      (cond-> s
-                                              item (conj item)))]
-                    [(safely-conj (nth triple 0) (nth extract 0))
-                     (safely-conj (nth triple 1) (nth extract 1))
-                     (safely-conj (nth triple 2) (nth extract 2))]))
-        [publishers-ids creators-ids themes-ids] (reduce reducer
-                                                         [#{} #{} #{}]
-                                                         datasets)
+  [context promise<facets> facets-results
+   ;datasets
+   ]
+  (let [
+        ;reducer (fn reducer [triple ds]
+        ;          (let [extract ((juxt :publisher :creator :theme) ds)
+        ;                safely-conj (fn [s item]
+        ;                              (cond-> s
+        ;                                      item (conj item)))]
+        ;            [(safely-conj (nth triple 0) (nth extract 0))
+        ;             (safely-conj (nth triple 1) (nth extract 1))
+        ;             (safely-conj (nth triple 2) (nth extract 2))]))
+        ;[publishers-ids creators-ids themes-ids] (reduce reducer
+        ;                                                 [#{} #{} #{}]
+        ;                                                 datasets)
+
         set<facet> (set facets-results)
+
+        publishers-ids (set (remove nil? (map :publishers facets-results)))
+        creators-ids (set (remove nil? (map :creators facets-results)))
+        themes-ids (set (remove nil? (map :themes facets-results)))
+
         indexes (into {} (for [facet-g [:publishers :creators :themes]]
                            [facet-g (set/index set<facet> [facet-g])]))
         make-facet* (fn make-facet* [kw ids]
@@ -153,11 +162,15 @@
    {catalog-uri :id :as _value}]
   (let [results (q/query repo (-all-facets-query context catalog-uri))
         promise<facets> (resolve/resolve-promise)]
-    (resolve/on-deliver! promise<datasets>
-                         (partial datasets-resolver-completion
-                                  context
-                                  promise<facets>
-                                  results))
+    ;(resolve/on-deliver! promise<datasets>
+    ;                     (partial datasets-resolver-completion
+    ;                              context
+    ;                              promise<facets>
+    ;                              results))
+    (datasets-resolver-completion
+             context
+             promise<facets>
+             results)
     promise<facets>))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
