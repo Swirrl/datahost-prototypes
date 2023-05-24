@@ -23,30 +23,32 @@
             (is (= status 404))
             (is (= body "Not found"))))))
 
-    (testing "A series can be created and retrieved via the API"
-      (let [jsonld-doc {"@context"
-                        ["https://publishmydata.com/def/datahost/context"
-                         {"@base" "https://example.org/data/"}],
-                        "dcterms:title" "A title"}]
+    (let [incoming-jsonld-doc {"@context"
+                               ["https://publishmydata.com/def/datahost/context"
+                                {"@base" "https://example.org/data/"}],
+                               "dcterms:title" "A title"}
+          augmented-jsonld-doc (sut/normalise-series {:series-slug "new-series"}
+                                                     incoming-jsonld-doc)]
+      (testing "A series can be created and retrieved via the API"
+
         (let [response (http/put
                         "http://localhost:3400/data/new-series"
                         {:content-type :json
-                         :body (json/write-str jsonld-doc)})]
+                         :body (json/write-str incoming-jsonld-doc)})]
           (is (= (:status response) 200))
-          (is (= (json/read-str (:body response)) {"status" "success"})))
+          (is (= (json/read-str (:body response)) augmented-jsonld-doc)))
 
         (let [response (http/get "http://localhost:3400/data/new-series")]
           (is (= (:status response) 200))
-          (is (= (json/read-str (:body response)) jsonld-doc)))))
+          (is (= (json/read-str (:body response)) incoming-jsonld-doc))))
 
-    (testing "A series can be updated via the API"
-      (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]
-        (is (= (:status response) 200))
-        (is (= (json/read-str (:body response)) {"status" "success"})))
+      (testing "A series can be updated via the API"
+        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]
+          (is (= (:status response) 200)))
 
-      (let [response (http/get "http://localhost:3400/data/new-series")]
-        (is (= (:status response) 200))
-        (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title"))))))
+        (let [response (http/get "http://localhost:3400/data/new-series")]
+          (is (= (:status response) 200))
+          (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title")))))))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"

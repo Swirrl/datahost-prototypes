@@ -39,6 +39,15 @@
        (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
        (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
 
+(def JsonLdSchema
+  [:maybe
+   [:map
+    ["dcterms:title" {:optional true} string?]
+    ["dcterms:description" {:optional true} string?]
+    ["@context" [:or :string
+                 [:tuple :string [:map
+                                  ["@base" string?]]]]]]])
+
 (defn router [triplestore db]
   (ring/router
    [["/triplestore-query" ;; TODO remove this route when we have real ones using the triplestore
@@ -68,13 +77,7 @@
 * list
 * here"
              :parameters {:path {:series-slug string?}}
-             :responses {200 {:body [:maybe
-                                     [:map
-                                      ["dcterms:title" {:optional true} string?]
-                                      ["dcterms:description" {:optional true} string?]
-                                      ["@context" [:or :string
-                                                   [:tuple :string [:map
-                                                                    ["@base" string?]]]]]]]}
+             :responses {200 {:body JsonLdSchema}
                          404 {:body [:enum "Not found"]}}
              :handler (partial handlers/get-dataset-series db)}
        :put {:summary "Create or update metadata on a dataset-series"
@@ -93,8 +96,8 @@
                                   [:description {:title "Description"
                                                  :description "Description of dataset"
                                                  :optional true} string?]]}
-             :responses {200 {:body [:map
-                                     ["status" [:enum "success"]]]}
+             :responses {;200 {:body [:maybe [:map]]}
+                         ;;201 {:body [:maybe [:map]]}
                          500 {:body [:map
                                      [:status [:enum "error"]]
                                      [:message string?]]}}

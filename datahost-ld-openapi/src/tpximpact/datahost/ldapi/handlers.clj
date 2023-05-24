@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
+   [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.series :as series]))
 
 (defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
@@ -12,15 +13,15 @@
        :body "Not found"})))
 
 (defn put-dataset-series [db {:keys [body-params path-params query-params]}]
-  (let [params (-> query-params (update-keys keyword) (merge path-params))]
-    (try
-      (swap! db series/upsert-series {:api-params params
-                                      :jsonld-doc body-params})
+  (try
+    (let [api-params (-> query-params (update-keys keyword) (merge path-params))
+          incoming-jsonld-doc body-params
+          jsonld-doc (db/upsert-series! db api-params incoming-jsonld-doc)]
       {:status 200
-       :body {"status" "success"}}
+       :body jsonld-doc})
 
-      (catch Throwable e
-        (let [message (ex-message e)]
-          {:status 500
-           :body {:status "error"
-                  :message message}})))))
+    (catch Throwable e
+      (let [message (ex-message e)]
+        {:status 500
+         :body {:status "error"
+                :message message}}))))
