@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer :all]
     [clj-http.client :as http]
-    [tpximpact.test-helper :as th]))
+    [tpximpact.test-helpers :as th]))
 
 (deftest service-sanity-test
   (th/with-system sys

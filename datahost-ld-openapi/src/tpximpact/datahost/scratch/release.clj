@@ -1,7 +1,7 @@
 (ns tpximpact.datahost.scratch.release
   (:require
    [clojure.tools.logging :as log]
-   [tpximpact.datahost.scratch.series :as series]))
+   [tpximpact.datahost.ldapi.series :as series]))
 
 (defn normalise-release [base-entity {:keys [api-params jsonld-doc]}]
   (let [{:keys [series-slug release-slug]} api-params
