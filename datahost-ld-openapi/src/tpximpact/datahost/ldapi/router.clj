@@ -50,9 +50,10 @@
 
 (defn router [triplestore db]
   (ring/router
-   [["/triplestore-query" ;; TODO remove this route when we have real ones using the triplestore
-     {:get {:nodoc true}
-      :handler #(query-example triplestore %)}]
+   [["/triplestore-query"
+     ;; TODO remove this route when we have real ones using the triplestore
+     {:get {:no-doc true
+            :handler #(query-example triplestore %)}}]
     ["/openapi.json"
      {:get {:no-doc true
             :openapi {:openapi "3.0.0"
