@@ -16,8 +16,11 @@
   (try
     (let [api-params (-> query-params (update-keys keyword) (merge path-params))
           incoming-jsonld-doc body-params
-          jsonld-doc (db/upsert-series! db api-params incoming-jsonld-doc)]
-      {:status 200
+          {:keys [op jsonld-doc]} (db/upsert-series! db api-params incoming-jsonld-doc)
+          response-code (case op
+                          :create 201
+                          :update 200)]
+      {:status response-code
        :body jsonld-doc})
 
     (catch Throwable e

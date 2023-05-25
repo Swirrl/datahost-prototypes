@@ -3,6 +3,9 @@
             [integrant.core :as ig]
             [tpximpact.datahost.ldapi :as ldapi-system]))
 
+(defn clean-up-database! [system]
+  (let [db (get system :tpximpact.datahost.ldapi.db/db)]
+    (reset! db {})))
 
 (defmacro with-system [system-binding & body]
   `(let [config# (ldapi-system/load-configs ["ldapi/base-system.edn"
@@ -14,6 +17,7 @@
          sys# (ldapi-system/start-system config#)
          ~system-binding sys#]
      (try
-      ~@body
-      (finally
-        (ig/halt! sys#)))))
+       ~@body
+       (finally
+         (clean-up-database! sys#)
+         (ig/halt! sys#)))))

@@ -112,7 +112,7 @@
                           )]
      final-doc)))
 
-(defn- update-series [_old-series {:keys [api-params jsonld-doc] :as _new-series}]
+(defn- update-series [_old-series api-params jsonld-doc]
   (log/info "Updating series " (:series-slug api-params))
   (normalise-series api-params jsonld-doc))
 
@@ -140,8 +140,8 @@
   For example a `dcterms:issued` time should not change after a
   document is updated (TODO: https://github.com/Swirrl/datahost-prototypes/issues/57)
   "
-  [db {:keys [api-params jsonld-doc] :as new-series}]
+  [db api-params jsonld-doc]
   (let [series-key (dataset-series-key (:series-slug api-params))]
     (if-let [_old-series (get db series-key)]
-      (update db series-key update-series new-series)
+      (update db series-key update-series api-params jsonld-doc)
       (assoc db series-key (create-series api-params jsonld-doc)))))

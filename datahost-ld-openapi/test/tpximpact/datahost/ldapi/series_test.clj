@@ -35,7 +35,7 @@
                         "http://localhost:3400/data/new-series"
                         {:content-type :json
                          :body (json/write-str incoming-jsonld-doc)})]
-          (is (= (:status response) 200))
+          (is (= (:status response) 201))
           (is (= (json/read-str (:body response)) augmented-jsonld-doc)))
 
         (let [response (http/get "http://localhost:3400/data/new-series")]
