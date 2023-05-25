@@ -97,9 +97,12 @@
                                   [:description {:title "Description"
                                                  :description "Description of dataset"
                                                  :optional true} string?]]}
-             :responses {;200 {:body [:maybe [:map]]}
-                         ;;201 {:body [:maybe [:map]]}
-                         500 {:body [:map
+             :responses {200 {:description "Series already existed and was successfully updated"
+                              :body map?}
+                         201 {:description "Series did not exist previously and was successfully created"
+                              :body map?}
+                         500 {:description "Internal server error"
+                              :body [:map
                                      [:status [:enum "error"]]
                                      [:message string?]]}}
              :handler (partial handlers/put-dataset-series db)}}]]]
