@@ -39,7 +39,7 @@
   (let [db (atom {})] ;; an empty database
     (testing "Constructing the series"
       ;; first make a series
-      (swap! db series/upsert-series {:api-params {:series-slug "my-dataset-series" :title "My series"}})
+      (swap! db series/upsert-series {:series-slug "my-dataset-series" :title "My series"} {})
 
       (is (matcha/ask [[example:my-dataset-series dh:baseEntity ?o]] (db->matcha @db)))
       (is (matcha/ask [[example:my-dataset-series dcterms:title "My series"]] (db->matcha @db)))
@@ -47,7 +47,8 @@
       (testing "idempotent - upserting same request again is equivalent to inserting once"
 
         (let [start-state @db
-              end-state (swap! db series/upsert-series {:api-params {:series-slug "my-dataset-series" :title "My series"}})]
+              end-state (swap! db series/upsert-series
+                               {:series-slug "my-dataset-series" :title "My series"} {})]
           (is (= start-state end-state)))))
 
     (testing "Constructing a release"
@@ -71,6 +72,4 @@
           (is (matcha/ask [[example:my-release dcat:inSeries example:my-dataset-series]]
                           mdb))))
 
-      (testing "TODO inverse triples see issue: https://github.com/Swirrl/datahost-prototypes/issues/54"
-
-        ))))
+      (testing "TODO inverse triples see issue: https://github.com/Swirrl/datahost-prototypes/issues/54"))))

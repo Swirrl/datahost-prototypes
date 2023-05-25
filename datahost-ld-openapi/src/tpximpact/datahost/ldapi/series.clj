@@ -127,8 +127,7 @@
   Intended usage is via swap!
 
   ```
-  (swap! db upsert-series {:api-params {:series-slug \"my-dataset-series\"}
-                           :jsonld-doc {}})
+  (swap! db upsert-series {:series-slug \"my-dataset-series\"} {})
   ```
 
   An upsert will insert a new series if it isn't there already.
@@ -140,8 +139,8 @@
   For example a `dcterms:issued` time should not change after a
   document is updated (TODO: https://github.com/Swirrl/datahost-prototypes/issues/57)
   "
-  [db api-params jsonld-doc]
-  (let [series-key (dataset-series-key (:series-slug api-params))]
-    (if-let [_old-series (get db series-key)]
-      (update db series-key update-series api-params jsonld-doc)
-      (assoc db series-key (create-series api-params jsonld-doc)))))
+  ([db api-params jsonld-doc]
+   (let [series-key (dataset-series-key (:series-slug api-params))]
+     (if-let [_old-series (get db series-key)]
+       (update db series-key update-series api-params jsonld-doc)
+       (assoc db series-key (create-series api-params jsonld-doc))))))
