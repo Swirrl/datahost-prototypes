@@ -1,12 +1,13 @@
 (ns tpximpact.test-helpers
   (:require
-   [clojure.java.io :as io]
-   [clojure.walk :as walk]
-   [com.walmartlabs.lacinia :as lacinia]
-   [grafter-2.rdf4j.repository :as repo]
-   [integrant.core :as ig]
-   [tpximpact.catql :as catql]
-   [tpximpact.catql.schema :as schema]))
+    [clojure.java.io :as io]
+    [clojure.walk :as walk]
+    [com.walmartlabs.lacinia :as lacinia]
+    [grafter-2.rdf4j.repository :as repo]
+    [integrant.core :as ig]
+    [tpximpact.catql.schema :as schema]
+    [tpximpact.sys :as sys])
+  (:import (clojure.lang IPersistentMap)))
 
 (defn simplify
     "Converts all ordered maps nested within the map into standard hash
@@ -16,7 +17,7 @@
     (walk/postwalk
      (fn [node]
        (cond
-         (instance? clojure.lang.IPersistentMap node)
+         (instance? IPersistentMap node)
          (into {} node)
 
          (seq? node)
@@ -62,7 +63,7 @@
 (defn load-configs
   [configs]
   (-> configs
-      (catql/load-configs)
+      (sys/load-configs)
       (dissoc :tpximpact.catql/service :tpximpact.catql/runnable-service)))
 
 (defn- start-system
@@ -89,7 +90,7 @@
     (ig/halt! sys)))
 
 (defn with-system
-  "Test fixture for startin/stopping the system."
+  "Test fixture for starting / stopping the system."
   [test-fn]
   (with-open [f (io/writer (io/file "OUT.log"))]
     (start-test-system)

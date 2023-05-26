@@ -1,6 +1,5 @@
 (ns tpximpact.facet-search-test
   (:require
-   [clojure.set :as set]
    [clojure.test :refer [deftest testing is use-fixtures]]
    [tpximpact.test-helpers :as h]))
 

@@ -16,7 +16,7 @@
                        :xsd (URI. "http://www.w3.org/2001/XMLSchema#")
                        :foaf (URI. "http://xmlns.com/foaf/0.1/")})
 
-(defmethod ig/init-key ::sparql-repo [_ {:keys [endpoint]}]
+(defmethod ig/init-key :tpximpact.catql.query/sparql-repo [_ {:keys [endpoint]}]
   (repo/sparql-repo endpoint))
 
 (defn query
