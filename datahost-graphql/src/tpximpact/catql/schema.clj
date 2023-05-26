@@ -167,20 +167,20 @@
 
 (s/def ::sdl-resource string?)
 
-(defmethod ig/pre-init-spec ::schema [k]
-  (s/keys :req-un [::sdl-resource]))
+;(defmethod ig/pre-init-spec :tpximpact.catql.schema/schema [k]
+;  (s/keys :req-un [::sdl-resource]))
 
-(defmethod ig/init-key ::const [_ v] v)
+(defmethod ig/init-key :tpximpact.catql.schema/const [_ v] v)
 
-(defmethod ig/pre-init-spec ::drafter-base-uri [_]
+(defmethod ig/pre-init-spec :tpximpact.catql.schema/drafter-base-uri [_]
   string?)
 
-(derive ::drafter-base-uri ::const)
+(derive :tpximpact.catql.schema/drafter-base-uri :tpximpact.catql.schema/const)
 
-(defmethod ig/pre-init-spec ::default-catalog-id [_]
+(defmethod ig/pre-init-spec :tpximpact.catql.schema/default-catalog-id [_]
   string?)
 
-(derive ::default-catalog-id ::const)
+(derive :tpximpact.catql.schema/default-catalog-id :tpximpact.catql.schema/const)
 
 (defn- make-prefix-map [custom-prefixes]
   (let [custom-prefixes (zipmap (map :prefix custom-prefixes)
@@ -272,8 +272,10 @@
                        :apply-field-directives (fn [field-def resolver-f]
                                                  nil)})))
 
-(defmethod ig/init-key ::schema [_ opts]
-  (load-schema opts))
+(defmethod ig/init-key :tpximpact.catql.schema/schema [_ opts]
+  ;; init can be called multiple times and doesn't always have its values filled out
+  (when (:sdl-resource opts)
+    (load-schema opts)))
 
 (defn- facet-label-query [pred]
   {:prefixes q/default-prefixes
@@ -292,9 +294,11 @@
                       (into {}))])
          (into {}))))
 
-(defmethod ig/init-key ::facet-labels [_ {:keys [sparql-repo]}]
-  (reset! facet-labels-store
-          (try (load-facet-labels! sparql-repo)
-               (catch Exception ex
-                 (throw (ex-info "Could not load facet labels" {} ex))
-                 {}))))
+(defmethod ig/init-key :tpximpact.catql.schema/facet-labels [_ {:keys [sparql-repo]}]
+  (when sparql-repo
+    (reset! facet-labels-store
+            (try (load-facet-labels! sparql-repo)
+                 (catch Exception ex
+                   (throw (ex-info "Could not load facet labels" {} ex))
+                   {}))))
+  (when @facet-labels-store :initialised))
