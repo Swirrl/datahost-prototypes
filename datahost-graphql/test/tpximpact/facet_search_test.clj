@@ -1,8 +1,10 @@
 (ns tpximpact.facet-search-test
   (:require
    [clojure.set :as set]
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest testing is use-fixtures]]
    [tpximpact.test-helpers :as h]))
+
+(use-fixtures :once h/with-system)
 
 (def query-no-facets-constraints
   "
@@ -65,8 +67,7 @@ query testQuery {
 }
 ")
 
-(deftest ^{:kaocha/pending "https://github.com/Swirrl/catql-prototype/issues/8"}
-  facet-search-test
+(deftest facet-search-test
   (let [schema (h/catql-schema)]
     (testing "Faceted queries"
 
