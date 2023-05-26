@@ -3,6 +3,7 @@
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
+            [com.walmartlabs.lacinia.executor :as executor]
             [com.walmartlabs.lacinia.util :as util]
             [com.walmartlabs.lacinia.resolve :as resolve]
             [com.walmartlabs.lacinia.schema :as schema]
@@ -219,8 +220,11 @@
     publishers :publishers}
    {:keys [id] :as catalog-value}]
   (let [coerce-uri #(cqlrdf/->uri % prefixes)
-        [arg-publishers arg-creators arg-themes] (map #(map coerce-uri  %) [publishers creators themes])]
-    (resolve/with-context {:id id} {::promise<datasets> (resolve/resolve-promise)
+        [arg-publishers arg-creators arg-themes] (map #(map coerce-uri  %) [publishers creators themes])
+        promise<datasets> (cond-> (resolve/resolve-promise)
+                            (not (executor/selects-field? context :CatalogSearchResult/datasets))
+                            (resolve/deliver! []))]
+    (resolve/with-context {:id id} {::promise<datasets> promise<datasets>
                                     ::args {:facets {:publishers arg-publishers
                                                      :themes arg-themes
                                                      :creators arg-creators}}

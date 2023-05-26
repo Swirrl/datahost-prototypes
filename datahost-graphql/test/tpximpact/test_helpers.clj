@@ -1,10 +1,12 @@
 (ns tpximpact.test-helpers
   (:require
-    [clojure.java.io :as io]
-    [clojure.walk :as walk]
-    [com.walmartlabs.lacinia :as lacinia]
-    [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.catql.schema :as schema]))
+   [clojure.java.io :as io]
+   [clojure.walk :as walk]
+   [com.walmartlabs.lacinia :as lacinia]
+   [grafter-2.rdf4j.repository :as repo]
+   [integrant.core :as ig]
+   [tpximpact.catql :as catql]
+   [tpximpact.catql.schema :as schema]))
 
 (defn simplify
     "Converts all ordered maps nested within the map into standard hash
@@ -49,3 +51,47 @@
 
 (defn facets-enabled [result facet-key]
   (->> (facets result facet-key) (filter :enabled)))
+
+(defmacro with-timeout
+  "Tries to return value of expr in within specified timeout (in ms),
+  otherwise returns sentinel `:timeout` value."
+  [timeout-ms expr]
+  `(let [f# (future ~expr)]
+     (deref f# ~timeout-ms :timeout)))
+
+(defn load-configs
+  [configs]
+  (-> configs
+      (catql/load-configs)
+      (dissoc :tpximpact.catql/service :tpximpact.catql/runnable-service)))
+
+(defn- start-system
+  [config]
+  (-> config
+      (doto (ig/load-namespaces))
+      ig/init))
+
+(def ^:dynamic *system* (atom nil))
+
+(defn start-test-system
+  "Use this fixture for graphql tests."
+  ([]
+   (start-test-system ["catql/base-system.edn"]))
+  ([configs]
+   (let [sys (-> configs
+                 (load-configs)
+                 (start-system))]
+     (reset! *system* sys))))
+
+(defn stop-test-system []
+  (let [sys @*system*]
+    (assert sys)
+    (ig/halt! sys)))
+
+(defn with-system
+  "Test fixture for startin/stopping the system."
+  [test-fn]
+  (with-open [f (io/writer (io/file "OUT.log"))]
+    (start-test-system)
+    (test-fn)
+    (stop-test-system)))

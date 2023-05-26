@@ -1,8 +1,10 @@
 (ns tpximpact.facet-search-test
   (:require
    [clojure.set :as set]
-   [clojure.test :refer :all]
+   [clojure.test :refer [deftest testing is use-fixtures]]
    [tpximpact.test-helpers :as h]))
+
+(use-fixtures :once h/with-system)
 
 (def query-no-facets-constraints
   "
@@ -65,8 +67,7 @@ query testQuery {
 }
 ")
 
-(deftest ^{:kaocha/pending "https://github.com/Swirrl/catql-prototype/issues/8"}
-  facet-search-test
+(deftest facet-search-test
   (let [schema (h/catql-schema)]
     (testing "Faceted queries"
 
@@ -177,3 +178,32 @@ query testQuery {
                    (->> (h/facets-enabled result :creators)
                         (map :id)
                         sort)))))))))
+
+
+(def query-no-datasets
+  "Note: Not including 'datasets' field int the query"
+  "
+query testQuery {
+  endpoint {
+    catalog {
+      catalog_query {
+        facets {
+          themes {
+            id
+            enabled
+          }
+          creators {
+            id
+            enabled
+          }
+        }
+      }
+    }
+  }
+}")
+
+(deftest no-datasets-query-test
+  (let [schema (h/catql-schema)]
+    (testing "Query without 'datasets' doesn't hang."
+      (let [result (h/with-timeout 5000 (h/execute schema query-no-datasets))]
+        (is (not= :timeout result))))))
