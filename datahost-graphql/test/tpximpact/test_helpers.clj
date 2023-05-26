@@ -1,12 +1,12 @@
 (ns tpximpact.test-helpers
   (:require
-    [clojure.java.io :as io]
-    [clojure.walk :as walk]
-    [com.walmartlabs.lacinia :as lacinia]
-    [grafter-2.rdf4j.repository :as repo]
-    [integrant.core :as ig]
-    [tpximpact.catql :as catql]
-    [tpximpact.catql.schema :as schema]))
+   [clojure.java.io :as io]
+   [clojure.walk :as walk]
+   [com.walmartlabs.lacinia :as lacinia]
+   [grafter-2.rdf4j.repository :as repo]
+   [integrant.core :as ig]
+   [tpximpact.catql :as catql]
+   [tpximpact.catql.schema :as schema]))
 
 (defn simplify
     "Converts all ordered maps nested within the map into standard hash
@@ -60,13 +60,8 @@
      (deref f# ~timeout-ms :timeout)))
 
 (defn load-configs
-  []
-  (-> ["catql/base-system.edn"
-       ;; env.edn contains environment specific
-       ;; overrides to the base-system.edn and
-       ;; is set on classpath depending on env.
-       ;; "catql/env.edn"
-       ]
+  [configs]
+  (-> configs
       (catql/load-configs)
       (dissoc :tpximpact.catql/service :tpximpact.catql/runnable-service)))
 
@@ -79,10 +74,14 @@
 (def ^:dynamic *system* (atom nil))
 
 (defn start-test-system
-  []
-  (let [sys (-> (load-configs)
-                (start-system))]
-    (reset! *system* sys)))
+  "Use this fixture for graphql tests."
+  ([]
+   (start-test-system ["catql/base-system.edn"]))
+  ([configs]
+   (let [sys (-> configs
+                 (load-configs)
+                 (start-system))]
+     (reset! *system* sys))))
 
 (defn stop-test-system []
   (let [sys @*system*]
@@ -92,6 +91,7 @@
 (defn with-system
   "Test fixture for startin/stopping the system."
   [test-fn]
-  (start-test-system)
-  (test-fn)
-  (stop-test-system))
+  (with-open [f (io/writer (io/file "OUT.log"))]
+    (start-test-system)
+    (test-fn)
+    (stop-test-system)))
