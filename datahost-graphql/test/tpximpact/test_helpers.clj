@@ -92,7 +92,6 @@
 (defn with-system
   "Test fixture for starting / stopping the system."
   [test-fn]
-  (with-open [f (io/writer (io/file "OUT.log"))]
-    (start-test-system)
-    (test-fn)
-    (stop-test-system)))
+  (start-test-system)
+  (test-fn)
+  (stop-test-system))
