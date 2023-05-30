@@ -58,10 +58,8 @@
      {:get {:no-doc true
             :openapi {:openapi "3.0.0"
                       :info {:title "Prototype OpenData API"
-                             :description "blah blah blah. [a link](http://foo.com/)
-* bulleted
-* list
-* here "
+                             :description (str "Source viewable in GitHub "
+                                               "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
                              :version "0.0.1"}
                       ;; used in /secure APIs below
                       :components {:securitySchemes {"auth" {:type :apiKey
@@ -73,10 +71,8 @@
      ["/:series-slug"
       {:muuntaja leave-keys-alone-muuntaja-coercer
        :get {:summary "Retrieve metadata for an existing dataset-series"
-             :description "blah blah blah. [a link](http://foo.com/)
-* bulleted
-* list
-* here"
+             :description (str "Source viewable in GitHub "
+                               "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
              :parameters {:path {:series-slug string?}}
              :responses {200 {:body JsonLdSchema}
                          404 {:body [:enum "Not found"]}}
