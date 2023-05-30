@@ -5,7 +5,8 @@
    [tpximpact.datahost.ldapi.series :as series]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.db/db [_ {:keys [storage-type opts]}]
-  (da/duratom storage-type opts))
+  (when storage-type
+    (da/duratom storage-type opts)))
 
 (defn upsert-series! [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
   (let [series-key (series/dataset-series-key series-slug)

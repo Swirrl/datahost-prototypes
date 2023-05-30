@@ -1,15 +1,21 @@
 (ns dev
+  (:refer-clojure :exclude [test])
   (:require
-   [integrant.core :as ig]
-   [tpximpact.datahost.ldapi :as main]))
+    [clojure.repl :refer :all]
+    [clojure.tools.namespace.repl :refer [refresh] :as tns]
+    [integrant.repl :refer [clear halt go init prep reset]]
+    [integrant.repl.state :refer [config system]]
+    [tpximpact.datahost.sys :as sys]))
+
+;; temp disable this line if working on the dev namespace, obviously.
+(tns/disable-reload! (find-ns 'dev))
 
 ;; require scope capture as a side effect
 (require 'sc.api)
 
-(defn start! []
-  (def sys (main/start-system (main/load-configs ["ldapi/base-system.edn"])))
-  :ready)
+(clojure.tools.namespace.repl/set-refresh-dirs "dev/src" "src" "test" "resources")
 
-(defn reset! []
-  (ig/halt! sys)
-  (def sys (main/start-system (main/load-configs ["ldapi/base-system.edn"]))))
+(def start go)
+
+(integrant.repl/set-prep!
+  #(sys/prep-config (sys/load-configs ["ldapi/base-system.edn"])))
