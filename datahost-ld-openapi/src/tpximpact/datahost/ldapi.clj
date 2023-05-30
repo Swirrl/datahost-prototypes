@@ -1,10 +1,8 @@
 (ns tpximpact.datahost.ldapi
   (:require
-    [clojure.java.io :as io]
     [clojure.spec.alpha :as s]
-    [clojure.tools.logging :as log]
     [integrant.core :as ig]
-    [meta-merge.core :as mm])
+    [tpximpact.datahost.sys :as sys])
   (:import
     [java.net URI])
   (:gen-class))
@@ -28,29 +26,33 @@
 
 (derive ::default-catalog-id ::const)
 
-(defn load-system-config [config]
-  (if config
-    (-> config
-        slurp
-        ig/read-string)
-    {}))
+(def system nil)
 
-(defn load-configs [configs]
-  (->> configs
-       (map (comp load-system-config io/resource))
-       (apply mm/meta-merge)))
+(defn stop-system! []
+  (println "Stopping Service")
+  (when system
+    (ig/halt! system)))
 
-(defn start-system [config]
-  (-> config
-      (doto
-        (ig/load-namespaces))
-      ig/init))
+(defn add-shutdown-hook!
+  "Register a shutdown hook with the JVM.  This is not guaranteed to
+  be called in all circumstances, but should be called upon receipt of
+  a SIGTERM (a normal Unix kill command)."
+  []
+  (.addShutdownHook (Runtime/getRuntime) (Thread. stop-system!)))
+
+(defn start-system [configs]
+  (let [initialised-sys (-> configs
+                            (sys/load-configs)
+                            (sys/prep-config)
+                            (ig/init))]
+    (alter-var-root #'system (constantly initialised-sys))
+    initialised-sys))
 
 (defn -main [& _args]
-  (let [config (load-configs ["ldapi/base-system.edn"
-                              ;; env.edn contains environment specific
-                              ;; overrides to the base-system.edn and
-                              ;; is set on classpath depending on env.
-                              "ldapi/env.edn"])
-        sys (start-system config)]
-    (log/info "System started")))
+  (println "Starting Service...")
+  (add-shutdown-hook!)
+  (start-system ["ldapi/base-system.edn"
+                 ;; env.edn contains environment specific
+                 ;; overrides to the base-system.edn and
+                 ;; is set on classpath depending on env.
+                 "ldapi/env.edn"]))

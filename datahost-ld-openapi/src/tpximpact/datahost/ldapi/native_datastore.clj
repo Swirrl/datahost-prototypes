@@ -8,6 +8,8 @@
   (:import (java.io File)
            (java.net URI)))
 
+(def repo-instance (atom nil))
+
 (def background-data-graph (URI. "http://www.example.org/graphs/background-data"))
 
 (defn eager-query
@@ -33,8 +35,15 @@
       (pr/add c (rio/statements (io/resource "ldapi/base-data.trig"))))
     r))
 
-(defmethod ig/init-key ::repo [_ opts]
-  (load-repo opts))
+(defmethod ig/init-key ::repo [_ {:keys [data-directory] :as opts}]
+  (if-let [repo @repo-instance]
+    repo
+    (when data-directory
+      (let [repo (load-repo opts)]
+        (reset! repo-instance repo)
+        repo))))
 
 (defmethod ig/halt-key! ::repo [_ repo]
-  (repo/shutdown repo))
+  (when repo
+    (repo/shutdown repo))
+  (reset! repo-instance nil))

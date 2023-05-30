@@ -1,12 +1,14 @@
 (ns user)
 
 (defn help []
-  (println "Welcome to ldapi")
+  (println)
+  (println "Welcome to LD API")
+  (println "*****************")
   (println)
   (println "Available commands are:")
   (println)
-  (println "(start!)                  ;; Start the system")
-  (println "(reset!)                  ;; Reset the system"))
+  (println "(start) or (go)          ;; Start the system")
+  (println "(reset)                  ;; Reset the system"))
 
 (defn dev
   "Load and switch to the 'dev' namespace."
