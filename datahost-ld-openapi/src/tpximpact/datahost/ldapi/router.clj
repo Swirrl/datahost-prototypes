@@ -17,7 +17,7 @@
    [reitit.coercion.malli :as rcm]
    [muuntaja.core :as m]
    [malli.util :as mu]
-   [tpximpact.datahost.ldapi.handlers :as handlers]))
+   [tpximpact.datahost.ldapi.routes.series :as series-routes]))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -39,15 +39,6 @@
        (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
        (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
 
-(def JsonLdSchema
-  [:maybe
-   [:map
-    ["dcterms:title" {:optional true} string?]
-    ["dcterms:description" {:optional true} string?]
-    ["@context" [:or :string
-                 [:tuple :string [:map
-                                  ["@base" string?]]]]]]])
-
 (defn router [triplestore db]
   (ring/router
    [["/triplestore-query"
@@ -67,41 +58,12 @@
                                                              :name "Example-Api-Key"}}}}
             :handler (openapi/create-openapi-handler)}}]
 
-    ["/data" {:tags ["linked data api"]}
+    ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
+              :tags ["linked data api"]}
      ["/:series-slug"
-      {:muuntaja leave-keys-alone-muuntaja-coercer
-       :get {:summary "Retrieve metadata for an existing dataset-series"
-             :description (str "Source viewable in GitHub "
-                               "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
-             :parameters {:path {:series-slug string?}}
-             :responses {200 {:body JsonLdSchema}
-                         404 {:body [:enum "Not found"]}}
-             :handler (partial handlers/get-dataset-series db)}
-       :put {:summary "Create or update metadata on a dataset-series"
-             :parameters {:body [:maybe [:map]]
-                          ;; [:maybe
-                          ;;        [:map
-                          ;;         ["dcterms:title" string?]
-                          ;;         ["@context" [:or :string
-                          ;;                      [:tuple :string [:map
-                          ;;                                       ["@base" string?]]]]]]]
-                          :path {:series-slug string?}
-                          :query [:map
-                                  [:title {:title "Title"
-                                           :description "Title of dataset"
-                                           :optional true} string?]
-                                  [:description {:title "Description"
-                                                 :description "Description of dataset"
-                                                 :optional true} string?]]}
-             :responses {200 {:description "Series already existed and was successfully updated"
-                              :body map?}
-                         201 {:description "Series did not exist previously and was successfully created"
-                              :body map?}
-                         500 {:description "Internal server error"
-                              :body [:map
-                                     [:status [:enum "error"]]
-                                     [:message string?]]}}
-             :handler (partial handlers/put-dataset-series db)}}]]]
+      {:get (series-routes/get-series-route-config db)
+       :put (series-routes/put-series-route-config db)}]
+     ["/:series-slug/release/:release-slug"]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
