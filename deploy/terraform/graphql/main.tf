@@ -9,6 +9,11 @@ terraform {
       source = "hashicorp/null"
       version = "3.1.1"
     }
+
+    aws = {
+      source = "hashicorp/aws"
+      version = "5.0.1"
+    }
   }
 
   # S3 backend state configuration
@@ -25,6 +30,10 @@ terraform {
 provider "google" {
   project = "swirrl-ons-datahost"
   region = "europe-west2"
+}
+
+provider "aws" {
+  region = "eu-west-2"
 }
 
 locals {
@@ -64,6 +73,18 @@ resource "google_project_iam_member" "image_creator_service_account_permissions"
 resource "google_compute_address" "datahost_instance_address" {
   name = "datahost-address"
   address_type = "EXTERNAL"
+}
+
+data "aws_route53_zone" "gss_zone" {
+  name = "gss-data.org.uk"
+}
+
+resource "aws_route53_record" "graphql_record" {
+  zone_id = data.aws_route53_zone.gss_zone.zone_id
+  name = "graphql-prototype.gss-data.org.uk"
+  type = "A"
+  ttl = 300
+  records = [google_compute_address.datahost_instance_address.address]
 }
 
 resource "google_compute_instance" "datahost_instance" {
