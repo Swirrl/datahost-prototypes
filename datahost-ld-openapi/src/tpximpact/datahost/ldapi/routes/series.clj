@@ -13,10 +13,7 @@
 
 (defn get-series-route-config [db]
   {:summary "Retrieve metadata for an existing dataset-series"
-   :description "blah blah blah. [a link](http://foo.com/)
-* bulleted
-* list
-* here"
+   :description "A dataset series is a named dataset regardless of schema, methodology or compatibility changes"
    :parameters {:path {:series-slug string?}}
    :responses {200 {:body JsonLdSchema}
                404 {:body [:enum "Not found"]}}

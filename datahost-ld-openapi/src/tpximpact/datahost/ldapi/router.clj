@@ -17,7 +17,8 @@
    [reitit.coercion.malli :as rcm]
    [muuntaja.core :as m]
    [malli.util :as mu]
-   [tpximpact.datahost.ldapi.routes.series :as series-routes]))
+   [tpximpact.datahost.ldapi.routes.series :as series-routes]
+   [tpximpact.datahost.ldapi.routes.release :as release-routes]))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -63,7 +64,9 @@
      ["/:series-slug"
       {:get (series-routes/get-series-route-config db)
        :put (series-routes/put-series-route-config db)}]
-     ["/:series-slug/release/:release-slug"]]]
+     ["/:series-slug/release/:release-slug"
+      {:get (release-routes/get-release-route-config db)
+       :put (release-routes/put-release-route-config db)}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
