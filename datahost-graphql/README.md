@@ -62,11 +62,11 @@ Start a REPL and from the user namespace first run:
 (dev)
 ```
 
-Then use `(start!)` and `(reset!)` to start and restart the service against a local copy of static fixture data from the REPL.
+Then use `(start)` and `(reset)` to start and restart the service against a local copy of static fixture data from the REPL.
 
-If you want to run against the live / beta site you can run `(start-live!)` and `(reset-live!)` respectively.
+`reset` will also reload changed namespaces.
 
-To run tests run:
+To run tests, from this directory run:
 
 ```
 $ clojure -X:test
