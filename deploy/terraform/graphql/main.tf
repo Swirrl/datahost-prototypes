@@ -24,7 +24,7 @@ terraform {
 
 provider "google" {
   project = "swirrl-ons-datahost"
-  region = "europe-west2-b"
+  region = "europe-west2"
 }
 
 locals {
@@ -61,6 +61,11 @@ resource "google_project_iam_member" "image_creator_service_account_permissions"
   member = "serviceAccount:${google_service_account.graphql_service_account.email}"
 }
 
+resource "google_compute_address" "datahost_instance_address" {
+  name = "datahost-address"
+  address_type = "EXTERNAL"
+}
+
 resource "google_compute_instance" "datahost_instance" {
   name = "tf-datahost-graphql"
   machine_type = "e2-small"
@@ -76,7 +81,7 @@ resource "google_compute_instance" "datahost_instance" {
   network_interface {
     network = "default"
     access_config {
-      // ephemeral public IP
+      nat_ip = google_compute_address.datahost_instance_address.address
     }
   }
 
