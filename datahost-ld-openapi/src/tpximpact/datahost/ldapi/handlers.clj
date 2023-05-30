@@ -28,3 +28,9 @@
         {:status 500
          :body {:status "error"
                 :message message}}))))
+
+(defn get-release [db params]
+  {:status 200})
+
+(defn put-release [db params]
+  {:status 200})
