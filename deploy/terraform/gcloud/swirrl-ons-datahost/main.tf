@@ -34,7 +34,7 @@ locals {
   ci_service_account_roles = [
     "roles/compute.instanceAdmin.v1",
     "roles/iam.serviceAccountUser",
-    "roles/compute.publicIpAdmin"
+    "roles/compute.loadBalancerAdmin"
   ]
   swirrl_circleci_organisation_id = "294dc3ff-773f-44a8-820e-f12f3ba2e1ac"
 }
