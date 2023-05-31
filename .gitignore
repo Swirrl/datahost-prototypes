@@ -21,4 +21,5 @@
 .envrc
 .rebl
 datahost-ld-openapi/tmp
-.datahostdb.edn
+.datahost-*-db.edn
+

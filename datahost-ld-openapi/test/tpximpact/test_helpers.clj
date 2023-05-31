@@ -1,11 +1,12 @@
 (ns tpximpact.test-helpers
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
+            [duratom.core :as da]
             [tpximpact.datahost.sys :as sys]))
 
 (defn clean-up-database! [system]
   (when-let [db (get system :tpximpact.datahost.ldapi.db/db)]
-    (reset! db {})))
+    (da/destroy db)))
 
 (defn start-system [configs]
   (-> configs
@@ -13,7 +14,7 @@
       (sys/prep-config)
       (ig/init)))
 
-(defmacro with-system [system-binding & body]
+(defmacro with-system* [{:keys [on-halt on-init] :as _opts} system-binding & body]
   `(let [sys# (start-system ["ldapi/base-system.edn"
                              ;; TODO - nuke test-system & move contents to env.edn
                              "test-system.edn"
@@ -23,7 +24,25 @@
                              "ldapi/env.edn"])
          ~system-binding sys#]
      (try
+       (doseq [f!# ~on-init]
+         (f!# sys#))
        ~@body
        (finally
-         (clean-up-database! sys#)
-         (ig/halt! sys#)))))
+         (doseq [f!# ~on-halt]
+           (f!# sys#))))))
+
+(defmacro with-system [system-bindings system-loader & body]
+  `(with-system* {:on-halt [ig/halt!]}
+                 ~system-bindings ~system-loader
+                 ~@body))
+
+
+(defmacro with-system-and-clean-up [system-binding & body]
+  `(with-system* {:on-init []
+                  :on-halt [clean-up-database!
+                            ig/halt!]}
+                 ~system-binding
+                 ~@body))
+
+
+
