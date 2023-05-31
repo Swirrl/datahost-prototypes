@@ -13,7 +13,7 @@
    (java.net URI)))
 
 (deftest round-tripping-series-test
-  (th/with-system sys
+  (th/with-system-and-clean-up sys
     (testing "A series that does not exist returns 'not found'"
       (try
         (http/get "http://localhost:3400/data/does-not-exist")

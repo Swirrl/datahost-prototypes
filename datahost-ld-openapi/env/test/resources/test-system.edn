@@ -1,4 +1,7 @@
 {:tpximpact.datahost.ldapi.jetty/runnable-service {:port 3400}
 
+ :tpximpact.datahost.ldapi.db/db {:opts {:file-path ".datahost-test-db.edn"}}
+
  :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "/tmp/ld-test-db"}
+
  }
