@@ -3,7 +3,7 @@
    [duratom.core :as da]
    [integrant.core :as ig]
    [meta-merge.core :as mm]
-   [tpximpact.datahost.ldapi.series :as series]))
+   [tpximpact.datahost.ldapi.models.series :as series]))
 
 (def db-defaults
   {:storage-type :local-file
