@@ -75,10 +75,12 @@
             ;;             ]]
             ]})
 
+(s/def ::constraint-key #{:publishers :creators :themes})
+
 (defn- constraint-type
   "Returns a string."
   [constraint-kw]
-  {:pre [(keyword? constraint-kw)]}
+  {:pre [(s/valid? ::constraint-key constraint-kw)]}
   (let [constraint-name (name constraint-kw)]
     (-> constraint-name
         (subs 0 (dec (count constraint-name)))
@@ -94,6 +96,55 @@
   (get (@facet-labels-store (constraint->pred facet-constraint))
        facet-id))
 
+(s/def :tpximpact.catql.schema.make-facet/available-ids set?)
+
+(s/def :tpximpact.catql.schema/other-constraints
+  (s/and (s/keys :opt-un [:tpximpact.catql.schema.other-constraints/publishers
+                          :tpximpact.catql.schema.other-constraints/creators
+                          :tpximpact.catql.schema.other-constraints/themes])
+         #(= 2 (count %))))
+
+(s/def :tpximpact.catql.schema/facet-by-id
+  (s/keys :req-un [:tpximpact.catql.schema.facet-by-id/id]
+          :opt-un [:tpximpact.catql.schema.facet-by-id/title
+                   :tpximpact.catql.schema.facet-by-id/description]))
+
+(defn -facet-enabled?
+  "Returns whether the facet
+
+  - text-search-fn - fn taking a collection of records and returning a
+    boolean
+    "
+  [context constraint [facet-id grouped] available-ids text-search-fn]
+  {:pre [(s/valid? ::constraint-key constraint)
+         (s/valid? :tpximpact.catql.schema.make-facet/available-ids available-ids)]}
+  (let [other-constraints (dissoc (get-in context [::args :facets]) constraint)]
+    (boolean
+     (or
+      (contains? available-ids facet-id)
+      ;; Let's say we are looking at a particular publisher.
+      ;; for every *other* constraint: is there at least one match?
+      ;; AND (when search-string was passed)
+      ;; do we have a text match for a record grouped under this publisher
+      (and (every? seq
+                   (for [[other-constraint-key values] other-constraints
+                         constraint-value values]
+                     (sequence (comp (map other-constraint-key)
+                                     (filter #(= constraint-value %)))
+                               grouped)))
+           (text-search-fn grouped))))))
+
+(s/def :CatalogSearchResult/search-string (s/nilable string?))
+
+(s/def :tpximpact.catql.schema.make-facet.context.args/facets
+  (s/keys :req-un [::publishers ::creators ::themes]))
+
+(s/def ::args (s/keys :un-req [:tpximpact.catql.schema.make-facet.context.args/facets]))
+
+(s/def :tpximpact.catql.schema.make-facet/context
+  (s/keys :req [::args]
+          :opt [:CatalogSearchResult/search-string]))
+
 (defn make-facet
   "Returns a facet map.
 
@@ -105,22 +156,30 @@
             {:publishers {{:publishers URI} seq<FACET>, ...}
             as crated by [[clojure.set/index]]."
   [context constraint available-ids indexes]
-  {:pre [(contains? #{:publishers :creators :themes} constraint)]}
-  (let [other-constraints (dissoc (get-in context [::args :facets]) constraint)]
+  {:pre [(s/valid? ::constraint-key constraint)]}
+  (let [text-search-fn (if-some [search-string (:CatalogSearchResult/search-string context)]
+                         (fn text-search [ms]
+                           (->> (search/filter-results context ms)
+                                (some some?)))
+                         (fn [_] true))]
     (for [index-entry (dissoc (get indexes constraint) {})
           :let [facet-id (get (key index-entry) constraint)]]
       (schema/tag-with-type
-        {:id facet-id
-         :label (lookup-facet-label constraint facet-id)
-         :enabled (or ;;(seq (get-in context [::args :facets] constraint))
-                    (contains? available-ids facet-id)
-                    (boolean (every? seq
-                                     (for [[other-constraint-key values] other-constraints
-                                           constraint-value values]
-                                       (sequence (comp (map other-constraint-key)
-                                                       (filter #(= constraint-value %)))
-                                                 (val index-entry))))))}
-        (constraint-type constraint)))))
+       {:id facet-id
+        :label (lookup-facet-label constraint facet-id)
+        ;; Let's say we are looking at a particular publisher.
+        ;; we set 'enabled=true' when:
+        ;; - if this publisher is in the set of all publishers extracted from our datasets
+        ;; OR
+        ;; - if any of the items published by this particular publisher
+        ;;   match *all* other constraints (e.g. particular creators, themes, 
+        ;;   and search string, as passed in query arguments)
+        :enabled (-facet-enabled? context
+                                  constraint
+                                  index-entry
+                                  available-ids
+                                  text-search-fn)}
+       (constraint-type constraint)))))
 
 (defn- datasets-resolver-completion
   "Completion fn for datasets promise. To be used from within the facets
@@ -131,7 +190,7 @@
                   (let [extract ((juxt :publisher :creator :theme) ds)
                         safely-conj (fn [s item]
                                       (cond-> s
-                                              item (conj item)))]
+                                        item (conj item)))]
                     [(safely-conj (nth triple 0) (nth extract 0))
                      (safely-conj (nth triple 1) (nth extract 1))
                      (safely-conj (nth triple 2) (nth extract 2))]))
