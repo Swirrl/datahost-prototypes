@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.series
+(ns tpximpact.datahost.ldapi.models.series
   (:require
    [clojure.set :as set]
    [clojure.tools.logging :as log]

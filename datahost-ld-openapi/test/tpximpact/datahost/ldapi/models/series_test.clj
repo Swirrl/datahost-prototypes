@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.series-test
+(ns tpximpact.datahost.ldapi.models.series-test
   (:require
    [clj-http.client :as http]
    [clojure.test :refer [deftest is testing]]
