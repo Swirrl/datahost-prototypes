@@ -76,6 +76,10 @@ jobs:
           project-dir: datahost-ld-openapi
 
   deploy-graphql-vm:
+    parameters:
+      env:
+        type: string
+        description: Terraform environment to deploy
     docker:
       - image: cimg/base:2023.05
     steps:
@@ -94,16 +98,16 @@ jobs:
           command: gcloud version
       - run:
           command: terraform init
-          working_directory: deploy/terraform/graphql
+          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
       - run:
           command: terraform get
-          working_directory: deploy/terraform/graphql
+          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
       - run:
           command: terraform plan -out update.tfplan -var digest=$(cat /tmp/workspace/graphql_container_digest)
-          working_directory: deploy/terraform/graphql
+          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
       - run:
           command: terraform apply update.tfplan
-          working_directory: deploy/terraform/graphql
+          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -153,6 +157,7 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - deploy-graphql-service
+          env: dev
           filters:
             branches:
               only: main
