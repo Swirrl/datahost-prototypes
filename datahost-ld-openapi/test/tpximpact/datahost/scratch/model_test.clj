@@ -9,7 +9,7 @@
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
    [tpximpact.datahost.ldapi.util :as util]
    [tpximpact.datahost.scratch.release :as release]
-   [tpximpact.datahost.ldapi.series :as series])
+   [tpximpact.datahost.ldapi.models.series :as series])
   (:import
    [java.net URI]))
 

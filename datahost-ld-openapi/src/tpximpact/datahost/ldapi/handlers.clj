@@ -1,7 +1,7 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.series :as series]))
+   [tpximpact.datahost.ldapi.models.series :as series]))
 
 (defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
   (let [key (series/dataset-series-key series-slug)

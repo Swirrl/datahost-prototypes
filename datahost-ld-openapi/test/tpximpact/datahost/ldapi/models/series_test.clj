@@ -1,10 +1,10 @@
-(ns tpximpact.datahost.ldapi.series-test
+(ns tpximpact.datahost.ldapi.models.series-test
   (:require
    [clj-http.client :as http]
    [clojure.test :refer [deftest is testing]]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
-   [tpximpact.datahost.ldapi.series :as sut]
+   [tpximpact.datahost.ldapi.models.series :as sut]
    [tpximpact.datahost.ldapi.util :as util]
    [tpximpact.test-helpers :as th]
    [clojure.data.json :as json])
