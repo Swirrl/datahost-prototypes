@@ -11,7 +11,7 @@ locals {
   http_proxy_name = "${var.env}-ldapi-http-proxy"
 
   ssl_policy_name = "${var.env}-ldapi-ssl-policy"
-  graphql_certificate_name = "${var.env}-ldapi-certificate"
+  certificate_name = "${var.env}-ldapi-certificate"
 
   fqdn = "${var.dns.host}.${var.dns.zone}"
 }
@@ -106,18 +106,18 @@ resource "google_compute_ssl_policy" "lb_ssl_policy" {
 }
 
 resource "google_compute_managed_ssl_certificate" "ssl_certificate" {
-  name = local.graphql_certificate_name
+  name = local.certificate_name
   managed {
-    domains = [aws_route53_record.graphql_record.name]
+    domains = [aws_route53_record.ldapi_record.name]
   }
 }
 
-data "aws_route53_zone" "graphql_zone" {
+data "aws_route53_zone" "dns_zone" {
   name = var.dns.zone
 }
 
-resource "aws_route53_record" "graphql_record" {
-  zone_id = data.aws_route53_zone.graphql_zone.zone_id
+resource "aws_route53_record" "ldapi_record" {
+  zone_id = data.aws_route53_zone.dns_zone.zone_id
   name = local.fqdn
   type = "A"
   ttl = 300

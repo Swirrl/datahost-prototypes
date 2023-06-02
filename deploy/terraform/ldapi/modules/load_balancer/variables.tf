@@ -5,12 +5,12 @@ variable "env" {
 
 variable "server_self_link" {
   type = string
-  description = "Self link of the graphql server instance"
+  description = "Self link of the ldapi server instance"
 }
 
 variable "server_zone" {
   type = string
-  description = "Zone of the graphql server instance"
+  description = "Zone of the ldapi server instance"
 }
 
 variable "dns" {

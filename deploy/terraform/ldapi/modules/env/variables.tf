@@ -23,5 +23,5 @@ variable "dns" {
     host = string,
     zone = string
   })
-  description = "DNS configuration for the graphql site"
+  description = "DNS configuration for the ldapi site"
 }
