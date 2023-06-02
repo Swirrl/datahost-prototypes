@@ -74,6 +74,9 @@ interface Endpoint {
 interface Facet {
   id: ID
   label: String
+  """
+  Should the facet be enabled for user interaction?
+  """
   enabled: Boolean
 }
 

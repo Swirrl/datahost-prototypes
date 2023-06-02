@@ -1,6 +1,8 @@
 (ns tpximpact.facet-search-test
   (:require
+   [clojure.set :as set]
    [clojure.test :refer [deftest testing is use-fixtures]]
+   [tpximpact.catql.search :as search]
    [tpximpact.test-helpers :as h]))
 
 (use-fixtures :once h/with-system)
@@ -206,3 +208,122 @@ query testQuery {
     (testing "Query without 'datasets' doesn't hang."
       (let [result (h/with-timeout 5000 (h/execute schema query-no-datasets))]
         (is (not= :timeout result))))))
+
+(def query-facets-with-search-string
+  "
+query testQuery {
+  endpoint {
+    catalog {
+      catalog_query(search_string: \"hmrc\") {
+        datasets {
+          id
+          title
+        }
+        facets {
+          themes {
+            id
+            enabled
+          }
+          creators {
+            id
+            enabled
+          }
+        }
+      }
+    }
+  }
+}")
+
+(def query-facets-with-search-string+constraint
+  "
+{
+  endpoint {
+    catalog {
+      catalog_query(search_string:\"hmrc\"
+                    themes:[\"http://gss-data.org.uk/def/gdp#trade\"]
+      ) {
+        datasets {
+          title
+          creator
+        }
+        facets {
+          creators {
+            enabled
+            id
+          }
+          themes {
+            enabled
+            id
+          }
+        }
+      }
+    }
+  }
+}")
+
+(def url-hm-rev-customs "https://www.gov.uk/government/organisations/hm-revenue-customs")
+
+(def url-office-for-ns-stats "https://www.gov.uk/government/organisations/office-for-national-statistics")
+
+(def url-trade "http://gss-data.org.uk/def/gdp#trade")
+
+(def url-balance-of-payments "https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments")
+
+(deftest facets-with-search-string-test
+  (let [schema (h/catql-schema)]
+    (testing "Facets query with a search string"
+      (let [result (h/execute schema query-facets-with-search-string)]
+        (is (= 0 (count (h/facets-enabled result :publishers)))
+            "we didn't request 'publishers' facet, so there should be zero.")
+        (is (= #{url-hm-rev-customs url-office-for-ns-stats}
+               (set (map :id (h/facets-enabled result :creators)))))
+        (is (= #{url-balance-of-payments url-trade}
+               (set (map :id (h/facets-enabled result :themes)))))))
+    
+    (testing "Facets query with a search string and theme constraint"
+      (let [result (h/execute schema query-facets-with-search-string+constraint)]
+
+        (testing "facets other than 'theme' should have theme locked"
+          (is (= #{url-hm-rev-customs}
+                 (set (map :id (h/facets-enabled result :creators))))))
+
+        (testing "no other constraints, so theme facet only needs text search match"
+          (is (= #{url-trade url-balance-of-payments} 
+                 (set (map :id (h/facets-enabled result :themes))))))))))
+
+
+(comment
+  ;; here are some utilites to help with verifying the results
+  ;; on test data
+
+  (def query-all-datasets
+    "
+query testQuery {
+  endpoint {
+    catalog {
+      catalog_query {
+        datasets { id title description publisher creator theme}
+      }
+    }
+  }
+}")
+
+  (defn regex-filter
+    [search-string item]
+    (let [pattern (re-pattern (str "(?i).*" search-string ".*"))]
+      (or (re-find pattern (or (:title item) ""))
+          (re-find pattern (or (:description item) "")))))
+
+  (defn filter-results                  ;replacement for search/filter-results
+    [search-string items]
+    (filter (partial regex-filter search-string) items))
+
+  (let [all-ds (h/result-datasets (h/execute schema query-all-datasets))
+        ;; for verifying results of queries with search string:
+        txt-filtered (->> all-ds (filter-results "hmrc") set)
+        by-creator (set/index txt-filtered [:creator])
+        by-theme   (set/index txt-filtered [:theme])
+        ;; our query shoud return this many theme facets
+        num-themes (->> txt-filtered (group-by :theme) count)]
+    (= num-themes 2))
+  )
