@@ -110,7 +110,7 @@
                    :tpximpact.catql.schema.facet-by-id/description]))
 
 (defn -facet-enabled?
-  "Returns whether the facet
+  "Returns whether the facet should be enabled or not.
 
   - text-search-fn - fn taking a collection of records and returning a
     boolean
