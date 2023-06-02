@@ -1,7 +1,8 @@
 (ns build
   (:require [clojure.tools.build.api :as b]
             [clojure.string :as str]
-            [juxt.pack.api :as pack]))
+            [juxt.pack.api :as pack])
+  (:import [com.google.cloud.tools.jib.api JibContainer]))
 
 (def lib 'tpximpact.datahost/ldapi)
 (def version (format "2.0.%s" (b/git-count-revs nil)))
@@ -23,30 +24,31 @@
                    "branch --show-current"]
                   (map #(tag (b/git-process {:git-args %})))
                   (remove nil?))
-        image-type (get opts :image-type :docker)]
-    (pack/docker
-     {:basis (b/create-basis {:project "deps.edn" :aliases [:ldapi/docker]})
-      ;; If we don't include a tag in the :image-name, then pack implicitly
-      ;; tags the image with latest, even when we specify additional tags. So
-      ;; choose a tag arbitrarily to be part of the :image-name, and then
-      ;; provide the rest in :tags.
-      :image-name (str repo "/datahost-ld-openapi:" (first tags))
-      :tags (set (rest tags))
-      :image-type image-type
+        image-type (get opts :image-type :docker)
+        ^JibContainer container (pack/docker
+                                  {:basis (b/create-basis {:project "deps.edn" :aliases [:ldapi/docker]})
+                                   ;; If we don't include a tag in the :image-name, then pack implicitly
+                                   ;; tags the image with latest, even when we specify additional tags. So
+                                   ;; choose a tag arbitrarily to be part of the :image-name, and then
+                                   ;; provide the rest in :tags.
+                                   :image-name (str repo "/datahost-ld-openapi:" (first tags))
+                                   :tags (set (rest tags))
+                                   :image-type image-type
 
-      :base-image "eclipse-temurin:17" ;; An openJDK 17 base docker provided by https://github.com/adoptium/containers#containers
+                                   :base-image "eclipse-temurin:17" ;; An openJDK 17 base docker provided by https://github.com/adoptium/containers#containers
 
-      :platforms #{:linux/amd64 :linux/arm64}
+                                   :platforms #{:linux/amd64 :linux/arm64}
 
-      ;; NOTE Not as documented!
-      ;; The docstring states that these should be
-      ;;     :to-registry {:username ... :password ...}
-      ;; but alas, that is a lie.
-      ;; https://github.com/juxt/pack.alpha/issues/101
-      :to-registry-username "_json_key"
-      :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
+                                   ;; NOTE Not as documented!
+                                   ;; The docstring states that these should be
+                                   ;;     :to-registry {:username ... :password ...}
+                                   ;; but alas, that is a lie.
+                                   ;; https://github.com/juxt/pack.alpha/issues/101
+                                   :to-registry-username "_json_key"
+                                   :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
 
-      })))
+                                   })]
+    (println (.. container (getDigest) (getHash)))))
 
 (defn clean [_]
   (b/delete {:path "target"}))
