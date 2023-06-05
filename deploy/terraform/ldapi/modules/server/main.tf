@@ -1,6 +1,7 @@
 locals {
   gcloud_zone = "europe-west2-a"
   service_account_id = "${var.name}-account"
+  data_disk_name = "${var.name}-data"
 }
 
 module "gce_container_spec" {
@@ -9,7 +10,24 @@ module "gce_container_spec" {
 
   container = {
     image = "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi@sha256:${var.digest}"
+    volumeMounts = [
+      {
+        mountPath = "/cache"
+        name = "ldapi-data"
+        readOnly = false
+      }
+    ]
   }
+
+  volumes = [
+    {
+      name = "ldapi-data"
+      gcePersistentDisk = {
+        pdName = "data"
+        fsType = "ext4"
+      }
+    }
+  ]
 
   restart_policy = "Always"
 }
@@ -32,6 +50,13 @@ resource "google_project_iam_member" "ldapi_service_account_permissions" {
   member = "serviceAccount:${google_service_account.ldapi_service_account.email}"
 }
 
+resource "google_compute_disk" "datahost_ldapi_data" {
+  name = local.data_disk_name
+  type = "pd-ssd"
+  zone = var.zone
+  size = 10
+}
+
 resource "google_compute_instance" "datahost_ldapi_instance" {
   name = var.name
   machine_type = "e2-small"
@@ -42,6 +67,12 @@ resource "google_compute_instance" "datahost_ldapi_instance" {
       size = "10"
       image = module.gce_container_spec.source_image
     }
+  }
+
+  attached_disk {
+    source = google_compute_disk.datahost_ldapi_data.self_link
+    device_name = "data"
+    mode = "READ_WRITE"
   }
 
   network_interface {
