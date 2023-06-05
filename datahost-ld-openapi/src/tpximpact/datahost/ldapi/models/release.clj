@@ -1,12 +1,13 @@
 (ns tpximpact.datahost.ldapi.models.release
   (:require
-   [tpximpact.datahost.ldapi.models.series :as series]))
+   [clojure.tools.logging :as log]
+   [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
 ;; (defn upsert-release [db {:keys [api-params jsonld-doc] :as new-release}]
 ;;     ;[db {:keys [series-slug release-slug] :as api-params} jsonld-doc]
 ;;    (let [{:keys [series-slug release-slug]} api-params
-;;          release-path (str (.getPath series/ld-root) series-slug "/" release-slug)
-;;          series-path (str (.getPath series/ld-root) series-slug)
+;;          release-path (str (.getPath models-shared/ld-root) series-slug "/" release-slug)
+;;          series-path (str (.getPath models-shared/ld-root) series-slug)
 ;;          series (get db series-path)
 ;;          base-entity (get series "dh:baseEntity")]
 
@@ -21,7 +22,7 @@
         context ["https://publishmydata.com/def/datahost/context"
                  {"@base" base-entity}]]
 
-    (-> (series/merge-params-with-doc api-params jsonld-doc)
+    (-> (models-shared/merge-params-with-doc api-params jsonld-doc)
         (assoc "@context" context
                "@id" release-slug
                "dcat:inSeries" (str "../" series-slug)))))
@@ -32,8 +33,8 @@
 
 (defn upsert-release [db {:keys [api-params jsonld-doc] :as new-release}] ;[db {:keys [series-slug release-slug] :as api-params} jsonld-doc]
   (let [{:keys [series-slug release-slug]} api-params
-        release-path (str (.getPath series/ld-root) series-slug "/" release-slug)
-        series-path (str (.getPath series/ld-root) series-slug)
+        release-path (str (.getPath models-shared/ld-root) series-slug "/" release-slug)
+        series-path (str (.getPath models-shared/ld-root) series-slug)
         series (get db series-path)
         base-entity (get series "dh:baseEntity")]
 

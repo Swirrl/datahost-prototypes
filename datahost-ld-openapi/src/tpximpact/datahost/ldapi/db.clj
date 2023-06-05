@@ -3,7 +3,8 @@
    [duratom.core :as da]
    [integrant.core :as ig]
    [meta-merge.core :as mm]
-   [tpximpact.datahost.ldapi.models.series :as series]))
+   [tpximpact.datahost.ldapi.models.series :as series]
+   [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
 (def db-defaults
   {:storage-type :local-file
@@ -18,7 +19,7 @@
     (da/duratom storage-type opts))
 
 (defn upsert-series! [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
-  (let [series-key (series/dataset-series-key series-slug)
+  (let [series-key (models-shared/dataset-series-key series-slug)
         ;; TODO: could handle this more nicely after
         ;; https://github.com/Swirrl/datahost-prototypes/issues/57
         ;; by comparing modified/issued times..

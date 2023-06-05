@@ -1,13 +1,14 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
    [clj-http.client :as http]
+   [clojure.data.json :as json]
    [clojure.test :refer [deftest is testing]]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
    [tpximpact.datahost.ldapi.models.series :as sut]
+   [tpximpact.datahost.ldapi.models.shared :as models-shared]
    [tpximpact.datahost.ldapi.util :as util]
-   [tpximpact.test-helpers :as th]
-   [clojure.data.json :as json])
+   [tpximpact.test-helpers :as th])
   (:import
    (clojure.lang ExceptionInfo)
    (java.net URI)))
@@ -56,15 +57,15 @@
 
     (testing "An empty @context is normalised"
       (is (= expected-context
-             (sut/normalise-context {}))))
+             (models-shared/normalise-context {}))))
 
     (testing "A declared context of 'https://publishmydata.com/def/datahost/context' is normalised"
       (is (= expected-context
-             (sut/normalise-context {"@context" "https://publishmydata.com/def/datahost/context"}))))
+             (models-shared/normalise-context {"@context" "https://publishmydata.com/def/datahost/context"}))))
 
     (testing "A normalised context is idempotent to itself"
       (is (= expected-context
-             (sut/normalise-context {"@context" ["https://publishmydata.com/def/datahost/context",
+             (models-shared/normalise-context {"@context" ["https://publishmydata.com/def/datahost/context",
                                                  {"@base" "https://example.org/data/"}]}))))))
 
 (defn canonicalisation-idempotent? [api-params jsonld]
