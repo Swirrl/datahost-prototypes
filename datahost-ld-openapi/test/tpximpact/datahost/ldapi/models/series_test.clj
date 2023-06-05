@@ -40,7 +40,7 @@
 
         (let [response (http/get "http://localhost:3400/data/new-series")]
           (is (= (:status response) 200))
-          (is (= (json/read-str (:body response)) incoming-jsonld-doc))))
+          (is (= (json/read-str (:body response)) augmented-jsonld-doc))))
 
       (testing "A series can be updated via the API"
         (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]

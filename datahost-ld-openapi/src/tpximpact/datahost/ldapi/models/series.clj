@@ -1,20 +1,11 @@
 (ns tpximpact.datahost.ldapi.models.series
   (:require
-   [clojure.set :as set]
    [clojure.tools.logging :as log]
-   [tpximpact.datahost.ldapi.util :as util]
    [malli.core :as m]
-   [malli.error :as me])
+   [malli.error :as me]
+   [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
    [java.net URI]))
-
-(def ld-root
-  "For the prototype this item will come from config or be derived from
-  it. It should have a trailing slash."
-  (URI. "https://example.org/data/"))
-
-(defn dataset-series-key [series-slug]
-  (str (.getPath ld-root) series-slug))
 
 (def SeriesApiParams [:map
                       [:series-slug :series-slug-string]
@@ -37,19 +28,7 @@
                                                (catch Exception ex
                                                  false))))})}))
 
-(defn normalise-context [ednld]
-  (let [normalised-context ["https://publishmydata.com/def/datahost/context"
-                            {"@base" (str ld-root)}]]
-    (if-let [context (get ednld "@context")]
-      (cond
-        (= context "https://publishmydata.com/def/datahost/context") normalised-context
-        (= context normalised-context) normalised-context
 
-        :else (throw (ex-info "Invalid @context" {:supplied-context context
-                                                  :valid-context normalised-context})))
-
-      ;; return normalised-context if none provided
-      normalised-context)))
 
 (defn validate-id [{:keys [series-slug] :as _api-params} cleaned-doc]
   (let [id-in-doc (get cleaned-doc "@id")]
@@ -65,25 +44,14 @@
 
 (defn validate-series-context [ednld]
   (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
-    (if (= (str ld-root) base-in-doc)
-      (update ednld "@context" normalise-context)
+    (if (= (str models-shared/ld-root) base-in-doc)
+      (update ednld "@context" models-shared/normalise-context)
       (throw (ex-info
-              (str "@base for the dataset-series must currently be set to the linked-data root '" ld-root "'")
+              (str "@base for the dataset-series must currently be set to the linked-data root '" models-shared/ld-root "'")
               {:type :validation-error
-               :expected-value (str ld-root)
+               :expected-value (str models-shared/ld-root)
                :actual-value base-in-doc})))
-    (update ednld "@context" normalise-context)))
-
-(defn merge-params-with-doc [{:keys [series-slug] :as api-params} jsonld-doc]
-  (let [merged-doc (merge (set/rename-keys api-params
-                                           {:title "dcterms:title"
-                                            :description "dcterms:description"})
-                          jsonld-doc)
-        cleaned-doc (-> merged-doc
-                        (util/dissoc-by-key keyword?)
-                        #_(update "@context" normalise-context))]
-
-    cleaned-doc))
+    (update ednld "@context" models-shared/normalise-context)))
 
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
@@ -99,7 +67,7 @@
                       :validation-error (-> (m/explain SeriesApiParams api-params {:registry registry})
                                             (me/humanize))})))
 
-   (let [cleaned-doc (merge-params-with-doc api-params jsonld-doc)
+   (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
 
          validated-doc (-> (validate-id api-params cleaned-doc)
                            (validate-series-context))
@@ -108,7 +76,7 @@
                             ;; add any managed params
                           "@type" "dh:DatasetSeries"
                           "@id" series-slug
-                          "dh:baseEntity" (str ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
+                          "dh:baseEntity" (str models-shared/ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
                           )]
      final-doc)))
 
@@ -140,7 +108,7 @@
   document is updated (TODO: https://github.com/Swirrl/datahost-prototypes/issues/57)
   "
   ([db api-params jsonld-doc]
-   (let [series-key (dataset-series-key (:series-slug api-params))]
+   (let [series-key (models-shared/dataset-series-key (:series-slug api-params))]
      (if-let [_old-series (get db series-key)]
        (update db series-key update-series api-params jsonld-doc)
        (assoc db series-key (create-series api-params jsonld-doc))))))
