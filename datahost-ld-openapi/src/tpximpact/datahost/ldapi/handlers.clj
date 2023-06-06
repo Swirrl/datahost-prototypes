@@ -1,10 +1,10 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.models.series :as series]))
+   [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
 (defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
-  (let [key (series/dataset-series-key series-slug)
+  (let [key (models-shared/dataset-series-key series-slug)
         jsonld-doc (get @db key)]
     (if jsonld-doc
       {:status 200
@@ -33,4 +33,9 @@
   {:status 200})
 
 (defn put-release [db params]
+  (try
+    (let []
+      {:status 200 ;; response-code
+       :body  "";; jsonld-doc
+       }))
   {:status 200})
