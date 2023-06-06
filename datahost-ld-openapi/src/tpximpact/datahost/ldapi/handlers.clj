@@ -3,14 +3,21 @@
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
+(def not-found-response
+  {:status 404
+   :body "Not found"})
+
+(defn error-response [error]
+  (let [message (ex-message error)]
+    {:status 500
+     :body {:status "error"
+            :message message}}))
+
 (defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
-  (let [key (models-shared/dataset-series-key series-slug)
-        jsonld-doc (get @db key)]
-    (if jsonld-doc
-      {:status 200
-       :body jsonld-doc}
-      {:status 404
-       :body "Not found"})))
+  (if-let [series (db/get-series db series-slug)]
+    {:status 200
+     :body series}
+    not-found-response))
 
 (defn put-dataset-series [db {:keys [body-params path-params query-params]}]
   (try
@@ -24,18 +31,23 @@
        :body jsonld-doc})
 
     (catch Throwable e
-      (let [message (ex-message e)]
-        {:status 500
-         :body {:status "error"
-                :message message}}))))
+      (error-response e))))
 
-(defn get-release [db params]
-  {:status 200})
+(defn get-release [db {{:keys [series-slug release-slug]} :path-params :as path-params}]
+  (if-let [release (db/get-release db series-slug release-slug)]
+    {:status 200
+     :body release}
+    not-found-response))
 
-(defn put-release [db params]
+(defn put-release [db {{:keys [series-slug release-slug]} :path-params}]
   (try
-    (let []
+    (if-let [series (db/get-series db series-slug)]
+      ;; try to upsert release
       {:status 200 ;; response-code
        :body  "";; jsonld-doc
-       }))
-  {:status 200})
+       }
+      {:status 422
+       :body "Series does not exist"})
+
+    (catch Throwable e
+      (error-response e))))

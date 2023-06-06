@@ -5,7 +5,7 @@
    [meta-merge.core :as mm]
    [tpximpact.datahost.ldapi.models.series :as series]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
-  (:import 
+  (:import
    [java.time ZoneId ZonedDateTime]))
 
 (def db-defaults
@@ -20,6 +20,14 @@
 (defmethod ig/init-key ::db [_ {:keys [storage-type opts]}]
     (da/duratom storage-type opts))
 
+(defn get-series [db series-slug]
+  (let [key (models-shared/dataset-series-key series-slug)]
+    (get @db key)))
+
+(defn get-release [db series-slug release-slug]
+  (let [key (models-shared/release-key series-slug release-slug)]
+    (get @db key)))
+
 (defn upsert-series!
   "Returns a map {:op ... :jdonld-doc ...}"
   [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
@@ -30,8 +38,8 @@
         series-exists? (get @db series-key)
         op (if series-exists? :update :create)
         ts (ZonedDateTime/now (ZoneId/of "UTC"))
-        updated-db (swap! db 
-                          series/upsert-series 
+        updated-db (swap! db
+                          series/upsert-series
                           (assoc api-params :op/timestamp ts)
                           incoming-jsonld-doc)]
     {:op op

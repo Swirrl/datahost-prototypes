@@ -25,11 +25,11 @@
                         [:description {:title "Description"
                                        :description "Description of release"
                                        :optional true} string?]]
-                :responses {200 {:description "Series already existed and was successfully updated"
+                :responses {200 {:description copy/put-release-200-desc
                                  :body map?}
-                            201 {:description "Series did not exist previously and was successfully created"
+                            201 {:description copy/put-release-201-desc
                                  :body map?}
-                            500 {:description "Internal server error"
+                            500 {:description copy/internal-server-error-desc
                                  :body [:map
                                         [:status [:enum "error"]]
                                         [:message string?]]}}}})

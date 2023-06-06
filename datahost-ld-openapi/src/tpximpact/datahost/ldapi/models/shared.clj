@@ -13,6 +13,9 @@
 (defn dataset-series-key [series-slug]
   (str (.getPath ld-root) series-slug))
 
+(defn release-key [series-slug release-slug]
+  (str (dataset-series-key series-slug) "/" release-slug))
+
 (defn normalise-context [ednld]
   (let [normalised-context ["https://publishmydata.com/def/datahost/context"
                             {"@base" (str ld-root)}]]
