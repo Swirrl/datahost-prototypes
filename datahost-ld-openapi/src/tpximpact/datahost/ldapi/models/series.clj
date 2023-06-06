@@ -30,7 +30,11 @@
 
 
 
-(defn validate-id [{:keys [series-slug] :as _api-params} cleaned-doc]
+(defn validate-id
+  "Returns unchanged doc or throws.
+
+  Thrown exception's `ex-data` will contain :supplied-id, :expected-id"
+  [{:keys [series-slug] :as _api-params} cleaned-doc]
   (let [id-in-doc (get cleaned-doc "@id")]
     (cond
       (nil? id-in-doc) cleaned-doc
@@ -42,7 +46,9 @@
                       {:supplied-id id-in-doc
                        :expected-id series-slug})))))
 
-(defn validate-series-context [ednld]
+(defn validate-series-context
+  "Returns modified LD document or throws."
+  [ednld]
   (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
     (if (= (str models-shared/ld-root) base-in-doc)
       (update ednld "@context" models-shared/normalise-context)
@@ -73,7 +79,7 @@
                            (validate-series-context))
 
          final-doc (assoc validated-doc
-                            ;; add any managed params
+                          ;; add any managed params
                           "@type" "dh:DatasetSeries"
                           "@id" series-slug
                           "dh:baseEntity" (str models-shared/ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
