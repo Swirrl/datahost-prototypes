@@ -5,7 +5,7 @@
    [malli.error :as me]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
-   [java.net URI]))
+   [java.net URI URISyntaxException]))
 
 (def SeriesApiParams [:map
                       [:series-slug :series-slug-string]
@@ -25,7 +25,7 @@
                                      (and (string? x)
                                           (try (URI. x)
                                                true
-                                               (catch Exception ex
+                                               (catch URISyntaxException ex
                                                  false))))})}))
 
 
