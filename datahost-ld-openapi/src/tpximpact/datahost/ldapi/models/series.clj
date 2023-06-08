@@ -163,16 +163,11 @@
   document is updated."
   ([db api-params jsonld-doc]
    {:pre [(contains? api-params :op/timestamp)]
-    :post [;; (if-let [issued (get jsonld-doc "dcterms:issued")]
-           ;;   (= issued (get % "dcterms:issued"))
-           ;;   true)
-           (validate-issued-unchanged jsonld-doc %)
+    :post [(validate-issued-unchanged jsonld-doc %)
            (if (get jsonld-doc "dcterms:issued")
              (not= (get jsonld-doc "dcterms:modified")
                    (get % "dcterms:modified"))
              true)]}
-   ;; TODO: we need to guard against upserting "dcterms:issued"
-   ;; TODO: we need to guard against upserting "updating:modified"?
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))]
      (if-let [_old-series (get db series-key)]
        (update db series-key update-series api-params jsonld-doc)
