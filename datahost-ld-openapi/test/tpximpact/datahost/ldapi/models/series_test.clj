@@ -13,6 +13,10 @@
    (clojure.lang ExceptionInfo)
    (java.net URI)))
 
+(defn format-date-time
+  [dt]
+  (.format dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
+
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up sys
     (testing "A series that does not exist returns 'not found'"
@@ -28,28 +32,46 @@
                                ["https://publishmydata.com/def/datahost/context"
                                 {"@base" "https://example.org/data/"}],
                                "dcterms:title" "A title"}
-          augmented-jsonld-doc (sut/normalise-series {:series-slug "new-series"}
+          timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
+          augmented-jsonld-doc (sut/normalise-series {:series-slug "new-series"
+                                                      :op/timestamp timestamp}
                                                      incoming-jsonld-doc)]
-      (testing "A series can be created and retrieved via the API"
+      (testing "A series can be"
 
-        (let [response (http/put
-                        "http://localhost:3400/data/new-series"
-                        {:content-type :json
-                         :body (json/write-str incoming-jsonld-doc)})]
-          (is (= (:status response) 201))
-          (is (= (json/read-str (:body response)) augmented-jsonld-doc)))
+        (testing "created via API"
+         (let [response (http/put
+                         "http://localhost:3400/data/new-series"
+                         {:content-type :json
+                          :body (json/write-str incoming-jsonld-doc)})]
+           (is (= (:status response) 201))
+           (let [resp-body (json/read-str (:body response))
+                 timestamp-str (format-date-time timestamp)
+                 added-fields {"dcterms:issued" timestamp-str
+                               "dcterms:modified" timestamp-str}]
+             (is (= augmented-jsonld-doc 
+                    (dissoc resp-body "dcterms:issued" "dcterms:modified")))
+             (is (= (get resp-body "dcterms:issued")
+                    (get resp-body "dcterms:modified"))))))
 
-        (let [response (http/get "http://localhost:3400/data/new-series")]
-          (is (= (:status response) 200))
-          (is (= (json/read-str (:body response)) augmented-jsonld-doc))))
+        (testing "retrieved via the API"
+          (let [response (http/get "http://localhost:3400/data/new-series")
+                resp-body (json/read-str (:body response))]
+            (is (= (:status response) 200))
+            (is  (= augmented-jsonld-doc
+                    (dissoc resp-body  "dcterms:issued" "dcterms:modified")))
+            (is (= (get resp-body "dcterms:issued")
+                   (get resp-body "dcterms:modified"))))))
 
       (testing "A series can be updated via the API"
         (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]
           (is (= (:status response) 200)))
 
-        (let [response (http/get "http://localhost:3400/data/new-series")]
+        (let [response (http/get "http://localhost:3400/data/new-series")
+              resp-body (-> response :body json/read-str )]
           (is (= (:status response) 200))
-          (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title")))))))
+          (is (= (get resp-body "dcterms:title") "A new title"))
+          (is (not= (get resp-body "dcterms:issued")
+                    (get resp-body "dcterms:modified"))))))))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"
@@ -102,19 +124,27 @@
         "@id usage in the series document is (for now) restricted to be in slugised form only"))
 
   (testing "Valid cases"
-    (let [returned-value (sut/normalise-series {:series-slug "my-dataset-series"}
+    (let [timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
+          returned-value (sut/normalise-series {:series-slug "my-dataset-series"
+                                                :op/timestamp timestamp}
                                                {"@id" "my-dataset-series"})]
       (is (= {"@id" "my-dataset-series"
               "@context" ["https://publishmydata.com/def/datahost/context"
                           {"@base" "https://example.org/data/"}]
               "@type" "dh:DatasetSeries"
-              "dh:baseEntity" "https://example.org/data/my-dataset-series/"}
+              "dh:baseEntity" "https://example.org/data/my-dataset-series/"
+              ;; "dcterms:issued" (format-date-time timestamp)
+              }
              returned-value))
 
-      (is (canonicalisation-idempotent? {:series-slug "my-dataset-series"} returned-value)))
+      (is (canonicalisation-idempotent? {:series-slug "my-dataset-series"
+                                         :op/timestamp timestamp}
+                                        returned-value)))
 
     (testing "with title metadata"
-      (let [ednld (sut/normalise-series {:series-slug "my-dataset-series"}
+      (let [timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
+            ednld (sut/normalise-series {:series-slug "my-dataset-series"
+                                         :op/timestamp timestamp}
                                         {"@context" ["https://publishmydata.com/def/datahost/context"
                                                      {"@base" "https://example.org/data/"}]
                                          "dcterms:title" "My Dataset Series"})]

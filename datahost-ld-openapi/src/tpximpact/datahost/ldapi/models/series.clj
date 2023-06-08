@@ -5,7 +5,8 @@
    [malli.error :as me]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
-   [java.net URI URISyntaxException]))
+   [java.net URI URISyntaxException]
+   [java.time ZonedDateTime]))
 
 (def SeriesApiParams [:map
                       [:series-slug :series-slug-string]
@@ -20,15 +21,14 @@
    (m/type-schemas)
    {:series-slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
                                        #"^[a-z,A-Z,\-,0-9]+$"]]
-    :url-string (m/-simple-schema {:type :url-string :pred
-                                   (fn [x]
-                                     (and (string? x)
-                                          (try (URI. x)
-                                               true
-                                               (catch URISyntaxException ex
-                                                 false))))})}))
-
-
+    :url-string (m/-simple-schema 
+                 {:type :url-string 
+                  :pred (fn url-string-pred [x]
+                          (and (string? x)
+                               (try (URI. x)
+                                    true
+                                    (catch URISyntaxException ex
+                                      false))))})}))
 
 (defn validate-id
   "Returns unchanged doc or throws.
@@ -59,6 +59,48 @@
                :actual-value base-in-doc})))
     (update ednld "@context" models-shared/normalise-context)))
 
+(def ^:private date-formatter 
+  java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
+
+(defn- validate-issued-unchanged
+  "Returns a boolean."
+  [old-doc new-doc]
+  (let [issued (get new-doc "dcterms:issued")]
+    (or (nil? issued)
+        (= issued (get old-doc "dcterms:issued")))))
+
+(defmulti -issued+modified-dates 
+  "Adjusts the 'dcterms:issued' and 'dcterms:modified' of the document.
+  Ensures that the new document does not modify the issue date.
+
+  Behaviour differs when issuing a new seris and when modifying an
+  existing one."
+  (fn [api-params old-doc new-doc]
+    (case (some? old-doc)
+      false :issue
+      true  :modify)))
+
+(defmethod -issued+modified-dates :issue
+  [{timestamp :op/timestamp} _ new-doc]
+  (let [ts-string (.format timestamp date-formatter)]
+    (assoc new-doc 
+           "dcterms:issued" ts-string
+           "dcterms:modified" ts-string)))
+
+(defmethod -issued+modified-dates :modify
+  [{timestamp :op/timestamp} old-doc new-doc]
+  (when-not (validate-issued-unchanged old-doc new-doc)
+    (throw (ex-info "Attempting to modify 'dcterms:issued'"
+                    {:old old-doc :new new-doc})))
+  (assoc new-doc 
+         "dcterms:issued" (get old-doc "dcterms:issued")
+         "dcterms:modified" (.format timestamp date-formatter)))
+
+(defn issued+modified-dates
+  [{timestamp :op/timestamp :as api-params} old-doc new-doc]
+  {:pre [(instance? java.time.ZonedDateTime timestamp)]}
+  (-issued+modified-dates api-params old-doc new-doc))
+
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
   returns a normalised EDN form of the JSON-LD, with the API
@@ -70,29 +112,36 @@
    (when-not (m/validate SeriesApiParams api-params {:registry registry})
      (throw (ex-info "Invalid API parameters"
                      {:type :validation-error
-                      :validation-error (-> (m/explain SeriesApiParams api-params {:registry registry})
+                      :validation-error (-> (m/explain SeriesApiParams 
+                                                       api-params
+                                                       {:registry registry})
                                             (me/humanize))})))
-
    (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
-
          validated-doc (-> (validate-id api-params cleaned-doc)
-                           (validate-series-context))
+                           (validate-series-context))]
+     (assoc validated-doc
+            ;; add any managed params
+            "@type" "dh:DatasetSeries"
+            "@id" series-slug
+            ;; coin base-entity to serve as the @base
+            ;; for nested resources
+            "dh:baseEntity" (str models-shared/ld-root series-slug "/")))))
 
-         final-doc (assoc validated-doc
-                          ;; add any managed params
-                          "@type" "dh:DatasetSeries"
-                          "@id" series-slug
-                          "dh:baseEntity" (str models-shared/ld-root series-slug "/") ;; coin base-entity to serve as the @base for nested resources
-                          )]
-     final-doc)))
-
-(defn- update-series [_old-series api-params jsonld-doc]
+(defn- update-series [old-series api-params jsonld-doc]
+  ;; we don't want the client to overwrite the 'issued' value
+  {:pre [(validate-issued-unchanged old-series jsonld-doc)]
+   :post [(some? (get % "dcterms:issued"))
+          (some? (get % "dcterms:modified"))]}
   (log/info "Updating series " (:series-slug api-params))
-  (normalise-series api-params jsonld-doc))
+  (->> jsonld-doc
+       (normalise-series api-params)
+       (issued+modified-dates api-params old-series)))
 
 (defn- create-series [api-params jsonld-doc]
   (log/info "Updating series " (:series-slug api-params))
-  (normalise-series api-params jsonld-doc))
+  (->> jsonld-doc
+       (normalise-series api-params)
+       (issued+modified-dates api-params nil)))
 
 (defn upsert-series
   "Takes a derefenced db state map with the shape {path jsonld} and
@@ -111,9 +160,19 @@
   fields specially on update.
 
   For example a `dcterms:issued` time should not change after a
-  document is updated (TODO: https://github.com/Swirrl/datahost-prototypes/issues/57)
-  "
+  document is updated."
   ([db api-params jsonld-doc]
+   {:pre [(contains? api-params :op/timestamp)]
+    :post [;; (if-let [issued (get jsonld-doc "dcterms:issued")]
+           ;;   (= issued (get % "dcterms:issued"))
+           ;;   true)
+           (validate-issued-unchanged jsonld-doc %)
+           (if (get jsonld-doc "dcterms:issued")
+             (not= (get jsonld-doc "dcterms:modified")
+                   (get % "dcterms:modified"))
+             true)]}
+   ;; TODO: we need to guard against upserting "dcterms:issued"
+   ;; TODO: we need to guard against upserting "updating:modified"?
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))]
      (if-let [_old-series (get db series-key)]
        (update db series-key update-series api-params jsonld-doc)
