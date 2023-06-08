@@ -65,9 +65,16 @@
 (defn- validate-issued-unchanged
   "Returns a boolean."
   [old-doc new-doc]
-  (let [issued (get new-doc "dcterms:issued")]
-    (or (nil? issued)
-        (= issued (get old-doc "dcterms:issued")))))
+  (let [old-issued (get old-doc "dcterms:issued")]
+    ;;(tap> {:validate-unchanged {:old old-doc :new new-doc}})
+    (or (nil? old-issued)
+        (= old-issued (get new-doc "dcterms:issued")))))
+
+(defn- validate-modified-changed
+  [old-doc new-doc]
+  (let [old-modified (get old-doc "dcterms:modified")]
+    (or (nil? old-modified)
+        (not= old-modified (get new-doc "dcterms:modified")))))
 
 (defmulti -issued+modified-dates 
   "Adjusts the 'dcterms:issued' and 'dcterms:modified' of the document.
@@ -164,10 +171,7 @@
   ([db api-params jsonld-doc]
    {:pre [(contains? api-params :op/timestamp)]
     :post [(validate-issued-unchanged jsonld-doc %)
-           (if (get jsonld-doc "dcterms:issued")
-             (not= (get jsonld-doc "dcterms:modified")
-                   (get % "dcterms:modified"))
-             true)]}
+           (validate-modified-changed jsonld-doc %)]}
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))]
      (if-let [_old-series (get db series-key)]
        (update db series-key update-series api-params jsonld-doc)
