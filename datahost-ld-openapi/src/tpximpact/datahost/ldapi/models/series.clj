@@ -66,7 +66,6 @@
   "Returns a boolean."
   [old-doc new-doc]
   (let [old-issued (get old-doc "dcterms:issued")]
-    ;;(tap> {:validate-unchanged {:old old-doc :new new-doc}})
     (or (nil? old-issued)
         (= old-issued (get new-doc "dcterms:issued")))))
 
@@ -96,10 +95,7 @@
 
 (defmethod -issued+modified-dates :modify
   [{timestamp :op/timestamp} old-doc new-doc]
-  (when-not (validate-issued-unchanged old-doc new-doc)
-    (throw (ex-info "Attempting to modify 'dcterms:issued'"
-                    {:old old-doc :new new-doc})))
-  (assoc new-doc 
+  (assoc new-doc
          "dcterms:issued" (get old-doc "dcterms:issued")
          "dcterms:modified" (.format timestamp date-formatter)))
 
@@ -168,11 +164,13 @@
 
   For example a `dcterms:issued` time should not change after a
   document is updated."
+  ;; TODO: put malli schema on the arguments. E.g. a series
+  ;; modification request can pass a nil document
   ([db api-params jsonld-doc]
    {:pre [(contains? api-params :op/timestamp)]
     :post [(validate-issued-unchanged jsonld-doc %)
            (validate-modified-changed jsonld-doc %)]}
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))]
-     (if-let [_old-series (get db series-key)]
-       (update db series-key update-series api-params jsonld-doc)
+     (if-let [old-series (get db series-key)]
+       (update db series-key update-series api-params (or jsonld-doc old-series))
        (assoc db series-key (create-series api-params jsonld-doc))))))

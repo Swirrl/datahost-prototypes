@@ -31,7 +31,8 @@
     (let [incoming-jsonld-doc {"@context"
                                ["https://publishmydata.com/def/datahost/context"
                                 {"@base" "https://example.org/data/"}],
-                               "dcterms:title" "A title"}
+                               "dcterms:title" "A title"
+                               "dcterms:identifier" "foobar"}
           timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
           augmented-jsonld-doc (sut/normalise-series {:series-slug "new-series"
                                                       :op/timestamp timestamp}
@@ -65,13 +66,15 @@
       (testing "A series can be updated via the API"
         (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]
           (is (= (:status response) 200)))
-
+        
         (let [response (http/get "http://localhost:3400/data/new-series")
               resp-body (-> response :body json/read-str )]
           (is (= (:status response) 200))
           (is (= (get resp-body "dcterms:title") "A new title"))
           (is (not= (get resp-body "dcterms:issued")
-                    (get resp-body "dcterms:modified"))))))))
+                    (get resp-body "dcterms:modified")))
+          (is (= "foobar" (get resp-body "dcterms:identifier"))
+              "The identifier should be left untouched."))))))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"

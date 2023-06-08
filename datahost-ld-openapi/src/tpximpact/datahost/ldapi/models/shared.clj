@@ -28,11 +28,8 @@
       normalised-context)))
 
 (defn merge-params-with-doc [api-params jsonld-doc]
-  (let [merged-doc (merge (set/rename-keys api-params
+  (let [merged-doc (merge jsonld-doc
+                          (set/rename-keys api-params
                                            {:title "dcterms:title"
-                                            :description "dcterms:description"})
-                          jsonld-doc)
-        cleaned-doc (-> merged-doc
-                        (util/dissoc-by-key keyword?))]
-
-    cleaned-doc))
+                                            :description "dcterms:description"}))]
+    (util/dissoc-by-key merged-doc keyword?)))
