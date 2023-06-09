@@ -3,15 +3,23 @@
    [clojure.tools.logging :as log]
    [malli.core :as m]
    [malli.error :as me]
+   [malli.util :as mu]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
    [java.net URI URISyntaxException]
    [java.time ZonedDateTime]))
 
-(def SeriesApiParams [:map
-                      [:series-slug :series-slug-string]
-                      [:title {:optional true} :string]
-                      [:description {:optional true} :string]])
+(def ^:private custom-registry-keys
+  {::series-slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
+                                       #"^[a-z,A-Z,\-,0-9]+$"]]
+   ::url-string (m/-simple-schema 
+                 {:type :url-string 
+                  :pred (fn url-string-pred [x]
+                          (and (string? x)
+                               (try (URI. x)
+                                    true
+                                    (catch URISyntaxException ex
+                                      false))))})})
 
 (def registry
   (merge
@@ -19,16 +27,23 @@
    (m/comparator-schemas)
    (m/base-schemas)
    (m/type-schemas)
-   {:series-slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
-                                       #"^[a-z,A-Z,\-,0-9]+$"]]
-    :url-string (m/-simple-schema 
-                 {:type :url-string 
-                  :pred (fn url-string-pred [x]
-                          (and (string? x)
-                               (try (URI. x)
-                                    true
-                                    (catch URISyntaxException ex
-                                      false))))})}))
+   custom-registry-keys))
+
+(def SeriesPathParams
+  (m/schema
+   [:map {:registry custom-registry-keys}
+    [:series-slug ::series-slug-string]]))
+
+(def SeriesQueryParams
+  (m/schema
+   [:map
+    [:title {:optional true} :string]
+    [:description {:optional true} :string]]))
+
+(def SeriesApiParams 
+  (mu/merge
+   SeriesPathParams
+   SeriesQueryParams))
 
 (defn validate-id
   "Returns unchanged doc or throws.
@@ -146,6 +161,8 @@
        (normalise-series api-params)
        (issued+modified-dates api-params nil)))
 
+(def ^:private api-query-params-keys (m/explicit-keys SeriesQueryParams))
+
 (defn upsert-series
   "Takes a derefenced db state map with the shape {path jsonld} and
   upserts a new dataset series into it.
@@ -170,7 +187,17 @@
    {:pre [(contains? api-params :op/timestamp)]
     :post [(validate-issued-unchanged jsonld-doc %)
            (validate-modified-changed jsonld-doc %)]}
-   (let [series-key (models-shared/dataset-series-key (:series-slug api-params))]
-     (if-let [old-series (get db series-key)]
-       (update db series-key update-series api-params (or jsonld-doc old-series))
+   (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
+         old-series (get db series-key)]
+     (cond
+       (and old-series 
+            (nil? jsonld-doc) 
+            (empty? (select-keys api-params api-query-params-keys)))
+       db                               ;NOOP
+       
+       old-series
+       (update db series-key update-series
+               api-params (or jsonld-doc old-series))
+       
+       :else
        (assoc db series-key (create-series api-params jsonld-doc))))))

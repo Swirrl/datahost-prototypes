@@ -68,7 +68,7 @@
           (is (= (:status response) 200)))
         
         (let [response (http/get "http://localhost:3400/data/new-series")
-              resp-body (-> response :body json/read-str )]
+              resp-body (-> response :body json/read-str)]
           (is (= (:status response) 200))
           (is (= (get resp-body "dcterms:title") "A new title"))
           (is (not= (get resp-body "dcterms:issued")
