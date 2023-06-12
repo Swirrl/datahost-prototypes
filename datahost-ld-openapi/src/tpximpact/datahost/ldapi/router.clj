@@ -18,7 +18,8 @@
    [muuntaja.core :as m]
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.routes.series :as series-routes]
-   [tpximpact.datahost.ldapi.routes.release :as release-routes]))
+   [tpximpact.datahost.ldapi.routes.release :as release-routes]
+   [ring.middleware.cors :as cors]))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -39,6 +40,17 @@
    (-> m/default-options
        (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
        (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
+
+(def cors-middleware
+  "Defines a CORS middleware for a route"
+  {:name ::cors
+   :compile (fn [_route _opts]
+              (fn [handler]
+                ;; apply CORS to each router
+                ;; NOTE: in future we might want to make this opt-in for specific routes
+                (cors/wrap-cors handler
+                                :access-control-allow-origin (constantly true)
+                                :access-control-allow-methods [:get :post :put])))})
 
 (defn router [triplestore db]
   (ring/router
@@ -84,7 +96,10 @@
                        ;; malli options
                        :options nil})
            :muuntaja m/instance
-           :middleware [;; swagger & openapi
+           :middleware [
+                        ;; CORS
+                        cors-middleware
+                        ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
                         ;; query-params & form-params
