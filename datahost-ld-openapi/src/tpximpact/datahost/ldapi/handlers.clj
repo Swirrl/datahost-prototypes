@@ -1,7 +1,6 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-   [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.models.shared :as models-shared]))
+   [tpximpact.datahost.ldapi.db :as db]))
 
 (def not-found-response
   {:status 404
@@ -13,15 +12,18 @@
      :body {:status "error"
             :message message}}))
 
+(defn get-api-params [{:keys [path-params query-params]}]
+  (-> query-params (update-keys keyword) (merge path-params)))
+
 (defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
   (if-let [series (db/get-series db series-slug)]
     {:status 200
      :body series}
     not-found-response))
 
-(defn put-dataset-series [db {:keys [body-params path-params query-params]}]
+(defn put-dataset-series [db {:keys [body-params] :as request}]
   (try
-    (let [api-params (-> query-params (update-keys keyword) (merge path-params))
+    (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           {:keys [op jsonld-doc]} (db/upsert-series! db api-params incoming-jsonld-doc)
           response-code (case op
@@ -39,13 +41,22 @@
      :body release}
     not-found-response))
 
-(defn put-release [db {{:keys [series-slug release-slug]} :path-params}]
+(defn put-release [db {{:keys [series-slug release-slug]} :path-params
+                       body-params :body-params :as request}]
   (try
-    (if-let [series (db/get-series db series-slug)]
-      ;; try to upsert release
-      {:status 200 ;; response-code
-       :body  "";; jsonld-doc
-       }
+    (if-let [_series (db/get-series db series-slug)]
+      (try
+        (let [api-params (get-api-params request)
+              incoming-jsonld-doc body-params
+              {:keys [op jsonld-doc]} (db/upsert-release! db api-params incoming-jsonld-doc)
+              response-code (case op
+                              :create 201
+                              :update 200)]
+          {:status response-code
+           :body jsonld-doc})
+
+        (catch Throwable e
+          (error-response e)))
       {:status 422
        :body "Series does not exist"})
 
