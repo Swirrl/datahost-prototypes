@@ -32,6 +32,7 @@
       normalised-context)))
 
 (defn validate-context [ednld base]
+  "Returns modified LD document or throws."
   (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
     (if (= base base-in-doc)
       (update ednld "@context" normalise-context base)
@@ -79,6 +80,9 @@
                                                  false))))})}))
 
 (defn validate-id [slug cleaned-doc]
+  "Returns unchanged doc or throws.
+
+  Thrown exception's `ex-data` will contain :supplied-id, :expected-id"
   (let [id-in-doc (get cleaned-doc "@id")]
     (cond
       (nil? id-in-doc) cleaned-doc
