@@ -19,7 +19,13 @@
                                (try (URI. x)
                                     true
                                     (catch URISyntaxException ex
-                                      false))))})})
+                                      false))))})
+   :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
+                               (m/-simple-schema
+                                {:type :datahost/timestamp
+                                 :pred (fn [ts]
+                                         (and (instance? java.time.ZonedDateTime ts)
+                                              (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
 
 (def registry
   (merge
@@ -102,14 +108,14 @@
       true  :modify)))
 
 (defmethod -issued+modified-dates :issue
-  [{timestamp :op/timestamp} _ new-doc]
+  [{^ZonedDateTime timestamp :op/timestamp} _ new-doc]
   (let [ts-string (.format timestamp date-formatter)]
     (assoc new-doc 
            "dcterms:issued" ts-string
            "dcterms:modified" ts-string)))
 
 (defmethod -issued+modified-dates :modify
-  [{timestamp :op/timestamp} old-doc new-doc]
+  [{^ZonedDateTime timestamp :op/timestamp} old-doc new-doc]
   (assoc new-doc
          "dcterms:issued" (get old-doc "dcterms:issued")
          "dcterms:modified" (.format timestamp date-formatter)))
@@ -163,6 +169,16 @@
 
 (def ^:private api-query-params-keys (m/explicit-keys SeriesQueryParams))
 
+(def UpsertArgs
+  (let [db-schema [:map {}]
+        api-params-schema (m/schema [:map {:registry custom-registry-keys}
+                                     [:op/timestamp :datahost/timestamp]])
+        input-jsonld-doc-schema [:maybe [:map {}]]]
+    [:catn
+     [:db db-schema]
+     [:api-params api-params-schema]
+     [:jsonld-doc input-jsonld-doc-schema]]))
+
 (defn upsert-series
   "Takes a derefenced db state map with the shape {path jsonld} and
   upserts a new dataset series into it.
@@ -181,18 +197,19 @@
 
   For example a `dcterms:issued` time should not change after a
   document is updated."
-  ;; TODO: put malli schema on the arguments. E.g. a series
-  ;; modification request can pass a nil document
   ([db api-params jsonld-doc]
-   {:pre [(contains? api-params :op/timestamp)]
+   {:pre [(m/validate UpsertArgs [db api-params jsonld-doc])]
     :post [(validate-issued-unchanged jsonld-doc %)
            (validate-modified-changed jsonld-doc %)]}
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
          old-series (get db series-key)]
      (cond
        (and old-series 
-            (nil? jsonld-doc) 
-            (empty? (select-keys api-params api-query-params-keys)))
+            (nil? jsonld-doc)
+            (let [query-changes (select-keys api-params api-query-params-keys)]
+              (or (empty? query-changes)
+                  (let [renamed (models-shared/rename-query-params-to-series-keys query-changes)]
+                    (= renamed (select-keys old-series (keys renamed)))))))
        db                               ;NOOP
        
        old-series
@@ -201,3 +218,4 @@
        
        :else
        (assoc db series-key (create-series api-params jsonld-doc))))))
+

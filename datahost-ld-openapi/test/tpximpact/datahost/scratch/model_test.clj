@@ -47,11 +47,10 @@
       (is (matcha/ask [[example:my-dataset-series dcterms:title "My series"]] (db->matcha @db)))
 
       (testing "idempotent - upserting same request again is equivalent to inserting once"
-
         (let [start-state @db
               end-state (swap! db series/upsert-series
                                {:series-slug "my-dataset-series" 
-                                ;;:title "My series"
+                                :title "My series"
                                 :op/timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))} 
                                nil)]
           (is (= start-state end-state)))))
