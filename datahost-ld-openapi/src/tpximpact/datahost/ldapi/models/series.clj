@@ -208,6 +208,8 @@
      (cond
        (and old-series 
             (nil? jsonld-doc)
+            ;; we don't want an update if the query-params' values are
+            ;; the same as the ones in the document already
             (let [query-changes (select-keys api-params api-query-params-keys)]
               (or (empty? query-changes)
                   (let [renamed (models-shared/rename-query-params-to-series-keys query-changes)]
