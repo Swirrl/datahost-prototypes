@@ -56,4 +56,4 @@
         op (get-op db release-key)
         updated-db (swap! db release/upsert-release api-params incoming-jsonld-doc)]
     {:op op
-     :jsonld-doc (get updated-db series-key)}))
+     :jsonld-doc (get updated-db release-key)}))

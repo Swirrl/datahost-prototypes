@@ -23,7 +23,6 @@
       (try
         (http/get "http://localhost:3400/data/does-not-exist/release/release-1")
 
-
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
             (is (= status 404))
@@ -55,89 +54,105 @@
 
     (put-series)
 
-    (testing "Creating a release for a series that does exist works"
-      (let [jsonld {"@context"
-                    ["https://publishmydata.com/def/datahost/context"
-                     {"@base" "http://example.org/data/"}]
-                    "dcterms:title" "Example Release"}
-            response (http/put "http://localhost:3400/data/new-series/release/release-1"
-                               {:content-type :json
-                                :body (json/write-str jsonld)})]
-        (is (= (:status response) 201))
-        (is (= (json/read-str (:body response)) ))
-        ))
+    (let [request-ednld {"@context"
+                         ["https://publishmydata.com/def/datahost/context"
+                          {"@base" "https://example.org/data/new-series/"}]
+                         "dcterms:title" "Example Release"}
+          normalised-ednld {"@context"
+                            ["https://publishmydata.com/def/datahost/context"
+                             {"@base" "https://example.org/data/new-series/"}],
+                            "dcterms:title" "Example Release",
+                            "@type" "dh:Release"
+                            "@id" "release-1",
+                            "dcat:inSeries" "../new-series"}]
 
-    (testing "Fetching a release that does exist works")
+      (testing "Creating a release for a series that does exist works"
+        (let [response (http/put "http://localhost:3400/data/new-series/release/release-1"
+                                 {:content-type :json
+                                  :body (json/write-str request-ednld)})]
+          (is (= (:status response) 201))
+          (is (= (json/read-str (:body response)) normalised-ednld))))
 
-    (testing "A release can be updated"))
+      (testing "Fetching a release that does exist works"
+        (let [response (http/get "http://localhost:3400/data/new-series/release/release-1 ")]
+          (is (= (:status response) 200))
+          (is (= (json/read-str (:body response)) normalised-ednld))))
 
-;; (th/with-system-and-clean-up sys
-  ;;   (testing "A series that does not exist returns 'not found'"
-  ;;     (try
-  ;;       (http/get "http://localhost:3400/data/does-not-exist")
-
-  ;;       (catch Throwable ex
-  ;;         (let [{:keys [status body]} (ex-data ex)]
-  ;;           (is (= status 404))
-  ;;           (is (= body "Not found"))))))
-
-  ;;   (let [incoming-jsonld-doc {"@context"
-  ;;                              ["https://publishmydata.com/def/datahost/context"
-  ;;                               {"@base" "https://example.org/data/"}],
-  ;;                              "dcterms:title" "A title"}
-  ;;         augmented-jsonld-doc (sut/normalise-series {:series-slug "new-series"}
-  ;;                                                    incoming-jsonld-doc)]
-  ;;     (testing "A series can be created and retrieved via the API"
-
-  ;;       (let [response (http/put
-  ;;                       "http://localhost:3400/data/new-series"
-  ;;                       {:content-type :json
-  ;;                        :body (json/write-str incoming-jsonld-doc)})]
-  ;;         (is (= (:status response) 201))
-  ;;         (is (= (json/read-str (:body response)) augmented-jsonld-doc)))
-
-  ;;       (let [response (http/get "http://localhost:3400/data/new-series")]
-  ;;         (is (= (:status response) 200))
-  ;;         (is (= (json/read-str (:body response)) augmented-jsonld-doc))))
-
-  ;;     (testing "A series can be updated via the API"
-  ;;       (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]
-  ;;         (is (= (:status response) 200)))
-
-  ;;       (let [response (http/get "http://localhost:3400/data/new-series")]
-  ;;         (is (= (:status response) 200))
-  ;;         (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title"))))))
-  )
+      (testing "A release can be updated, query params take precedence"
+        (let [response (http/put "http://localhost:3400/data/new-series/release/release-1?title=A%20new%20title"
+                                 {:content-type :json
+                                  :body (json/write-str request-ednld)})]
+          (is (= (:status response) 200))
+          (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title")))))))
 
 (deftest normalise-release-test
   (testing "invalid cases"
     (testing "missing :series-slug"
       (is (thrown? ExceptionInfo
-                   (sut/normalise-release {}
+                   (sut/normalise-release "https://example.org/data/series-1"
+                                          {}
                                           {})))
 
       ;; Invalid for PUT as slug will be part of URI
       (is (thrown? ExceptionInfo
-                   (sut/normalise-release {}
-                                          {"@id" "my-dataset-series"}))))
+                   (sut/normalise-release "https://example.org/data/series-1"
+                                          {}
+                                          {"@id" "release-1"}))))
 
     (testing "missing :release-slug"
       (is (thrown? ExceptionInfo
-                   (sut/normalise-release {:series-slug "my-dataset-series"}
+                   (sut/normalise-release "https://example.org/data/series-1"
+                                          {:series-slug "my-dataset-series"}
+                                          {}))))
+
+    (testing "different base is invalid"
+      (is (thrown? ExceptionInfo
+                   (sut/normalise-release "https://example.org/data/series-1"
+                                          {:series-slug "my-dataset-series"}
                                           {"@context" ["https://publishmydata.com/def/datahost/context"
                                                        {"@base" "https://different.base/is/invalid/"}]}))))
 
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (sut/normalise-release {:series-slug "my-dataset-series"
-                                         :release-slug "2023"}
-                                        {"@context" ["https://publishmydata.com/def/datahost/context",
-                                                     {"@base" "https://example.org/data/"}],
-                                         "@id" "https://example.org/data/my-dataset-series"}))
-        "@id usage in the series document is (for now) restricted to be in slugised form only"))
+    (testing "@id must be slugised in the doc"
+      (is (thrown? clojure.lang.ExceptionInfo
+                   (sut/normalise-release "https://example.org/data/series-1"
+                                          {:series-slug "my-dataset-series"
+                                           :release-slug "2023"}
+                                          {"@context" ["https://publishmydata.com/def/datahost/context",
+                                                       {"@base" "https://example.org/data/"}],
+                                           "@id" "https://example.org/data/my-dataset-series"}))
+          "@id usage in the series document is (for now) restricted to be in slugised form only")))
 
   (testing "valid cases"
-    (testing "canonicalisation works")
-    (testing "canonicalisation is idempotent")
+    (let [returned-value (sut/normalise-release "https://example.org/data/series-1"
+                                                {:series-slug "my-dataset-series"
+                                                 :release-slug "release-1"}
+                                                {})]
+      (testing "canonicalisation works"
+        (is (= {"@context"
+                ["https://publishmydata.com/def/datahost/context"
+                 {"@base" "https://example.org/data/series-1"}]
+                "@id" "release-1"
+                "@type" "dh:Release"
+                "dcat:inSeries" "../my-dataset-series"}
+               returned-value)))
 
-    (testing "with title metadata")
-    (testing "with description metadata")))
+      (testing "canonicalisation is idempotent"
+        (is (= returned-value (sut/normalise-release "https://example.org/data/series-1"
+                                                     {:series-slug "my-dataset-series"
+                                                      :release-slug "release-1"}
+                                                     returned-value))))
+
+      (testing "with title metadata"
+        (is (= {"@context"
+                ["https://publishmydata.com/def/datahost/context"
+                 {"@base" "https://example.org/data/series-1"}]
+                "@id" "release-1"
+                "@type" "dh:Release"
+                "dcterms:title" "My Release"
+                "dcat:inSeries" "../my-dataset-series"}
+               (sut/normalise-release "https://example.org/data/series-1"
+                                      {:series-slug "my-dataset-series"
+                                       :release-slug "release-1"}
+                                      {"@context" ["https://publishmydata.com/def/datahost/context"
+                                                    {"@base" "https://example.org/data/series-1"}]
+                                        "dcterms:title" "My Release"})))))))

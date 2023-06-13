@@ -52,6 +52,8 @@
    SeriesPathParams
    SeriesQueryParams))
 
+;;;;;;;;;;;;;;;;;;
+;; TODO NOW: MOVE THESE
 (defn validate-id
   "Returns unchanged doc or throws.
 
@@ -126,6 +128,7 @@
   {:pre [(instance? java.time.ZonedDateTime timestamp)]}
   (-issued+modified-dates api-params old-doc new-doc))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
   returns a normalised EDN form of the JSON-LD, with the API
@@ -145,14 +148,15 @@
                                             (me/humanize))})))
    (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
          validated-doc (-> (models-shared/validate-id series-slug cleaned-doc)
-                           (validate-series-context))]
-     (assoc validated-doc
-            ;; add any managed params
-            "@type" "dh:DatasetSeries"
-            "@id" series-slug
-            ;; coin base-entity to serve as the @base
-            ;; for nested resources
-            "dh:baseEntity" (str models-shared/ld-root series-slug "/")))))
+                           (models-shared/validate-context (str models-shared/ld-root)))
+
+         final-doc (assoc validated-doc
+                          ;; add any managed params
+                          "@type" "dh:DatasetSeries"
+                          "@id" series-slug
+                          ;; coin base-entity to serve as the @base for nested resources
+                          "dh:baseEntity" (str models-shared/ld-root series-slug "/"))]
+     final-doc)))
 
 (defn- update-series [old-series api-params jsonld-doc]
   ;; we don't want the client to overwrite the 'issued' value

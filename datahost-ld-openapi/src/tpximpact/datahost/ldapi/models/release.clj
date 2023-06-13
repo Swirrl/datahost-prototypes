@@ -11,19 +11,9 @@
                        [:title {:optional true} :string]
                        [:description {:optional true} :string]])
 
-(defn validate-release-context [ednld]
-  ;; TODO
-  ;; (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
-
-  ;;   )
-  ednld
-  )
-
 (defn normalise-release [base-entity api-params jsonld-doc]
   (let [{:keys [series-slug release-slug]} api-params
-        _ (assert base-entity "Expected base entity to be set")
-        context ["https://publishmydata.com/def/datahost/context"
-                 {"@base" base-entity}]]
+        _ (assert base-entity "Expected base entity to be set")]
     (when-not (m/validate ReleaseApiParams
                           api-params
                           {:registry models-shared/registry})
@@ -35,16 +25,17 @@
                                              (me/humanize))})))
 
     (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
-          validated-doc (-> (models-shared/validate-id api-params cleaned-doc)
-                            (validate-release-context))])
 
-    (->
-     (assoc "@context" context
-            "@id" release-slug
-            "dcat:inSeries" (str "../" series-slug)))))
+          validated-doc (-> (models-shared/validate-id release-slug cleaned-doc)
+                            (models-shared/validate-context base-entity))
 
-(defn- update-release [_old-release base-entity api-params jsonld-doc]
-  (normalise-release base-entity api-params jsonld-doc))
+          final-doc (assoc validated-doc
+                           ;; add managed properties,
+                           ;; timestamps, and dcat:seriesMember <release> to series metadata
+                           "@type" "dh:Release"
+                           "@id" release-slug
+                           "dcat:inSeries" (str "../" series-slug))]
+      final-doc)))
 
 (defn- update-release [_old-release base-entity api-params jsonld-doc]
   (log/info "Updating release " (:series-slug api-params) "/" (:release-slug api-params))

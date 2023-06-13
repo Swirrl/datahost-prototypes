@@ -41,7 +41,7 @@
      :body release}
     not-found-response))
 
-(defn put-release [db {{:keys [series-slug release-slug]} :path-params
+(defn put-release [db {{:keys [series-slug]} :path-params
                        body-params :body-params :as request}]
   (try
     (if-let [_series (db/get-series db series-slug)]

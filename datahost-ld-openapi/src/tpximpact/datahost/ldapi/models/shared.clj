@@ -17,9 +17,9 @@
 (defn release-key [series-slug release-slug]
   (str (dataset-series-key series-slug) "/" release-slug))
 
-(defn normalise-context [ednld]
+(defn normalise-context [ednld base]
   (let [normalised-context ["https://publishmydata.com/def/datahost/context"
-                            {"@base" (str ld-root)}]]
+                            {"@base" base}]]
     (if-let [context (get ednld "@context")]
       (cond
         (= context "https://publishmydata.com/def/datahost/context") normalised-context
@@ -31,6 +31,17 @@
       ;; return normalised-context if none provided
       normalised-context)))
 
+(defn validate-context [ednld base]
+  (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
+    (if (= base base-in-doc)
+      (update ednld "@context" normalise-context base)
+      (throw (ex-info
+              (str "@base must currently be set to '" base "'")
+              {:type :validation-error
+               :expected-value base
+               :actual-value base-in-doc})))
+    (update ednld "@context" normalise-context base)))
+
 (def query-params->series-keys
   {:title "dcterms:title"
    :description "dcterms:description"})
@@ -38,6 +49,7 @@
 (defn rename-query-params-to-series-keys
   [m]
   (set/rename-keys m query-params->series-keys))
+
 
 (defn merge-params-with-doc [api-params jsonld-doc]
 ;; TODO NOW:: probably change this to prefer jsonld doc
