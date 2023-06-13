@@ -13,8 +13,6 @@
   (:import
    [java.net URI]))
 
-
-
 (deftest ontology-parses
   (is (< 0 (count (gio/statements (io/file "./doc/datahost-ontology.ttl"))))))
 
@@ -39,8 +37,8 @@
   (let [db (atom {})] ;; an empty database
     (testing "Constructing the series"
       ;; first make a series
-      (swap! db series/upsert-series {:series-slug "my-dataset-series" 
-                                      :title "My series" 
+      (swap! db series/upsert-series {:series-slug "my-dataset-series"
+                                      :title "My series"
                                       :op/timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))} nil)
 
       (is (matcha/ask [[example:my-dataset-series dh:baseEntity ?o]] (db->matcha @db)))
@@ -49,27 +47,29 @@
       (testing "idempotent - upserting same request again is equivalent to inserting once"
         (let [start-state @db
               end-state (swap! db series/upsert-series
-                               {:series-slug "my-dataset-series" 
+                               {:series-slug "my-dataset-series"
                                 :title "My series"
-                                :op/timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))} 
+                                :op/timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))}
                                nil)]
           (is (= start-state end-state)))))
 
     (testing "Constructing a release"
       (swap! db release/upsert-release
-	         {:api-params {:series-slug "my-dataset-series" :release-slug "2018"}
-              :jsonld-doc {"dcterms:title" "2018"}})
+	          {:series-slug "my-dataset-series" :release-slug "2018"}
+              {"dcterms:title" "2018"})
 
       (is (matcha/ask [[example:my-release ?p ?o]] (db->matcha @db)))
       (is (matcha/ask [[example:my-release dcterms:title "2018"]] (db->matcha @db)))
 
-      (swap! db release/upsert-release {:api-params {:series-slug "my-dataset-series" :release-slug "2018"}
-                                        :jsonld-doc {"dcterms:title" "2018"}})
+      (swap! db release/upsert-release
+             {:series-slug "my-dataset-series" :release-slug "2018"}
+             {"dcterms:title" "2018"})
 
       (testing "idempotent - upserting same request again is equivalent to inserting once"
         (let [start-state @db
-              end-state (swap! db release/upsert-release {:api-params {:series-slug "my-dataset-series" :release-slug "2018"}
-                                                          :jsonld-doc {"dcterms:title" "2018"}})]
+              end-state (swap! db release/upsert-release
+                               {:series-slug "my-dataset-series" :release-slug "2018"}
+                               {"dcterms:title" "2018"})]
           (is (= start-state end-state))))
 
       (testing "RDF graph joins up"
