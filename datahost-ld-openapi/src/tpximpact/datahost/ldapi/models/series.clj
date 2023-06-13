@@ -179,6 +179,8 @@
      [:api-params api-params-schema]
      [:jsonld-doc input-jsonld-doc-schema]]))
 
+(def upsert-args-valid? (m/validator UpsertArgs))
+
 (defn upsert-series
   "Takes a derefenced db state map with the shape {path jsonld} and
   upserts a new dataset series into it.
@@ -198,7 +200,7 @@
   For example a `dcterms:issued` time should not change after a
   document is updated."
   ([db api-params jsonld-doc]
-   {:pre [(m/validate UpsertArgs [db api-params jsonld-doc])]
+   {:pre [(upsert-args-valid? [db api-params jsonld-doc])]
     :post [(validate-issued-unchanged jsonld-doc %)
            (validate-modified-changed jsonld-doc %)]}
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
@@ -218,4 +220,3 @@
        
        :else
        (assoc db series-key (create-series api-params jsonld-doc))))))
-
