@@ -6,40 +6,13 @@
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
-   [java.net URI URISyntaxException]
    [java.time ZonedDateTime]))
-
-(def ^:private custom-registry-keys
-  {::series-slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
-                                       #"^[a-z,A-Z,\-,0-9]+$"]]
-   ::url-string (m/-simple-schema 
-                 {:type :url-string 
-                  :pred (fn url-string-pred [x]
-                          (and (string? x)
-                               (try (URI. x)
-                                    true
-                                    (catch URISyntaxException ex
-                                      false))))})
-   :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
-                         (m/-simple-schema
-                          {:type :datahost/timestamp
-                           :pred (fn [ts]
-                                   (and (instance? java.time.ZonedDateTime ts)
-                                        (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
-
-(def registry
-  (merge
-   (m/class-schemas)
-   (m/comparator-schemas)
-   (m/base-schemas)
-   (m/type-schemas)
-   custom-registry-keys))
 
 (def SeriesPathParams
   (m/schema
    [:map
-    [:series-slug ::series-slug-string]]
-   {:registry registry}))
+    [:series-slug :datahost/slug-string]]
+   {:registry models-shared/registry}))
 
 (def SeriesQueryParams
   (m/schema
@@ -47,57 +20,32 @@
     [:title {:optional true} :string]
     [:description {:optional true} :string]]))
 
-(def SeriesApiParams 
+(def SeriesApiParams
   (mu/merge
    SeriesPathParams
    SeriesQueryParams))
 
-(defn validate-id
-  "Returns unchanged doc or throws.
-
-  Thrown exception's `ex-data` will contain :supplied-id, :expected-id"
-  [{:keys [series-slug] :as _api-params} cleaned-doc]
-  (let [id-in-doc (get cleaned-doc "@id")]
-    (cond
-      (nil? id-in-doc) cleaned-doc
-
-      (= series-slug id-in-doc) cleaned-doc
-
-      :else (throw
-             (ex-info "@id should for now be expressed as a slugged style suffix, and if present match that supplied as the API slug."
-                      {:supplied-id id-in-doc
-                       :expected-id series-slug})))))
-
-(defn validate-series-context
-  "Returns modified LD document or throws."
-  [ednld]
-  (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
-    (if (= (str models-shared/ld-root) base-in-doc)
-      (update ednld "@context" models-shared/normalise-context)
-      (throw (ex-info
-              (str "@base for the dataset-series must currently be set to the linked-data root '" models-shared/ld-root "'")
-              {:type :validation-error
-               :expected-value (str models-shared/ld-root)
-               :actual-value base-in-doc})))
-    (update ednld "@context" models-shared/normalise-context)))
-
-(def ^:private date-formatter 
+(def ^:private date-formatter
   java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
 
 (defn- validate-issued-unchanged
   "Returns a boolean."
   [old-doc new-doc]
-  (let [old-issued (get old-doc "dcterms:issued")]
+  (let [old-issued (get old-doc "dcterms:issued")
+        new-issued (get new-doc "dcterms:issued")]
     (or (nil? old-issued)
+        (nil? new-issued)
         (= old-issued (get new-doc "dcterms:issued")))))
 
 (defn- validate-modified-changed
   [old-doc new-doc]
-  (let [old-modified (get old-doc "dcterms:modified")]
+  (let [old-modified (get old-doc "dcterms:modified")
+        new-modified (get new-doc "dcterms:modified")]
     (or (nil? old-modified)
+        (nil? new-modified)
         (not= old-modified (get new-doc "dcterms:modified")))))
 
-(defmulti -issued+modified-dates 
+(defmulti -issued+modified-dates
   "Adjusts the 'dcterms:issued' and 'dcterms:modified' of the document.
   Ensures that the new document does not modify the issue date.
 
@@ -111,7 +59,7 @@
 (defmethod -issued+modified-dates :issue
   [{^ZonedDateTime timestamp :op/timestamp} _ new-doc]
   (let [ts-string (.format timestamp date-formatter)]
-    (assoc new-doc 
+    (assoc new-doc
            "dcterms:issued" ts-string
            "dcterms:modified" ts-string)))
 
@@ -126,6 +74,7 @@
   {:pre [(instance? java.time.ZonedDateTime timestamp)]}
   (-issued+modified-dates api-params old-doc new-doc))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
   returns a normalised EDN form of the JSON-LD, with the API
@@ -134,23 +83,26 @@
   ([api-params]
    (normalise-series api-params nil))
   ([{:keys [series-slug] :as api-params} jsonld-doc]
-   (when-not (m/validate SeriesApiParams api-params {:registry registry})
+   (when-not (m/validate SeriesApiParams
+                         api-params
+                         {:registry models-shared/registry})
      (throw (ex-info "Invalid API parameters"
                      {:type :validation-error
-                      :validation-error (-> (m/explain SeriesApiParams 
+                      :validation-error (-> (m/explain SeriesApiParams
                                                        api-params
-                                                       {:registry registry})
+                                                       {:registry models-shared/registry})
                                             (me/humanize))})))
    (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
-         validated-doc (-> (validate-id api-params cleaned-doc)
-                           (validate-series-context))]
-     (assoc validated-doc
-            ;; add any managed params
-            "@type" "dh:DatasetSeries"
-            "@id" series-slug
-            ;; coin base-entity to serve as the @base
-            ;; for nested resources
-            "dh:baseEntity" (str models-shared/ld-root series-slug "/")))))
+         validated-doc (-> (models-shared/validate-id series-slug cleaned-doc)
+                           (models-shared/validate-context (str models-shared/ld-root)))
+
+         final-doc (assoc validated-doc
+                          ;; add any managed params
+                          "@type" "dh:DatasetSeries"
+                          "@id" series-slug
+                          ;; coin base-entity to serve as the @base for nested resources
+                          "dh:baseEntity" (str models-shared/ld-root series-slug "/"))]
+     final-doc)))
 
 (defn- update-series [old-series api-params jsonld-doc]
   ;; we don't want the client to overwrite the 'issued' value
@@ -163,7 +115,7 @@
        (issued+modified-dates api-params old-series)))
 
 (defn- create-series [api-params jsonld-doc]
-  (log/info "Updating series " (:series-slug api-params))
+  (log/info "Creating series " (:series-slug api-params))
   (->> jsonld-doc
        (normalise-series api-params)
        (issued+modified-dates api-params nil)))
@@ -174,7 +126,7 @@
   (let [db-schema [:map {}]
         api-params-schema (m/schema [:map
                                      [:op/timestamp :datahost/timestamp]]
-                                    {:registry registry})
+                                    {:registry models-shared/registry})
         input-jsonld-doc-schema [:maybe [:map {}]]]
     [:catn
      [:db db-schema]
@@ -208,7 +160,7 @@
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
          old-series (get db series-key)]
      (cond
-       (and old-series 
+       (and old-series
             (nil? jsonld-doc)
             ;; we don't want an update if the query-params' values are
             ;; the same as the ones in the document already
@@ -217,10 +169,10 @@
                   (let [renamed (models-shared/rename-query-params-to-series-keys query-changes)]
                     (= renamed (select-keys old-series (keys renamed)))))))
        db                               ;NOOP
-       
+
        old-series
        (update db series-key update-series
                api-params (or jsonld-doc old-series))
-       
+
        :else
        (assoc db series-key (create-series api-params jsonld-doc))))))

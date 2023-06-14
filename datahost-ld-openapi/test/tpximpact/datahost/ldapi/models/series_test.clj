@@ -2,6 +2,7 @@
   (:require
    [clj-http.client :as http]
    [clojure.data.json :as json]
+   [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
@@ -25,56 +26,63 @@
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
-            (is (= status 404))
-            (is (= body "Not found"))))))
+            (is (= 404 status))
+            (is (= "Not found" body))))))
 
-    (let [incoming-jsonld-doc {"@context"
-                               ["https://publishmydata.com/def/datahost/context"
-                                {"@base" "https://example.org/data/"}],
-                               "dcterms:title" "A title"
-                               "dcterms:identifier" "foobar"}
-          timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
-          augmented-jsonld-doc (sut/normalise-series {:series-slug "new-series"
-                                                      :op/timestamp timestamp}
-                                                     incoming-jsonld-doc)]
-      (testing "A series can be"
+    (let [request-ednld {"@context"
+                         ["https://publishmydata.com/def/datahost/context"
+                          {"@base" "https://example.org/data/"}],
+                         "dcterms:title" "A title"
+                         "dcterms:identifier" "foobar"}
+          timestamp-str (format-date-time (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC")))
+          normalised-ednld {"@context"
+                            ["https://publishmydata.com/def/datahost/context"
+                             {"@base" "https://example.org/data/"}],
+                            "@type" "dh:DatasetSeries"
+                            "dcterms:identifier" "foobar"
+                            "@id" "new-series"
+                            "dh:baseEntity" "https://example.org/data/new-series/"
+                            "dcterms:title" "A title"}]
 
-        (testing "created via API"
-         (let [response (http/put
-                         "http://localhost:3400/data/new-series"
-                         {:content-type :json
-                          :body (json/write-str incoming-jsonld-doc)})]
-           (is (= (:status response) 201))
-           (let [resp-body (json/read-str (:body response))
-                 timestamp-str (format-date-time timestamp)
-                 added-fields {"dcterms:issued" timestamp-str
-                               "dcterms:modified" timestamp-str}]
-             (is (= augmented-jsonld-doc 
-                    (dissoc resp-body "dcterms:issued" "dcterms:modified")))
-             (is (= (get resp-body "dcterms:issued")
-                    (get resp-body "dcterms:modified"))))))
+      (testing "A series can be created"
+        (let [response (http/put
+                        "http://localhost:3400/data/new-series"
+                        {:content-type :json
+                         :body (json/write-str request-ednld)})
+              resp-body (json/read-str (:body response))]
+          (is (= 201 (:status response)))
+          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))
 
-        (testing "retrieved via the API"
-          (let [response (http/get "http://localhost:3400/data/new-series")
-                resp-body (json/read-str (:body response))]
-            (is (= (:status response) 200))
-            (is  (= augmented-jsonld-doc
-                    (dissoc resp-body  "dcterms:issued" "dcterms:modified")))
-            (is (= (get resp-body "dcterms:issued")
-                   (get resp-body "dcterms:modified"))))))
+          (is (= (th/truncate-string (get resp-body "dcterms:issued") 15)
+                 (th/truncate-string (get resp-body "dcterms:modified") 15)
+                 (th/truncate-string timestamp-str 15)))
 
-      (testing "A series can be updated via the API"
-        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")]
-          (is (= (:status response) 200)))
-        
+          (is (= (get resp-body "dcterms:issued")
+                 (get resp-body "dcterms:modified")))))
+
+      (testing "A series can be retrieved via the API"
         (let [response (http/get "http://localhost:3400/data/new-series")
-              resp-body (-> response :body json/read-str)]
-          (is (= (:status response) 200))
-          (is (= (get resp-body "dcterms:title") "A new title"))
+              resp-body (json/read-str (:body response))]
+          (is (= 200 (:status response)))
+          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
+
+      (testing "A series can be updated via the API, query params take precedence"
+        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title"
+                                 {:content-type :json
+                                  :body (json/write-str request-ednld)})
+              resp-body (json/read-str (:body response))]
+          (is (= 200 (:status response)))
+          (is (not= (get resp-body "dcterms:issued")
+                    (get resp-body "dcterms:modified"))))
+
+        (let [response (http/get "http://localhost:3400/data/new-series")
+              resp-body (json/read-str (:body response))]
+          (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified")))
           (is (= "foobar" (get resp-body "dcterms:identifier"))
-              "The identifier should be left untouched."))))))
+              "The identifier should be left untouched.")
+          (is (= (get resp-body "dcterms:title") "A new title")))))))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"
@@ -82,16 +90,19 @@
 
     (testing "An empty @context is normalised"
       (is (= expected-context
-             (models-shared/normalise-context {}))))
+             (models-shared/normalise-context {}
+                                              (str models-shared/ld-root)))))
 
     (testing "A declared context of 'https://publishmydata.com/def/datahost/context' is normalised"
       (is (= expected-context
-             (models-shared/normalise-context {"@context" "https://publishmydata.com/def/datahost/context"}))))
+             (models-shared/normalise-context {"@context" "https://publishmydata.com/def/datahost/context"}
+                                              (str models-shared/ld-root)))))
 
     (testing "A normalised context is idempotent to itself"
       (is (= expected-context
              (models-shared/normalise-context {"@context" ["https://publishmydata.com/def/datahost/context",
-                                                 {"@base" "https://example.org/data/"}]}))))))
+                                                           {"@base" "https://example.org/data/"}]}
+                                              (str models-shared/ld-root)))))))
 
 (defn canonicalisation-idempotent? [api-params jsonld]
   (let [canonicalised-form (sut/normalise-series api-params jsonld)]

@@ -8,3 +8,7 @@
 
 (def get-release-summary "Retrieve metadata for an existing release")
 (def put-release-summary "Create or update metadata for a release")
+(def put-release-200-desc "Release already existed and was successfully updated")
+(def put-release-201-desc "Release did not exist previously and was successfully created")
+
+(def internal-server-error-desc "Internal server error")
