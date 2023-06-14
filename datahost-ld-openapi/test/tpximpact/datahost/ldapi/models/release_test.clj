@@ -25,8 +25,8 @@
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
-            (is (= status 404))
-            (is (= body "Not found"))))))
+            (is (= 404 status))
+            (is (= "Not found" body))))))
 
     (testing "Fetching a release that does not exist returns 'not found'"
       (try
@@ -34,8 +34,8 @@
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
-            (is (= status 404))
-            (is (= body "Not found"))))))
+            (is (= 404 status))
+            (is (= "Not found" body))))))
 
     (testing "Creating a release for a series that is not found fails gracefully"
       (let [jsonld {"@context"
@@ -49,8 +49,8 @@
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
-              (is (= status 422))
-              (is (= body "Series does not exist")))))))
+              (is (= 422 status))
+              (is (= "Series does not exist" body)))))))
 
     (put-series)
 
@@ -70,20 +70,20 @@
         (let [response (http/put "http://localhost:3400/data/new-series/release/release-1"
                                  {:content-type :json
                                   :body (json/write-str request-ednld)})]
-          (is (= (:status response) 201))
-          (is (= (json/read-str (:body response)) normalised-ednld))))
+          (is (= 201 (:status response)))
+          (is (= normalised-ednld (json/read-str (:body response))))))
 
       (testing "Fetching a release that does exist works"
         (let [response (http/get "http://localhost:3400/data/new-series/release/release-1 ")]
-          (is (= (:status response) 200))
-          (is (= (json/read-str (:body response)) normalised-ednld))))
+          (is (= 200 (:status response)))
+          (is (= normalised-ednld (json/read-str (:body response))))))
 
       (testing "A release can be updated, query params take precedence"
         (let [response (http/put "http://localhost:3400/data/new-series/release/release-1?title=A%20new%20title"
                                  {:content-type :json
                                   :body (json/write-str request-ednld)})]
-          (is (= (:status response) 200))
-          (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title")))))))
+          (is (= 200 (:status response)))
+          (is (= "A new title" (-> response :body json/read-str (get "dcterms:title")))))))))
 
 (deftest normalise-release-test
   (testing "invalid cases"

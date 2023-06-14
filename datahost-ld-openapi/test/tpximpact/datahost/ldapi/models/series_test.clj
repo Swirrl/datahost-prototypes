@@ -26,8 +26,8 @@
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
-            (is (= status 404))
-            (is (= body "Not found"))))))
+            (is (= 404 status))
+            (is (= "Not found" body))))))
 
     (let [request-ednld {"@context"
                          ["https://publishmydata.com/def/datahost/context"
@@ -50,8 +50,8 @@
                         {:content-type :json
                          :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
-          (is (= (:status response) 201))
-          (is (= (dissoc resp-body "dcterms:issued" "dcterms:modified") normalised-ednld))
+          (is (= 201 (:status response)))
+          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))
 
           (is (= (th/truncate-string (get resp-body "dcterms:issued") 15)
                  (th/truncate-string (get resp-body "dcterms:modified") 15)
@@ -63,21 +63,21 @@
       (testing "A series can be retrieved via the API"
         (let [response (http/get "http://localhost:3400/data/new-series")
               resp-body (json/read-str (:body response))]
-          (is (= (:status response) 200))
-          (is (= (dissoc resp-body "dcterms:issued" "dcterms:modified") normalised-ednld))))
+          (is (= 200 (:status response)))
+          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
 
       (testing "A series can be updated via the API, query params take precedence"
         (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title"
                                  {:content-type :json
                                   :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
-          (is (= (:status response) 200))
+          (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified"))))
 
         (let [response (http/get "http://localhost:3400/data/new-series")
               resp-body (json/read-str (:body response))]
-          (is (= (:status response) 200))
+          (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified")))
           (is (= "foobar" (get resp-body "dcterms:identifier"))
