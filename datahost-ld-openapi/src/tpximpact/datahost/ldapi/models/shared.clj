@@ -27,6 +27,14 @@
       ;; return normalised-context if none provided
       normalised-context)))
 
+(def query-params->series-keys
+  {:title "dcterms:title"
+   :description "dcterms:description"})
+
+(defn rename-query-params-to-series-keys
+  [m]
+  (set/rename-keys m query-params->series-keys))
+
 (defn merge-params-with-doc [api-params jsonld-doc]
   (let [merged-doc (merge jsonld-doc
                           (set/rename-keys api-params
