@@ -28,6 +28,4 @@
                                                   (RDFDatasetUtils/toNQuads dataset sb)
                                                   (str sb))]
 
-                               (tap> nquad-string)
-
                                (rio/statements (java.io.StringReader. nquad-string) :format :nq))))))

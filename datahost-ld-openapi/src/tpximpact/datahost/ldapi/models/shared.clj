@@ -27,12 +27,17 @@
       ;; return normalised-context if none provided
       normalised-context)))
 
-(defn merge-params-with-doc [api-params jsonld-doc]
-  (let [merged-doc (merge (set/rename-keys api-params
-                                           {:title "dcterms:title"
-                                            :description "dcterms:description"})
-                          jsonld-doc)
-        cleaned-doc (-> merged-doc
-                        (util/dissoc-by-key keyword?))]
+(def query-params->series-keys
+  {:title "dcterms:title"
+   :description "dcterms:description"})
 
-    cleaned-doc))
+(defn rename-query-params-to-series-keys
+  [m]
+  (set/rename-keys m query-params->series-keys))
+
+(defn merge-params-with-doc [api-params jsonld-doc]
+  (let [merged-doc (merge jsonld-doc
+                          (set/rename-keys api-params
+                                           {:title "dcterms:title"
+                                            :description "dcterms:description"}))]
+    (util/dissoc-by-key merged-doc keyword?)))
