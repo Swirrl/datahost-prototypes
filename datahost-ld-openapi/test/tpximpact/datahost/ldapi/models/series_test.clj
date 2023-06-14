@@ -15,7 +15,7 @@
 
 (defn format-date-time
   [dt]
-  (.format dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
+  (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up sys

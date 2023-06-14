@@ -21,11 +21,11 @@
                                     (catch URISyntaxException ex
                                       false))))})
    :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
-                               (m/-simple-schema
-                                {:type :datahost/timestamp
-                                 :pred (fn [ts]
-                                         (and (instance? java.time.ZonedDateTime ts)
-                                              (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
+                         (m/-simple-schema
+                          {:type :datahost/timestamp
+                           :pred (fn [ts]
+                                   (and (instance? java.time.ZonedDateTime ts)
+                                        (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
 
 (def registry
   (merge
@@ -37,8 +37,9 @@
 
 (def SeriesPathParams
   (m/schema
-   [:map {:registry custom-registry-keys}
-    [:series-slug ::series-slug-string]]))
+   [:map
+    [:series-slug ::series-slug-string]]
+   {:registry registry}))
 
 (def SeriesQueryParams
   (m/schema
@@ -171,8 +172,9 @@
 
 (def UpsertArgs
   (let [db-schema [:map {}]
-        api-params-schema (m/schema [:map {:registry custom-registry-keys}
-                                     [:op/timestamp :datahost/timestamp]])
+        api-params-schema (m/schema [:map
+                                     [:op/timestamp :datahost/timestamp]]
+                                    {:registry registry})
         input-jsonld-doc-schema [:maybe [:map {}]]]
     [:catn
      [:db db-schema]
