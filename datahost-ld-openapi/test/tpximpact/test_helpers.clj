@@ -44,5 +44,5 @@
                  ~system-binding
                  ~@body))
 
-
-
+(defn truncate-string [s n]
+  (subs s 0 (min (count s) n)))

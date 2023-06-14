@@ -4,7 +4,8 @@
    [malli.core :as m]
    [tpximpact.datahost.ldapi.util :as util])
   (:import
-   [java.net URI]))
+   [java.net URI URISyntaxException]
+   [java.time ZonedDateTime]))
 
 (def ld-root
   "For the prototype this item will come from config or be derived from
@@ -51,33 +52,38 @@
   [m]
   (set/rename-keys m query-params->series-keys))
 
-
 (defn merge-params-with-doc [api-params jsonld-doc]
-;; TODO NOW:: probably change this to prefer jsonld doc
   (let [merged-doc (merge jsonld-doc
                           (set/rename-keys api-params
                                            {:title "dcterms:title"
                                             :description "dcterms:description"}))]
     (util/dissoc-by-key merged-doc keyword?)))
 
+(def ^:private custom-registry-keys
+  {:datahost/slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
+                                        #"^[a-z,A-Z,\-,0-9]+$"]]
+   :datahost/url-string (m/-simple-schema
+                         {:type :url-string
+                          :pred (fn url-string-pred [x]
+                                  (and (string? x)
+                                       (try (URI. x)
+                                            true
+                                            (catch URISyntaxException ex
+                                              false))))})
+   :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
+                         (m/-simple-schema
+                          {:type :datahost/timestamp
+                           :pred (fn [ts]
+                                   (and (instance? java.time.ZonedDateTime ts)
+                                        (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
 
-
-;; TODO NOW double check these..
 (def registry
   (merge
    (m/class-schemas)
    (m/comparator-schemas)
    (m/base-schemas)
    (m/type-schemas)
-   {:slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
-                                       #"^[a-z,A-Z,\-,0-9]+$"]]
-    :url-string (m/-simple-schema {:type :url-string :pred
-                                   (fn [x]
-                                     (and (string? x)
-                                          (try (URI. x)
-                                               true
-                                               (catch Exception ex
-                                                 false))))})}))
+   custom-registry-keys))
 
 (defn validate-id [slug cleaned-doc]
   "Returns unchanged doc or throws.

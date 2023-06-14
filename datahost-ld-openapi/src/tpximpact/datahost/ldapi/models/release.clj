@@ -6,8 +6,8 @@
    [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
 (def ReleaseApiParams [:map
-                       [:series-slug :slug-string]
-                       [:release-slug :slug-string]
+                       [:series-slug :datahost/slug-string]
+                       [:release-slug :datahost/slug-string]
                        [:title {:optional true} :string]
                        [:description {:optional true} :string]])
 

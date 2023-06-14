@@ -2,6 +2,7 @@
   (:require
    [clj-http.client :as http]
    [clojure.data.json :as json]
+   [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
@@ -33,53 +34,55 @@
                           {"@base" "https://example.org/data/"}],
                          "dcterms:title" "A title"
                          "dcterms:identifier" "foobar"}
-          timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
+          timestamp-str (format-date-time (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC")))
           normalised-ednld {"@context"
                             ["https://publishmydata.com/def/datahost/context"
                              {"@base" "https://example.org/data/"}],
                             "@type" "dh:DatasetSeries"
+                            "dcterms:identifier" "foobar"
                             "@id" "new-series"
                             "dh:baseEntity" "https://example.org/data/new-series/"
-                            "dcterms:title" "A title"
-                            "dcterms:issued" timestamp
-                            "dcterms:modified" timestamp}]
-      (testing "A series can be created and retrieved via the API"
+                            "dcterms:title" "A title"}]
 
+      (testing "A series can be created"
         (let [response (http/put
                         "http://localhost:3400/data/new-series"
                         {:content-type :json
                          :body (json/write-str request-ednld)})
-              resp-body (json/read-str (:body response))
-              timestamp-str (format-date-time timestamp)]
+              resp-body (json/read-str (:body response))]
           (is (= (:status response) 201))
-          (is (= (json/read-str (:body response)) normalised-ednld))
+          (is (= (dissoc resp-body "dcterms:issued" "dcterms:modified") normalised-ednld))
+
+          (is (= (th/truncate-string (get resp-body "dcterms:issued") 15)
+                 (th/truncate-string (get resp-body "dcterms:modified") 15)
+                 (th/truncate-string timestamp-str 15)))
 
           (is (= (get resp-body "dcterms:issued")
-                 (get resp-body "dcterms:modified")
-                 timestamp-str)))
-;; TODO NOW: make this a separate test
-;; testing "retrieved via the API"
-        (let [response (http/get "http://localhost:3400/data/new-series")]
-          (is (= (:status response) 200))
-          (is (= (json/read-str (:body response)) normalised-ednld))))
+                 (get resp-body "dcterms:modified")))))
 
-      (testing "A series can be updated via the API, query params take precedence"
-        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title")
+      (testing "A series can be retrieved via the API"
+        (let [response (http/get "http://localhost:3400/data/new-series")
               resp-body (json/read-str (:body response))]
           (is (= (:status response) 200))
-          (is (= normalised-ednld resp-body)
-          (is (= (get resp-body "dcterms:issued")
-                 (get resp-body "dcterms:modified"))))
+          (is (= (dissoc resp-body "dcterms:issued" "dcterms:modified") normalised-ednld))))
 
-        (let [response (http/get "http://localhost:3400/data/new-series")]
+      (testing "A series can be updated via the API, query params take precedence"
+        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title"
+                                 {:content-type :json
+                                  :body (json/write-str request-ednld)})
+              resp-body (json/read-str (:body response))]
           (is (= (:status response) 200))
-          ;; TODO NOW get resp-body "dcterms:title"
-          ;; (is (not= (get resp-body "dcterms:issued")
-                    ;; (get resp-body "dcterms:modified")))
-          ;; (is (= "foobar" (get resp-body "dcterms:identifier"))
-               ;; "The identifier should be left untouched.")))
+          (is (not= (get resp-body "dcterms:issued")
+                    (get resp-body "dcterms:modified"))))
 
-          (is (= (-> response :body json/read-str (get "dcterms:title")) "A new title")))))))
+        (let [response (http/get "http://localhost:3400/data/new-series")
+              resp-body (json/read-str (:body response))]
+          (is (= (:status response) 200))
+          (is (not= (get resp-body "dcterms:issued")
+                    (get resp-body "dcterms:modified")))
+          (is (= "foobar" (get resp-body "dcterms:identifier"))
+              "The identifier should be left untouched.")
+          (is (= (get resp-body "dcterms:title") "A new title")))))))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"

@@ -6,40 +6,13 @@
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
-   [java.net URI URISyntaxException]
    [java.time ZonedDateTime]))
-
-(def ^:private custom-registry-keys
-  {::series-slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
-                                       #"^[a-z,A-Z,\-,0-9]+$"]]
-   ::url-string (m/-simple-schema
-                 {:type :url-string
-                  :pred (fn url-string-pred [x]
-                          (and (string? x)
-                               (try (URI. x)
-                                    true
-                                    (catch URISyntaxException ex
-                                      false))))})
-   :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
-                         (m/-simple-schema
-                          {:type :datahost/timestamp
-                           :pred (fn [ts]
-                                   (and (instance? java.time.ZonedDateTime ts)
-                                        (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
-
-(def registry
-  (merge
-   (m/class-schemas)
-   (m/comparator-schemas)
-   (m/base-schemas)
-   (m/type-schemas)
-   custom-registry-keys))
 
 (def SeriesPathParams
   (m/schema
    [:map
-    [:series-slug ::series-slug-string]]
-   {:registry registry}))
+    [:series-slug :datahost/slug-string]]
+   {:registry models-shared/registry}))
 
 (def SeriesQueryParams
   (m/schema
@@ -52,51 +25,24 @@
    SeriesPathParams
    SeriesQueryParams))
 
-;;;;;;;;;;;;;;;;;;
-;; TODO NOW: MOVE THESE
-(defn validate-id
-  "Returns unchanged doc or throws.
-
-  Thrown exception's `ex-data` will contain :supplied-id, :expected-id"
-  [{:keys [series-slug] :as _api-params} cleaned-doc]
-  (let [id-in-doc (get cleaned-doc "@id")]
-    (cond
-      (nil? id-in-doc) cleaned-doc
-
-      (= series-slug id-in-doc) cleaned-doc
-
-      :else (throw
-             (ex-info "@id should for now be expressed as a slugged style suffix, and if present match that supplied as the API slug."
-                      {:supplied-id id-in-doc
-                       :expected-id series-slug})))))
-
-(defn validate-series-context
-  "Returns modified LD document or throws."
-  [ednld]
-  (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
-    (if (= (str models-shared/ld-root) base-in-doc)
-      (update ednld "@context" models-shared/normalise-context)
-      (throw (ex-info
-              (str "@base for the dataset-series must currently be set to the linked-data root '" models-shared/ld-root "'")
-              {:type :validation-error
-               :expected-value (str models-shared/ld-root)
-               :actual-value base-in-doc})))
-    (update ednld "@context" models-shared/normalise-context)))
-
 (def ^:private date-formatter
   java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
 
 (defn- validate-issued-unchanged
   "Returns a boolean."
   [old-doc new-doc]
-  (let [old-issued (get old-doc "dcterms:issued")]
+  (let [old-issued (get old-doc "dcterms:issued")
+        new-issued (get new-doc "dcterms:issued")]
     (or (nil? old-issued)
+        (nil? new-issued)
         (= old-issued (get new-doc "dcterms:issued")))))
 
 (defn- validate-modified-changed
   [old-doc new-doc]
-  (let [old-modified (get old-doc "dcterms:modified")]
+  (let [old-modified (get old-doc "dcterms:modified")
+        new-modified (get new-doc "dcterms:modified")]
     (or (nil? old-modified)
+        (nil? new-modified)
         (not= old-modified (get new-doc "dcterms:modified")))))
 
 (defmulti -issued+modified-dates
@@ -180,7 +126,7 @@
   (let [db-schema [:map {}]
         api-params-schema (m/schema [:map
                                      [:op/timestamp :datahost/timestamp]]
-                                    {:registry registry})
+                                    {:registry models-shared/registry})
         input-jsonld-doc-schema [:maybe [:map {}]]]
     [:catn
      [:db db-schema]
