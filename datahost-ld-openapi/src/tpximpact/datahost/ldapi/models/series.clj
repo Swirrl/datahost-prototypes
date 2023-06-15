@@ -4,6 +4,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]
+   [tpximpact.datahost.ldapi.models.schema :refer [registry]]
    [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import
    [java.time ZonedDateTime]))
@@ -12,7 +13,7 @@
   (m/schema
    [:map
     [:series-slug :datahost/slug-string]]
-   {:registry models-shared/registry}))
+   {:registry registry}))
 
 (def SeriesQueryParams
   (m/schema
@@ -85,12 +86,12 @@
   ([{:keys [series-slug] :as api-params} jsonld-doc]
    (when-not (m/validate SeriesApiParams
                          api-params
-                         {:registry models-shared/registry})
+                         {:registry registry})
      (throw (ex-info "Invalid API parameters"
                      {:type :validation-error
                       :validation-error (-> (m/explain SeriesApiParams
                                                        api-params
-                                                       {:registry models-shared/registry})
+                                                       {:registry registry})
                                             (me/humanize))})))
    (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
          validated-doc (-> (models-shared/validate-id series-slug cleaned-doc)
@@ -126,7 +127,7 @@
   (let [db-schema [:map {}]
         api-params-schema (m/schema [:map
                                      [:op/timestamp :datahost/timestamp]]
-                                    {:registry models-shared/registry})
+                                    {:registry registry})
         input-jsonld-doc-schema [:maybe [:map {}]]]
     [:catn
      [:db db-schema]
