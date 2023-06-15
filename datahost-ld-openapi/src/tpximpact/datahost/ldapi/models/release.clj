@@ -6,18 +6,20 @@
    [tpximpact.datahost.ldapi.models.schema :refer [registry]]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
-(def ReleaseApiParams [:map
-                       [:series-slug :datahost/slug-string]
-                       [:release-slug :datahost/slug-string]
-                       [:title {:optional true} :string]
-                       [:description {:optional true} :string]])
+(def ReleaseApiParams 
+  (m/schema [:map
+             [:series-slug :datahost/slug-string]
+             [:release-slug :datahost/slug-string]
+             [:title {:optional true} :string]
+             [:description {:optional true} :string]]
+            {:registry registry}))
+
+(def api-params-valid? (m/validator ReleaseApiParams))
 
 (defn normalise-release [base-entity api-params jsonld-doc]
   (let [{:keys [series-slug release-slug]} api-params
         _ (assert base-entity "Expected base entity to be set")]
-    (when-not (m/validate ReleaseApiParams
-                          api-params
-                          {:registry registry})
+    (when-not (api-params-valid? api-params)
       (throw (ex-info "Invalid API parameters"
                       {:type :validation-error
                        :validation-error (-> (m/explain ReleaseApiParams
