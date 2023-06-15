@@ -44,20 +44,22 @@
                :actual-value base-in-doc})))
     (update ednld "@context" normalise-context base)))
 
-(def query-params->series-keys
+(def query-params->common-keys
   {:title "dcterms:title"
    :description "dcterms:description"})
 
-(defn rename-query-params-to-series-keys
+(defn rename-query-params-to-common-keys
   [m]
-  (set/rename-keys m query-params->series-keys))
+  (set/rename-keys m query-params->common-keys))
 
-(defn merge-params-with-doc [api-params jsonld-doc]
-  (let [merged-doc (merge jsonld-doc
-                          (set/rename-keys api-params
-                                           {:title "dcterms:title"
-                                            :description "dcterms:description"}))]
-    (util/dissoc-by-key merged-doc keyword?)))
+(defn merge-params-with-doc 
+  "Merges the api params with document (api params last).
+  
+  Renames the api params keys to appropriate document keys."
+  [api-params jsonld-doc]
+  (-> jsonld-doc
+      (merge (rename-query-params-to-common-keys api-params))
+      (util/dissoc-by-key keyword?)))
 
 (def ^:private custom-registry-keys
   {:datahost/slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
