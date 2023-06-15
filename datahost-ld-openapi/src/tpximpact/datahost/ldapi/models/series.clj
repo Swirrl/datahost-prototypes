@@ -166,7 +166,7 @@
             ;; the same as the ones in the document already
             (let [query-changes (select-keys api-params api-query-params-keys)]
               (or (empty? query-changes)
-                  (let [renamed (models-shared/rename-query-params-to-series-keys query-changes)]
+                  (let [renamed (models-shared/rename-query-params-to-common-keys query-changes)]
                     (= renamed (select-keys old-series (keys renamed)))))))
        db                               ;NOOP
 
