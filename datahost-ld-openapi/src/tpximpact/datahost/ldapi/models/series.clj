@@ -26,6 +26,8 @@
    SeriesPathParams
    SeriesQueryParams))
 
+(def api-params-valid? (m/validator SeriesApiParams))
+
 (def ^:private date-formatter
   java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
 
@@ -75,6 +77,8 @@
   {:pre [(instance? java.time.ZonedDateTime timestamp)]}
   (-issued+modified-dates api-params old-doc new-doc))
 
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
@@ -84,9 +88,7 @@
   ([api-params]
    (normalise-series api-params nil))
   ([{:keys [series-slug] :as api-params} jsonld-doc]
-   (when-not (m/validate SeriesApiParams
-                         api-params
-                         {:registry registry})
+   (when-not (api-params-valid? api-params)
      (throw (ex-info "Invalid API parameters"
                      {:type :validation-error
                       :validation-error (-> (m/explain SeriesApiParams
