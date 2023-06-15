@@ -28,9 +28,6 @@
 
 (def api-params-valid? (m/validator SeriesApiParams))
 
-(def ^:private date-formatter
-  java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
-
 (defn- validate-issued-unchanged
   "Returns a boolean."
   [old-doc new-doc]
@@ -47,37 +44,6 @@
     (or (nil? old-modified)
         (nil? new-modified)
         (not= old-modified (get new-doc "dcterms:modified")))))
-
-(defmulti -issued+modified-dates
-  "Adjusts the 'dcterms:issued' and 'dcterms:modified' of the document.
-  Ensures that the new document does not modify the issue date.
-
-  Behaviour differs when issuing a new seris and when modifying an
-  existing one."
-  (fn [api-params old-doc new-doc]
-    (case (some? old-doc)
-      false :issue
-      true  :modify)))
-
-(defmethod -issued+modified-dates :issue
-  [{^ZonedDateTime timestamp :op/timestamp} _ new-doc]
-  (let [ts-string (.format timestamp date-formatter)]
-    (assoc new-doc
-           "dcterms:issued" ts-string
-           "dcterms:modified" ts-string)))
-
-(defmethod -issued+modified-dates :modify
-  [{^ZonedDateTime timestamp :op/timestamp} old-doc new-doc]
-  (assoc new-doc
-         "dcterms:issued" (get old-doc "dcterms:issued")
-         "dcterms:modified" (.format timestamp date-formatter)))
-
-(defn issued+modified-dates
-  [{timestamp :op/timestamp :as api-params} old-doc new-doc]
-  {:pre [(instance? java.time.ZonedDateTime timestamp)]}
-  (-issued+modified-dates api-params old-doc new-doc))
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn normalise-series
@@ -115,13 +81,13 @@
   (log/info "Updating series " (:series-slug api-params))
   (->> jsonld-doc
        (normalise-series api-params)
-       (issued+modified-dates api-params old-series)))
+       (models-shared/issued+modified-dates api-params old-series)))
 
 (defn- create-series [api-params jsonld-doc]
   (log/info "Creating series " (:series-slug api-params))
   (->> jsonld-doc
        (normalise-series api-params)
-       (issued+modified-dates api-params nil)))
+       (models-shared/issued+modified-dates api-params nil)))
 
 (def ^:private api-query-params-keys (m/explicit-keys SeriesQueryParams))
 
