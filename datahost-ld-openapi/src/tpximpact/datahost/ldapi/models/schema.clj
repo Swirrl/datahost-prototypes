@@ -1,7 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.schema
   "Shared schema for data handled by datahost."
   (:require
-   ;;[clojure.set :as set]
    [malli.core :as m])
   (:import
    [java.net URI URISyntaxException]
