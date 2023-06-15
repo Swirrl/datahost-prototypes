@@ -5,8 +5,7 @@
    [tpximpact.datahost.ldapi.util :as util]
    [tpximpact.datahost.ldapi.errors :as api-errors])
   (:import
-   [java.net URI URISyntaxException]
-   [java.time ZonedDateTime]))
+   [java.net URI]))
 
 (def ld-root
   "For the prototype this item will come from config or be derived from
@@ -33,8 +32,9 @@
       ;; return normalised-context if none provided
       normalised-context)))
 
-(defn validate-context [ednld base]
+(defn validate-context 
   "Returns modified LD document or throws."
+  [ednld base]
   (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
     (if (= base base-in-doc)
       (update ednld "@context" normalise-context base)
@@ -62,36 +62,11 @@
       (merge (rename-query-params-to-common-keys api-params))
       (util/dissoc-by-key keyword?)))
 
-(def ^:private custom-registry-keys
-  {:datahost/slug-string [:and :string [:re {:error/message "should contain alpha numeric characters and hyphens only."}
-                                        #"^[a-z,A-Z,\-,0-9]+$"]]
-   :datahost/url-string (m/-simple-schema
-                         {:type :url-string
-                          :pred (fn url-string-pred [x]
-                                  (and (string? x)
-                                       (try (URI. x)
-                                            true
-                                            (catch URISyntaxException ex
-                                              false))))})
-   :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
-                         (m/-simple-schema
-                          {:type :datahost/timestamp
-                           :pred (fn [ts]
-                                   (and (instance? java.time.ZonedDateTime ts)
-                                        (= (.getZone ^ZonedDateTime ts) utc-tz)))}))})
-
-(def registry
-  (merge
-   (m/class-schemas)
-   (m/comparator-schemas)
-   (m/base-schemas)
-   (m/type-schemas)
-   custom-registry-keys))
-
-(defn validate-id [slug cleaned-doc]
+(defn validate-id 
   "Returns unchanged doc or throws.
 
   Thrown exception's `ex-data` will contain :supplied-id, :expected-id"
+  [slug cleaned-doc]
   (let [id-in-doc (get cleaned-doc "@id")]
     (cond
       (nil? id-in-doc) cleaned-doc

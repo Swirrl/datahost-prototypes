@@ -3,6 +3,7 @@
    [clojure.tools.logging :as log]
    [malli.core :as m]
    [malli.error :as me]
+   [tpximpact.datahost.ldapi.models.schema :refer [registry]]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
 (def ReleaseApiParams [:map
@@ -16,12 +17,12 @@
         _ (assert base-entity "Expected base entity to be set")]
     (when-not (m/validate ReleaseApiParams
                           api-params
-                          {:registry models-shared/registry})
+                          {:registry registry})
       (throw (ex-info "Invalid API parameters"
                       {:type :validation-error
                        :validation-error (-> (m/explain ReleaseApiParams
                                                         api-params
-                                                        {:registry models-shared/registry})
+                                                        {:registry registry})
                                              (me/humanize))})))
 
     (let [cleaned-doc (models-shared/merge-params-with-doc api-params jsonld-doc)
