@@ -1,6 +1,6 @@
-{:tpximpact.datahost.ldapi.jetty/http-port 3400
- 
- :tpximpact.datahost.ldapi.test/http-client 
+{:tpximpact.datahost.ldapi.jetty/http-port #int #or [#env "LD_API_HTTP_PORT" "3400"]
+
+ :tpximpact.datahost.ldapi.test/http-client
  {:port #ig/ref :tpximpact.datahost.ldapi.jetty/http-port}
 
  :tpximpact.datahost.ldapi.db/db {:opts {:file-path ".datahost-test-db.edn"}}
