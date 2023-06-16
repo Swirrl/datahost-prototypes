@@ -34,7 +34,8 @@
 
   ;; NOTE this is a stateful test with accreting data
 
-  (let [db (atom {})] ;; an empty database
+  (let [timestamp (fn [] (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC")))
+        db (atom {})] ;; an empty database
     (testing "Constructing the series"
       ;; first make a series
       (swap! db series/upsert-series {:series-slug "my-dataset-series"
@@ -55,22 +56,34 @@
 
     (testing "Constructing a release"
       (swap! db release/upsert-release
-	          {:series-slug "my-dataset-series" :release-slug "2018"}
+	          {:series-slug "my-dataset-series" 
+               :release-slug "2018"
+               :op/timestamp (timestamp)}
               {"dcterms:title" "2018"})
 
       (is (matcha/ask [[example:my-release ?p ?o]] (db->matcha @db)))
       (is (matcha/ask [[example:my-release dcterms:title "2018"]] (db->matcha @db)))
 
       (swap! db release/upsert-release
-             {:series-slug "my-dataset-series" :release-slug "2018"}
+             {:series-slug "my-dataset-series" 
+              :release-slug "2018"
+              :op/timestamp (timestamp)}
              {"dcterms:title" "2018"})
 
       (testing "idempotent - upserting same request again is equivalent to inserting once"
         (let [start-state @db
               end-state (swap! db release/upsert-release
-                               {:series-slug "my-dataset-series" :release-slug "2018"}
-                               {"dcterms:title" "2018"})]
-          (is (= start-state end-state))))
+                               {:series-slug "my-dataset-series"
+                                :release-slug "2018"
+                                :op/timestamp (timestamp)}
+                               {"dcterms:title" "2018"})
+              sanitise (fn [m] (dissoc m "dcterms:issued" "dcterms:modified"))]
+          (is (= (-> start-state
+                     (update-in ["/data/my-dataset-series"] sanitise)
+                     (update-in ["/data/my-dataset-series/2018"] sanitise))
+                 (-> end-state
+                     (update-in ["/data/my-dataset-series"] sanitise)
+                     (update-in ["/data/my-dataset-series/2018"] sanitise))))))
 
       (testing "RDF graph joins up"
         (let [mdb (db->matcha @db)]

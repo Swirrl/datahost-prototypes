@@ -35,6 +35,16 @@
 (defn get-op [db key]
   (if (exists? db key) :update :create))
 
+(defn- upsert-doc!
+  "Applies upsert of the JSON-LD document and mutates the db-ref.
+  Returns the value of the db-ref after the upsert."
+  [db-ref update-fn api-params incoming-jsonld-doc]
+  (let [ts (ZonedDateTime/now (ZoneId/of "UTC"))]
+    (swap! db-ref
+           update-fn
+           (assoc api-params :op/timestamp ts)
+           incoming-jsonld-doc)))
+
 (defn upsert-series!
   "Returns a map {:op ... :jdonld-doc ...}"
   [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
@@ -43,17 +53,15 @@
         ;; https://github.com/Swirrl/datahost-prototypes/issues/57
         ;; by comparing modified/issued times..
         op (get-op db series-key)
-        ts (ZonedDateTime/now (ZoneId/of "UTC"))
-        updated-db (swap! db
-                          series/upsert-series
-                          (assoc api-params :op/timestamp ts)
-                          incoming-jsonld-doc)]
+        updated-db (upsert-doc! db series/upsert-series api-params incoming-jsonld-doc)]
     {:op op
      :jsonld-doc (get updated-db series-key)}))
 
-(defn upsert-release! [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
+(defn upsert-release! 
+  "Returns a map {:op ... :jsonld-doc ...}"
+  [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
   (let [release-key (models-shared/release-key series-slug release-slug)
         op (get-op db release-key)
-        updated-db (swap! db release/upsert-release api-params incoming-jsonld-doc)]
+        updated-db (upsert-doc! db release/upsert-release api-params incoming-jsonld-doc)]
     {:op op
      :jsonld-doc (get updated-db release-key)}))
