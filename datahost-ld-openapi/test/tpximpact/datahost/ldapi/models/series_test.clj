@@ -19,10 +19,10 @@
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
 (deftest round-tripping-series-test
-  (th/with-system-and-clean-up sys
+  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}
     (testing "A series that does not exist returns 'not found'"
       (try
-        (http/get "http://localhost:3400/data/does-not-exist")
+        (GET "/data/does-not-exist")
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
@@ -45,10 +45,9 @@
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"
-        (let [response (http/put
-                        "http://localhost:3400/data/new-series"
-                        {:content-type :json
-                         :body (json/write-str request-ednld)})
+        (let [response (PUT "/data/new-series"
+                            {:content-type :json
+                             :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 201 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))
@@ -61,13 +60,13 @@
                  (get resp-body "dcterms:modified")))))
 
       (testing "A series can be retrieved via the API"
-        (let [response (http/get "http://localhost:3400/data/new-series")
+        (let [response (GET "/data/new-series")
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
 
       (testing "A series can be updated via the API, query params take precedence"
-        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title"
+        (let [response (PUT "/data/new-series?title=A%20new%20title"
                                  {:content-type :json
                                   :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
@@ -75,7 +74,7 @@
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified"))))
 
-        (let [response (http/get "http://localhost:3400/data/new-series")
+        (let [response (GET "/data/new-series")
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
