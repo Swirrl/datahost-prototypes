@@ -19,6 +19,7 @@
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.routes.series :as series-routes]
    [tpximpact.datahost.ldapi.routes.release :as release-routes]
+   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
    [ring.middleware.cors :as cors]))
 
 (defn query-example [triplestore request]
@@ -109,10 +110,10 @@
                         ;; encoding response body
                         muuntaja/format-response-middleware
                         ;; exception handling
-                        exception/exception-middleware
+                        ldapi-errors/exception-middleware
                         ;; decoding request body
                         muuntaja/format-request-middleware
-                        ;; coercing response bodys
+                        ;; coercing response bodies
                         coercion/coerce-response-middleware
                         ;; coercing request parameters
                         coercion/coerce-request-middleware

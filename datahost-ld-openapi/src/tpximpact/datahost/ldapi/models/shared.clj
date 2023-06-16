@@ -2,7 +2,8 @@
   (:require
    [clojure.set :as set]
    [malli.core :as m]
-   [tpximpact.datahost.ldapi.util :as util])
+   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.ldapi.errors :as api-errors])
   (:import
    [java.net URI URISyntaxException]
    [java.time ZonedDateTime]))
@@ -99,5 +100,6 @@
 
       :else (throw
              (ex-info "@id should for now be expressed as a slugged style suffix, and if present match that supplied as the API slug."
-                      {:supplied-id id-in-doc
+                      {:type ::api-errors/validation-failure
+                       :supplied-id id-in-doc
                        :expected-id slug})))))
