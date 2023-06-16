@@ -40,13 +40,17 @@
                            "dcat:inSeries" (str "../" series-slug))]
       final-doc)))
 
-(defn- update-release [_old-release base-entity api-params jsonld-doc]
+(defn- update-release [old-release base-entity api-params jsonld-doc]
   (log/info "Updating release " (:series-slug api-params) "/" (:release-slug api-params))
-  (normalise-release base-entity api-params jsonld-doc))
+  (->> jsonld-doc
+       (normalise-release base-entity api-params)
+       (models-shared/issued+modified-dates api-params old-release)))
 
 (defn- create-release [base-entity api-params jsonld-doc]
   (log/info "Creating release " (:series-slug api-params) "/" (:release-slug api-params))
-  (normalise-release base-entity api-params jsonld-doc))
+  (->> jsonld-doc 
+       (normalise-release base-entity api-params)
+       (models-shared/issued+modified-dates api-params nil)))
 
 (defn upsert-release [db api-params jsonld-doc]
   (let [{:keys [series-slug release-slug]} api-params

@@ -2,7 +2,11 @@
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
             [duratom.core :as da]
-            [tpximpact.datahost.sys :as sys]))
+            [tpximpact.datahost.sys :as sys]
+            [tpximpact.datahost.ldapi.test-util.http-client :as http-client]))
+
+(defmethod ig/init-key :tpximpact.datahost.ldapi.test/http-client [_ {:keys [port] :as config}]
+  (http-client/make-client config))
 
 (defn clean-up-database! [system]
   (when-let [db (get system :tpximpact.datahost.ldapi.db/db)]

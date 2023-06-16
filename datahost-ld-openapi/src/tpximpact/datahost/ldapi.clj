@@ -26,6 +26,8 @@
 
 (derive ::default-catalog-id ::const)
 
+(derive :tpximpact.datahost.ldapi.jetty/http-port ::const)
+
 (def system nil)
 
 (defn stop-system! []

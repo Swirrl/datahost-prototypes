@@ -25,7 +25,7 @@
                             "-Dcom.sun.management.jmxremote.authenticate=false"
                             "-Dcom.sun.management.jmxremote.port=3007"
                             ;;"-Dlog4j.configuration=log4j2-docker.xml"
-                            ;"-Dlog4j2.debug=true"
+                            ;;"-Dlog4j2.debug=true"
                             ]
 
                  :main-opts ["-m" "tpximpact.datahost.ldapi"]}
@@ -39,7 +39,7 @@
           :ns-default build}
 
   :test {:extra-paths ["test" "env/test/resources"]
-         :extra-deps {lambdaisland/kaocha {:mvn/version "1.82.1306"}
+         :extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}
                       lambdaisland/kaocha-junit-xml {:mvn/version "1.17.101"}}
          :exec-fn kaocha.runner/exec-fn
          :exec-args {:tests [{:id :unit
@@ -49,6 +49,11 @@
                      :kaocha.plugin.junit-xml/target-file "test-results/kaocha/results.xml"
                      :reporter kaocha.report/documentation
                      }}
+  :test-watch {:extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}}
+               :exec-fn kaocha.runner/exec-fn
+               :exec-args {:watch? true
+	                       :skip-meta :slow
+	                       :fail-fast? true}}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}

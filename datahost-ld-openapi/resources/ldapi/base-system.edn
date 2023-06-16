@@ -1,8 +1,9 @@
 {:tpximpact.datahost.ldapi/default-catalog-id "http://gss-data.org.uk/catalog/datasets"
  :tpximpact.datahost.ldapi/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
+ :tpximpact.datahost.ldapi.jetty/http-port 3000
 
  :tpximpact.datahost.ldapi.jetty/runnable-service {:host "localhost"
-                                                   :port 3000
+                                                   :port #ig/ref :tpximpact.datahost.ldapi.jetty/http-port;;3000
                                                    :handler #ig/ref :tpximpact.datahost.ldapi.router/handler
                                                    :ide-path "/ld-api"
                                                    :default-subscriptions-path "/ws"}
