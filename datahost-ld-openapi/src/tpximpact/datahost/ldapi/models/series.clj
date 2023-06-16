@@ -5,9 +5,7 @@
    [malli.error :as me]
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.models.schema :refer [registry]]
-   [tpximpact.datahost.ldapi.models.shared :as models-shared])
-  (:import
-   [java.time ZonedDateTime]))
+   [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
 (def SeriesPathParams
   (m/schema
