@@ -74,8 +74,8 @@
               body (json/read-str (:body response))]
           (is (= 201 (:status response)))
           (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))
-          (is (contains? body "dcterms:issued"))
-          (is (contains? body "dcterms:modified"))))
+          (is (= (get body "dcterms:issued")
+                 (get body "dcterms:modified")))))
 
       (testing "Fetching a release that does exist works"
         (let [response (GET "/data/new-series/release/release-1 ")
@@ -96,7 +96,19 @@
           (is (= (get body-before "dcterms:issued")
                  (get body "dcterms:issued")))
           (is (not= (get body "dcterms:modified")
-                    (get body-before "dcterms:modified"))))))))
+                    (get body-before "dcterms:modified")))
+
+          (testing "No update when query params same as in existing doc"
+            (let [response (PUT (str "/data/new-series"
+                                     "/release/release-1?title=A%20new%20title")
+                                {:content-type :json
+                                 :body nil})
+                  body' (-> response :body json/read-str)]
+              (is (= 200 (:status response)))
+              (is (= "A new title" (get body' "dcterms:title")))
+              (is (= (select-keys body ["dcterms:issued" "dcterms:modified"])
+                     (select-keys body' ["dcterms:issued" "dcterms:modified"]))
+                  "The document shouldn't be modified"))))))))
 
 (deftest normalise-release-test
   (testing "invalid cases"

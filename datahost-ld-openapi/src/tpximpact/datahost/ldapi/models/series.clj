@@ -4,46 +4,14 @@
    [malli.core :as m]
    [malli.error :as me]
    [malli.util :as mu]
-   [tpximpact.datahost.ldapi.models.schema :refer [registry]]
+   [tpximpact.datahost.ldapi.schemas.common :refer [registry]]
+   [tpximpact.datahost.ldapi.schemas.series :as s.series]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]))
 
-(def SeriesPathParams
-  (m/schema
-   [:map
-    [:series-slug :datahost/slug-string]]
-   {:registry registry}))
+(def api-params-valid? (m/validator s.series/ApiParams))
 
-(def SeriesQueryParams
-  (m/schema
-   [:map
-    [:title {:optional true} :string]
-    [:description {:optional true} :string]]))
+;;; ---- NORMALISE
 
-(def SeriesApiParams
-  (mu/merge
-   SeriesPathParams
-   SeriesQueryParams))
-
-(def api-params-valid? (m/validator SeriesApiParams))
-
-(defn- validate-issued-unchanged
-  "Returns a boolean."
-  [old-doc new-doc]
-  (let [old-issued (get old-doc "dcterms:issued")
-        new-issued (get new-doc "dcterms:issued")]
-    (or (nil? old-issued)
-        (nil? new-issued)
-        (= old-issued (get new-doc "dcterms:issued")))))
-
-(defn- validate-modified-changed
-  [old-doc new-doc]
-  (let [old-modified (get old-doc "dcterms:modified")
-        new-modified (get new-doc "dcterms:modified")]
-    (or (nil? old-modified)
-        (nil? new-modified)
-        (not= old-modified (get new-doc "dcterms:modified")))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn normalise-series
   "Takes api params and an optional json-ld document of metadata, and
   returns a normalised EDN form of the JSON-LD, with the API
@@ -55,7 +23,7 @@
    (when-not (api-params-valid? api-params)
      (throw (ex-info "Invalid API parameters"
                      {:type :validation-error
-                      :validation-error (-> (m/explain SeriesApiParams
+                      :validation-error (-> (m/explain s.series/ApiParams
                                                        api-params
                                                        {:registry registry})
                                             (me/humanize))})))
@@ -71,9 +39,12 @@
                           "dh:baseEntity" (str models-shared/ld-root series-slug "/"))]
      final-doc)))
 
+;;; ---- UPDATE
+
 (defn- update-series [old-series api-params jsonld-doc]
   ;; we don't want the client to overwrite the 'issued' value
-  {:pre [(validate-issued-unchanged old-series jsonld-doc)]
+  {:pre [(some? jsonld-doc)
+         (models-shared/validate-issued-unchanged old-series jsonld-doc)]
    :post [(some? (get % "dcterms:issued"))
           (some? (get % "dcterms:modified"))]}
   (log/info "Updating series " (:series-slug api-params))
@@ -81,26 +52,17 @@
        (normalise-series api-params)
        (models-shared/issued+modified-dates api-params old-series)))
 
+;;; ---- CREATE
+
 (defn- create-series [api-params jsonld-doc]
   (log/info "Creating series " (:series-slug api-params))
   (->> jsonld-doc
        (normalise-series api-params)
        (models-shared/issued+modified-dates api-params nil)))
 
-(def ^:private api-query-params-keys (m/explicit-keys SeriesQueryParams))
+;;; ---- UPSERT
 
-(def UpsertArgs
-  (let [db-schema [:map {}]
-        api-params-schema (m/schema [:map
-                                     [:op/timestamp :datahost/timestamp]]
-                                    {:registry registry})
-        input-jsonld-doc-schema [:maybe [:map {}]]]
-    [:catn
-     [:db db-schema]
-     [:api-params api-params-schema]
-     [:jsonld-doc input-jsonld-doc-schema]]))
-
-(def upsert-args-valid? (m/validator UpsertArgs))
+(def ^:private api-query-params-keys (m/explicit-keys s.series/ApiQueryParams))
 
 (defn upsert-series
   "Takes a derefenced db state map with the shape {path jsonld} and
@@ -121,25 +83,14 @@
   For example a `dcterms:issued` time should not change after a
   document is updated."
   ([db api-params jsonld-doc]
-   {:pre [(upsert-args-valid? [db api-params jsonld-doc])]
-    :post [(validate-issued-unchanged jsonld-doc %)
-           (validate-modified-changed jsonld-doc %)]}
+   {:pre [(s.series/upsert-args-valid? [db api-params jsonld-doc])]
+    :post [(models-shared/validate-issued-unchanged jsonld-doc %)
+           (models-shared/validate-modified-changed jsonld-doc %)]}
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
          old-series (get db series-key)]
-     (cond
-       (and old-series
-            (nil? jsonld-doc)
-            ;; we don't want an update if the query-params' values are
-            ;; the same as the ones in the document already
-            (let [query-changes (select-keys api-params api-query-params-keys)]
-              (or (empty? query-changes)
-                  (let [renamed (models-shared/rename-query-params-to-common-keys query-changes)]
-                    (= renamed (select-keys old-series (keys renamed)))))))
-       db                               ;NOOP
-
-       old-series
-       (update db series-key update-series
-               api-params (or jsonld-doc old-series))
-
-       :else
-       (assoc db series-key (create-series api-params jsonld-doc))))))
+     (case (models-shared/infer-upsert-op api-query-params-keys api-params 
+                                          old-series jsonld-doc)
+       :noop db
+       :update (update db series-key update-series api-params
+                       (or jsonld-doc old-series))
+       :create (assoc db series-key (create-series api-params jsonld-doc))))))

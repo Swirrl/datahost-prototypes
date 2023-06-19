@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.models.schema
+(ns tpximpact.datahost.ldapi.schemas.common
   "Shared schema for data handled by datahost."
   (:require
    [malli.core :as m])

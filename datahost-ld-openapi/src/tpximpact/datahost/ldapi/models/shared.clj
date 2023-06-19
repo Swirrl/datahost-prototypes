@@ -2,8 +2,7 @@
   (:require
    [clojure.set :as set]
    [malli.core :as m]
-   [tpximpact.datahost.ldapi.util :as util]
-   [tpximpact.datahost.ldapi.errors :as api-errors])
+   [tpximpact.datahost.ldapi.util :as util])
   (:import
    [java.net URI]
    [java.time ZonedDateTime]))
@@ -57,6 +56,7 @@
    :description "dcterms:description"})
 
 (defn rename-query-params-to-common-keys
+  "Renames keyword keys to JSON LD string keys."
   [m]
   (set/rename-keys m query-params->common-keys))
 
@@ -82,10 +82,38 @@
 
       :else (throw
              (ex-info "@id should for now be expressed as a slugged style suffix, and if present match that supplied as the API slug."
-                      {:type ::api-errors/validation-failure
+                      {:type :tpximpact.datahost.ldapi.errors/validation-failure
                        :supplied-id id-in-doc
                        :expected-id slug})))))
 
+
+(defn query-param-changes?
+  [params-keys api-params old-doc]
+  (let [query-changes (select-keys api-params params-keys)]
+    (or (empty? query-changes)
+        (let [renamed (rename-query-params-to-common-keys query-changes)]
+          (not= renamed (select-keys old-doc (keys renamed)))))))
+
+(def infer-upsert-op-return-val-valid? (m/validator [:enum :noop :update :create]))
+
+(defn infer-upsert-op
+  "Returns an `[:enum :noop :update :create].
+
+  The returned value indicates what the semantics of upset operation
+  should be."
+  [params-keys api-params old-doc new-doc]
+  {:post [(infer-upsert-op-return-val-valid? %)]}
+  (cond
+    (and old-doc
+         (nil? new-doc)
+         (not (query-param-changes? params-keys api-params old-doc)))
+    :noop
+
+    (some? old-doc)
+    :update
+
+    :else 
+    :create))
 
 ;;; ---- ISSUED+MODIFIED DATES
 
@@ -121,3 +149,24 @@
   {:pre [(instance? java.time.ZonedDateTime timestamp)]}
   (-issued+modified-dates api-params old-doc new-doc))
 
+(defn validate-issued-unchanged
+  "Returns true when 'issued' hasn't changed.
+  Takes into consideration `nil` documents (e.g. old-doc is not
+  available when creating a new record)."
+  [old-doc new-doc]
+  (let [old-issued (get old-doc "dcterms:issued")
+        new-issued (get new-doc "dcterms:issued")]
+    (or (nil? old-issued)
+        (nil? new-issued)
+        (= old-issued (get new-doc "dcterms:issued")))))
+
+(defn validate-modified-changed
+  "Returns true when 'modified' change is valid.
+  Takes into consideration `nil` documents (e.g. old-doc is not
+  available when creating a new record)."
+  [old-doc new-doc]
+  (let [old-modified (get old-doc "dcterms:modified")
+        new-modified (get new-doc "dcterms:modified")]
+    (or (nil? old-modified)
+        (nil? new-modified)
+        (not= old-modified (get new-doc "dcterms:modified")))))

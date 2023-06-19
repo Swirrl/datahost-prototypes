@@ -3,26 +3,17 @@
    [clojure.tools.logging :as log]
    [malli.core :as m]
    [malli.error :as me]
-   [tpximpact.datahost.ldapi.models.schema :refer [registry]]
+   [tpximpact.datahost.ldapi.schemas.common :refer [registry]]
+   [tpximpact.datahost.ldapi.schemas.release :as s.release]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]))
-
-(def ReleaseApiParams 
-  (m/schema [:map
-             [:series-slug :datahost/slug-string]
-             [:release-slug :datahost/slug-string]
-             [:title {:optional true} :string]
-             [:description {:optional true} :string]]
-            {:registry registry}))
-
-(def api-params-valid? (m/validator ReleaseApiParams))
 
 (defn normalise-release [base-entity api-params jsonld-doc]
   (let [{:keys [series-slug release-slug]} api-params
         _ (assert base-entity "Expected base entity to be set")]
-    (when-not (api-params-valid? api-params)
+    (when-not (s.release/api-params-valid? api-params)
       (throw (ex-info "Invalid API parameters"
                       {:type :validation-error
-                       :validation-error (-> (m/explain ReleaseApiParams
+                       :validation-error (-> (m/explain s.release/ApiParams
                                                         api-params
                                                         {:registry registry})
                                              (me/humanize))})))
@@ -52,13 +43,23 @@
        (normalise-release base-entity api-params)
        (models-shared/issued+modified-dates api-params nil)))
 
-(defn upsert-release [db api-params jsonld-doc]
+(def ^:private api-query-params-keys (m/explicit-keys s.release/ApiQueryParams))
+
+(defn upsert-release 
+  [db api-params jsonld-doc]
+  {:pre [(s.release/upsert-args-valid? [db api-params jsonld-doc])]
+   :post [(models-shared/validate-issued-unchanged jsonld-doc %)
+          (models-shared/validate-modified-changed jsonld-doc %)]}
   (let [{:keys [series-slug release-slug]} api-params
         release-key (models-shared/release-key series-slug release-slug)
         series-key (models-shared/dataset-series-key series-slug)
         series (get db series-key)
-        base-entity (get series "dh:baseEntity")]
+        base-entity (get series "dh:baseEntity")
+        old-release (get db release-key)]
 
-    (if-let [_old-release (get db release-key)]
-      (update db release-key update-release base-entity api-params jsonld-doc)
-      (assoc db release-key (create-release base-entity api-params jsonld-doc)))))
+    (case (models-shared/infer-upsert-op api-query-params-keys api-params
+                                         old-release jsonld-doc)
+      :noop db
+      :update (update db release-key update-release base-entity api-params
+                      (or jsonld-doc old-release))
+      :create (assoc db release-key (create-release base-entity api-params jsonld-doc)))))

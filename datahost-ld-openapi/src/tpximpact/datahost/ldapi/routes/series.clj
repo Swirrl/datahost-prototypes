@@ -2,7 +2,8 @@
   (:require
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.copy :as copy]
-   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
+   [tpximpact.datahost.ldapi.schemas.series :as schema]))
 
 (defn get-series-route-config [db]
   {:summary copy/get-series-summary
@@ -17,13 +18,7 @@
    :handler (partial handlers/put-dataset-series db)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?}
-                :query [:map
-                        [:title {:title "Title"
-                                 :description "Title of dataset series"
-                                 :optional true} string?]
-                        [:description {:title "Description"
-                                       :description "Description of dataset series"
-                                       :optional true} string?]]}
+                :query schema/ApiQueryParams}
    :responses {200 {:description "Series already existed and was successfully updated"
                     :body routes-shared/JsonLdSchema}
                201 {:description "Series did not exist previously and was successfully created"
