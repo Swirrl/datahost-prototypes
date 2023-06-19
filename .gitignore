@@ -19,7 +19,9 @@
 *.iml
 *.swp
 .envrc
+.justfile
 .rebl
 datahost-ld-openapi/tmp
 .datahost-*-db.edn
+
 
