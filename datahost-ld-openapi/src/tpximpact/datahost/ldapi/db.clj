@@ -42,12 +42,12 @@
   (let [key (models-shared/release-key series-slug release-slug)]
     (get @db key)))
 
-(def ^:private UpsertInernalParams
+(def ^:private UpsertInternalParams
   [:map
    [:op.upsert/keys
     [:or s.series/UpsertKeys s.release/UpsertKeys]]])
 
-(def ^:private upsert-internal-params-valid? (m/validator UpsertInernalParams))
+(def ^:private upsert-internal-params-valid? (m/validator UpsertInternalParams))
 
 (defn- upsert-doc!
   "Applies upsert of the JSON-LD document and mutates the db-ref.
