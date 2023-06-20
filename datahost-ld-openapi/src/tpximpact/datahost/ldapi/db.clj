@@ -1,4 +1,14 @@
 (ns tpximpact.datahost.ldapi.db
+  "Note: current persistence is a temporary solution.
+
+  Current persistence layer has same inteterface as Clojure's atom. At
+  the moment we make use of the fact that each upsert results in an
+  update of the atom value if the value didn't change. In other words:
+  the atom's' value may be equal but not `identical?`, because the
+  metadata is always updated with `:op` entry.
+  status (`[:enum :noop :update :create]`)
+
+  See: https://github.com/jimpil/duratom"
   (:require
    [duratom.core :as da]
    [integrant.core :as ig]
@@ -32,12 +42,12 @@
   (let [key (models-shared/release-key series-slug release-slug)]
     (get @db key)))
 
-(def UpsertInernalParams
+(def ^:private UpsertInernalParams
   [:map
    [:op.upsert/keys
     [:or s.series/UpsertKeys s.release/UpsertKeys]]])
 
-(def upsert-internal-params-valid? (m/validator UpsertInernalParams))
+(def ^:private upsert-internal-params-valid? (m/validator UpsertInernalParams))
 
 (defn- upsert-doc!
   "Applies upsert of the JSON-LD document and mutates the db-ref.
@@ -51,7 +61,8 @@
            incoming-jsonld-doc)))
 
 (defn upsert-series!
-  "Returns a map {:op ... :jdonld-doc ...}"
+  "Returns a map {:op ... :jdonld-doc ...}, where :op conforms to
+  `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
   (let [series-key (models-shared/dataset-series-key series-slug)
         api-params (assoc api-params :op.upsert/keys {:series series-key})
@@ -60,7 +71,8 @@
      :jsonld-doc (get updated-db series-key)}))
 
 (defn upsert-release! 
-  "Returns a map {:op ... :jsonld-doc ...}"
+  "Returns a map {:op ... :jsonld-doc ...} where :op conforms to
+  `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
   (let [release-key (models-shared/release-key series-slug release-slug)
         api-params (assoc api-params :op.upsert/keys 
