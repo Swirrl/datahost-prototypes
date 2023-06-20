@@ -44,8 +44,10 @@
 
 (defn insert-revision [db api-params revision-id jsonld-doc]
   (let [{:keys [series-slug release-slug]} api-params
+        release-key (models-shared/release-key series-slug release-slug)
         revision-key (models-shared/revision-key series-slug release-slug revision-id)
         series-key (models-shared/dataset-series-key series-slug)
         series (get db series-key)
         base-entity (get series "dh:baseEntity")]
-      (assoc db revision-key (create-revision base-entity api-params revision-id jsonld-doc))))
+    (-> (assoc db revision-key (create-revision base-entity api-params revision-id jsonld-doc))
+        (update release-key assoc "dh:hasRevision" revision-key))))

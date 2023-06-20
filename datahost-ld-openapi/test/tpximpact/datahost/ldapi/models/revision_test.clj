@@ -55,14 +55,20 @@
 
                 revision-resp (http/post revision-url
                                          {:content-type :json
-                                          :body (json/write-str revision-ednld)})]
+                                          :body (json/write-str revision-ednld)})
+                inserted-revision-id (get (json/read-str (:body revision-resp)) "@id")
+                inserted-revision-url (str revision-url "/" inserted-revision-id)]
+
             (is (= normalised-revision-ld (json/read-str (:body revision-resp)))
                 "successful post returns normalised release data")
 
             (testing "Fetching an existing revision works"
-              (let [rev-id (get (json/read-str (:body revision-resp)) "@id")
-                    response (http/get (str revision-url "/" rev-id))]
+              (let [response (http/get inserted-revision-url)]
                 (is (= 200 (:status response)))
-                (is (= normalised-revision-ld (json/read-str (:body response))))))))))))
+                (is (= normalised-revision-ld (json/read-str (:body response))))))
 
-
+            (testing "Associated Release gets the Revision inverse triple"
+              (let [release-resp (http/get release-url)
+                    release (json/read-str (:body release-resp))]
+                (is (= (str "/data/my-lovely-series/release-1/revisions/" inserted-revision-id)
+                       (get release "dh:hasRevision")))))))))))
