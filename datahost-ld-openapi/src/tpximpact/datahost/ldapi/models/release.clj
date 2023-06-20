@@ -46,6 +46,7 @@
 (def ^:private api-query-params-keys (m/explicit-keys s.release/ApiQueryParams))
 
 (defn upsert-release 
+  "Returns potentially updated db value."
   [db api-params jsonld-doc]
   {:pre [(s.release/upsert-args-valid? [db api-params jsonld-doc])]
    :post [(models-shared/validate-issued-unchanged jsonld-doc %)
@@ -55,11 +56,14 @@
         series-key (models-shared/dataset-series-key series-slug)
         series (get db series-key)
         base-entity (get series "dh:baseEntity")
-        old-release (get db release-key)]
+        old-release (get db release-key)
+        op (models-shared/infer-upsert-op api-query-params-keys api-params
+                                          old-release jsonld-doc)]
 
-    (case (models-shared/infer-upsert-op api-query-params-keys api-params
-                                         old-release jsonld-doc)
-      :noop db
-      :update (update db release-key update-release base-entity api-params
-                      (or jsonld-doc old-release))
-      :create (assoc db release-key (create-release base-entity api-params jsonld-doc)))))
+    (vary-meta
+     (case op
+       :noop db
+       :update (update db release-key update-release base-entity api-params
+                       (or jsonld-doc old-release))
+       :create (assoc db release-key (create-release base-entity api-params jsonld-doc)))
+     assoc :op op)))

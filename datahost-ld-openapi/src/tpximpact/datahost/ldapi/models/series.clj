@@ -87,10 +87,13 @@
     :post [(models-shared/validate-issued-unchanged jsonld-doc %)
            (models-shared/validate-modified-changed jsonld-doc %)]}
    (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
-         old-series (get db series-key)]
-     (case (models-shared/infer-upsert-op api-query-params-keys api-params 
-                                          old-series jsonld-doc)
-       :noop db
-       :update (update db series-key update-series api-params
-                       (or jsonld-doc old-series))
-       :create (assoc db series-key (create-series api-params jsonld-doc))))))
+         old-series (get db series-key)
+         op (models-shared/infer-upsert-op api-query-params-keys api-params 
+                                           old-series jsonld-doc)]
+     (vary-meta
+      (case op
+        :noop db
+        :update (update db series-key update-series api-params
+                        (or jsonld-doc old-series))
+        :create (assoc db series-key (create-series api-params jsonld-doc)))
+      assoc :op op))))

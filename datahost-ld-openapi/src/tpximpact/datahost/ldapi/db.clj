@@ -29,12 +29,6 @@
   (let [key (models-shared/release-key series-slug release-slug)]
     (get @db key)))
 
-(defn exists? [db key]
-  (get @db key))
-
-(defn get-op [db key]
-  (if (exists? db key) :update :create))
-
 (defn- upsert-doc!
   "Applies upsert of the JSON-LD document and mutates the db-ref.
   Returns the value of the db-ref after the upsert."
@@ -49,19 +43,14 @@
   "Returns a map {:op ... :jdonld-doc ...}"
   [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
   (let [series-key (models-shared/dataset-series-key series-slug)
-        ;; TODO: could handle this more nicely after
-        ;; https://github.com/Swirrl/datahost-prototypes/issues/57
-        ;; by comparing modified/issued times..
-        op (get-op db series-key)
         updated-db (upsert-doc! db series/upsert-series api-params incoming-jsonld-doc)]
-    {:op op
+    {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db series-key)}))
 
 (defn upsert-release! 
   "Returns a map {:op ... :jsonld-doc ...}"
   [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
   (let [release-key (models-shared/release-key series-slug release-slug)
-        op (get-op db release-key)
         updated-db (upsert-doc! db release/upsert-release api-params incoming-jsonld-doc)]
-    {:op op
+    {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db release-key)}))
