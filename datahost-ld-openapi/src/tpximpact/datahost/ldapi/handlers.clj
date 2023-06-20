@@ -27,15 +27,11 @@
     :noop   200))
 
 (defn put-dataset-series [db {:keys [body-params] :as request}]
-  (try
-    (let [api-params (get-api-params request)
-          incoming-jsonld-doc body-params
-          {:keys [op jsonld-doc]} (db/upsert-series! db api-params incoming-jsonld-doc)]
-      {:status (op->response-code op)
-       :body jsonld-doc})
-
-    (catch Throwable e
-      (error-response e))))
+  (let [api-params (get-api-params request)
+        incoming-jsonld-doc body-params
+        {:keys [op jsonld-doc]} (db/upsert-series! db api-params incoming-jsonld-doc)]
+    {:status (op->response-code op)
+     :body jsonld-doc}))
 
 (defn get-release [db {{:keys [series-slug release-slug]} :path-params :as path-params}]
   (if-let [release (db/get-release db series-slug release-slug)]
@@ -45,19 +41,11 @@
 
 (defn put-release [db {{:keys [series-slug]} :path-params
                        body-params :body-params :as request}]
-  (try
-    (if-let [_series (db/get-series db series-slug)]
-      (try
-        (let [api-params (get-api-params request)
-              incoming-jsonld-doc body-params
-              {:keys [op jsonld-doc]} (db/upsert-release! db api-params incoming-jsonld-doc)]
-          {:status (op->response-code op)
-           :body jsonld-doc})
-
-        (catch Throwable e
-          (error-response e)))
-      {:status 422
-       :body "Series does not exist"})
-
+  (if-let [_series (db/get-series db series-slug)]
+    (let [api-params (get-api-params request)
+          incoming-jsonld-doc body-params
+          {:keys [op jsonld-doc]} (db/upsert-release! db api-params incoming-jsonld-doc)]
+      {:status (op->response-code op)
+       :body jsonld-doc})
     {:status 422
      :body "Series does not exist"}))
