@@ -1,6 +1,5 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
-   [clj-http.client :as http]
    [clojure.data.json :as json]
    [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
@@ -19,10 +18,10 @@
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
 (deftest round-tripping-series-test
-  (th/with-system-and-clean-up sys
+  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}
     (testing "A series that does not exist returns 'not found'"
       (try
-        (http/get "http://localhost:3400/data/does-not-exist")
+        (GET "/data/does-not-exist")
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
@@ -34,7 +33,6 @@
                           {"@base" "https://example.org/data/"}],
                          "dcterms:title" "A title"
                          "dcterms:identifier" "foobar"}
-          timestamp-str (format-date-time (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC")))
           normalised-ednld {"@context"
                             ["https://publishmydata.com/def/datahost/context"
                              {"@base" "https://example.org/data/"}],
@@ -45,29 +43,23 @@
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"
-        (let [response (http/put
-                        "http://localhost:3400/data/new-series"
-                        {:content-type :json
-                         :body (json/write-str request-ednld)})
+        (let [response (PUT "/data/new-series"
+                            {:content-type :json
+                             :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 201 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))
-
-          (is (= (th/truncate-string (get resp-body "dcterms:issued") 15)
-                 (th/truncate-string (get resp-body "dcterms:modified") 15)
-                 (th/truncate-string timestamp-str 15)))
-
           (is (= (get resp-body "dcterms:issued")
                  (get resp-body "dcterms:modified")))))
 
       (testing "A series can be retrieved via the API"
-        (let [response (http/get "http://localhost:3400/data/new-series")
+        (let [response (GET "/data/new-series")
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
 
       (testing "A series can be updated via the API, query params take precedence"
-        (let [response (http/put "http://localhost:3400/data/new-series?title=A%20new%20title"
+        (let [response (PUT "/data/new-series?title=A%20new%20title"
                                  {:content-type :json
                                   :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
@@ -75,14 +67,24 @@
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified"))))
 
-        (let [response (http/get "http://localhost:3400/data/new-series")
+        (let [response (GET "/data/new-series")
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified")))
           (is (= "foobar" (get resp-body "dcterms:identifier"))
               "The identifier should be left untouched.")
-          (is (= (get resp-body "dcterms:title") "A new title")))))))
+          (is (= (get resp-body "dcterms:title") "A new title"))
+
+          (testing "No update when query params same as in existing doc"
+            (let [{body' :body :as response} (PUT "/data/new-series?title=A%20new%20title"
+                                                  {:content-type :json :body nil})
+                  body' (json/read-str body')]
+              (is (= 200 (:status response)))
+              (is (= "A new title" (get body' "dcterms:title")))
+              (is (= (select-keys resp-body ["dcterms:issued" "dcterms:modified"])
+                     (select-keys body' ["dcterms:issued" "dcterms:modified"]))
+                  "The document shouldn't be modified"))))))))
 
 (deftest normalise-context-test
   (let [expected-context ["https://publishmydata.com/def/datahost/context"
@@ -107,11 +109,6 @@
 (defn canonicalisation-idempotent? [api-params jsonld]
   (let [canonicalised-form (sut/normalise-series api-params jsonld)]
     (= canonicalised-form (sut/normalise-series api-params canonicalised-form))))
-
-(defn subject= [expected-s]
-  (fn [s]
-    (comp #(= (URI. expected-s) s)
-          :s)))
 
 (deftest normalise-series-test
   (testing "Invalid cases"

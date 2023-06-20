@@ -7,21 +7,22 @@
    [tpximpact.datahost.ldapi.models.release :as sut])
   (:import (clojure.lang ExceptionInfo)))
 
-(defn- put-series []
+(defn- put-series [put-fn]
   (let [jsonld {"@context"
                 ["https://publishmydata.com/def/datahost/context"
                  {"@base" "https://example.org/data/"}]
                 "dcterms:title" "A title"}]
-    (http/put
-     "http://localhost:3400/data/new-series"
-     {:content-type :json
-      :body (json/write-str jsonld)})))
+    (put-fn "/data/new-series"
+            {:content-type :json
+             :body (json/write-str jsonld)})))
 
 (deftest round-tripping-release-test
-  (th/with-system-and-clean-up sys
+  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
+                                :as sys}
     (testing "Fetching a release for a series that does not exist returns 'not found'"
       (try
-        (http/get "http://localhost:3400/data/does-not-exist/release/release-1")
+        
+        (GET "/data/does-not-exist/release/release-1")
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
@@ -30,7 +31,7 @@
 
     (testing "Fetching a release that does not exist returns 'not found'"
       (try
-        (http/get "http://localhost:3400/data/new-series/release/release-1")
+        (GET "/data/new-series/release/release-1")
 
         (catch Throwable ex
           (let [{:keys [status body]} (ex-data ex)]
@@ -39,20 +40,20 @@
 
     (testing "Creating a release for a series that is not found fails gracefully"
       (let [jsonld {"@context"
-                    ["https://publishmydata.com/def/datahost/context"
+                    ["https://publishmydata.com/debf/datahost/context"
                      {"@base" "http://example.org/data/"}]
                     "dcterms:title" "Example Release"}]
         (try
-          (http/put "http://localhost:3400/data/new-series/release/release-1"
-                    {:content-type :json
-                     :body (json/write-str jsonld)})
+          (PUT "/data/new-series/release/release-1"
+               {:content-type :json
+                :body (json/write-str jsonld)})
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
               (is (= 422 status))
               (is (= "Series does not exist" body)))))))
 
-    (put-series)
+    (put-series PUT)
 
     (let [request-ednld {"@context"
                          ["https://publishmydata.com/def/datahost/context"
@@ -67,23 +68,47 @@
                             "dcat:inSeries" "../new-series"}]
 
       (testing "Creating a release for a series that does exist works"
-        (let [response (http/put "http://localhost:3400/data/new-series/release/release-1"
-                                 {:content-type :json
-                                  :body (json/write-str request-ednld)})]
+        (let [response (PUT "/data/new-series/release/release-1"
+                            {:content-type :json
+                             :body (json/write-str request-ednld)})
+              body (json/read-str (:body response))]
           (is (= 201 (:status response)))
-          (is (= normalised-ednld (json/read-str (:body response))))))
+          (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))
+          (is (= (get body "dcterms:issued")
+                 (get body "dcterms:modified")))))
 
       (testing "Fetching a release that does exist works"
-        (let [response (http/get "http://localhost:3400/data/new-series/release/release-1 ")]
+        (let [response (GET "/data/new-series/release/release-1 ")
+              body (json/read-str (:body response))]
           (is (= 200 (:status response)))
-          (is (= normalised-ednld (json/read-str (:body response))))))
+          (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
 
       (testing "A release can be updated, query params take precedence"
-        (let [response (http/put "http://localhost:3400/data/new-series/release/release-1?title=A%20new%20title"
-                                 {:content-type :json
-                                  :body (json/write-str request-ednld)})]
+        (let [{body-str-before :body} (GET "/data/new-series/release/release-1 ")
+              {:keys [body] :as response} (PUT (str "/data/new-series"
+                                                    "/release/release-1?title=A%20new%20title")
+                                               {:content-type :json
+                                                :body (json/write-str request-ednld)})
+              body-before (json/read-str body-str-before)
+              body (json/read-str body)]
           (is (= 200 (:status response)))
-          (is (= "A new title" (-> response :body json/read-str (get "dcterms:title")))))))))
+          (is (= "A new title" (get body "dcterms:title")))
+          (is (= (get body-before "dcterms:issued")
+                 (get body "dcterms:issued")))
+          (is (not= (get body "dcterms:modified")
+                    (get body-before "dcterms:modified")))
+
+          (testing "No update when query params same as in existing doc"
+            (let [response (PUT (str "/data/new-series"
+                                     "/release/release-1?title=A%20new%20title")
+                                {:content-type :json
+                                 :body nil})
+                  body' (-> response :body json/read-str)]
+              (is (= 200 (:status response)))
+              (is (= "A new title" (get body' "dcterms:title")))
+              (is (= (select-keys body ["dcterms:issued" "dcterms:modified"])
+                     (select-keys body' ["dcterms:issued" "dcterms:modified"]))
+                  "The document shouldn't be modified"))))))))
 
 (deftest normalise-release-test
   (testing "invalid cases"

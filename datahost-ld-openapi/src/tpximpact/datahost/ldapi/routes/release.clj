@@ -2,7 +2,8 @@
   (:require
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.copy :as copy]
-   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
+   [tpximpact.datahost.ldapi.schemas.release :as schema]))
 
 (defn get-release-route-config [db]
   {:summary copy/get-release-summary
@@ -18,13 +19,7 @@
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
                        :release-slug string?}
-                :query [:map
-                        [:title {:title "Title"
-                                 :description "Title of release"
-                                 :optional true} string?]
-                        [:description {:title "Description"
-                                       :description "Description of release"
-                                       :optional true} string?]]}
+                :query schema/ApiQueryParams}
    :responses {200 {:description copy/put-release-200-desc
                     :body map?}
                201 {:description copy/put-release-201-desc
