@@ -2,7 +2,8 @@
   (:require
    [clojure.set :as set]
    [malli.core :as m]
-   [tpximpact.datahost.ldapi.util :as util])
+   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.ldapi.schemas.api :as s.api])
   (:import
    [java.net URI]
    [java.time ZonedDateTime]))
@@ -94,15 +95,15 @@
         (let [renamed (rename-query-params-to-common-keys query-changes)]
           (not= renamed (select-keys old-doc (keys renamed)))))))
 
-(def infer-upsert-op-return-val-valid? (m/validator [:enum :noop :update :create]))
-
 (defn infer-upsert-op
-  "Returns an `[:enum :noop :update :create].
+  "Returns an `[:enum :noop :update :create]`.
 
   The returned value indicates what the semantics of upset operation
-  should be."
+  should be.
+
+  See: [tpximpact.datahost.ldapi.schemas.api/UpsertOp]."
   [params-keys api-params old-doc new-doc]
-  {:post [(infer-upsert-op-return-val-valid? %)]}
+  {:post [(s.api/upsert-op-valid? %)]}
   (cond
     (and old-doc
          (nil? new-doc)
