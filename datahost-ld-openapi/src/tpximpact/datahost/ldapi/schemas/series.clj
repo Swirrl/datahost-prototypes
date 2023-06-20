@@ -30,12 +30,17 @@
 
 ;;; ---- MODEL SCHEMA
 
+(def UpsertKeys
+  [:map
+   [:series :string]])
+
 (def UpsertArgs
   (let [db-schema [:map {}]
         api-params-schema (mu/merge
                            ApiParams
                            (m/schema [:map  
-                                      [:op/timestamp :datahost/timestamp]]
+                                      [:op/timestamp :datahost/timestamp]
+                                      [:op.upsert/keys UpsertKeys]]
                                      {:registry registry}))
         input-jsonld-doc-schema [:maybe [:map {}]]]
     [:catn

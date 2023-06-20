@@ -51,9 +51,7 @@
   {:pre [(s.release/upsert-args-valid? [db api-params jsonld-doc])]
    :post [(models-shared/validate-issued-unchanged jsonld-doc %)
           (models-shared/validate-modified-changed jsonld-doc %)]}
-  (let [{:keys [series-slug release-slug]} api-params
-        release-key (models-shared/release-key series-slug release-slug)
-        series-key (models-shared/dataset-series-key series-slug)
+  (let [{{series-key :series release-key :release} :op.upsert/keys} api-params
         series (get db series-key)
         base-entity (get series "dh:baseEntity")
         old-release (get db release-key)

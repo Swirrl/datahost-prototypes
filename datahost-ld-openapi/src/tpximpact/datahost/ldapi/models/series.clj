@@ -86,7 +86,7 @@
    {:pre [(s.series/upsert-args-valid? [db api-params jsonld-doc])]
     :post [(models-shared/validate-issued-unchanged jsonld-doc %)
            (models-shared/validate-modified-changed jsonld-doc %)]}
-   (let [series-key (models-shared/dataset-series-key (:series-slug api-params))
+   (let [{{series-key :series} :op.upsert/keys} api-params
          old-series (get db series-key)
          op (models-shared/infer-upsert-op api-query-params-keys api-params 
                                            old-series jsonld-doc)]
