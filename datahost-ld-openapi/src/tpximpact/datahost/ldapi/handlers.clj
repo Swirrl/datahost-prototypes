@@ -48,4 +48,22 @@
       {:status (op->response-code op)
        :body jsonld-doc})
     {:status 422
-     :body "Series does not exist"}))
+     :body "Series for this release does not exist"}))
+
+(defn get-revision [db {{:keys [series-slug release-slug revision-id]} :path-params :as _path-params}]
+  (if-let [rev (db/get-revision db series-slug release-slug revision-id)]
+    {:status 200
+     :body rev}
+    not-found-response))
+
+(defn post-revision [db {{:keys [series-slug release-slug]} :path-params
+                         body-params :body-params :as request}]
+  (if-let [_release (db/get-release db series-slug release-slug)]
+    (let [api-params (get-api-params request)
+          incoming-jsonld-doc body-params
+          {:keys [_op jsonld-doc]} (db/insert-revision! db api-params incoming-jsonld-doc)]
+      {:status 201
+       :body jsonld-doc})
+
+    {:status 422
+     :body "Release for this revision does not exist"}))

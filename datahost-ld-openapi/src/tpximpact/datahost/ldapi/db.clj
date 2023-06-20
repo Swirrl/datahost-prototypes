@@ -17,6 +17,7 @@
    [tpximpact.datahost.ldapi.models.shared :as models-shared]
    [tpximpact.datahost.ldapi.models.series :as series]
    [tpximpact.datahost.ldapi.models.release :as release]
+   [tpximpact.datahost.ldapi.models.revision :as revision]
    [tpximpact.datahost.ldapi.schemas.release :as s.release]
    [tpximpact.datahost.ldapi.schemas.series :as s.series])
   (:import
@@ -40,6 +41,10 @@
 
 (defn get-release [db series-slug release-slug]
   (let [key (models-shared/release-key series-slug release-slug)]
+    (get @db key)))
+
+(defn get-revision [db series-slug release-slug revision-id]
+  (let [key (models-shared/revision-key series-slug release-slug revision-id)]
     (get @db key)))
 
 (def ^:private UpsertInternalParams
@@ -70,14 +75,21 @@
     {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db series-key)}))
 
-(defn upsert-release! 
+(defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
   (let [release-key (models-shared/release-key series-slug release-slug)
-        api-params (assoc api-params :op.upsert/keys 
+        api-params (assoc api-params :op.upsert/keys
                           {:series (models-shared/dataset-series-key series-slug)
                            :release release-key})
         updated-db (upsert-doc! db release/upsert-release api-params incoming-jsonld-doc)]
     {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db release-key)}))
+
+(defn insert-revision! [db {:keys [series-slug release-slug revision-id] :as api-params} incoming-jsonld-doc]
+  (let [revision-key (models-shared/revision-key series-slug release-slug revision-id)
+        op (get-op db revision-key)
+        updated-db (swap! db revision/insert-revision api-params incoming-jsonld-doc)]
+    {:op op
+     :jsonld-doc (get updated-db revision-key)}))

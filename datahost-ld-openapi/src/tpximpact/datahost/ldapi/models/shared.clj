@@ -21,6 +21,9 @@
 (defn release-key [series-slug release-slug]
   (str (dataset-series-key series-slug) "/" release-slug))
 
+(defn revision-key [series-slug release-slug revision-id]
+  (str (release-key series-slug release-slug) "/" revision-id))
+
 ;;; ---- CONTEXT OPS
 
 (defn normalise-context [ednld base]
@@ -37,7 +40,7 @@
       ;; return normalised-context if none provided
       normalised-context)))
 
-(defn validate-context 
+(defn validate-context
   "Returns modified LD document or throws."
   [ednld base]
   (if-let [base-in-doc (get-in ednld ["@context" 1 "@base"])]
@@ -70,7 +73,7 @@
       (merge (rename-query-params-to-common-keys api-params))
       (util/dissoc-by-key keyword?)))
 
-(defn validate-id 
+(defn validate-id
   "Returns unchanged doc or throws.
 
   Thrown exception's `ex-data` will contain :supplied-id, :expected-id"
@@ -118,7 +121,7 @@
     (some? old-doc)
     :update
 
-    :else 
+    :else
     :create))
 
 ;;; ---- ISSUED+MODIFIED DATES

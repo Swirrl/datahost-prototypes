@@ -7,7 +7,6 @@
    [reitit.openapi :as openapi]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as coercion]
-   [reitit.ring.middleware.exception :as exception]
    [reitit.ring.middleware.multipart :as multipart]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]
@@ -19,6 +18,7 @@
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.routes.series :as series-routes]
    [tpximpact.datahost.ldapi.routes.release :as release-routes]
+   [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
    [tpximpact.datahost.ldapi.errors :as ldapi-errors]
    [ring.middleware.cors :as cors]))
 
@@ -65,7 +65,7 @@
                       :info {:title "Prototype OpenData API"
                              :description (str "Source viewable in GitHub "
                                                "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
-                             :version "0.0.1"}
+                             :version "0.0.2"}
                       ;; used in /secure APIs below
                       :components {:securitySchemes {"auth" {:type :apiKey
                                                              :in :header
@@ -77,9 +77,14 @@
      ["/:series-slug"
       {:get (series-routes/get-series-route-config db)
        :put (series-routes/put-series-route-config db)}]
+
      ["/:series-slug/release/:release-slug"
       {:get (release-routes/get-release-route-config db)
-       :put (release-routes/put-release-route-config db)}]]]
+       :put (release-routes/put-release-route-config db)}]
+
+     ["/:series-slug/release/:release-slug/revisions/:revision-id"
+      {:get (revision-routes/get-revision-route-config db)
+       :post (revision-routes/post-revision-route-config db)}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -97,9 +102,7 @@
                        ;; malli options
                        :options nil})
            :muuntaja m/instance
-           :middleware [
-                        ;; CORS
-                        cors-middleware
+           :middleware [cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
