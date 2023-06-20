@@ -89,6 +89,11 @@
 
 
 (defn query-param-changes?
+  "Returns true if the values that can be passed in query params changed
+  compared to corresponding values in the old document.
+
+  Only keys in params-keys are checked, caller should ideally obtain
+  them from a schema."
   [params-keys api-params old-doc]
   (let [query-changes (select-keys api-params params-keys)]
     (or (empty? query-changes)
