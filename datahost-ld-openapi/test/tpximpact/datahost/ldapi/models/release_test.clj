@@ -51,7 +51,7 @@
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
               (is (= 422 status))
-              (is (= "Series does not exist" body)))))))
+              (is (= "Series for this release does not exist" body)))))))
 
     (put-series PUT)
 
