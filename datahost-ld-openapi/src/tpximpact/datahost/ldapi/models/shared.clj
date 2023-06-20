@@ -22,7 +22,7 @@
   (str (dataset-series-key series-slug) "/" release-slug))
 
 (defn revision-key [series-slug release-slug revision-id]
-  (str (release-key series-slug release-slug) "/" revision-id))
+  (str (release-key series-slug release-slug) "/revisions/" revision-id))
 
 ;;; ---- CONTEXT OPS
 

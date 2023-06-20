@@ -1,7 +1,7 @@
 (ns tpximpact.datahost.ldapi.db
   "Note: current persistence is a temporary solution.
 
-  Current persistence layer has same inteterface as Clojure's atom. At
+  Current persistence layer has same interface as Clojure's atom. At
   the moment we make use of the fact that each upsert results in an
   update of the atom value if the value didn't change. In other words:
   the atom's' value may be equal but not `identical?`, because the
@@ -26,7 +26,7 @@
 (def db-defaults
   {:storage-type :local-file
    :opts {:commit-mode :sync
-          :init {}}})
+          :init {:revision-id-counter 0}}})
 
 (defmethod ig/prep-key ::db
   [_ options]
@@ -66,7 +66,7 @@
            incoming-jsonld-doc)))
 
 (defn upsert-series!
-  "Returns a map {:op ... :jdonld-doc ...}, where :op conforms to
+  "Returns a map {:op ... :jsonld-doc ...}, where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
   (let [series-key (models-shared/dataset-series-key series-slug)
@@ -87,9 +87,11 @@
     {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db release-key)}))
 
-(defn insert-revision! [db {:keys [series-slug release-slug revision-id] :as api-params} incoming-jsonld-doc]
-  (let [revision-key (models-shared/revision-key series-slug release-slug revision-id)
-        op (get-op db revision-key)
-        updated-db (swap! db revision/insert-revision api-params incoming-jsonld-doc)]
-    {:op op
+(defn insert-revision! [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
+  (let [auto-revision-id (-> (swap! db update :revision-id-counter inc) :revision-id-counter)
+        revision-key (models-shared/revision-key series-slug release-slug auto-revision-id)
+        updated-db (swap! db revision/insert-revision api-params auto-revision-id incoming-jsonld-doc)]
+    {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db revision-key)}))
+
+

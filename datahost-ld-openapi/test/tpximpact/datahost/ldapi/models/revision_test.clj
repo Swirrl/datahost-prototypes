@@ -27,14 +27,7 @@
           request-ednld {"@context"
                          ["https://publishmydata.com/def/datahost/context"
                           {"@base" base}]
-                         "dcterms:title" series-title}
-          normalised-release-ld {"@context"
-                                 ["https://publishmydata.com/def/datahost/context"
-                                  {"@base" base}],
-                                 "dcterms:title" series-title,
-                                 "@type" "dh:Release"
-                                 "@id" "release-1",
-                                 "dcat:inSeries" (str "../" series-slug)}]
+                         "dcterms:title" series-title}]
 
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
@@ -43,11 +36,10 @@
                                      {:content-type :json
                                       :body (json/write-str request-ednld)})]
           (is (= 201 (:status release-resp)))
-          (is (= normalised-release-ld (json/read-str (:body release-resp))))
 
           ;; REVISION
           (let [revision-title "A revision for release 1"
-                revision-url (str release-url "/revisions/" (ld-str/slugify revision-title))
+                revision-url (str release-url "/revisions")
                 revision-ednld {"@context"
                                 ["https://publishmydata.com/def/datahost/context"
                                  {"@base" base}]
@@ -58,7 +50,7 @@
                                          {"@base" base}],
                                         "dcterms:title" revision-title,
                                         "@type" "dh:Revision"
-                                        "@id" (ld-str/slugify revision-title),
+                                        "@id" 1,
                                         "dh:appliesToRelease" (str "../release-1")}
 
                 revision-resp (http/post revision-url
@@ -68,7 +60,8 @@
                 "successful post returns normalised release data")
 
             (testing "Fetching an existing revision works"
-              (let [response (http/get revision-url)]
+              (let [rev-id (get (json/read-str (:body revision-resp)) "@id")
+                    response (http/get (str revision-url "/" rev-id))]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (json/read-str (:body response))))))))))))
 

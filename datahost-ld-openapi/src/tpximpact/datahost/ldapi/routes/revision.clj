@@ -8,7 +8,7 @@
    :handler (partial handlers/get-revision db)
    :parameters {:path {:series-slug string?
                        :release-slug string?
-                       :revision-id string?}}
+                       :revision-id int?}}
    :responses {200 {:body map?}
                404 {:body [:re "Not found"]}}})
 
@@ -17,8 +17,7 @@
    :handler (partial handlers/post-revision db)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
-                       :release-slug string?
-                       :revision-id string?}
+                       :release-slug string?}
                 :query [:map
                         [:title {:title "Title"
                                  :description "Title of revision"
