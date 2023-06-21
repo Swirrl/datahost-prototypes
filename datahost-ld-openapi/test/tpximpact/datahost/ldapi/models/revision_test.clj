@@ -53,13 +53,17 @@
                                     {:content-type :json
                                      :body (json/write-str revision-ednld)})
                 inserted-revision-id (get (json/read-str (:body revision-resp)) "@id")
-                inserted-revision-url (str revision-url "/" inserted-revision-id)]
+                new-revision-location (-> revision-resp :headers (get "Location"))]
 
             (is (= normalised-revision-ld (json/read-str (:body revision-resp)))
                 "successful post returns normalised release data")
 
+            (is (= new-revision-location
+                   (str revision-url "/" inserted-revision-id))
+                "Created with the resource URI provided in the Location header")
+
             (testing "Fetching an existing revision works"
-              (let [response (GET inserted-revision-url)]
+              (let [response (GET new-revision-location)]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (json/read-str (:body response))))))
 

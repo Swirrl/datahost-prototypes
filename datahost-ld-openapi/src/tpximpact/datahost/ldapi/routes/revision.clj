@@ -13,7 +13,8 @@
                404 {:body [:re "Not found"]}}})
 
 (defn post-revision-route-config [db]
-  {:summary "Create metadata for a revision"
+  {:summary (str "Create metadata for a revision. The successfully created resource "
+                 "path will be returned in the `Location` header")
    :handler (partial handlers/post-revision db)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
@@ -26,7 +27,9 @@
                                        :description "Description of revision"
                                        :optional true} string?]]}
    :responses {201 {:description "Revision was successfully created"
-                    :body map?}
+                    :body map?
+                    ;; headers is not currently supported
+                    :headers {"Location" string?}}
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]

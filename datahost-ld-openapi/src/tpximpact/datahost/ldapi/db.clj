@@ -92,6 +92,7 @@
         revision-key (models-shared/revision-key series-slug release-slug auto-revision-id)
         updated-db (swap! db revision/insert-revision api-params auto-revision-id incoming-jsonld-doc)]
     {:op (-> updated-db meta :op)
+     :resource-id auto-revision-id
      :jsonld-doc (get updated-db revision-key)}))
 
 

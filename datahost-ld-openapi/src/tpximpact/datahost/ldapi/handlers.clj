@@ -61,8 +61,9 @@
   (if-let [_release (db/get-release db series-slug release-slug)]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
-          {:keys [_op jsonld-doc]} (db/insert-revision! db api-params incoming-jsonld-doc)]
+          {:keys [_op jsonld-doc resource-id]} (db/insert-revision! db api-params incoming-jsonld-doc)]
       {:status 201
+       :headers {"Location" (str "/data/" series-slug "/release/" release-slug "/revisions/" resource-id)}
        :body jsonld-doc})
 
     {:status 422
