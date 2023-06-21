@@ -14,12 +14,6 @@ module "gce_container_spec" {
   restart_policy = "Always"
 }
 
-resource "null_resource" "image_digest" {
-  triggers = {
-    digest = var.digest
-  }
-}
-
 resource "google_service_account" "graphql_service_account" {
   account_id   = local.service_account_id
   display_name = "Service account to run the graphql server"
@@ -33,7 +27,7 @@ resource "google_project_iam_member" "image_creator_service_account_permissions"
 }
 
 resource "google_compute_instance" "datahost_instance" {
-  name = var.name
+  name = "${var.name}-${substr(var.digest, 0, 8)}"
   machine_type = "e2-small"
   zone = local.gcloud_zone
 
@@ -60,10 +54,6 @@ resource "google_compute_instance" "datahost_instance" {
 
   metadata = {
     gce-container-declaration = module.gce_container_spec.metadata_value
-  }
-
-  lifecycle {
-    replace_triggered_by = [null_resource.image_digest]
   }
 
   service_account {
