@@ -1,0 +1,34 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://gss-data.org.uk/def/gdp#edvp> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Energy" .
+
+<http://gss-data.org.uk/def/gdp#housing> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Housing" .
+
+<http://gss-data.org.uk/def/gdp#trade> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Trade" .
+
+<http://gss-data.org.uk/def/gdp#migration> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Migration" .
+
+<http://gss-data.org.uk/def/gdp#health> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Health" .
+
+<http://gss-data.org.uk/def/gdp#towns-and-high-streets> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Towns & High Streets" .
+
+<http://gss-data.org.uk/def/gdp#energy> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Energy" .
+
+<http://gss-data.org.uk/def/gdp#disability> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Disability" .
+
+<http://gss-data.org.uk/def/gdp#homelessness> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Homelessness" .
+
+<http://gss-data.org.uk/def/gdp#covid-19> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "COVID-19" .
+
+<http://gss-data.org.uk/def/gdp#climate-change> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
+  rdfs:label "Climate Change" .

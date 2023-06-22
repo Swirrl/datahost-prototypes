@@ -1,0 +1,1713 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix gss: <http://gss-data.org.uk/catalog/> .
+@prefix pmd: <http://publishmydata.com/pmdcat#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://www.gov.uk/government/organisations/academy-for-justice-commissioning> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Academy for Justice Commissioning"@en .
+
+<https://www.gov.uk/government/organisations/academy-for-social-justice> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Academy for Social Justice"@en .
+
+<https://www.gov.uk/government/organisations/academy-for-social-justice-commissioning>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Academy for Social Justice Commissioning"@en .
+
+<https://www.gov.uk/government/organisations/acas> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory, Conciliation and Arbitration Service"@en .
+
+<https://www.gov.uk/government/organisations/accelerated-access-review> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Accelerated Access Review"@en .
+
+<https://www.gov.uk/government/organisations/administration-of-radioactive-substances-advisory-committee>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Administration of Radioactive Substances Advisory Committee"@en .
+
+<https://www.gov.uk/government/organisations/administrative-court> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Administrative Court"@en .
+
+<https://www.gov.uk/government/organisations/administrative-justice-and-tribunals-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Administrative Justice and Tribunals Council"@en .
+
+<https://www.gov.uk/government/organisations/administrative-justice-and-tribunals-council-welsh-committee>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Administrative Justice and Tribunals Council Welsh Committee"@en .
+
+<https://www.gov.uk/government/organisations/admiralty-court> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Admiralty Court"@en .
+
+<https://www.gov.uk/government/organisations/adult-learning-inspectorate> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Adult Learning Inspectorate"@en .
+
+<https://www.gov.uk/government/organisations/advantage-west-midlands> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advantage West Midlands"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-animal-feedingstuffs>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Animal Feedingstuffs"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-business-appointments>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Business Appointments"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-clinical-excellence-awards>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Clinical Excellence Awards"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-conscientious-objectors>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Conscientious Objectors"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-novel-foods-and-processes>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Novel Foods and Processes"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-pesticides> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Pesticides"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-releases-to-the-environment>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on Releases to the Environment"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committee-on-the-microbiological-safety-of-food>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committee on the Microbiological Safety of Food"@en .
+
+<https://www.gov.uk/government/organisations/advisory-committees-on-justices-of-the-peace>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Committees on Justices of the Peace"@en .
+
+<https://www.gov.uk/government/organisations/advisory-council-on-the-misuse-of-drugs>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Council on the Misuse of Drugs"@en .
+
+<https://www.gov.uk/government/organisations/advisory-group-on-military-medicine>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Group on Military and Emergency Response Medicine"@en .
+
+<https://www.gov.uk/government/organisations/advisory-panel-on-public-sector-information>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Advisory Panel on Public Sector Information"@en .
+
+<https://www.gov.uk/government/organisations/agri-food-and-biosciences-institute>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Agri-Food and Biosciences Institute (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/agricultural-dwelling-house-advisory-committees-x16>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Agricultural Dwelling House Advisory Committees (x16)"@en .
+
+<https://www.gov.uk/government/organisations/agricultural-wages-committee-x13> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Agricultural Wages Committee"@en .
+
+<https://www.gov.uk/government/organisations/agriculture-and-horticulture-development-board>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Agriculture and Horticulture Development Board"@en .
+
+<https://www.gov.uk/government/organisations/air-accidents-investigation-branch> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Air Accidents Investigation Branch"@en .
+
+<https://www.gov.uk/government/organisations/airports-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Airports Commission"@en .
+
+<https://www.gov.uk/government/organisations/alcohol-education-and-research-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Alcohol Education and Research Council"@en .
+
+<https://www.gov.uk/government/organisations/ancient-monuments-board-for-scotland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ancient Monuments Board for Scotland"@en .
+
+<https://www.gov.uk/government/organisations/animal-and-plant-health-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Animal and Plant Health Agency"@en .
+
+<https://www.gov.uk/government/organisations/animal-health> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Animal Health"@en .
+
+<https://www.gov.uk/government/organisations/animal-health-and-veterinary-laboratories-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Animal Health and Veterinary Laboratories Agency"@en .
+
+<https://www.gov.uk/government/organisations/animal-procedures-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Animal Procedures Committee"@en .
+
+<https://www.gov.uk/government/organisations/animals-in-science-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Animals in Science Committee"@en .
+
+<https://www.gov.uk/government/organisations/appeals-service-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Appeals Service Agency"@en .
+
+<https://www.gov.uk/government/organisations/architects-registration-board> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Architects Registration Board"@en .
+
+<https://www.gov.uk/government/organisations/armagh-observatory-and-planetarium> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Armagh Observatory and Planetarium"@en .
+
+<https://www.gov.uk/government/organisations/armed-forces-covenant-fund-trust> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Armed Forces Covenant Fund Trust"@en .
+
+<https://www.gov.uk/government/organisations/armed-forces-pay-review-body> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Armed Forces' Pay Review Body"@en .
+
+<https://www.gov.uk/government/organisations/armed-forces-personnel-administration-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Armed Forces Personnel Administration Agency"@en .
+
+<https://www.gov.uk/government/organisations/army-base-repair-organisation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Army Base Repair Organisation"@en .
+
+<https://www.gov.uk/government/organisations/arts-and-humanities-research-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Arts and Humanities Research Council"@en .
+
+<https://www.gov.uk/government/organisations/arts-council-england> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Arts Council England"@en .
+
+<https://www.gov.uk/government/organisations/arts-council-of-northern-ireland> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Arts Council of Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/arts-council-of-wales> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Arts Council of Wales"@en .
+
+<https://www.gov.uk/government/organisations/ashington-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ashington Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/asset-protection-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Asset Protection Agency"@en .
+
+<https://www.gov.uk/government/organisations/assets-recovery-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Assets Recovery Agency"@en .
+
+<https://www.gov.uk/government/organisations/audit-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Audit Commission"@en .
+
+<https://www.gov.uk/government/organisations/azelle-rodney-inquiry> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Azelle Rodney Inquiry"@en .
+
+<https://www.gov.uk/government/organisations/baha-mousa-inquiry> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Baha Mousa Inquiry"@en .
+
+<https://www.gov.uk/government/organisations/bank-of-england> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bank of England"@en .
+
+<https://www.gov.uk/government/organisations/barker-review-of-land-use-planning> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Barker Review of Land Use Planning"@en .
+
+<https://www.gov.uk/government/organisations/barrow-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Barrow Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/bbc> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "BBC"@en .
+
+<https://www.gov.uk/government/organisations/bbc-world-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "BBC World Service"@en .
+
+<https://www.gov.uk/government/organisations/bedford-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bedford Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/behavioural-insights-team> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Behavioural Insights Team"@en .
+
+<https://www.gov.uk/government/organisations/big-lottery-fund> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Big Lottery Fund"@en .
+
+<https://www.gov.uk/government/organisations/billy-wright-inquiry> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Billy Wright Inquiry"@en .
+
+<https://www.gov.uk/government/organisations/biometrics-and-forensics-ethics-group>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Biometrics and Forensics Ethics Group"@en .
+
+<https://www.gov.uk/government/organisations/biometrics-commissioner> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Biometrics Commissioner"@en .
+
+<https://www.gov.uk/government/organisations/biotechnology-biological-sciences-research-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Biotechnology and Biological Sciences Research Council"@en .
+
+<https://www.gov.uk/government/organisations/birmingham-organising-committee-for-the-2022-commonwealth-games-ltd>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Birmingham Organising Committee for the 2022 Commonwealth Games Ltd"@en .
+
+<https://www.gov.uk/government/organisations/bloody-sunday-inquiry> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bloody Sunday Inquiry"@en .
+
+<https://www.gov.uk/government/organisations/board-of-banking-supervision> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Board of Banking Supervision"@en .
+
+<https://www.gov.uk/government/organisations/board-of-inland-revenue> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Board of Inland Revenue"@en .
+
+<https://www.gov.uk/government/organisations/board-of-trustees-of-the-royal-botanic-gardens-kew>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Board of Trustees of the Royal Botanic Gardens Kew"@en .
+
+<https://www.gov.uk/government/organisations/bolton-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bolton Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/bona-vacantia> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bona Vacantia"@en .
+
+<https://www.gov.uk/government/organisations/border-force> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Border Force"@en .
+
+<https://www.gov.uk/government/organisations/boundary-commission-for-england> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Boundary Commission for England"@en .
+
+<https://www.gov.uk/government/organisations/boundary-commission-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Boundary Commission for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/boundary-commission-for-scotland> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Boundary Commission for Scotland"@en .
+
+<https://www.gov.uk/government/organisations/boundary-commission-for-wales> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Boundary Commission for Wales"@en .
+
+<https://www.gov.uk/government/organisations/bpdts-ltd> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "BPDTS Ltd"@en .
+
+<https://www.gov.uk/government/organisations/brb-residuary-ltd> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "BRB (Residuary) Ltd"@en .
+
+<https://www.gov.uk/government/organisations/bridgwater-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bridgwater Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/bristol-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Bristol Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/british-business-bank> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Business Bank"@en .
+
+<https://www.gov.uk/government/organisations/british-cattle-movement-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Cattle Movement Service"@en .
+
+<https://www.gov.uk/government/organisations/british-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Council"@en .
+
+<https://www.gov.uk/government/organisations/british-educational-communications-and-technology-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Educational Communications and Technology Agency"@en .
+
+<https://www.gov.uk/government/organisations/british-film-institute> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Film Institute"@en .
+
+<https://www.gov.uk/government/organisations/british-forces-post-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Forces Post Office"@en .
+
+<https://www.gov.uk/government/organisations/british-hallmarking-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Hallmarking Council"@en .
+
+<https://www.gov.uk/government/organisations/british-library> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Library"@en .
+
+<https://www.gov.uk/government/organisations/british-museum> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Museum"@en .
+
+<https://www.gov.uk/government/organisations/british-pharmacopoeia> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Pharmacopoeia Commission"@en .
+
+<https://www.gov.uk/government/organisations/british-potato-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Potato Council"@en .
+
+<https://www.gov.uk/government/organisations/british-transport-police-authority> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "British Transport Police Authority"@en .
+
+<https://www.gov.uk/government/organisations/broadcasting-standards-commission> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Broadcasting Standards Commission"@en .
+
+<https://www.gov.uk/government/organisations/broads-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Broads Authority"@en .
+
+<https://www.gov.uk/government/organisations/building-regulations-advisory-committee>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Building Regulations Advisory Committee"@en .
+
+<https://www.gov.uk/government/organisations/building-research-establishment> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Building Research Establishment"@en .
+
+<https://www.gov.uk/government/organisations/business-development-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Business Development Service"@en .
+
+<https://www.gov.uk/government/organisations/buying-solutions> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Buying Solutions"@en .
+
+<https://www.gov.uk/government/organisations/cabinet-office-board> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Cabinet Office Board"@en .
+
+<https://www.gov.uk/government/organisations/camborne-pool-and-redruth-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Camborne, Pool and Redruth Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/capacitybuilders> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Capacitybuilders"@en .
+
+<https://www.gov.uk/government/organisations/capital-for-enterprise-ltd> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Capital for Enterprise Limited"@en .
+
+<https://www.gov.uk/government/organisations/care-quality-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Care Quality Commission"@en .
+
+<https://www.gov.uk/government/organisations/careers-wales> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Careers Wales"@en .
+
+<https://www.gov.uk/government/organisations/central-advisory-committee-on-compensation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Advisory Committee on Compensation"@en .
+
+<https://www.gov.uk/government/organisations/central-advisory-committee-on-pensions-and-compensation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Advisory Committee on Pensions and Compensation "@en .
+
+<https://www.gov.uk/government/organisations/central-arbitration-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Arbitration Committee"@en .
+
+<https://www.gov.uk/government/organisations/central-digital-and-data-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Digital and Data Office"@en .
+
+<https://www.gov.uk/government/organisations/central-office-of-information> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Office of Information"@en .
+
+<https://www.gov.uk/government/organisations/central-police-training-and-development-authority>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Police Training and Development Authority"@en .
+
+<https://www.gov.uk/government/organisations/central-science-laboratory> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Central Science Laboratory"@en .
+
+<https://www.gov.uk/government/organisations/centre-for-connected-and-autonomous-vehicles>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Centre for Connected and Autonomous Vehicles "@en .
+
+<https://www.gov.uk/government/organisations/centre-for-data-ethics-and-innovation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Centre for Data Ethics and Innovation"@en .
+
+<https://www.gov.uk/government/organisations/centre-for-defence-enterprise> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Centre for Defence Enterprise"@en .
+
+<https://www.gov.uk/government/organisations/centre-for-environment-fisheries-and-aquaculture-science>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Centre for Environment, Fisheries and Aquaculture Science"@en .
+
+<https://www.gov.uk/government/organisations/centre-for-the-protection-of-national-infrastructure>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Centre for the Protection of National Infrastructure"@en .
+
+<https://www.gov.uk/government/organisations/certification-officer> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Certification Officer"@en .
+
+<https://www.gov.uk/government/organisations/cesg> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "CESG"@en .
+
+<https://www.gov.uk/government/organisations/chancery-division-of-the-high-court>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Chancery Division of the High Court"@en .
+
+<https://www.gov.uk/government/organisations/channel-4> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Channel 4"@en .
+
+<https://www.gov.uk/government/organisations/charity-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "The Charity Commission"@en .
+
+<https://www.gov.uk/government/organisations/chemical-and-biological-defence-establishment>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Chemical and Biological Defence Establishment"@en .
+
+<https://www.gov.uk/government/organisations/chevening-foundation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Chevening Scholarship Programme "@en .
+
+<https://www.gov.uk/government/organisations/chief-fire-and-rescue-adviser-unit> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Chief Fire and Rescue Adviser"@en .
+
+<https://www.gov.uk/government/organisations/child-maintenance-and-enforcement-commission>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Child Maintenance and Enforcement Commission"@en .
+
+<https://www.gov.uk/government/organisations/child-safeguarding-practice-review-panel>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Child Safeguarding Practice Review Panel"@en .
+
+<https://www.gov.uk/government/organisations/children-and-family-court-advisory-and-support-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Cafcass"@en .
+
+<https://www.gov.uk/government/organisations/childrens-workforce-development-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Children's Workforce Development Council"@en .
+
+<https://www.gov.uk/government/organisations/churches-conservation-trust> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Churches Conservation Trust"@en .
+
+<https://www.gov.uk/government/organisations/civil-aviation-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Aviation Authority"@en .
+
+<https://www.gov.uk/government/organisations/civil-justice-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Justice Council"@en .
+
+<https://www.gov.uk/government/organisations/civil-nuclear-constabulary> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Nuclear Constabulary"@en .
+
+<https://www.gov.uk/government/organisations/civil-procedure-rules-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Procedure Rule Committee"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-board> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Board"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Commission"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-corporate-finance-profession-cfp>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Corporate Finance Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-fast-stream> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Fast Stream"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-fast-track-apprenticeship>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Fast Track Apprenticeship"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-communication-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Communication Service"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-economic-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Economic Service"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-finance-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Finance Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-it-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government IT Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-knowledge-information-management-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Knowledge & Information Management Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-legal-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Legal Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-legal-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Legal Service"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-occupational-psychology-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Occupational Psychology Profession "@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-operational-research-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Operational Research Service"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-planning-inspectors>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Planning Inspectors"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-property-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Property Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-science-engineering>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Science & Engineering Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-social-research-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Social Research Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-statistical-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Statistical Service"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-tax-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Tax Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-veterinary-services>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Veterinary Services "@en .
+
+<https://www.gov.uk/government/organisations/civil-service-group> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Group"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-human-resources-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Human Resources Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-intelligence-analysis-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Intelligence Analysis "@en .
+
+<https://www.gov.uk/government/organisations/civil-service-internal-audit-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Internal Audit Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-medical-profession> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Medical Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-operational-delivery-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Operational Delivery Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-policy-profession> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Policy Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-procurement-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Procurement profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-project-delivery-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Project Delivery Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-reform> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Reform"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-the-government-planning-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Planning Profession"@en .
+
+<https://www.gov.uk/government/organisations/clacton-and-harwich-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Clacton and Harwich Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/co2sense> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "CO2Sense"@en .
+
+<https://www.gov.uk/government/organisations/college-of-policing> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "College of Policing"@en .
+
+<https://www.gov.uk/government/organisations/commercial-circuit-court> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Circuit Commercial Court"@en .
+
+<https://www.gov.uk/government/organisations/commercial-court> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commercial Court"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-architecture-and-the-built-environment-cabe>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Architecture and the Built Environment (CABE)"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-countering-extremism>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Countering Extremism"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-health-improvement> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Health Improvement"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-patient-and-public-involvement-in-health>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Patient and Public Involvement in Health"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-racial-equality> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Racial Equality"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-rural-communities> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Rural Communities"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-social-care-inspection>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for Social Care Inspection"@en .
+
+<https://www.gov.uk/government/organisations/commission-for-the-compact> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission for the Compact"@en .
+
+<https://www.gov.uk/government/organisations/commission-on-human-medicines> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission on Human Medicines"@en .
+
+<https://www.gov.uk/government/organisations/commission-on-race-and-ethnic-disparities>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commission on Race and Ethnic Disparities"@en .
+
+<https://www.gov.uk/government/organisations/commissioner-for-public-appointments>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commissioner for Public Appointments"@en .
+
+<https://www.gov.uk/government/organisations/committee-on-climate-change> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Committee on Climate Change"@en .
+
+<https://www.gov.uk/government/organisations/committee-on-fuel-poverty> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Committee on Fuel Poverty"@en .
+
+<https://www.gov.uk/government/organisations/committee-on-mutagenicity-of-chemicals-in-food-consumer-products-and-the-environment>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Committee on Mutagenicity of Chemicals in Food, Consumer Products and the Environment"@en .
+
+<https://www.gov.uk/government/organisations/committee-on-radioactive-waste-management>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Committee on Radioactive Waste Management"@en .
+
+<https://www.gov.uk/government/organisations/committee-on-toxicity-of-chemicals-in-food-consumer-products-and-the-environment>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Committee on Toxicity of Chemicals in Food, Consumer Products and the Environment"@en .
+
+<https://www.gov.uk/government/organisations/commonwealth-scholarship-commission-in-the-uk>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Commonwealth Scholarship Commission in the UK"@en .
+
+<https://www.gov.uk/government/organisations/community-development-foundation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Community Development Foundation"@en .
+
+<https://www.gov.uk/government/organisations/community-fund> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Community Fund"@en .
+
+<https://www.gov.uk/government/organisations/companies-house> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Companies House "@en .
+
+<https://www.gov.uk/government/organisations/companies-list> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Companies List"@en .
+
+<https://www.gov.uk/government/organisations/company-names-tribunal> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Company Names Tribunal"@en .
+
+<https://www.gov.uk/government/organisations/compensation-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Compensation Agency"@en .
+
+<https://www.gov.uk/government/organisations/competition-and-markets-authority> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Competition and Markets Authority"@en .
+
+<https://www.gov.uk/government/organisations/competition-appeal-tribunal> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Competition Appeal Tribunal"@en .
+
+<https://www.gov.uk/government/organisations/competition-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Competition Commission"@en .
+
+<https://www.gov.uk/government/organisations/competition-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Competition Service"@en .
+
+<https://www.gov.uk/government/organisations/conflict-stability-and-security-fund>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Conflict, Stability and Security Fund"@en .
+
+<https://www.gov.uk/government/organisations/construction-industry-training-board>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Construction Industry Training Board"@en .
+
+<https://www.gov.uk/government/organisations/consumer-council-for-postal-services>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Consumer Council for Postal Services"@en .
+
+<https://www.gov.uk/government/organisations/consumer-council-for-water> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Consumer Council for Water"@en .
+
+<https://www.gov.uk/government/organisations/consumer-focus> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Consumer Futures"@en .
+
+<https://www.gov.uk/government/organisations/cooksey-review> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Cooksey Review"@en .
+
+<https://www.gov.uk/government/organisations/copyright-tribunal> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Copyright Tribunal"@en .
+
+<https://www.gov.uk/government/organisations/corby-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Corby Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/council-for-catholic-maintained-schools>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Council for Catholic Maintained Schools"@en .
+
+<https://www.gov.uk/government/organisations/council-for-healthcare-regulatory-excellence>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Council for Healthcare Regulatory Excellence"@en .
+
+<https://www.gov.uk/government/organisations/council-for-science-and-technology> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Council for Science and Technology"@en .
+
+<https://www.gov.uk/government/organisations/council-for-the-central-laboratory-of-the-research-councils>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Council for the Central Laboratory of the Research Councils"@en .
+
+<https://www.gov.uk/government/organisations/council-on-tribunals> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Council on Tribunals"@en .
+
+<https://www.gov.uk/government/organisations/counter-fraud-and-security-management-service>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Counter Fraud and Security Management Service"@en .
+
+<https://www.gov.uk/government/organisations/countryside-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Countryside Agency"@en .
+
+<https://www.gov.uk/government/organisations/court-of-appeal-civil-division> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Court of Appeal Civil Division"@en .
+
+<https://www.gov.uk/government/organisations/court-of-appeal-criminal-division> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Court of Appeal Criminal Division"@en .
+
+<https://www.gov.uk/government/organisations/court-of-judicature-of-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Court of Judicature of Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/court-of-protection> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Court of Protection"@en .
+
+<https://www.gov.uk/government/organisations/covent-garden-market-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Covent Garden Market Authority"@en .
+
+<https://www.gov.uk/government/organisations/coventry-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Coventry Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/creative-scotland> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Creative Scotland"@en .
+
+<https://www.gov.uk/government/organisations/criminal-cases-review-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Cases Review Commission"@en .
+
+<https://www.gov.uk/government/organisations/criminal-injuries-compensation-appeals-panel>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Injuries Compensation Appeals Panel"@en .
+
+<https://www.gov.uk/government/organisations/criminal-injuries-compensation-appeals-panel-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Injuries Compensation Appeals Panel for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/criminal-injuries-compensation-authority>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Injuries Compensation Authority"@en .
+
+<https://www.gov.uk/government/organisations/criminal-justice-inspection-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Justice Inspection Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/criminal-procedure-rule-committee> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Procedure Rule Committee"@en .
+
+<https://www.gov.uk/government/organisations/criminal-records-bureau> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Criminal Records Bureau"@en .
+
+<https://www.gov.uk/government/organisations/crossrail-international> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Crossrail International"@en .
+
+<https://www.gov.uk/government/organisations/crown-agents-holding-and-realisation-board>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Crown Agents Holding and Realisation Board"@en .
+
+<https://www.gov.uk/government/organisations/crown-commercial-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Crown Commercial Service"@en .
+
+<https://www.gov.uk/government/organisations/crown-prosecution-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Crown Prosecution Service"@en .
+
+<https://www.gov.uk/government/organisations/dartmoor-national-park-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Dartmoor National Park Authority"@en .
+
+<https://www.gov.uk/government/organisations/deepcut-review> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Deepcut Review"@en .
+
+<https://www.gov.uk/government/organisations/defence-academy> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Academy of the United Kingdom"@en .
+
+<https://www.gov.uk/government/organisations/defence-analytical-services-agency> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Analytical Services Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-and-security-accelerator> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence and Security Accelerator"@en .
+
+<https://www.gov.uk/government/organisations/defence-and-security-media-advisory-committee>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence and Security Media Advisory Committee"@en .
+
+<https://www.gov.uk/government/organisations/defence-aviation-repair-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Aviation Repair Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-bills-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Bills Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-communication-services-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Communication Services Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-electronics-and-components-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Electronics and Components Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-equipment-and-support> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Equipment and Support"@en .
+
+<https://www.gov.uk/government/organisations/defence-estates> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Estates"@en .
+
+<https://www.gov.uk/government/organisations/defence-infrastructure-organisation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Infrastructure Organisation"@en .
+
+<https://www.gov.uk/government/organisations/defence-intelligence-and-security-centre>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Intelligence and Security Centre"@en .
+
+<https://www.gov.uk/government/organisations/defence-medical-education-and-training-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Medical Education and Training Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-nuclear-organisation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Nuclear Organisation"@en .
+
+<https://www.gov.uk/government/organisations/defence-nuclear-safety-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Nuclear Safety Committee"@en .
+
+<https://www.gov.uk/government/organisations/defence-press-and-broadcasting-advisory-committee>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence, Press and Broadcasting Advisory Committee"@en .
+
+<https://www.gov.uk/government/organisations/defence-procurement-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Procurement Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-scientific-advisory-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Scientific Advisory Council"@en .
+
+<https://www.gov.uk/government/organisations/defence-sixth-form-college> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Sixth Form College"@en .
+
+<https://www.gov.uk/government/organisations/defence-storage-and-distribution-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Storage and Distribution Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-support-group> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Support Group"@en .
+
+<https://www.gov.uk/government/organisations/defence-transport-and-movements-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Transport and Movements Agency"@en .
+
+<https://www.gov.uk/government/organisations/defence-vetting-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Vetting Agency"@en .
+
+<https://www.gov.uk/government/organisations/dental-practice-board> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Dental Practice Board"@en .
+
+<https://www.gov.uk/government/organisations/dental-vocational-training-authority>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Dental Vocational Training Authority"@en .
+
+<https://www.gov.uk/government/organisations/department-for-business-enterprise-and-regulatory-reform>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Business, Enterprise and Regulatory Reform"@en .
+
+<https://www.gov.uk/government/organisations/department-for-children-schools-and-families>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Children, Schools and Families"@en .
+
+<https://www.gov.uk/government/organisations/department-for-constitutional-affairs>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Constitutional Affairs"@en .
+
+<https://www.gov.uk/government/organisations/department-for-education-and-skills>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Education and Skills"@en .
+
+<https://www.gov.uk/government/organisations/department-for-employment-and-learning>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Employment and Learning"@en .
+
+<https://www.gov.uk/government/organisations/department-for-exiting-the-european-union>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Exiting the European Union"@en .
+
+<https://www.gov.uk/government/organisations/department-for-infrastructure-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Infrastructure (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/department-for-innovation-universities-and-skills>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Innovation, Universities and Skills"@en .
+
+<https://www.gov.uk/government/organisations/department-for-international-trade-defence-and-security-organisation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for International Trade Defence & Security Organisation"@en .
+
+<https://www.gov.uk/government/organisations/department-for-regional-development>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Regional Development (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/department-for-social-development> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Social Development"@en .
+
+<https://www.gov.uk/government/organisations/department-for-the-economy-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for the Economy (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/department-of-agriculture-and-rural-development>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Agriculture and Rural Development"@en .
+
+<https://www.gov.uk/government/organisations/department-of-constitutional-affairs>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Constitutional Affairs"@en .
+
+<https://www.gov.uk/government/organisations/department-of-culture-arts-and-leisure>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Culture, Arts and Leisure"@en .
+
+<https://www.gov.uk/government/organisations/department-of-enterprise-trade-and-investment>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Enterprise, Trade and Investment (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/department-of-finance-and-personnel-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Finance and Personnel for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/department-of-health-social-services-and-public-safety>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Health, Social Services and Public Safety"@en .
+
+<https://www.gov.uk/government/organisations/department-of-inland-revenue> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Inland Revenue"@en .
+
+<https://www.gov.uk/government/organisations/department-of-national-heritage> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of National Heritage"@en .
+
+<https://www.gov.uk/government/organisations/department-of-social-security> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Social Security"@en .
+
+<https://www.gov.uk/government/organisations/department-of-the-environment> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of the Environment (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/department-of-the-environment-transport-and-the-regions>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of the Environment, Transport and the Regions"@en .
+
+<https://www.gov.uk/government/organisations/department-of-trade-and-industry> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Trade and Industry"@en .
+
+<https://www.gov.uk/government/organisations/deputy-prime-ministers-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Deputy Prime Minister's Office"@en .
+
+<https://www.gov.uk/government/organisations/derby-north-east-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Derby North East Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/design-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Design Council"@en .
+
+<https://www.gov.uk/government/organisations/dft-olr-holdings-limited> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "DfT OLR Holdings Limited"@en .
+
+<https://www.gov.uk/government/organisations/digital-data-and-technology-profession>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Digital, Data and Technology Profession"@en .
+
+<https://www.gov.uk/government/organisations/dingle-granby-toxteth-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Dingle Granby Toxteth Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/directly-operated-railways-limited> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Directly Operated Railways Limited"@en .
+
+<https://www.gov.uk/government/organisations/disability-and-carers-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Disability and Carers Service"@en .
+
+<https://www.gov.uk/government/organisations/disability-rights-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Disability Rights Commission"@en .
+
+<https://www.gov.uk/government/organisations/disabled-peoples-employment-corporation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Disabled People’s Employment Corporation (GB) Ltd"@en .
+
+<https://www.gov.uk/government/organisations/disabled-persons-transport-advisory-committee>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Disabled Persons Transport Advisory Committee"@en .
+
+<https://www.gov.uk/government/organisations/disclosure-and-barring-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Disclosure and Barring Service"@en .
+
+<https://www.gov.uk/government/organisations/disposal-services-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Disposal Services Agency"@en .
+
+<https://www.gov.uk/government/organisations/district-valuer-services-dvs> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "District Valuer Services (DVS)"@en .
+
+<https://www.gov.uk/government/organisations/dormant-assets-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Independent Dormant Assets Commission "@en .
+
+<https://www.gov.uk/government/organisations/dounreay> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Dounreay "@en .
+
+<https://www.gov.uk/government/organisations/downham-and-bellingham-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Downham and Bellingham Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/drinking-water-inspectorate> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Drinking Water Inspectorate"@en .
+
+<https://www.gov.uk/government/organisations/driver-and-vehicle-licensing-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Driver and Vehicle Licensing Agency"@en .
+
+<https://www.gov.uk/government/organisations/driver-and-vehicle-standards-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Driver and Vehicle Standards Agency"@en .
+
+<https://www.gov.uk/government/organisations/driver-and-vehicle-testing-agency> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Driver and Vehicle Testing Agency"@en .
+
+<https://www.gov.uk/government/organisations/driving-standards-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Driving Standards Agency"@en .
+
+<https://www.gov.uk/government/organisations/dudley-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Dudley Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/easington-and-seaham-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Easington and Seaham Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/east-cleveland-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "East Cleveland Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/east-manchester-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "East Manchester Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/east-midlands-development-agency-emda>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "East Midlands Development Agency (emda)"@en .
+
+<https://www.gov.uk/government/organisations/east-of-england-development-agency> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "East of England Development Agency"@en .
+
+<https://www.gov.uk/government/organisations/east-west-railway-company> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "East West Railway Company Limited"@en .
+
+<https://www.gov.uk/government/organisations/eastern-health-and-social-services-board>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Eastern Health and Social Services Board"@en .
+
+<https://www.gov.uk/government/organisations/ebbsfleet-development-corporation> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ebbsfleet Development Corporation"@en .
+
+<https://www.gov.uk/government/organisations/economic-and-social-research-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Economic and Social Research Council"@en .
+
+<https://www.gov.uk/government/organisations/education-and-skills-funding-agency>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Education and Skills Funding Agency"@en .
+
+<https://www.gov.uk/government/organisations/education-funding-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Education Funding Agency"@en .
+
+<https://www.gov.uk/government/organisations/efficiency-and-reform-group> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Efficiency and Reform Group"@en .
+
+<https://www.gov.uk/government/organisations/eliasch-review> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Eliasch Review"@en .
+
+<https://www.gov.uk/government/organisations/ellesmere-port-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ellesmere Port Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/employment-agency-standards-inspectorate>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Employment Agency Standards Inspectorate"@en .
+
+<https://www.gov.uk/government/organisations/employment-appeal-tribunal> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Employment Appeal Tribunal"@en .
+
+<https://www.gov.uk/government/organisations/employment-tribunal> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Employment Tribunal"@en .
+
+<https://www.gov.uk/government/organisations/engineering-and-physical-sciences-research-council>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Engineering and Physical Sciences Research Council"@en .
+
+<https://www.gov.uk/government/organisations/engineering-construction-industry-training-board>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Engineering Construction Industry Training Board"@en .
+
+<https://www.gov.uk/government/organisations/english-heritage> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "English Heritage"@en .
+
+<https://www.gov.uk/government/organisations/english-institute-of-sport> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "English Institute of Sport"@en .
+
+<https://www.gov.uk/government/organisations/english-nature> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "English Nature"@en .
+
+<https://www.gov.uk/government/organisations/english-partnerships> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "English Partnerships"@en .
+
+<https://www.gov.uk/government/organisations/english-sports-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "English Sports Council"@en .
+
+<https://www.gov.uk/government/organisations/enterprise-ulster> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Enterprise Ulster"@en .
+
+<https://www.gov.uk/government/organisations/environment-and-heritage-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Environment and Heritage Service"@en .
+
+<https://www.gov.uk/government/organisations/equal-opportunities-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Equal Opportunities Commission"@en .
+
+<https://www.gov.uk/government/organisations/equality-2025> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Equality 2025"@en .
+
+<https://www.gov.uk/government/organisations/equality-and-human-rights-commission>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Equality and Human Rights Commission"@en .
+
+<https://www.gov.uk/government/organisations/equality-commission-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Equality Commission for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/equitable-life-inquiry> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Equitable Life Inquiry"@en .
+
+<https://www.gov.uk/government/organisations/estyn> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Estyn"@en .
+
+<https://www.gov.uk/government/organisations/examination-team-on-child-care-procedures-and-practice-in-north-wales>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Examination team on child care procedures and practice in North Wales"@en .
+
+<https://www.gov.uk/government/organisations/exchequer-and-audit-department> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Exchequer and Audit Department"@en .
+
+<https://www.gov.uk/government/organisations/exmoor-national-park-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Exmoor National Park Authority"@en .
+
+<https://www.gov.uk/government/organisations/export-control-organisation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Export Control Joint Unit"@en .
+
+<https://www.gov.uk/government/organisations/export-guarantees-advisory-council> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Export Guarantees Advisory Council"@en .
+
+<https://www.gov.uk/government/organisations/family-division-of-the-high-court> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Family Division of the High Court"@en .
+
+<https://www.gov.uk/government/organisations/family-health-services-appeal-authority>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Family Health Services Appeal Authority"@en .
+
+<https://www.gov.uk/government/organisations/family-justice-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Family Justice Council"@en .
+
+<https://www.gov.uk/government/organisations/family-procedure-rule-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Family Procedure Rule Committee"@en .
+
+<https://www.gov.uk/government/organisations/fcdo-services> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "FCDO Services "@en .
+
+<https://www.gov.uk/government/organisations/fco-services> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "FCO Services"@en .
+
+<https://www.gov.uk/government/organisations/financial-conduct-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Financial Conduct Authority"@en .
+
+<https://www.gov.uk/government/organisations/financial-remedies-court> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Financial Remedies Court"@en .
+
+<https://www.gov.uk/government/organisations/financial-reporting-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Financial Reporting Council"@en .
+
+<https://www.gov.uk/government/organisations/financial-services-organisation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Financial Services Organisation"@en .
+
+<https://www.gov.uk/government/organisations/financial-services-trade-and-investment-board>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Financial Services Trade and Investment Board"@en .
+
+<https://www.gov.uk/government/organisations/fire-authority-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Fire Authority for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/fire-service-college> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Fire Service College"@en .
+
+<https://www.gov.uk/government/organisations/firearms-consultative-committee> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Firearms Consultative Committee"@en .
+
+<https://www.gov.uk/government/organisations/firebuy> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Firebuy"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-asylum-support> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Asylum Support)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-care-standards> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Care Standards)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-criminal-injuries-compensation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Criminal Injuries Compensation)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-general-regulatory-chamber>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (General Regulatory Chamber)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-immigration-and-asylum>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Immigration and Asylum)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-mental-health> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Mental Health)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-property-chamber>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Property Chamber)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-social-security-and-child-support>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Social Security and Child Support)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-special-educational-needs-and-disability>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Special Educational Needs and Disability)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-tax> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (Tax)"@en .
+
+<https://www.gov.uk/government/organisations/first-tier-tribunal-war-pensions-and-armed-forces-compensation>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "First-tier Tribunal (War Pensions and Armed Forces Compensation)"@en .
+
+<https://www.gov.uk/government/organisations/fisheries-conservancy-board-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Fisheries Conservancy Board for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/fleet-air-arm-museum> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Fleet Air Arm Museum "@en .
+
+<https://www.gov.uk/government/organisations/flood-and-coastal-erosion-risk-management-research-and-development-programme>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Flood and Coastal Erosion Risk Management Research and Development Programme"@en .
+
+<https://www.gov.uk/government/organisations/food-from-britain> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Food from Britain"@en .
+
+<https://www.gov.uk/government/organisations/food-safety-promotion-board> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Food Safety Promotion Board"@en .
+
+<https://www.gov.uk/government/organisations/football-licensing-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Football Licensing Authority"@en .
+
+<https://www.gov.uk/government/organisations/foreign-compensation-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Foreign Compensation Commission"@en .
+
+<https://www.gov.uk/government/organisations/forensic-science-northern-ireland> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forensic Science Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/forensic-science-regulator> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forensic Science Regulator"@en .
+
+<https://www.gov.uk/government/organisations/forensic-science-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forensic Science Service"@en .
+
+<https://www.gov.uk/government/organisations/forest-enterprise-england> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forestry England"@en .
+
+<https://www.gov.uk/government/organisations/forest-research> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forest Research"@en .
+
+<https://www.gov.uk/government/organisations/forest-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forest Service"@en .
+
+<https://www.gov.uk/government/organisations/further-and-higher-education-funding-councils-for-wales>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Further and Higher Education Funding Councils for Wales"@en .
+
+<https://www.gov.uk/government/organisations/further-education-commissioner> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Further Education Commissioner"@en .
+
+<https://www.gov.uk/government/organisations/gambling-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gambling Commission"@en .
+
+<https://www.gov.uk/government/organisations/gaming-board-for-great-britain> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gaming Board for Great Britain"@en .
+
+<https://www.gov.uk/government/organisations/gangmasters-and-labour-abuse-authority>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gangmasters and Labour Abuse Authority"@en .
+
+<https://www.gov.uk/government/organisations/gangmasters-licensing-appeals> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gangmasters Licensing Appeals"@en .
+
+<https://www.gov.uk/government/organisations/gangmasters-licensing-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gangmasters Licensing Authority"@en .
+
+<https://www.gov.uk/government/organisations/gas-and-electricity-consumer-council-energywatch>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gas and Electricity Consumer Council (Energywatch)"@en .
+
+<https://www.gov.uk/government/organisations/geffrye-museum> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Geffrye Museum"@en .
+
+<https://www.gov.uk/government/organisations/general-advisory-committee-on-science>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "General Advisory Committee on Science"@en .
+
+<https://www.gov.uk/government/organisations/general-consumer-council-for-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "General Consumer Council for Northern Ireland"@en .
+
+<https://www.gov.uk/government/organisations/general-social-care-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "General Social Care Council"@en .
+
+<https://www.gov.uk/government/organisations/general-teaching-council-for-england>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "General Teaching Council for England"@en .
+
+<https://www.gov.uk/government/organisations/gloucester-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gloucester Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/gov-facility-services-limited> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gov Facility Services Limited"@en .
+
+<https://www.gov.uk/government/organisations/government-actuarys-department> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Actuary's Department"@en .
+
+<https://www.gov.uk/government/organisations/government-analysis-function> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Analysis Function"@en .
+
+<https://www.gov.uk/government/organisations/government-car-and-despatch-agency> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Car and Despatch Agency"@en .
+
+<https://www.gov.uk/government/organisations/government-chemist> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Chemist"@en .
+
+<https://www.gov.uk/government/organisations/government-commercial-function> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Commercial Function"@en .
+
+<https://www.gov.uk/government/organisations/government-data-quality-hub> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Data Quality Hub"@en .
+
+<https://www.gov.uk/government/organisations/government-digital-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Digital Service"@en .
+
+<https://www.gov.uk/government/organisations/government-estates-management> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Estates Management"@en .
+
+<https://www.gov.uk/government/organisations/government-finance-function> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Finance Function"@en .
+
+<https://www.gov.uk/government/organisations/government-geography-profession> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Geography Profession"@en .
+
+<https://www.gov.uk/government/organisations/government-internal-audit-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Internal Audit Agency"@en .
+
+<https://www.gov.uk/government/organisations/government-office-for-science> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Office for Science"@en .
+
+<https://www.gov.uk/government/organisations/government-partnerships-international>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Partnerships International"@en .
+
+<https://www.gov.uk/government/organisations/government-procurement-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Procurement Service"@en .
+
+<https://www.gov.uk/government/organisations/government-property-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Property Agency"@en .
+
+<https://www.gov.uk/government/organisations/government-property-function> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Property Function"@en .
+
+<https://www.gov.uk/government/organisations/government-recruitment-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Recruitment Service"@en .
+
+<https://www.gov.uk/government/organisations/government-security-profession> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Security Profession"@en .
+
+<https://www.gov.uk/government/organisations/government-skills-and-curriculum-unit>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Skills and Curriculum Unit"@en .
+
+<https://www.gov.uk/government/organisations/gowers-review-of-intellectual-property>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Gowers Review of Intellectual Property"@en .
+
+<https://www.gov.uk/government/organisations/great-britain-china-centre> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Great Britain-China Centre"@en .
+
+<https://www.gov.uk/government/organisations/great-yarmouth-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Great Yarmouth Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/greenwich-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Greenwich Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/groceries-code-adjudicator> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Groceries Code Adjudicator"@en .
+
+<https://www.gov.uk/government/organisations/hackney-education-action-zone> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Hackney Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/hamilton-oxford-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Hamilton Oxford Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/hastings-and-st-leonards-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Hastings and St Leonards Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/health-and-safety-executive> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Health and Safety Executive"@en .
+
+<https://www.gov.uk/government/organisations/health-and-social-care-information-centre>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Health and Social Care Information Centre"@en .
+
+<https://www.gov.uk/government/organisations/health-education-england> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Health Education England"@en .
+
+<https://www.gov.uk/government/organisations/health-protection-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Health Protection Agency"@en .
+
+<https://www.gov.uk/government/organisations/health-research-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Health Research Authority"@en .
+
+<https://www.gov.uk/government/organisations/healthcare-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Healthcare Commission"@en .
+
+<https://www.gov.uk/government/organisations/healthcare-uk> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Healthcare UK"@en .
+
+<https://www.gov.uk/government/organisations/hearing-aid-council> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Hearing Aid Council"@en .
+
+<https://www.gov.uk/government/organisations/heart-of-slough-education-action-zone>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Heart of Slough Education Action Zone"@en .
+
+<https://www.gov.uk/government/organisations/her-majestys-government-communications-centre>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Her Majesty's Government Communications Centre"@en .
+
+<https://www.gov.uk/government/organisations/her-majestys-magistrates-courts-service-inspectorate>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Her Majesty's Magistrates Courts Service Inspectorate"@en .
+
+<https://www.gov.uk/government/organisations/heritage-lottery-fund> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Heritage Lottery Fund (administered by the NHMF)"@en .
+
+<https://www.gov.uk/government/organisations/civil-nuclear-police-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Nuclear Police Authority"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-resourcing> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service Resourcing"@en .
+
+<https://www.gov.uk/government/organisations/defence-science-and-technology-laboratory>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Defence Science and Technology Laboratory"@en .
+
+<https://www.gov.uk/government/organisations/department-for-international-development>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for International Development"@en .
+
+<https://www.gov.uk/government/organisations/environment-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Environment Agency"@en .
+
+<https://www.gov.uk/government/organisations/foreign-commonwealth-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Foreign & Commonwealth Office"@en .
+
+<https://www.gov.uk/government/organisations/geospatial-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Geospatial Commission"@en .
+
+<https://www.gov.uk/government/organisations/government-legal-department> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Legal Department"@en .
+
+<https://www.gov.uk/government/organisations/intellectual-property-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Intellectual Property Office"@en .
+
+<https://www.gov.uk/government/organisations/natural-resources-wales> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Natural Resources Wales"@en .
+
+<https://www.gov.uk/government/organisations/nhs-business-services-authority> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "NHS Business Services Authority"@en .
+
+<https://www.gov.uk/government/organisations/nhs-commissioning-board> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "NHS England"@en .
+
+<https://www.gov.uk/government/organisations/office-for-national-statistics> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Office for National Statistics"@en .
+
+<https://www.gov.uk/government/organisations/office-of-the-secretary-of-state-for-scotland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Office of the Secretary of State for Scotland"@en .
+
+<https://www.gov.uk/government/organisations/stabilisation-unit> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Stabilisation Unit"@en .
+
+<https://www.gov.uk/government/organisations/the-security-service-mi5> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "The Security Service"@en .
+
+<https://www.gov.uk/government/organisations/treasury-solicitor-s-department> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Treasury Solicitor’s Department"@en .
+
+<https://www.gov.uk/government/organisations/uk-export-finance> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "UK Export Finance"@en .
+
+<https://www.gov.uk/government/organisations/uk-sport> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "UK Sport"@en .
+
+<https://www.gov.uk/government/organisations/department-for-communities-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Communities (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/department-of-agriculture-environment-and-rural-affairs-northern-ireland>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Agriculture, Environment and Rural Affairs (Northern Ireland)"@en .
+
+<https://www.gov.uk/government/organisations/forestry-commission> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Forestry Commission"@en .
+
+<https://www.gov.uk/government/organisations/rural-payments-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Rural Payments Agency"@en .
+
+<https://www.gov.uk/government/organisations/valuation-office-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Valuation Office Agency"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-hr> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service HR"@en .
+
+<https://www.gov.uk/government/organisations/government-communications-headquarters>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Government Communications Headquarters"@en .
+
+<https://www.gov.uk/government/organisations/northern-ireland-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Northern Ireland Office"@en .
+
+<https://www.gov.uk/government/organisations/the-scottish-government> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "The Scottish Government"@en .
+
+<https://www.gov.uk/government/organisations/uk-government-investments> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "UK Government Investments"@en .
+
+<https://www.gov.uk/government/organisations/uk-trade-investment> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "UK Trade & Investment"@en .
+
+<https://www.gov.uk/government/organisations/attorney-generals-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Attorney General's Office"@en .
+
+<https://www.gov.uk/government/organisations/nuclear-decommissioning-authority> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Nuclear Decommissioning Authority"@en .
+
+<https://www.gov.uk/government/organisations/welsh-government> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Welsh Government"@en .
+
+<https://www.gov.uk/government/organisations/food-standards-agency> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Food Standards Agency"@en .
+
+<https://www.gov.uk/government/organisations/department-for-international-trade> a
+    <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for International Trade"@en .
+
+<https://www.gov.uk/government/organisations/uk-research-and-innovation> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "UK Research and Innovation"@en .
+
+<https://www.gov.uk/government/organisations/department-for-business-innovation-skills>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Business, Innovation & Skills"@en .
+
+<https://www.gov.uk/government/organisations/foreign-commonwealth-development-office>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Foreign, Commonwealth & Development Office"@en .
+
+<https://www.gov.uk/government/organisations/ministry-of-housing-communities-and-local-government>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ministry of Housing, Communities & Local Government"@en .
+
+<https://www.gov.uk/government/organisations/hm-treasury> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "HM Treasury"@en .
+
+<https://www.gov.uk/government/organisations/department-for-work-pensions> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Work and Pensions"@en .
+
+<https://www.gov.uk/government/organisations/department-for-education> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Education"@en .
+
+<https://www.gov.uk/government/organisations/civil-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Civil Service"@en .
+
+<https://www.gov.uk/government/organisations/department-for-transport> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Transport"@en .
+
+<https://www.gov.uk/government/organisations/department-of-health-and-social-care>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department of Health and Social Care"@en .
+
+<https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Environment, Food & Rural Affairs"@en .
+
+<https://www.gov.uk/government/organisations/ministry-of-justice> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ministry of Justice"@en .
+
+<https://www.gov.uk/government/organisations/hm-courts-and-tribunals-service> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "HM Courts & Tribunals Service"@en .
+
+<https://www.gov.uk/government/organisations/cabinet-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Cabinet Office"@en .
+
+<https://www.gov.uk/government/organisations/home-office> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Home Office"@en .
+
+<https://www.gov.uk/government/organisations/ministry-of-defence> a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Ministry of Defence"@en .
+
+<https://www.gov.uk/government/organisations/department-for-business-energy-and-industrial-strategy>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Business, Energy & Industrial Strategy"@en .
+
+<https://www.gov.uk/government/organisations/department-for-digital-culture-media-sport>
+  a <http://www.w3.org/ns/org#Organization>;
+  rdfs:label "Department for Digital, Culture, Media & Sport"@en .
+
+<https://www.gov.uk/government/organisations/centre-for-connected-and-autonomous-vehicles>
+  rdfs:label "Centre for Connected and Autonomous Vehicles"@en .
+
+<https://www.gov.uk/government/organisations/chevening-foundation> rdfs:label "Chevening Scholarship Programme"@en .
+
+<https://www.gov.uk/government/organisations/central-advisory-committee-on-pensions-and-compensation>
+  rdfs:label "Central Advisory Committee on Pensions and Compensation"@en .
+
+<https://www.gov.uk/government/organisations/companies-house> rdfs:label "Companies House"@en .
+
+<https://www.gov.uk/government/organisations/dounreay> rdfs:label "Dounreay"@en .
+
+<https://www.gov.uk/government/organisations/fcdo-services> rdfs:label "FCDO Services"@en .
+
+<https://www.gov.uk/government/organisations/fleet-air-arm-museum> rdfs:label "Fleet Air Arm Museum"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-occupational-psychology-profession>
+  rdfs:label "Government Occupational Psychology Profession"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-government-veterinary-services>
+  rdfs:label "Government Veterinary Services"@en .
+
+<https://www.gov.uk/government/organisations/dormant-assets-commission> rdfs:label
+    "Independent Dormant Assets Commission"@en .
+
+<https://www.gov.uk/government/organisations/civil-service-intelligence-analysis-profession>
+  rdfs:label "Intelligence Analysis"@en .
