@@ -1,34 +1,475 @@
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix gss: <http://gss-data.org.uk/catalog/> .
+@prefix pmd: <http://publishmydata.com/pmdcat#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-<http://gss-data.org.uk/def/gdp#edvp> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Energy" .
+<https://www.ons.gov.uk/businessindustryandtrade> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Business, industry and trade";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#housing> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Housing" .
+<https://www.ons.gov.uk/economy> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Economy";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#trade> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Trade" .
+<https://www.ons.gov.uk/employmentandlabourmarket> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Employment and labour market";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#migration> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Migration" .
+<https://www.ons.gov.uk/peoplepopulationandcommunity> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "People, population and community";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#health> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Health" .
+<https://www.ons.gov.uk/businessindustryandtrade/business> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Business";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#towns-and-high-streets> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Towns & High Streets" .
+<https://www.ons.gov.uk/businessindustryandtrade/changestobusiness> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Changes to business";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#energy> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Energy" .
+<https://www.ons.gov.uk/businessindustryandtrade/constructionindustry> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Construction industry";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#disability> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Disability" .
+<https://www.ons.gov.uk/businessindustryandtrade/internationaltrade> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "International trade";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#homelessness> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Homelessness" .
+<https://www.ons.gov.uk/businessindustryandtrade/itandinternetindustry> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "IT and internet industry";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#covid-19> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "COVID-19" .
+<https://www.ons.gov.uk/businessindustryandtrade/manufacturingandproductionindustry>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Manufacturing and production industry";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
 
-<http://gss-data.org.uk/def/gdp#climate-change> a <http://gss-data.org.uk/def/gdp#DatasetFamily>;
-  rdfs:label "Climate Change" .
+<https://www.ons.gov.uk/businessindustryandtrade/retailindustry> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Retail industry";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/tourismindustry> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Tourism industry";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/economicoutputandproductivity> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Economic output and productivity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/environmentalaccounts> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Environmental accounts";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Government, public sector and taxes";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/grossdomesticproductgdp> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Gross Domestic Product (GDP)";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/grossvalueaddedgva> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Gross Value Added (GVA)";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/inflationandpriceindices> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Inflation and price indices";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/investmentspensionsandtrusts> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Investments, pensions and trusts";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/nationalaccounts> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "National accounts";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/regionalaccounts> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Regional accounts";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "People in work";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "People not in work";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Births, deaths and marriages";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/crimeandjustice> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Crime and justice";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/culturalidentity> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Cultural identity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/educationandchildcare> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Education and childcare";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/elections> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Elections";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Health and social care";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/householdcharacteristics> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Household characteristics";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/housing> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Housing";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/leisureandtourism> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Leisure and tourism";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Personal and household finances";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Population and migration";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/wellbeing> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Well-being";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/business/activitysizeandlocation>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Activity, size and location";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/business/businessinnovation> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Business innovation";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/business/businessservices> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Business services";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/changestobusiness/bankruptcyinsolvency>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Bankruptcy/insolvency";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/changestobusiness/businessbirthsdeathsandsurvivalrates>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Business births, deaths and survival rates";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/businessindustryandtrade/changestobusiness/mergersandacquisitions>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Mergers and acquisitions";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/economicoutputandproductivity/output> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Output";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/economicoutputandproductivity/productivitymeasures>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Productivity measures";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/economicoutputandproductivity/publicservicesproductivity>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Public services productivity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/localgovernmentfinance>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Local government finance";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/publicsectorfinance>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Public sector finance";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/publicspending> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Public spending";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/researchanddevelopmentexpenditure>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Research and development expenditure";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/governmentpublicsectorandtaxes/taxesandrevenue> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Taxes and revenue";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Balance of payments";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/nationalaccounts/satelliteaccounts> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Satellite accounts";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/nationalaccounts/supplyandusetables> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Supply and use tables";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/nationalaccounts/uksectoraccounts> a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "UK sector accounts";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/economy/regionalaccounts/grossdisposablehouseholdincome> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Gross disposable household income";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Earnings and working hours";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/employmentandemployeetypes>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Employment and employee types";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/labourproductivity>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Labour productivity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/publicsectorpersonnel>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Public sector personnel";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/workplacedisputesandworkingconditions>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Workplace disputes and working conditions";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/workplacepensions>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Workplace pensions";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork/economicinactivity>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Economic inactivity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork/outofworkbenefits>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Out of work benefits";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork/redundancies> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Redundancies";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/employmentandlabourmarket/peoplenotinwork/unemployment> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Unemployment";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/adoption>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Adoption";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/ageing>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Ageing";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/conceptionandfertilityrates>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Conception and fertility rates";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/deaths>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Deaths";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/divorce>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Divorce";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/families>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Families";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/lifeexpectancies>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Life expectancies";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/livebirths>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Live births";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/marriagecohabitationandcivilpartnerships>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Marriage, cohabitation and civil partnerships";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/maternities>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Maternities";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/birthsdeathsandmarriages/stillbirths>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Stillbirths";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/culturalidentity/ethnicity> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Ethnicity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/culturalidentity/language> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Language";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/culturalidentity/religion> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Religion";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/culturalidentity/sexuality> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Sexual identity";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/elections/electoralregistration>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Electoral registration";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/elections/generalelections> a
+    <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "General elections";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/elections/localgovernmentelections>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Local government elections";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/causesofdeath>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Causes of death";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/childhealth>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Child health";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/conditionsanddiseases>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Coronavirus (COVID-19)";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/disability>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Disability";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/drugusealcoholandsmoking>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Drug use, alcohol and smoking";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthcaresystem>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Health care system";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthinequalities>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Health inequalities";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandlifeexpectancies>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Health and life expectancies";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/healthandwellbeing>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Health and well-being";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/mentalhealth>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Mental health";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare/socialcare>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Social care";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/householdcharacteristics/homeinternetandsocialmediausage>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Home internet and social media usage";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/debt>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Debt";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/expenditure>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Expenditure";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/incomeandwealth>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Income and wealth";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/personalandhouseholdfinances/pensionssavingsandinvestments>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Pensions, savings and investments";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/internationalmigration>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "International migration";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/migrationwithintheuk>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Migration within the UK";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Population estimates";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
+
+<https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationprojections>
+  a <http://www.w3.org/2004/02/skos/core#Concept>;
+  rdfs:label "Population projections";
+  <http://www.w3.org/2004/02/skos/core#inScheme> <http://gss-data.org.uk/def/concept-scheme/ons-topics> .
