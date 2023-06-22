@@ -1,4 +1,8 @@
-`PREFIX dcat: <http://www.w3.org/ns/dcat#>
+# Notes on RDF
+
+## Publishers
+```
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -16,10 +20,12 @@ WHERE {
      } LIMIT 500
   }
   ?s ?p ?o .
-}`
+}
+```
 
-
-`PREFIX dcat: <http://www.w3.org/ns/dcat#>
+## Themes
+```
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
@@ -37,4 +43,5 @@ WHERE {
      } LIMIT 500
   }
   ?s ?p ?o .
-}`
+}
+```
