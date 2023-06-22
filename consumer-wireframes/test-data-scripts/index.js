@@ -75,6 +75,7 @@ createRevision = async () => {
                 body: JSON.stringify(body)
             });
             const api = await response.json();
+
             let revision = api["@id"]
             console.log(`Created: ${url}/${revision}`)
         }
@@ -83,17 +84,16 @@ createRevision = async () => {
 
 start = async () => {
     console.log("Starting: Loading Dataset Series")
-        await createSeries()
+    await createSeries()
     console.log("Complete: Loading Dataset Series")
 
     console.log("Starting: Loading Dataset Releases")
-        await createRelease()
+    await createRelease()
     console.log("Complete: Loading Dataset Releases")
 
     console.log("Starting: Creating revision for each Release")
     await createRevision()
     console.log("Complete: Creating revision for each Release")
-
 }
 
 start()
