@@ -39,7 +39,7 @@
 
 (defn- create-revision [base-entity api-params revision-id jsonld-doc]
   (log/info "Creating revision "
-            (str/join "/" [(:series-slug api-params) (:release-slug api-params) (:revision-id api-params)]))
+            (str/join "/" [(:series-slug api-params) (:release-slug api-params) revision-id]))
   (normalise-revision base-entity api-params revision-id jsonld-doc))
 
 (defn insert-revision [db api-params revision-id jsonld-doc]
@@ -50,4 +50,6 @@
         series (get db series-key)
         base-entity (get series "dh:baseEntity")]
     (-> (assoc db revision-key (create-revision base-entity api-params revision-id jsonld-doc))
-        (update release-key assoc "dh:hasRevision" revision-key))))
+        ;; release also gets the inverse revision triple
+        (update-in [release-key "dh:hasRevision"]
+                   #(conj (vec %) revision-key)))))
