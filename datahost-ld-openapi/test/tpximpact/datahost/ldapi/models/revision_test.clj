@@ -1,12 +1,14 @@
 (ns tpximpact.datahost.ldapi.models.revision-test
   (:require
     [clojure.data.json :as json]
+    [clojure.java.io :as io]
     [clojure.test :refer [deftest is testing]]
     [tpximpact.test-helpers :as th]
     [tpximpact.datahost.ldapi.strings :as ld-str]))
 
 (deftest round-tripping-revision-test
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client
+                                ld-api-app :tpximpact.datahost.ldapi.router/handler
                                 :as sys}
 
     (let [series-title "my lovely series"
@@ -71,4 +73,24 @@
               (let [release-resp (GET release-url)
                     release (json/read-str (:body release-resp))]
                 (is (= (str "/data/my-lovely-series/release-1/revisions/" inserted-revision-id)
-                       (get release "dh:hasRevision")))))))))))
+                       (first (get release "dh:hasRevision"))))))
+
+            ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+            (let [appends-file (io/file (io/resource "test-inputs/revision/2019.csv"))
+                  change-ednld {"@context"
+                                ["https://publishmydata.com/def/datahost/context"
+                                 {"@base" base}]
+                                "dcterms:description" "A new change"}
+                  multipart-temp-file-part {:tempfile appends-file
+                                            :size (.length appends-file)
+                                            :filename (.getName appends-file)
+                                            :content-type "text/csv;"}]
+
+              (is (= (-> {:request-method :post
+                          :uri (str new-revision-location "/changes")
+                          :multipart-params {:appends multipart-temp-file-part}
+                          :content-type "application/json"
+                          :body (json/write-str change-ednld)}
+                         ld-api-app :status)
+                     201)))
+            ))))))

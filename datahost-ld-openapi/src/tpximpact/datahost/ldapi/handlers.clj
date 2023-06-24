@@ -1,6 +1,5 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-   [malli.core :as m]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]))
 
@@ -68,3 +67,22 @@
 
     {:status 422
      :body "Release for this revision does not exist"}))
+
+;; TODO: Uploaded change data should be validated against a supplied schema
+(defn post-revision-changes [db {{:keys [series-slug release-slug revision-id]} :path-params
+                                 {{:keys [appends]} :multipart} :parameters
+                                 body-params :body-params :as request}]
+  (if-let [_revision (db/get-revision db series-slug release-slug revision-id)]
+    (let [incoming-jsonld-doc body-params
+          api-params (-> (get-api-params request)
+                         ;; TODO: coercion doesn't seem to be working on revision-id for some reason
+                         (update :revision-id parse-long))
+          {:keys [_op resource-id jsonld-doc]} (db/insert-change! db api-params incoming-jsonld-doc appends)]
+    {:status 201
+       ; /data/:series-slug/release/:release-slug/revisions/1/changes/:auto-incrementing-change-id
+       :headers {"Location" (str "/data/" series-slug "/release/" release-slug
+                                 "/revisions/" revision-id "/changes/" resource-id)}
+       :body jsonld-doc})
+
+    {:status 422
+     :body "Revision for this change does not exist"}))

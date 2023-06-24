@@ -24,6 +24,9 @@
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
 
+(defn change-key [series-slug release-slug revision-id change-id]
+  (str (revision-key series-slug release-slug revision-id) "/changes/" change-id))
+
 ;;; ---- CONTEXT OPS
 
 (defn normalise-context [ednld base]

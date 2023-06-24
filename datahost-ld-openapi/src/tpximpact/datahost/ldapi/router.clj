@@ -1,26 +1,26 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
-   [com.yetanalytics.flint :as fl]
-   [integrant.core :as ig]
-   [reitit.dev.pretty :as pretty]
-   [reitit.interceptor.sieppari :as sieppari]
-   [reitit.openapi :as openapi]
-   [reitit.ring :as ring]
-   [reitit.ring.coercion :as coercion]
-   [reitit.ring.middleware.multipart :as multipart]
-   [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.ring.middleware.parameters :as parameters]
-   [reitit.swagger :as swagger]
-   [reitit.swagger-ui :as swagger-ui]
-   [tpximpact.datahost.ldapi.native-datastore :as datastore]
-   [reitit.coercion.malli :as rcm]
-   [muuntaja.core :as m]
-   [malli.util :as mu]
-   [tpximpact.datahost.ldapi.routes.series :as series-routes]
-   [tpximpact.datahost.ldapi.routes.release :as release-routes]
-   [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
-   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-   [ring.middleware.cors :as cors]))
+    [com.yetanalytics.flint :as fl]
+    [integrant.core :as ig]
+    [reitit.dev.pretty :as pretty]
+    [reitit.interceptor.sieppari :as sieppari]
+    [reitit.openapi :as openapi]
+    [reitit.ring :as ring]
+    [reitit.ring.coercion :as coercion]
+    [reitit.ring.middleware.multipart :as multipart]
+    [reitit.ring.middleware.muuntaja :as muuntaja]
+    [reitit.ring.middleware.parameters :as parameters]
+    [reitit.swagger :as swagger]
+    [reitit.swagger-ui :as swagger-ui]
+    [tpximpact.datahost.ldapi.native-datastore :as datastore]
+    [reitit.coercion.malli :as rcm]
+    [muuntaja.core :as m]
+    [malli.util :as mu]
+    [tpximpact.datahost.ldapi.routes.series :as series-routes]
+    [tpximpact.datahost.ldapi.routes.release :as release-routes]
+    [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
+    [tpximpact.datahost.ldapi.errors :as ldapi-errors]
+    [ring.middleware.cors :as cors]))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -85,7 +85,10 @@
      ["/:series-slug/release/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]
      ["/:series-slug/release/:release-slug/revisions/:revision-id"
-      {:get (revision-routes/get-revision-route-config db)}]]]
+      {:get (revision-routes/get-revision-route-config db)}]
+     ["/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+      {:post (revision-routes/post-revision-changes-route-config db)}]]]
+
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -127,14 +130,14 @@
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
   [_ {:keys [triplestore db]}]
   (ring/ring-handler
-   (router triplestore db)
-   (ring/routes
-    (swagger-ui/create-swagger-ui-handler
-     {:path "/"
-      :config {:validatorUrl nil
-               :urls [{:name "swagger", :url "swagger.json"}
-                      {:name "openapi", :url "openapi.json"}]
-               :urls.primaryName "openapi"
-               :operationsSorter "alpha"}})
-    (ring/create-default-handler))
-   {:executor sieppari/executor}))
+    (router triplestore db)
+    (ring/routes
+      (swagger-ui/create-swagger-ui-handler
+        {:path "/"
+         :config {:validatorUrl nil
+                  :urls [{:name "swagger", :url "swagger.json"}
+                         {:name "openapi", :url "openapi.json"}]
+                  :urls.primaryName "openapi"
+                  :operationsSorter "alpha"}})
+      (ring/create-default-handler))
+    {:executor sieppari/executor}))
