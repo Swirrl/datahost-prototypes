@@ -23,6 +23,13 @@ erDiagram
         dateTime modified
     }
 
+    SCHEMA {
+        int id
+        string columns
+        dateTime issued
+        dateTime modified
+    }
+
     REVISION {
         int id
         string title "necessary?"
@@ -31,7 +38,7 @@ erDiagram
 
     CHANGE {
         int id
-        string description
+        string message
         dateTime issued
         file appends
         file deletes
@@ -40,6 +47,6 @@ erDiagram
 
     DATASET_SERIES ||--o{ RELEASE : has
     RELEASE ||--o{ REVISION : has
+    RELEASE ||--o| SCHEMA : has
     REVISION ||--o{ CHANGE : has
-
 ```
