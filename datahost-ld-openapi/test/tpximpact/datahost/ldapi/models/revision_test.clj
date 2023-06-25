@@ -4,7 +4,8 @@
     [clojure.java.io :as io]
     [clojure.test :refer [deftest is testing]]
     [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.strings :as ld-str]))
+    [tpximpact.datahost.ldapi.strings :as ld-str])
+  (:import (java.util UUID)))
 
 (deftest round-tripping-revision-test
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client
@@ -29,14 +30,15 @@
 
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
-        (let [release-url (str "/data/" series-slug "/release/release-1")
+        (let [release-id (str "release-" (UUID/randomUUID))
+              release-url (str "/data/" series-slug "/release/" release-id)
               release-resp (PUT release-url
                                 {:content-type :json
                                  :body (json/write-str request-ednld)})]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
-          (let [revision-title "A revision for release 1"
+          (let [revision-title (str "A revision for release " release-id)
                 revision-url (str release-url "/revisions")
                 revision-ednld {"@context"
                                 ["https://publishmydata.com/def/datahost/context"
@@ -49,7 +51,7 @@
                                         "dcterms:title" revision-title,
                                         "@type" "dh:Revision"
                                         "@id" 1,
-                                        "dh:appliesToRelease" (str "../release-1")}
+                                        "dh:appliesToRelease" (str "../" release-id)}
 
                 revision-resp (POST revision-url
                                     {:content-type :json
@@ -72,7 +74,7 @@
             (testing "Associated Release gets the Revision inverse triple"
               (let [release-resp (GET release-url)
                     release (json/read-str (:body release-resp))]
-                (is (= (str "/data/my-lovely-series/release-1/revisions/" inserted-revision-id)
+                (is (= (str "/data/my-lovely-series/" release-id "/revisions/" inserted-revision-id)
                        (first (get release "dh:hasRevision"))))))
 
             ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
