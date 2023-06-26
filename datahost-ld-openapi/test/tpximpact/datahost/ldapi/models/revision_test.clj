@@ -77,22 +77,28 @@
                 (is (= (str "/data/my-lovely-series/" release-id "/revisions/" inserted-revision-id)
                        (first (get release "dh:hasRevision"))))))
 
-            ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
-            (let [appends-file (io/file (io/resource "test-inputs/revision/2019.csv"))
-                  change-ednld {"@context"
-                                ["https://publishmydata.com/def/datahost/context"
-                                 {"@base" base}]
-                                "dcterms:description" "A new change"}
-                  multipart-temp-file-part {:tempfile appends-file
-                                            :size (.length appends-file)
-                                            :filename (.getName appends-file)
-                                            :content-type "text/csv;"}]
+            (testing "Changes resource created with CSV appends file"
+              ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+              (let [appends-file (io/file (io/resource "test-inputs/revision/2019.csv"))
+                    change-ednld {"@context"
+                                  ["https://publishmydata.com/def/datahost/context"
+                                   {"@base" base}]
+                                  "dcterms:description" "A new change"}
+                    multipart-temp-file-part {:tempfile appends-file
+                                              :size (.length appends-file)
+                                              :filename (.getName appends-file)
+                                              :content-type "text/csv;"}
+                    change-api-response (ld-api-app {:request-method :post
+                                                     :uri (str new-revision-location "/changes")
+                                                     :multipart-params {:appends multipart-temp-file-part}
+                                                     :content-type "application/json"
+                                                     :body (json/write-str change-ednld)})
+                    change-response-json (json/read-str (slurp (:body change-api-response)))
+                    inserted-change-id (get change-response-json "@id")
+                    new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-              (is (= (-> {:request-method :post
-                          :uri (str new-revision-location "/changes")
-                          :multipart-params {:appends multipart-temp-file-part}
-                          :content-type "application/json"
-                          :body (json/write-str change-ednld)}
-                         ld-api-app :status)
-                     201)))
-            ))))))
+
+                (is (= (:status change-api-response) 201))
+                (is (= new-change-resource-location
+                       (str new-revision-location "/changes/" inserted-change-id))
+                    "Created with the resource URI provided in the Location header")))))))))

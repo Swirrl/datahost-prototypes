@@ -5,7 +5,8 @@
             [malli.error :as me]
             [tpximpact.datahost.ldapi.schemas.common :refer [registry]]
             [tpximpact.datahost.ldapi.models.shared :as models-shared])
-  (:import (java.util UUID)))
+  (:import (java.time ZoneId ZonedDateTime)
+           (java.util UUID)))
 
 (def ChangeApiParams [:map
                       [:series-slug :datahost/slug-string]
@@ -15,7 +16,7 @@
                       ])
 
 (defn normalise-change [base-entity api-params change-id appends-file-key jsonld-doc]
-  (let [{:keys [revision-id]} api-params
+  (let [{:keys [series-slug release-slug revision-id]} api-params
         _ (assert base-entity "Expected base entity to be set")]
     (when-not (m/validate ChangeApiParams
                           api-params
@@ -35,8 +36,10 @@
           final-doc (assoc validated-doc
                       "@type" "dh:Change"
                       "@id" change-id
+                      "dcterms:issued" (-> (ZonedDateTime/now (ZoneId/of "UTC"))
+                                           (.format models-shared/date-formatter))
                       "dh:appends" appends-file-key
-                      "dh:appliesToRevision" (str "../" revision-id))]
+                      "dh:appliesToRevision" (str ".." (models-shared/revision-key series-slug release-slug revision-id)))]
       final-doc)))
 
 (def files-root-key "/data/files")

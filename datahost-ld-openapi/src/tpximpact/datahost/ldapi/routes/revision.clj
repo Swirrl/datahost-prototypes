@@ -44,6 +44,7 @@
                        :release-slug string?
                        :revision-id int?}}
    :responses {201 {:description "Changes were added to a Revision"
+                    :body map?
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"

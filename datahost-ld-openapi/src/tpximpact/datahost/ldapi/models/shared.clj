@@ -129,7 +129,7 @@
 
 ;;; ---- ISSUED+MODIFIED DATES
 
-(def ^:private date-formatter
+(def date-formatter
   java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
 
 (defmulti -issued+modified-dates
