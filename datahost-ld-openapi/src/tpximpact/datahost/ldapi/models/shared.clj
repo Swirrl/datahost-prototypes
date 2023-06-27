@@ -24,6 +24,9 @@
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
 
+(defn change-key [series-slug release-slug revision-id change-id]
+  (str (revision-key series-slug release-slug revision-id) "/changes/" change-id))
+
 ;;; ---- CONTEXT OPS
 
 (defn normalise-context [ednld base]
@@ -126,7 +129,7 @@
 
 ;;; ---- ISSUED+MODIFIED DATES
 
-(def ^:private date-formatter
+(def date-formatter
   java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME)
 
 (defmulti -issued+modified-dates

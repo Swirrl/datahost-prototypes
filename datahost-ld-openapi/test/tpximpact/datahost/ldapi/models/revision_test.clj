@@ -1,12 +1,15 @@
 (ns tpximpact.datahost.ldapi.models.revision-test
   (:require
     [clojure.data.json :as json]
+    [clojure.java.io :as io]
     [clojure.test :refer [deftest is testing]]
     [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.strings :as ld-str]))
+    [tpximpact.datahost.ldapi.strings :as ld-str])
+  (:import (java.util UUID)))
 
 (deftest round-tripping-revision-test
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client
+                                ld-api-app :tpximpact.datahost.ldapi.router/handler
                                 :as sys}
 
     (let [series-title "my lovely series"
@@ -27,14 +30,15 @@
 
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
-        (let [release-url (str "/data/" series-slug "/release/release-1")
+        (let [release-id (str "release-" (UUID/randomUUID))
+              release-url (str "/data/" series-slug "/release/" release-id)
               release-resp (PUT release-url
                                 {:content-type :json
                                  :body (json/write-str request-ednld)})]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
-          (let [revision-title "A revision for release 1"
+          (let [revision-title (str "A revision for release " release-id)
                 revision-url (str release-url "/revisions")
                 revision-ednld {"@context"
                                 ["https://publishmydata.com/def/datahost/context"
@@ -47,24 +51,89 @@
                                         "dcterms:title" revision-title,
                                         "@type" "dh:Revision"
                                         "@id" 1,
-                                        "dh:appliesToRelease" (str "../release-1")}
+                                        "dh:appliesToRelease" (str "../" release-id)}
 
                 revision-resp (POST revision-url
                                     {:content-type :json
                                      :body (json/write-str revision-ednld)})
                 inserted-revision-id (get (json/read-str (:body revision-resp)) "@id")
-                inserted-revision-url (str revision-url "/" inserted-revision-id)]
+                new-revision-location (-> revision-resp :headers (get "Location"))]
 
             (is (= normalised-revision-ld (json/read-str (:body revision-resp)))
                 "successful post returns normalised release data")
 
+            (is (= new-revision-location
+                   (str revision-url "/" inserted-revision-id))
+                "Created with the resource URI provided in the Location header")
+
             (testing "Fetching an existing revision works"
-              (let [response (GET inserted-revision-url)]
+              (let [response (GET new-revision-location)]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (json/read-str (:body response))))))
 
             (testing "Associated Release gets the Revision inverse triple"
               (let [release-resp (GET release-url)
                     release (json/read-str (:body release-resp))]
-                (is (= (str "/data/my-lovely-series/release-1/revisions/" inserted-revision-id)
-                       (get release "dh:hasRevision")))))))))))
+                (is (= (str "/data/my-lovely-series/" release-id "/revisions/" inserted-revision-id)
+                       (first (get release "dh:hasRevision"))))))
+
+            (testing "Changes resource created with CSV appends file"
+              ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+              (let [appends-file (io/file (io/resource "test-inputs/revision/2019.csv"))
+                    change-ednld {"@context"
+                                  ["https://publishmydata.com/def/datahost/context"
+                                   {"@base" base}]
+                                  "dcterms:description" "A new change"}
+                    multipart-temp-file-part {:tempfile appends-file
+                                              :size (.length appends-file)
+                                              :filename (.getName appends-file)
+                                              :content-type "text/csv;"}
+                    change-api-response (ld-api-app {:request-method :post
+                                                     :uri (str new-revision-location "/changes")
+                                                     :multipart-params {:appends multipart-temp-file-part}
+                                                     :content-type "application/json"
+                                                     :body (json/write-str change-ednld)})
+                    change-response-json (json/read-str (slurp (:body change-api-response)))
+                    inserted-change-id (get change-response-json "@id")
+                    new-change-resource-location (-> change-api-response :headers (get "Location"))]
+
+
+                (is (= (:status change-api-response) 201))
+                (is (= new-change-resource-location
+                       (str new-revision-location "/changes/" inserted-change-id))
+                    "Created with the resource URI provided in the Location header"))))
+
+          (testing "Creation of a second revision for a release"
+            (let [revision-title-2 (str "A second revision for release " release-id)
+                  revision-url-2 (str release-url "/revisions")
+                  revision-ednld-2 {"@context"
+                                    ["https://publishmydata.com/def/datahost/context"
+                                     {"@base" base}]
+                                    "dcterms:title" revision-title-2}
+
+                  normalised-revision-ld-2 {"@context"
+                                            ["https://publishmydata.com/def/datahost/context"
+                                             {"@base" base}],
+                                            "dcterms:title" revision-title-2,
+                                            "@type" "dh:Revision"
+                                            "@id" 2,
+                                            "dh:appliesToRelease" (str "../" release-id)}
+
+                  revision-resp-2 (POST revision-url-2
+                                        {:content-type :json
+                                         :body (json/write-str revision-ednld-2)})
+                  inserted-revision-id-2 (get (json/read-str (:body revision-resp-2)) "@id")
+                  new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
+
+              (is (= normalised-revision-ld-2 (json/read-str (:body revision-resp-2)))
+                  "successful second post returns normalised release data")
+
+              (is (= new-revision-location-2
+                     (str revision-url-2 "/" inserted-revision-id-2))
+                  "Created with the resource URI provided in the Location header")
+
+              (testing "Fetching a second existing revision works"
+                (let [response (GET new-revision-location-2)]
+                  (is (= 200 (:status response)))
+                  (is (= normalised-revision-ld-2 (json/read-str (:body response))))))))
+          )))))

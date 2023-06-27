@@ -10,23 +10,25 @@
 
   See: https://github.com/jimpil/duratom"
   (:require
-   [duratom.core :as da]
-   [integrant.core :as ig]
-   [malli.core :as m]
-   [meta-merge.core :as mm]
-   [tpximpact.datahost.ldapi.models.shared :as models-shared]
-   [tpximpact.datahost.ldapi.models.series :as series]
-   [tpximpact.datahost.ldapi.models.release :as release]
-   [tpximpact.datahost.ldapi.models.revision :as revision]
-   [tpximpact.datahost.ldapi.schemas.release :as s.release]
-   [tpximpact.datahost.ldapi.schemas.series :as s.series])
+    [clojure.string :as str]
+    [duratom.core :as da]
+    [integrant.core :as ig]
+    [malli.core :as m]
+    [meta-merge.core :as mm]
+    [tpximpact.datahost.ldapi.models.shared :as models-shared]
+    [tpximpact.datahost.ldapi.models.series :as series]
+    [tpximpact.datahost.ldapi.models.release :as release]
+    [tpximpact.datahost.ldapi.models.revision :as revision]
+    [tpximpact.datahost.ldapi.models.change :as change]
+    [tpximpact.datahost.ldapi.schemas.release :as s.release]
+    [tpximpact.datahost.ldapi.schemas.series :as s.series])
   (:import
-   [java.time ZoneId ZonedDateTime]))
+    [java.time ZoneId ZonedDateTime]))
 
 (def db-defaults
   {:storage-type :local-file
    :opts {:commit-mode :sync
-          :init {:revision-id-counter 0}}})
+          :init {}}})
 
 (defmethod ig/prep-key ::db
   [_ options]
@@ -87,11 +89,39 @@
     {:op (-> updated-db meta :op)
      :jsonld-doc (get updated-db release-key)}))
 
+(defn new-child-id [db parent-key child-predicate]
+  "Looks at child keys on parent collection. Assumes keys are strings of format
+  /x/y/.../1, i.e. paths that end in a stringified integer."
+  (let [child-keys (get-in @db [parent-key child-predicate])]
+    (if (empty? child-keys)
+      1
+      (-> child-keys
+          sort
+          last
+          (str/split #"/")
+          last
+          (Integer/parseInt)
+          inc))))
+
 (defn insert-revision! [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
-  (let [auto-revision-id (-> (swap! db update :revision-id-counter inc) :revision-id-counter)
+  (let [auto-revision-id (new-child-id db
+                                       (models-shared/release-key series-slug release-slug)
+                                       "dh:hasRevision")
         revision-key (models-shared/revision-key series-slug release-slug auto-revision-id)
         updated-db (swap! db revision/insert-revision api-params auto-revision-id incoming-jsonld-doc)]
     {:op (-> updated-db meta :op)
+     :resource-id auto-revision-id
      :jsonld-doc (get updated-db revision-key)}))
+
+
+(defn insert-change! [db {:keys [series-slug release-slug revision-id] :as api-params} incoming-jsonld-doc appends-tmp-file]
+  (let [auto-change-id (new-child-id db
+                                     (models-shared/revision-key series-slug release-slug revision-id)
+                                     "dh:hasChange")
+        change-key (models-shared/change-key series-slug release-slug revision-id auto-change-id)
+        updated-db (swap! db change/insert-change api-params auto-change-id incoming-jsonld-doc appends-tmp-file)]
+    {:op (-> updated-db meta :op)
+     :resource-id auto-change-id
+     :jsonld-doc (get updated-db change-key)}))
 
 
