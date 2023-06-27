@@ -92,13 +92,13 @@
 (defn new-child-id [db parent-key child-predicate]
   "Looks at child keys on parent collection. Assumes keys are strings of format
   /x/y/.../1, i.e. paths that end in a stringified integer."
-  (let [child-keys (get-in db [parent-key child-predicate])]
+  (let [child-keys (get-in @db [parent-key child-predicate])]
     (if (empty? child-keys)
       1
       (-> child-keys
           sort
           last
-          (str/split "/")
+          (str/split #"/")
           last
           (Integer/parseInt)
           inc))))

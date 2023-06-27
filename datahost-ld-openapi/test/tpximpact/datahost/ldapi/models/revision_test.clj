@@ -101,4 +101,39 @@
                 (is (= (:status change-api-response) 201))
                 (is (= new-change-resource-location
                        (str new-revision-location "/changes/" inserted-change-id))
-                    "Created with the resource URI provided in the Location header")))))))))
+                    "Created with the resource URI provided in the Location header"))))
+
+          (testing "Creation of a second revision for a release"
+            (let [revision-title-2 (str "A second revision for release " release-id)
+                  revision-url-2 (str release-url "/revisions")
+                  revision-ednld-2 {"@context"
+                                    ["https://publishmydata.com/def/datahost/context"
+                                     {"@base" base}]
+                                    "dcterms:title" revision-title-2}
+
+                  normalised-revision-ld-2 {"@context"
+                                            ["https://publishmydata.com/def/datahost/context"
+                                             {"@base" base}],
+                                            "dcterms:title" revision-title-2,
+                                            "@type" "dh:Revision"
+                                            "@id" 2,
+                                            "dh:appliesToRelease" (str "../" release-id)}
+
+                  revision-resp-2 (POST revision-url-2
+                                        {:content-type :json
+                                         :body (json/write-str revision-ednld-2)})
+                  inserted-revision-id-2 (get (json/read-str (:body revision-resp-2)) "@id")
+                  new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
+
+              (is (= normalised-revision-ld-2 (json/read-str (:body revision-resp-2)))
+                  "successful second post returns normalised release data")
+
+              (is (= new-revision-location-2
+                     (str revision-url-2 "/" inserted-revision-id-2))
+                  "Created with the resource URI provided in the Location header")
+
+              (testing "Fetching a second existing revision works"
+                (let [response (GET new-revision-location-2)]
+                  (is (= 200 (:status response)))
+                  (is (= normalised-revision-ld-2 (json/read-str (:body response))))))))
+          )))))
