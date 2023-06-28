@@ -15,6 +15,9 @@
 
 ;;; ---- KEY CTORS
 
+(defn dataset-series-uri [series-slug]
+  (.resolve ld-root series-slug))
+
 (defn dataset-series-key [series-slug]
   (str (.getPath ld-root) series-slug))
 

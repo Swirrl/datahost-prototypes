@@ -75,12 +75,12 @@
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
               :tags ["linked data api"]}
      ["/:series-slug"
-      {:get (series-routes/get-series-route-config db)
-       :put (series-routes/put-series-route-config db)}]
+      {:get (series-routes/get-series-route-config triplestore)
+       :put (series-routes/put-series-route-config triplestore)}]
 
      ["/:series-slug/release/:release-slug"
       {:get (release-routes/get-release-route-config db)
-       :put (release-routes/put-release-route-config db)}]
+       :put (release-routes/put-release-route-config db triplestore)}]
 
      ["/:series-slug/release/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]
@@ -124,17 +124,20 @@
                         ;; multipart
                         multipart/multipart-middleware]}}))
 
+(defn handler [triplestore db]
+  (ring/ring-handler
+    (router triplestore db)
+    (ring/routes
+      (swagger-ui/create-swagger-ui-handler
+        {:path "/"
+         :config {:validatorUrl nil
+                  :urls [{:name "swagger", :url "swagger.json"}
+                         {:name "openapi", :url "openapi.json"}]
+                  :urls.primaryName "openapi"
+                  :operationsSorter "alpha"}})
+      (ring/create-default-handler))
+    {:executor sieppari/executor}))
+
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
   [_ {:keys [triplestore db]}]
-  (ring/ring-handler
-   (router triplestore db)
-   (ring/routes
-    (swagger-ui/create-swagger-ui-handler
-     {:path "/"
-      :config {:validatorUrl nil
-               :urls [{:name "swagger", :url "swagger.json"}
-                      {:name "openapi", :url "openapi.json"}]
-               :urls.primaryName "openapi"
-               :operationsSorter "alpha"}})
-    (ring/create-default-handler))
-   {:executor sieppari/executor}))
+  (handler triplestore db))

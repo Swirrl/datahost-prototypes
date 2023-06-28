@@ -10,18 +10,26 @@
 
   See: https://github.com/jimpil/duratom"
   (:require
-   [duratom.core :as da]
-   [integrant.core :as ig]
-   [malli.core :as m]
-   [meta-merge.core :as mm]
-   [tpximpact.datahost.ldapi.models.shared :as models-shared]
-   [tpximpact.datahost.ldapi.models.series :as series]
-   [tpximpact.datahost.ldapi.models.release :as release]
-   [tpximpact.datahost.ldapi.models.revision :as revision]
-   [tpximpact.datahost.ldapi.schemas.release :as s.release]
-   [tpximpact.datahost.ldapi.schemas.series :as s.series])
+    [duratom.core :as da]
+    [grafter-2.rdf.protocols :as pr]
+    [grafter-2.rdf4j.repository :as repo]
+    [integrant.core :as ig]
+    [malli.core :as m]
+    [meta-merge.core :as mm]
+    [com.yetanalytics.flint :as f]
+    [clojure.data.json :as json]
+    [tpximpact.datahost.ldapi.models.shared :as models-shared]
+    [tpximpact.datahost.ldapi.models.series :as series]
+    [tpximpact.datahost.ldapi.models.release :as release]
+    [tpximpact.datahost.ldapi.models.revision :as revision]
+    [tpximpact.datahost.ldapi.schemas.release :as s.release]
+    [tpximpact.datahost.ldapi.schemas.series :as s.series]
+    [tpximpact.datahost.ldapi.native-datastore :as datastore]
+    [tpximpact.datahost.ldapi.compact :as compact]
+    [tpximpact.datahost.ldapi.resource :as resource])
   (:import
-   [java.time ZoneId ZonedDateTime]))
+   [java.time ZoneId ZonedDateTime Instant OffsetDateTime ZoneOffset]
+   [java.net URI]))
 
 (def db-defaults
   {:storage-type :local-file
@@ -35,9 +43,52 @@
 (defmethod ig/init-key ::db [_ {:keys [storage-type opts]}]
     (da/duratom storage-type opts))
 
-(defn get-series [db series-slug]
-  (let [key (models-shared/dataset-series-key series-slug)]
-    (get @db key)))
+(defn- get-series-query [series-url]
+  {:prefixes {:dcterms "<http://purl.org/dc/terms/>"
+               :dh "<https://publishmydata.com/def/datahost/>"}
+    :select '*
+    :where [[series-url 'a :dh/DatasetSeries]
+            [series-url :dcterms/title '?title]
+            [series-url :dcterms/description '?description]
+            [series-url :dcterms/modified '?modified]
+            [series-url :dcterms/issued '?issued]]})
+
+(def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
+               :dh (URI. "https://publishmydata.com/def/datahost/")})
+
+(defn- map-properties [prop-mapping m]
+  (reduce-kv (fn [props k v]
+               (if-let [prop-uri (get prop-mapping k)]
+                 (resource/add-property props prop-uri v)
+                 props))
+             {}
+             m))
+(defn- series-params->properties [query-params]
+  (let [prop-mapping {:title (compact/expand :dcterms/title)
+                      :description (compact/expand :dcterms/description)}]
+    (map-properties prop-mapping query-params)))
+
+(defn- compact-mapping [compact-keys]
+  (into {} (map (fn [k] [(keyword (name k)) (format "%s:%s" (namespace k) (name k))]) compact-keys)))
+
+(defn- bindings->series [bindings]
+  (let [mapping (compact-mapping [:dcterms/title :dcterms/description :dcterms/modified :dcterms/issued])]
+    (reduce-kv (fn [acc k v]
+                 (if-let [json-key (get mapping k)]
+                   (assoc acc json-key v)
+                   acc))
+               (resource/create-properties)
+               bindings)))
+
+(defn get-series-by-uri [triplestore series-uri]
+  (let [q (get-series-query series-uri)
+        results (datastore/eager-query triplestore (f/format-query q :pretty? true))]
+    (when-let [bindings (first results)]
+      (bindings->series bindings))))
+
+(defn get-series-by-slug [triplestore series-slug]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)]
+    (get-series-by-uri triplestore series-uri)))
 
 (defn get-release [db series-slug release-slug]
   (let [key (models-shared/release-key series-slug release-slug)]
@@ -65,15 +116,42 @@
            (assoc api-params :op/timestamp ts)
            incoming-jsonld-doc)))
 
+(defn- diff-resource [r1 r2 property-uris])
+
+(defn- series-changed? [old-series new-series]
+  false)
+
+(defn- request->series [{:keys [series-slug] :as api-params} incoming-jsonld-doc]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        series-doc (assoc incoming-jsonld-doc "@id" (str series-uri))
+        doc-resource (resource/from-json-ld-doc series-doc)
+        param-properties (series-params->properties api-params)]
+    (resource/set-properties doc-resource param-properties)))
+
+(defn- update-series [triplestore series])
+
+(defn- insert-series [triplestore series]
+  (let [subject (resource/id series)
+        now (.atOffset (Instant/now) ZoneOffset/UTC)
+        to-insert (concat (resource/->statements series)
+                          [(pr/->Triple subject (compact/expand :dcterms/issued) now)
+                           (pr/->Triple subject (compact/expand :dcterms/modified) now)])]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/add conn to-insert))))
+
 (defn upsert-series!
   "Returns a map {:op ... :jsonld-doc ...}, where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
-  [db {:keys [series-slug] :as api-params} incoming-jsonld-doc]
-  (let [series-key (models-shared/dataset-series-key series-slug)
-        api-params (assoc api-params :op.upsert/keys {:series series-key})
-        updated-db (upsert-doc! db series/upsert-series api-params incoming-jsonld-doc)]
-    {:op (-> updated-db meta :op)
-     :jsonld-doc (get updated-db series-key)}))
+  [triplestore {:keys [series-slug] :as api-params} incoming-jsonld-doc]
+  (let [new-series (request->series api-params incoming-jsonld-doc)]
+    (if-let [existing-series (get-series-by-slug triplestore series-slug)]
+      (if (series-changed? existing-series new-series)
+        (do (update-series triplestore new-series)
+            {:op :update :jsonld-doc nil})
+        {:op :noop :jsonld-doc incoming-jsonld-doc})
+      (do
+        (insert-series triplestore new-series)
+        {:op :create :jsonld-doc (resource/->json-ld new-series @compact/default-context)}))))
 
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to

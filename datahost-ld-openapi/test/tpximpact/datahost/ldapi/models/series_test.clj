@@ -2,12 +2,15 @@
   (:require
    [clojure.data.json :as json]
    [clojure.string :as str]
-   [clojure.test :refer [deftest is testing]]
+   [clojure.test :refer [deftest is testing] :as t]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
+   [grafter-2.rdf4j.repository :as repo]
    [tpximpact.datahost.ldapi.models.series :as sut]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]
    [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.ldapi.router :as router]
+   [reitit.ring :as ring]
    [tpximpact.test-helpers :as th])
   (:import
    (clojure.lang ExceptionInfo)
@@ -16,6 +19,22 @@
 (defn format-date-time
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
+
+(t/deftest put-series-create-test
+  (let [repo (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update") #_(repo/sail-repo)
+        handler (router/handler repo (atom {}))
+        request {:uri "/data/new-series"
+                 :request-method :put
+                 :headers {"content-type" "application/json"}
+                 :body (json/write-str {"dcterms:title" "A title"
+                                        "dcterms:identifier" "Description"})}
+        {:keys [status body] :as response} (handler request)
+        doc (json/read-str body)
+        ]
+    (println response)
+    (t/is (= 201 status))
+    (t/is (= "A title" (get doc "dcterms:title")))
+    (t/is (= "Description" (get doc "dcterms:identifier")))))
 
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}

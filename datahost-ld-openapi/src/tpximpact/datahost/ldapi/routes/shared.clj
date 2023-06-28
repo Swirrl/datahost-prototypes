@@ -8,6 +8,10 @@
     ["@type" {:optional true} string?]
     ["@id" {:optional true} string?]
     ["dh:baseEntity" {:optional true} string?]
-    ["@context" [:or :string
-                 [:tuple :string [:map
-                                  ["@base" string?]]]]]]])
+    ["@context" {:optional true} [:or :string
+                                  [:tuple :string [:map {:closed false}
+                                                   ["@base" string?]]]]]]])
+
+;; TODO: create better resource representation
+(def ResourceSchema
+  [:string])
