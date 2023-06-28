@@ -18,9 +18,9 @@
                      "application/json" {:body map?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn put-release-route-config [db]
+(defn put-release-route-config [db triplestore]
   {:summary "Create or update metadata for a release"
-   :handler (partial handlers/put-release db)
+   :handler (partial handlers/put-release db triplestore)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
                        :release-slug string?}

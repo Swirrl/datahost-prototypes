@@ -84,7 +84,7 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(defn router [triplestore db]
+(defn router [clock triplestore db]
   (ring/router
    [["/triplestore-query"
      ;; TODO remove this route when we have real ones using the triplestore
@@ -106,12 +106,12 @@
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
               :tags ["linked data api"]}
      ["/:series-slug"
-      {:get (series-routes/get-series-route-config db)
-       :put (series-routes/put-series-route-config db)}]
+      {:get (series-routes/get-series-route-config triplestore)
+       :put (series-routes/put-series-route-config clock triplestore)}]
 
      ["/:series-slug/releases/:release-slug"
       {:get (release-routes/get-release-route-config db)
-       :put (release-routes/put-release-route-config db)}]
+       :put (release-routes/put-release-route-config db triplestore)}]
 
      ["/:series-slug/releases/:release-slug/schemas"
       {:get (release-routes/get-release-ld-schema-config db)}]
@@ -164,10 +164,9 @@
                         ;; multipart
                         multipart/multipart-middleware]}}))
 
-(defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [triplestore db]}]
+(defn handler [clock triplestore db]
   (ring/ring-handler
-    (router triplestore db)
+    (router clock triplestore db)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
@@ -178,3 +177,7 @@
                   :operationsSorter "alpha"}})
       (ring/create-default-handler))
     {:executor sieppari/executor}))
+
+(defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
+  [_ {:keys [clock triplestore db]}]
+  (handler clock triplestore db))

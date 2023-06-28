@@ -11,10 +11,10 @@
 (defn get-api-params [{:keys [path-params query-params]}]
   (-> query-params (update-keys keyword) (merge path-params)))
 
-(defn get-dataset-series [db {{:keys [series-slug]} :path-params}]
-  (if-let [series (db/get-series db series-slug)]
+(defn get-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
+  (if-let [series (db/get-series-by-slug triplestore series-slug)]
     {:status 200
-     :body series}
+     :body (db/series->response-body series)}
     not-found-response))
 
 (defn op->response-code
@@ -26,10 +26,10 @@
     :update 200
     :noop   200))
 
-(defn put-dataset-series [db {:keys [body-params] :as request}]
+(defn put-dataset-series [clock triplestore {:keys [body-params] :as request}]
   (let [api-params (get-api-params request)
         incoming-jsonld-doc body-params
-        {:keys [op jsonld-doc]} (db/upsert-series! db api-params incoming-jsonld-doc)]
+        {:keys [op jsonld-doc]} (db/upsert-series! clock triplestore api-params incoming-jsonld-doc)]
     {:status (op->response-code op)
      :body jsonld-doc}))
 
@@ -45,9 +45,9 @@
        :body release})
     not-found-response))
 
-(defn put-release [db {{:keys [series-slug]} :path-params
+(defn put-release [db triplestore {{:keys [series-slug]} :path-params
                        body-params :body-params :as request}]
-  (if-let [_series (db/get-series db series-slug)]
+  (if-let [_series (db/get-series-by-slug triplestore series-slug)]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           {:keys [op jsonld-doc]} (db/upsert-release! db api-params incoming-jsonld-doc)]
@@ -60,7 +60,7 @@
   [db {{:keys [series-slug] :as params} :path-params
        incoming-jsonld-doc :body-params 
        :as request}]
-  (if (not (db/get-series db series-slug))
+  (if (not (db/get-series-by-slug db series-slug))
     not-found-response
     
     (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! db (get-api-params request) incoming-jsonld-doc)]

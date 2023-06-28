@@ -13,6 +13,9 @@
 
  :tpximpact.datahost.ldapi.router/handler 
  {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
-  :db #ig/ref :tpximpact.datahost.ldapi.db/db}
+  :db #ig/ref :tpximpact.datahost.ldapi.db/db
+  :clock #ig/ref :tpximpact.datahost.time/system-clock}
+
+ :tpximpact.datahost.time/system-clock {}
 
  :tpximpact.datahost.ldapi.db/db {:opts {:file-path ".datahost-dev-db.edn"}}}
