@@ -21,6 +21,12 @@
 (defn release-key [series-slug release-slug]
   (str (dataset-series-key series-slug) "/releases/" release-slug))
 
+(defn release-schema-key
+  ([{:keys [series-slug release-slug schema-slug]}]
+   (release-schema-key series-slug release-slug schema-slug))
+  ([series-slug release-slug schema-slug]
+   (str (release-key series-slug release-slug) "/schemas/" schema-slug)))
+
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
 

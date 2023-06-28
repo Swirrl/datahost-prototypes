@@ -12,20 +12,37 @@
   (when-let [db (get system :tpximpact.datahost.ldapi.db/db)]
     (da/destroy db)))
 
-(defn start-system [configs]
-  (-> configs
-      (sys/load-configs)
-      (sys/prep-config)
-      (ig/init)))
+(def ^:dynamic *system* (atom nil))
+
+(defn start-system 
+  ([]
+   (start-system ["ldapi/base-system.edn"
+                  ;; TODO - nuke test-system & move contents to env.edn
+                  "test-system.edn"
+                  ;; env.edn contains environment specific
+                  ;; overrides to the base-system.edn and
+                  ;; is set on classpath depending on env.
+                  "ldapi/env.edn"]))
+  ([configs]
+   (let [sys (-> configs
+                 (sys/load-configs)
+                 (sys/prep-config)
+                 (ig/init))]
+     (reset! *system* sys))))
+
+(defn stop-system
+  []
+  (let [sys @*system*]
+    (reset! *system* nil)
+    (ig/halt! sys)))
+
+(defn with-system-fixture [test-fn]
+  (start-system)
+  (test-fn)
+  (stop-system))
 
 (defmacro with-system* [{:keys [on-halt on-init] :as _opts} system-binding & body]
-  `(let [sys# (start-system ["ldapi/base-system.edn"
-                             ;; TODO - nuke test-system & move contents to env.edn
-                             "test-system.edn"
-                             ;; env.edn contains environment specific
-                             ;; overrides to the base-system.edn and
-                             ;; is set on classpath depending on env.
-                             "ldapi/env.edn"])
+  `(let [sys# (start-system)
          ~system-binding sys#]
      (try
        (doseq [f!# ~on-init]
