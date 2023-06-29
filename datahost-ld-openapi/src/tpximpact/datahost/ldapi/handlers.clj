@@ -1,7 +1,8 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.schemas.api :as s.api]))
+   [tpximpact.datahost.ldapi.schemas.api :as s.api]
+   [tpximpact.datahost.ldapi.models.revision :as revision-model]))
 
 (def not-found-response
   {:status 404
@@ -49,10 +50,18 @@
     {:status 422
      :body "Series for this release does not exist"}))
 
-(defn get-revision [db {{:keys [series-slug release-slug revision-id]} :path-params :as _path-params}]
+(defn get-revision [db {{:keys [series-slug release-slug revision-id]} :path-params
+                        {:strs [accept]} :headers :as _request}]
   (if-let [rev (db/get-revision db series-slug release-slug revision-id)]
-    {:status 200
-     :body rev}
+    (if (= accept "text/csv")
+      {:status 200
+       :headers {"content-type" "text/csv"
+                 "content-disposition" "attachment ; filename=revision.csv"}
+       :body (or (revision-model/revision->csv-stream db rev) "")}
+
+      {:status 200
+       :headers {"content-type" "application/json"}
+       :body rev})
     not-found-response))
 
 (defn post-revision [db {{:keys [series-slug release-slug]} :path-params

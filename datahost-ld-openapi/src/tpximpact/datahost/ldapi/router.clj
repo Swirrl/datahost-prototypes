@@ -15,12 +15,43 @@
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
     [reitit.coercion.malli :as rcm]
     [muuntaja.core :as m]
+    [muuntaja.format.core :as fc]
     [malli.util :as mu]
     [tpximpact.datahost.ldapi.routes.series :as series-routes]
     [tpximpact.datahost.ldapi.routes.release :as release-routes]
     [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
     [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-    [ring.middleware.cors :as cors]))
+    [ring.middleware.cors :as cors])
+  (:import (java.io InputStream InputStreamReader OutputStream)))
+
+(defn decode-str [options]
+  (reify
+    fc/Decode
+    (decode [_ data charset]
+      (slurp (InputStreamReader. ^InputStream data ^String charset)))))
+
+(defn encode-str [options]
+  (reify
+    fc/EncodeToBytes
+    (encode-to-bytes [_ data charset]
+      (.getBytes data ^String charset))
+    fc/EncodeToOutputStream
+    (encode-to-output-stream [_ data charset]
+      (fn [^OutputStream output-stream]
+        (.write output-stream
+                (.getBytes data ^String charset))))))
+
+(def csv-format
+  {:decoder [decode-str]
+   :encoder [encode-str]})
+
+(def muuntaja-csv-format-instance
+  (m/create
+    (-> (assoc-in
+          m/default-options
+          [:formats "text/csv"] csv-format)
+        ;; default would otherwise be application/json
+        (dissoc :default-format))))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -85,7 +116,8 @@
      ["/:series-slug/release/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]
      ["/:series-slug/release/:release-slug/revisions/:revision-id"
-      {:get (revision-routes/get-revision-route-config db)}]
+      {:get (assoc (revision-routes/get-revision-route-config db)
+              :muuntaja muuntaja-csv-format-instance)}]
      ["/:series-slug/release/:release-slug/revisions/:revision-id/changes"
       {:post (revision-routes/post-revision-changes-route-config db)}]]]
 

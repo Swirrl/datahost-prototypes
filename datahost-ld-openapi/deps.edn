@@ -16,7 +16,7 @@
         ring-cors/ring-cors {:mvn/version "0.1.13"}
         duratom/duratom {:mvn/version "0.5.8"}
         camel-snake-kebab {:mvn/version "0.4.3"}
-        }
+				scicloj/tablecloth {:mvn/version "7.000-beta-50"}}
 
  :aliases
  {:run {:main-opts ["-m" "tpximpact.datahost.ldapi"]}
