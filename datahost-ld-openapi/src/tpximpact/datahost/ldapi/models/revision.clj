@@ -17,7 +17,7 @@
                         [:description {:optional true} :string]])
 
 (defn normalise-revision [base-entity api-params revision-id jsonld-doc]
-  (let [{:keys [release-slug]} api-params
+  (let [{:keys [series-slug release-slug]} api-params
         _ (assert base-entity "Expected base entity to be set")]
     (when-not (m/validate RevisionApiParams
                           api-params
@@ -34,10 +34,12 @@
           validated-doc (-> (models-shared/validate-id revision-id cleaned-doc)
                             (models-shared/validate-context base-entity))
 
+          release-key (models-shared/release-key series-slug release-slug)
+
           final-doc (assoc validated-doc
                       "@type" "dh:Revision"
                       "@id" revision-id
-                      "dh:appliesToRelease" (str "../" release-slug))]
+                      "dh:appliesToRelease" release-key)]
       final-doc)))
 
 (defn string->stream

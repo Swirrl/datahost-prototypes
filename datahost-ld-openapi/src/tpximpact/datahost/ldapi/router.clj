@@ -109,16 +109,16 @@
       {:get (series-routes/get-series-route-config db)
        :put (series-routes/put-series-route-config db)}]
 
-     ["/:series-slug/release/:release-slug"
+     ["/:series-slug/releases/:release-slug"
       {:get (release-routes/get-release-route-config db)
        :put (release-routes/put-release-route-config db)}]
 
-     ["/:series-slug/release/:release-slug/revisions"
+     ["/:series-slug/releases/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]
-     ["/:series-slug/release/:release-slug/revisions/:revision-id"
+     ["/:series-slug/releases/:release-slug/revisions/:revision-id"
       {:get (assoc (revision-routes/get-revision-route-config db)
               :muuntaja muuntaja-csv-format-instance)}]
-     ["/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+     ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
       {:post (revision-routes/post-revision-changes-route-config db)}]]]
 
 

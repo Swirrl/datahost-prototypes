@@ -32,9 +32,9 @@ example:datasets
     datahost:base "http://www.example.org/life-expectancy"
     .
 
-# PUT       : ./release/2023
-# CONTROLLER: /data/:series/release/:release-slug
-<./release/2023>
+# PUT       : ./releases/2023
+# CONTROLLER: /data/:series/releases/:release-slug
+<./releases/2023>
     a datahost:Release ;
     dcterms:issued "T2" ;
     dcterms:title "2023" ;
@@ -42,15 +42,15 @@ example:datasets
     .
 
 # Note because of 1. we can now infer/add the following triple to our DatasetSeries, as 'managed metadata'
-# </> dcat:seriesMember <./release/2023> .
+# </> dcat:seriesMember <./releases/2023> .
 
 # POST      : ./schema/2023
-# CONTROLLER: /data/:series/release/:release-slug
+# CONTROLLER: /data/:series/releases/:release-slug
 
 <./schema/2023>
     a datahost:TableSchema ; # TODO details TBD by datahost Schema work
     dcterms:issued "T3" ;
-    datahost:appliesToRelease <./release/2023> ; # TODO come up with a better name for an @reverse of an underlying datahost:hasSchema predicate.
+    datahost:appliesToRelease <./releases/2023> ; # TODO come up with a better name for an @reverse of an underlying datahost:hasSchema predicate.
     appropriate-csvw:modeling-of-dialect "UTF-8,RFC4180"
     .
 
@@ -62,7 +62,7 @@ example:datasets
 # CONTROLLER: /data/:series/changesets
 # Server responds:
 #
-# 303 /data/life-expectancy/release/2023/changesets/:auto-increment-changeset-id
+# 303 /data/life-expectancy/releases/2023/changesets/:auto-increment-changeset-id
 #
 # API call then creates this resource in the database:
 </data/life-expectancy/changesets/1>
@@ -85,9 +85,9 @@ example:datasets
 #
 # DELETE's will look the same as POSTS just with the HTTP verb replaced
 
-# GET /data/life-expectancy/release/2023 Accept: application/json+ld
+# GET /data/life-expectancy/releases/2023 Accept: application/json+ld
 #
-# {"@id": "/data/life-expectancy/release/1",
+# {"@id": "/data/life-expectancy/releases/1",
 #  "@type": "datahost:Release"
 #  "dcterms:title": "2023",
 #  "rdfs:label": "Life Expectancy : 2023",
@@ -120,19 +120,19 @@ example:datasets
 
 
 
-# GET /data/life-expectancy/release/2023 Accept: text/csv
+# GET /data/life-expectancy/releases/2023 Accept: text/csv
 #
-# 303 /data/life-expectancy/release/2023.csv
-# GET /data/life-expectancy/release/2023.csv
+# 303 /data/life-expectancy/releases/2023.csv
+# GET /data/life-expectancy/releases/2023.csv
 #
 # W06000022,2004-01-01T00:00:00/P3Y,Female,80.7
 # W06000022,2004-01-01T00:00:00/P3Y,Male,78.3
 #
 
-# GET /data/life-expectancy/release/2023 Accept: application/csvm+json
+# GET /data/life-expectancy/releases/2023 Accept: application/csvm+json
 #
-# 302 /data/life-expectancy/release/2023.csv-metadata.json
-# GET /data/life-expectancy/release/2023.csv-metadata.json
+# 302 /data/life-expectancy/releases/2023.csv-metadata.json
+# GET /data/life-expectancy/releases/2023.csv-metadata.json
 #
 # {
 #  "@context": "http://www.w3.org/ns/csvw",

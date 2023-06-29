@@ -17,7 +17,7 @@
       (testing "Fetching a release for a series that does not exist returns 'not found'"
         (try
 
-          (GET (str new-series-path "/release/release-1"))
+          (GET (str new-series-path "/releases/release-1"))
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
@@ -26,7 +26,7 @@
 
       (testing "Fetching a release that does not exist returns 'not found'"
         (try
-          (GET (str new-series-path "/release/release-1"))
+          (GET (str new-series-path "/releases/release-1"))
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
@@ -39,7 +39,7 @@
                        {"@base" "http://example.org/data/"}]
                       "dcterms:title" "Example Release"}]
           (try
-            (PUT (str new-series-path "/release/release-1")
+            (PUT (str new-series-path "/releases/release-1")
                  {:content-type :json
                   :body (json/write-str jsonld)})
 
@@ -69,7 +69,7 @@
                               "dcat:inSeries" (str "../" new-series-id)}]
 
         (testing "Creating a release for a series that does exist works"
-          (let [response (PUT (str new-series-path "/release/release-1")
+          (let [response (PUT (str new-series-path "/releases/release-1")
                               {:content-type :json
                                :body (json/write-str request-ednld)})
                 body (json/read-str (:body response))]
@@ -79,15 +79,15 @@
                    (get body "dcterms:modified")))))
 
         (testing "Fetching a release that does exist works"
-          (let [response (GET (str new-series-path "/release/release-1"))
+          (let [response (GET (str new-series-path "/releases/release-1"))
                 body (json/read-str (:body response))]
             (is (= 200 (:status response)))
             (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
 
         (testing "A release can be updated, query params take precedence"
-          (let [{body-str-before :body} (GET (str new-series-path "/release/release-1"))
+          (let [{body-str-before :body} (GET (str new-series-path "/releases/release-1"))
                 {:keys [body] :as response} (PUT (str new-series-path
-                                                      "/release/release-1?title=A%20new%20title")
+                                                      "/releases/release-1?title=A%20new%20title")
                                                  {:content-type :json
                                                   :body (json/write-str request-ednld)})
                 body-before (json/read-str body-str-before)
@@ -101,7 +101,7 @@
 
             (testing "No update when query params same as in existing doc"
               (let [response (PUT (str new-series-path
-                                       "/release/release-1?title=A%20new%20title")
+                                       "/releases/release-1?title=A%20new%20title")
                                   {:content-type :json
                                    :body nil})
                     body' (-> response :body json/read-str)]

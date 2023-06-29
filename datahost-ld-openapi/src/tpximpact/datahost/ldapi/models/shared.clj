@@ -19,7 +19,7 @@
   (str (.getPath ld-root) series-slug))
 
 (defn release-key [series-slug release-slug]
-  (str (dataset-series-key series-slug) "/" release-slug))
+  (str (dataset-series-key series-slug) "/releases/" release-slug))
 
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
