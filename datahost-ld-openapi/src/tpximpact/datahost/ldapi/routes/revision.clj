@@ -10,7 +10,9 @@
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
-   :responses {200 {:body map?}
+   :responses {200 {:content
+                    {"text/csv" any?
+                     "application/json" map?}}
                404 {:body [:re "Not found"]}}})
 
 (defn post-revision-route-config [db]

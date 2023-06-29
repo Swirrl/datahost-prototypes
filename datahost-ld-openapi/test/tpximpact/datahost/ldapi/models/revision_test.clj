@@ -67,7 +67,7 @@
                 "Created with the resource URI provided in the Location header")
 
             (testing "Fetching an existing revision works"
-              (let [response (GET new-revision-location)]
+              (let [response (GET new-revision-location {:headers {"accept" "application/json"}})]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (json/read-str (:body response))))))
 
@@ -99,6 +99,33 @@
 
 
                 (is (= (:status change-api-response) 201))
+                (is (= new-change-resource-location
+                       (str new-revision-location "/changes/" inserted-change-id))
+                    "Created with the resource URI provided in the Location header")))
+
+            (testing "Second Changes resource created with CSV appends file"
+              ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+              (let [appends-file (io/file (io/resource "test-inputs/revision/2020.csv"))
+                    change-ednld {"@context"
+                                  ["https://publishmydata.com/def/datahost/context"
+                                   {"@base" base}]
+                                  "dcterms:description" "A new second change"}
+                    multipart-temp-file-part {:tempfile appends-file
+                                              :size (.length appends-file)
+                                              :filename (.getName appends-file)
+                                              :content-type "text/csv;"}
+                    change-api-response (ld-api-app {:request-method :post
+                                                     :uri (str new-revision-location "/changes")
+                                                     :multipart-params {:appends multipart-temp-file-part}
+                                                     :content-type "application/json"
+                                                     :body (json/write-str change-ednld)})
+                    change-response-json (json/read-str (slurp (:body change-api-response)))
+                    inserted-change-id (get change-response-json "@id")
+                    new-change-resource-location (-> change-api-response :headers (get "Location"))]
+
+
+                (is (= (:status change-api-response) 201))
+                (is (= 2 inserted-change-id))
                 (is (= new-change-resource-location
                        (str new-revision-location "/changes/" inserted-change-id))
                     "Created with the resource URI provided in the Location header"))))
@@ -133,7 +160,7 @@
                   "Created with the resource URI provided in the Location header")
 
               (testing "Fetching a second existing revision works"
-                (let [response (GET new-revision-location-2)]
+                (let [response (GET new-revision-location-2 {:headers {"accept" "application/json"}})]
                   (is (= 200 (:status response)))
                   (is (= normalised-revision-ld-2 (json/read-str (:body response))))))))
           )))))
