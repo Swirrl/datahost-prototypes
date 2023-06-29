@@ -121,23 +121,45 @@
 (defn- series-changed? [old-series new-series]
   false)
 
-(defn- request->series [{:keys [series-slug] :as api-params} incoming-jsonld-doc]
+(defn- input-context []
+  (assoc (update-vals @compact/default-context str)
+    "@base" (str models-shared/ld-root)))
+
+(defn- output-context []
+  (assoc (update-vals (compact/sub-context ["dh" "dcterms" "rdf"]) str)
+    "@base" (str models-shared/ld-root)))
+
+(defn- annotate-json-resource [json-doc resource-uri resource-type]
+  (assoc json-doc
+    "@id" (str resource-uri)
+    "@type" (str resource-type)
+    "@context" (input-context)))
+
+(defn- request->series [{:keys [series-slug] :as api-params} json-doc]
   (let [series-uri (models-shared/dataset-series-uri series-slug)
-        series-doc (assoc incoming-jsonld-doc "@id" (str series-uri))
+        series-doc (annotate-json-resource json-doc series-uri (compact/expand :dh/DatasetSeries))
         doc-resource (resource/from-json-ld-doc series-doc)
         param-properties (series-params->properties api-params)]
     (resource/set-properties doc-resource param-properties)))
 
 (defn- update-series [triplestore series])
 
+(defn- set-timestamps [series]
+  (let [now (.atOffset (Instant/now) ZoneOffset/UTC)]
+    (-> series
+        (resource/set-property1 (compact/expand :dcterms/issued) now)
+        (resource/set-property1 (compact/expand :dcterms/modified) now))))
+
+(defn- set-base-entity [series]
+  (resource/set-property1 series (compact/expand :dh/baseEntity) (resource/id series)))
+
 (defn- insert-series [triplestore series]
-  (let [subject (resource/id series)
-        now (.atOffset (Instant/now) ZoneOffset/UTC)
-        to-insert (concat (resource/->statements series)
-                          [(pr/->Triple subject (compact/expand :dcterms/issued) now)
-                           (pr/->Triple subject (compact/expand :dcterms/modified) now)])]
+  ;; TODO: move setting default properties outside?
+  (let [series (-> series set-timestamps set-base-entity)
+        to-insert (resource/->statements series)]
     (with-open [conn (repo/->connection triplestore)]
-      (pr/add conn to-insert))))
+      (pr/add conn to-insert))
+    series))
 
 (defn upsert-series!
   "Returns a map {:op ... :jsonld-doc ...}, where :op conforms to
@@ -149,9 +171,8 @@
         (do (update-series triplestore new-series)
             {:op :update :jsonld-doc nil})
         {:op :noop :jsonld-doc incoming-jsonld-doc})
-      (do
-        (insert-series triplestore new-series)
-        {:op :create :jsonld-doc (resource/->json-ld new-series @compact/default-context)}))))
+      (let [created-series (insert-series triplestore new-series)]
+        {:op :create :jsonld-doc (resource/->json-ld created-series (output-context))}))))
 
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to

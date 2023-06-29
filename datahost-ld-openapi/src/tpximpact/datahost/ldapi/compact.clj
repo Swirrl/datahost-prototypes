@@ -4,6 +4,9 @@
 
 (def default-context (atom {}))
 
+(defn sub-context [prefixes]
+  (select-keys @default-context prefixes))
+
 (defn add-prefix [prefix uri]
   (swap! default-context assoc (name prefix) uri))
 
@@ -15,7 +18,7 @@
   (let [prefix-key (-> compact-uri namespace)
         prefixes @default-context]
     (if-let [^URI prefix (get prefixes prefix-key)]
-      (.resolve prefix (name compact-uri))
+      (URI. (str prefix (name compact-uri)))
       (throw (ex-info (format "Unknown prefix '%s'" (name prefix-key)) {:prefixes prefixes})))))
 
 (add-prefix :dh (URI. "https://publishmydata.com/def/datahost/"))

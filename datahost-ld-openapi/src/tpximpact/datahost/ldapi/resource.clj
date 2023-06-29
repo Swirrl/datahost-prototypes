@@ -1,10 +1,12 @@
 (ns tpximpact.datahost.ldapi.resource
   (:require
     [clojure.java.io :as io]
+    [grafter-2.rdf.protocols :as rdf]
     [grafter-2.rdf4j.io :as gio]
     [grafter-2.rdf.protocols :as pr]
     [clojure.data.json :as json]
-    [clojure.set :as set])
+    [clojure.set :as set]
+    [tpximpact.datahost.ldapi.compact :as compact])
   (:import [java.io StringReader StringWriter]
            [org.eclipse.rdf4j.rio RioSetting]
            [org.eclipse.rdf4j.rio.helpers JSONLDMode JSONLDSettings]))
@@ -27,6 +29,9 @@
 
 (defn add-property [resource p o]
   (update resource p (fnil conj #{}) o))
+
+(defn set-property1 [resource p o]
+  (assoc resource p #{o}))
 
 (defn add-statement [resource statement]
   (if (= (id resource) (pr/subject statement))
@@ -63,7 +68,16 @@
 (defn ->json-ld
   ([resource] (->json-ld resource {}))
   ([resource prefixes]
-   (statements->json-ld (->statements resource) prefixes)))
+   ;; NOTE: When converting resource back to jsonld, we don't want type information
+   ;; associated with each object
+   ;; rdf:type uris are left so they can be compacted and converted to @type fields in the output
+   (let [statements (->statements resource)
+         rdf:type (compact/expand :rdf/type)
+         simplified (map (fn [s] (println (rdf/predicate s)) (if (= rdf:type (rdf/predicate s))
+                                   (do (println "yes") s)
+                                   (do (println "no") (update s :o str)) ))
+                         statements)]
+     (statements->json-ld simplified prefixes))))
 
 (defn- json-ld-str->statements [json-ld-str]
   (with-open [r (StringReader. json-ld-str)]

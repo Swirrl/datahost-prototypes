@@ -20,8 +20,11 @@
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
+(defn- temp-repo []
+  (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
+
 (t/deftest put-series-create-test
-  (let [repo (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update") #_(repo/sail-repo)
+  (let [repo (repo/sail-repo)
         handler (router/handler repo (atom {}))
         request {:uri "/data/new-series"
                  :request-method :put
@@ -29,12 +32,14 @@
                  :body (json/write-str {"dcterms:title" "A title"
                                         "dcterms:identifier" "Description"})}
         {:keys [status body] :as response} (handler request)
-        doc (json/read-str body)
-        ]
+        doc (json/read-str body)]
     (println response)
     (t/is (= 201 status))
     (t/is (= "A title" (get doc "dcterms:title")))
-    (t/is (= "Description" (get doc "dcterms:identifier")))))
+    (t/is (= "Description" (get doc "dcterms:identifier")))
+    (t/is (some? (get doc "dcterms:modified")))
+    (t/is (= (get doc "dcterms:issued") (get doc "dcterms:modified")))
+    (t/is (= (get doc "dh:baseEntity") "https://example.org/data/new-series"))))
 
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}
