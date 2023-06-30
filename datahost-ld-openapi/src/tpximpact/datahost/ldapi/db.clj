@@ -151,13 +151,23 @@
              [series-uri :dcterms/description '?description]
              [series-uri :dcterms/modified '?modified]]}))
 
-(defn- update-series [clock triplestore series]
-  (let [updated-series (resource/set-property1 series (compact/expand :dcterms/modified) (time/now clock))
-        q (series-update-query updated-series)
+(defn- update-series [triplestore series]
+  (let [q (series-update-query series)
         qs (f/format-update q :pretty? true)]
     (with-open [conn (repo/->connection triplestore)]
-      (pr/update! conn qs))
-    updated-series))
+      (pr/update! conn qs))))
+
+(defn- merge-series-updates [clock old-series new-properties]
+  (let [diff-properties [(compact/expand :dcterms/title)
+                         (compact/expand :dcterms/description)]
+        new-diff-properties (resource/get-properties new-properties diff-properties)]
+    (if (= (resource/get-properties old-series diff-properties)
+           new-diff-properties)
+      [false old-series]
+      (let [updated (-> old-series
+                        (resource/set-properties new-diff-properties)
+                        (resource/set-property1 (compact/expand :dcterms/modified) (time/now clock)))]
+        [true updated]))))
 
 (defn- set-timestamps [clock series]
   (let [now (time/now clock)]
@@ -187,10 +197,11 @@
   [clock triplestore {:keys [series-slug] :as api-params} incoming-jsonld-doc]
   (let [request-series (request->series api-params incoming-jsonld-doc)]
     (if-let [existing-series (get-series-by-slug triplestore series-slug)]
-      (if (series-changed? existing-series request-series)
-        (let [updated-series (update-series clock triplestore request-series)]
-            {:op :update :jsonld-doc (series->response-body updated-series)})
-        {:op :noop :jsonld-doc incoming-jsonld-doc})
+      (let [[changed? new-series] (merge-series-updates clock existing-series request-series)]
+        (when changed?
+          (update-series triplestore new-series))
+        {:op (if changed? :update :noop)
+         :jsonld-doc (series->response-body new-series)})
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
 

@@ -83,9 +83,28 @@
     (t/is (= 200 status))
     (t/is (= "Updated Title" (get updated-doc "dcterms:title")))
     (t/is (= "Updated Description" (get updated-doc "dcterms:description")))
+    (t/is (= (str t1) (get updated-doc "dcterms:issued")))
     (t/is (= (str t2) (get updated-doc "dcterms:modified")))))
 
-(t/deftest put-series-no-changes-test)
+(t/deftest put-series-no-changes-test
+  (let [repo (repo/sail-repo)
+        t1 (time/parse "2023-06-30T13:37:00Z")
+        t2 (time/parse "2023-06-30T15:08:03Z")
+        clock (time/manual-clock t1)
+        handler (router/handler clock repo (atom {}))
+
+        properties {"dcterms:title" "Title" "dcterms:description" "Description"}
+        create-request (create-put-request "new-series" properties)
+        create-response (handler create-request)
+        initial-doc (json/read-str (:body create-response))
+
+        _ (time/set-now clock t2)
+
+        update-request (create-put-request "new-series" properties)
+        update-response (handler update-request)
+        updated-doc (json/read-str (:body update-response))]
+    
+    (t/is (= initial-doc updated-doc))))
 
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}

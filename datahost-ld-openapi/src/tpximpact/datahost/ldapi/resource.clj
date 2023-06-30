@@ -33,6 +33,9 @@
 (defn get-property1 [resource p]
   (first (get resource p)))
 
+(defn get-properties [resource ps]
+  (select-keys resource ps))
+
 (defn set-property1 [resource p o]
   (assoc resource p #{o}))
 
