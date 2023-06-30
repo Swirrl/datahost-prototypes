@@ -30,6 +30,9 @@
 (defn add-property [resource p o]
   (update resource p (fnil conj #{}) o))
 
+(defn get-property1 [resource p]
+  (first (get resource p)))
+
 (defn set-property1 [resource p o]
   (assoc resource p #{o}))
 

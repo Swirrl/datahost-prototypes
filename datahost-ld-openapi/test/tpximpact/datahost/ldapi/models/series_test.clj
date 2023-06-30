@@ -34,16 +34,19 @@
         (with-open [r (io/reader body)]
           (json/read r))))
 
+(defn- create-put-request [series-slug body]
+  {:uri (str "/data/" series-slug)
+   :request-method :put
+   :headers {"content-type" "application/json"}
+   :body (json/write-str body)})
+
 (t/deftest put-series-create-test
   (let [repo (repo/sail-repo)
         t (time/parse "2023-06-29T10:11:07Z")
         clock (time/manual-clock t)
         handler (router/handler clock repo (atom {}))
-        request {:uri "/data/new-series"
-                 :request-method :put
-                 :headers {"content-type" "application/json"}
-                 :body (json/write-str {"dcterms:title" "A title"
-                                        "dcterms:description" "Description"})}
+        request (create-put-request "new-series" {"dcterms:title" "A title"
+                                                  "dcterms:description" "Description"})
         {:keys [status body] :as response} (handler request)
         new-series-doc (json/read-str body)]
     (println response)
@@ -61,6 +64,28 @@
           series-doc (json/read-str (:body response))]
       (t/is (= 200 status))
       (t/is (= new-series-doc series-doc)))))
+
+(t/deftest put-series-update-test
+  (let [repo (repo/sail-repo)
+        t1 (time/parse "2023-06-30T11:36:18Z")
+        t2 (time/parse "2023-06-30T14:25:33Z")
+        clock (time/manual-clock t1)
+        handler (router/handler clock repo (atom {}))
+        create-request (create-put-request "new-series" {"dcterms:title" "Initial Title"
+                                                         "dcterms:description" "Initial Description"})
+        _initial-response (handler create-request)
+
+        _ (time/set-now clock t2)
+        update-request (create-put-request "new-series" {"dcterms:title" "Updated Title"
+                                                         "dcterms:description" "Updated Description"})
+        {:keys [status body] :as update-response} (handler update-request)
+        updated-doc (json/read-str body)]
+    (t/is (= 200 status))
+    (t/is (= "Updated Title" (get updated-doc "dcterms:title")))
+    (t/is (= "Updated Description" (get updated-doc "dcterms:description")))
+    (t/is (= (str t2) (get updated-doc "dcterms:modified")))))
+
+(t/deftest put-series-no-changes-test)
 
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}

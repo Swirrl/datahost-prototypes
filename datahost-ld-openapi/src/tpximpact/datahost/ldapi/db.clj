@@ -71,18 +71,6 @@
                       :description (compact/expand :dcterms/description)}]
     (map-properties prop-mapping query-params)))
 
-(defn- compact-mapping [compact-keys]
-  (into {} (map (fn [k] [(keyword (name k)) (format "%s:%s" (namespace k) (name k))]) compact-keys)))
-
-(defn- bindings->series [bindings]
-  (let [mapping (compact-mapping [:dcterms/title :dcterms/description :dcterms/modified :dcterms/issued])]
-    (reduce-kv (fn [acc k v]
-                 (if-let [json-key (get mapping k)]
-                   (assoc acc json-key v)
-                   acc))
-               (resource/create-properties)
-               bindings)))
-
 (defn get-series-by-uri [triplestore series-uri]
   (let [q (get-series-query series-uri)
         statements (datastore/eager-query triplestore (f/format-query q :pretty? true))]
@@ -122,7 +110,7 @@
 (defn- diff-resource [r1 r2 property-uris])
 
 (defn- series-changed? [old-series new-series]
-  false)
+  true)
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
@@ -145,7 +133,31 @@
         param-properties (series-params->properties api-params)]
     (resource/set-properties doc-resource param-properties)))
 
-(defn- update-series [triplestore series])
+(defn- series-update-query [series]
+  (let [series-uri (resource/id series)
+        title (resource/get-property1 series (compact/expand :dcterms/title))
+        description (resource/get-property1 series (compact/expand :dcterms/description))
+        modified-at (resource/get-property1 series (compact/expand :dcterms/modified))]
+    (println "title" title ", description" description ", modified" modified-at)
+    (flush)
+    {:prefixes {:dcterms "<http://purl.org/dc/terms/>"}
+     :delete [[series-uri :dcterms/title '?title]
+              [series-uri :dcterms/description '?description]
+              [series-uri :dcterms/modified '?modified]]
+     :insert [[series-uri :dcterms/title title]
+              [series-uri :dcterms/description description]
+              [series-uri :dcterms/modified modified-at]]
+     :where [[series-uri :dcterms/title '?title]
+             [series-uri :dcterms/description '?description]
+             [series-uri :dcterms/modified '?modified]]}))
+
+(defn- update-series [clock triplestore series]
+  (let [updated-series (resource/set-property1 series (compact/expand :dcterms/modified) (time/now clock))
+        q (series-update-query updated-series)
+        qs (f/format-update q :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/update! conn qs))
+    updated-series))
 
 (defn- set-timestamps [clock series]
   (let [now (time/now clock)]
@@ -173,13 +185,13 @@
   "Returns a map {:op ... :jsonld-doc ...}, where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [clock triplestore {:keys [series-slug] :as api-params} incoming-jsonld-doc]
-  (let [new-series (request->series api-params incoming-jsonld-doc)]
+  (let [request-series (request->series api-params incoming-jsonld-doc)]
     (if-let [existing-series (get-series-by-slug triplestore series-slug)]
-      (if (series-changed? existing-series new-series)
-        (do (update-series triplestore new-series)
-            {:op :update :jsonld-doc nil})
+      (if (series-changed? existing-series request-series)
+        (let [updated-series (update-series clock triplestore request-series)]
+            {:op :update :jsonld-doc (series->response-body updated-series)})
         {:op :noop :jsonld-doc incoming-jsonld-doc})
-      (let [created-series (insert-series clock triplestore new-series)]
+      (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
 
 (defn upsert-release!
