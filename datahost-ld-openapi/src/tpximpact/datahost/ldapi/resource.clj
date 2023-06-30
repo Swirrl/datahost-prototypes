@@ -73,9 +73,9 @@
    ;; rdf:type uris are left so they can be compacted and converted to @type fields in the output
    (let [statements (->statements resource)
          rdf:type (compact/expand :rdf/type)
-         simplified (map (fn [s] (println (rdf/predicate s)) (if (= rdf:type (rdf/predicate s))
-                                   (do (println "yes") s)
-                                   (do (println "no") (update s :o str)) ))
+         simplified (map (fn [s] (if (= rdf:type (rdf/predicate s))
+                                   s
+                                   (update s :o str)))
                          statements)]
      (statements->json-ld simplified prefixes))))
 

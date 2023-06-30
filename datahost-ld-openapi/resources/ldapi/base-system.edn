@@ -16,3 +16,5 @@
   :db #ig/ref :tpximpact.datahost.ldapi.db/db}
 
  :tpximpact.datahost.ldapi.db/db {:opts {:file-path ".datahost-dev-db.edn"}}}
+
+:tpximpact.datahost.time/system-clock {}

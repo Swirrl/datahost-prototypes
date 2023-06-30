@@ -14,7 +14,7 @@
 (defn get-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
   (if-let [series (db/get-series-by-slug triplestore series-slug)]
     {:status 200
-     :body series}
+     :body (db/series->response-body series)}
     not-found-response))
 
 (defn op->response-code
@@ -26,10 +26,10 @@
     :update 200
     :noop   200))
 
-(defn put-dataset-series [triplestore {:keys [body-params] :as request}]
+(defn put-dataset-series [clock triplestore {:keys [body-params] :as request}]
   (let [api-params (get-api-params request)
         incoming-jsonld-doc body-params
-        {:keys [op jsonld-doc]} (db/upsert-series! triplestore api-params incoming-jsonld-doc)]
+        {:keys [op jsonld-doc]} (db/upsert-series! clock triplestore api-params incoming-jsonld-doc)]
     {:status (op->response-code op)
      :body jsonld-doc}))
 

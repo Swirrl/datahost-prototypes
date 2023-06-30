@@ -53,7 +53,7 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(defn router [triplestore db]
+(defn router [clock triplestore db]
   (ring/router
    [["/triplestore-query"
      ;; TODO remove this route when we have real ones using the triplestore
@@ -76,7 +76,7 @@
               :tags ["linked data api"]}
      ["/:series-slug"
       {:get (series-routes/get-series-route-config triplestore)
-       :put (series-routes/put-series-route-config triplestore)}]
+       :put (series-routes/put-series-route-config clock triplestore)}]
 
      ["/:series-slug/release/:release-slug"
       {:get (release-routes/get-release-route-config db)
@@ -124,9 +124,9 @@
                         ;; multipart
                         multipart/multipart-middleware]}}))
 
-(defn handler [triplestore db]
+(defn handler [clock triplestore db]
   (ring/ring-handler
-    (router triplestore db)
+    (router clock triplestore db)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
@@ -139,5 +139,5 @@
     {:executor sieppari/executor}))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [triplestore db]}]
-  (handler triplestore db))
+  [_ {:keys [clock triplestore db]}]
+  (handler clock triplestore db))

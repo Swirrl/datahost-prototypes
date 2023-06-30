@@ -1,20 +1,23 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
-   [clojure.data.json :as json]
-   [clojure.string :as str]
-   [clojure.test :refer [deftest is testing] :as t]
-   [grafter.matcha.alpha :as matcha]
-   [grafter.vocabularies.dcterms :refer [dcterms:title]]
-   [grafter-2.rdf4j.repository :as repo]
-   [tpximpact.datahost.ldapi.models.series :as sut]
-   [tpximpact.datahost.ldapi.models.shared :as models-shared]
-   [tpximpact.datahost.ldapi.util :as util]
-   [tpximpact.datahost.ldapi.router :as router]
-   [reitit.ring :as ring]
-   [tpximpact.test-helpers :as th])
+    [clojure.data.json :as json]
+    [clojure.java.io :as io]
+    [clojure.string :as str]
+    [clojure.test :refer [deftest is testing] :as t]
+    [grafter.matcha.alpha :as matcha]
+    [grafter.vocabularies.dcterms :refer [dcterms:title]]
+    [grafter-2.rdf4j.repository :as repo]
+    [tpximpact.datahost.ldapi.models.series :as sut]
+    [tpximpact.datahost.ldapi.models.shared :as models-shared]
+    [tpximpact.datahost.ldapi.util :as util]
+    [tpximpact.datahost.ldapi.router :as router]
+    [reitit.ring :as ring]
+    [tpximpact.datahost.time :as time]
+    [tpximpact.test-helpers :as th])
   (:import
-   (clojure.lang ExceptionInfo)
-   (java.net URI)))
+   [clojure.lang ExceptionInfo]
+   [java.io InputStream]
+   [java.net URI]))
 
 (defn format-date-time
   [dt]
@@ -23,23 +26,41 @@
 (defn- temp-repo []
   (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
 
+(defn- read-json-body [{:keys [body] :as response}]
+  (cond (string? body)
+        (json/read-str body)
+
+        (instance? InputStream body)
+        (with-open [r (io/reader body)]
+          (json/read r))))
+
 (t/deftest put-series-create-test
   (let [repo (repo/sail-repo)
-        handler (router/handler repo (atom {}))
+        t (time/parse "2023-06-29T10:11:07Z")
+        clock (time/manual-clock t)
+        handler (router/handler clock repo (atom {}))
         request {:uri "/data/new-series"
                  :request-method :put
                  :headers {"content-type" "application/json"}
                  :body (json/write-str {"dcterms:title" "A title"
-                                        "dcterms:identifier" "Description"})}
+                                        "dcterms:description" "Description"})}
         {:keys [status body] :as response} (handler request)
-        doc (json/read-str body)]
+        new-series-doc (json/read-str body)]
     (println response)
     (t/is (= 201 status))
-    (t/is (= "A title" (get doc "dcterms:title")))
-    (t/is (= "Description" (get doc "dcterms:identifier")))
-    (t/is (some? (get doc "dcterms:modified")))
-    (t/is (= (get doc "dcterms:issued") (get doc "dcterms:modified")))
-    (t/is (= (get doc "dh:baseEntity") "https://example.org/data/new-series"))))
+    (t/is (= "A title" (get new-series-doc "dcterms:title")))
+    (t/is (= "Description" (get new-series-doc "dcterms:description")))
+    (t/is (= (str t) (get new-series-doc "dcterms:modified")))
+    (t/is (= (str t) (get new-series-doc "dcterms:issued")))
+    (t/is (= (get new-series-doc "dh:baseEntity") "https://example.org/data/new-series"))
+
+    ;; fetch created series
+    (let [request {:uri "/data/new-series"
+                   :request-method :get}
+          {:keys [status] :as response} (handler request)
+          series-doc (json/read-str (:body response))]
+      (t/is (= 200 status))
+      (t/is (= new-series-doc series-doc)))))
 
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}

@@ -2,12 +2,15 @@
   (:require [clojure.test :as t]
             [grafter-2.rdf4j.repository :as repo]
             [reitit.ring :as ring]
+            [tpximpact.datahost.time :as time]
             [tpximpact.datahost.ldapi.router :as sut]))
 
-(defn- get-test-router []
-  (let [triplestore (repo/sail-repo)
-        db (atom {})]
-    (sut/router triplestore db)))
+(defn- get-test-router
+  ([] (get-test-router (time/system-clock)))
+  ([clock]
+   (let [triplestore (repo/sail-repo)
+         db (atom {})]
+     (sut/router clock triplestore db))))
 
 (t/deftest cors-preflight-request-test
   (let [router (get-test-router)

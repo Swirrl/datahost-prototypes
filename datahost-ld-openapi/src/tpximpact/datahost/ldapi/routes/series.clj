@@ -10,12 +10,12 @@
    :description copy/get-series-description
    :handler (partial handlers/get-dataset-series triplestore)
    :parameters {:path {:series-slug string?}}
-   :responses {200 {:body routes-shared/JsonLdSchema}
+   :responses {200 {:body string?}
                404 {:body [:re "Not found"]}}})
 
-(defn put-series-route-config [triplestore]
+(defn put-series-route-config [clock triplestore]
   {:summary copy/put-series-summary
-   :handler (partial handlers/put-dataset-series triplestore)
+   :handler (partial handlers/put-dataset-series clock triplestore)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?}
                 :query schema/ApiQueryParams}
