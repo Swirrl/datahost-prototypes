@@ -15,8 +15,8 @@
         metosin/ring-http-response {:mvn/version "0.9.3"}
         ring-cors/ring-cors {:mvn/version "0.1.13"}
         duratom/duratom {:mvn/version "0.5.8"}
-        camel-snake-kebab {:mvn/version "0.4.3"}
-				scicloj/tablecloth {:mvn/version "7.000-beta-50"}}
+        camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.3"}
+        scicloj/tablecloth {:mvn/version "7.000-beta-50"}}
 
  :aliases
  {:run {:main-opts ["-m" "tpximpact.datahost.ldapi"]}
@@ -49,12 +49,11 @@
                               :source-paths ["src"]}]
                      :plugins [:kaocha.plugin/profiling :kaocha.plugin/junit-xml]
                      :kaocha.plugin.junit-xml/target-file "test-results/kaocha/results.xml"
-                     :reporter kaocha.report/documentation
-                     }}
+                     :reporter kaocha.report/documentation}}
   :test-watch {:extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}}
                :exec-fn kaocha.runner/exec-fn
                :exec-args {:watch? true
-	                       :skip-meta :slow
+	                       :skip-meta :pending
 	                       :fail-fast? true}}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]

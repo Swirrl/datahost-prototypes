@@ -11,4 +11,11 @@
 (def put-release-200-desc "Release already existed and was successfully updated")
 (def put-release-201-desc "Release did not exist previously and was successfully created")
 
+(def get-release-schema-summary "Retrieve release schema")
+(def get-release-schema-200-desc "Retrieve release schema")
+(def put-release-schema-summary "Create schema for a release")
+(def put-release-schema-200-desc "Schema already exists.")
+(def put-release-schema-201-desc "Schema successfully created")
+
+
 (def internal-server-error-desc "Internal server error")

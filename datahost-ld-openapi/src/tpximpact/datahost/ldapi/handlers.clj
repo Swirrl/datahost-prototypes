@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
+   [malli.core :as m]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.revision :as revision-model]))
@@ -33,7 +34,7 @@
     {:status (op->response-code op)
      :body jsonld-doc}))
 
-(defn get-release [db {{:keys [series-slug release-slug]} :path-params :as path-params}]
+(defn get-release [db {{:keys [series-slug release-slug]} :path-params}]
   (if-let [release (db/get-release db series-slug release-slug)]
     {:status 200
      :body release}
@@ -49,6 +50,39 @@
        :body jsonld-doc})
     {:status 422
      :body "Series for this release does not exist"}))
+
+(defn put-release-schema
+  [db {{:keys [series-slug] :as params} :path-params
+       incoming-jsonld-doc :body-params 
+       :as request}]
+  (if (not (db/get-series db series-slug))
+    not-found-response
+    
+    (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! db (get-api-params request) incoming-jsonld-doc)]
+      {:status (op->response-code op)
+       :body jsonld-doc})))
+
+;;; we don't have the schema slug, and we don't use a real db in the
+;;; prototype, so we have to extract it from the path that's in the
+;;; release.
+
+(defn- schema-path->schema-slug
+  "Returns a string or nil"
+  [path]
+  (let [[_ slug] (re-find #"\/data.*\/schemas\/(\S+)$" path)]
+    slug))
+
+(defn get-release-schema 
+  [db {{:keys [series-slug release-slug] :as path-params} :path-params}]
+  (let [schema-path (some-> db
+                            (db/get-release series-slug release-slug) 
+                            (get "datahost:hasSchema"))]
+    (if-let [schema (db/get-release-schema db (assoc path-params :schema-slug (schema-path->schema-slug schema-path)))]
+      {:status 200
+       :body schema}
+      {:status 404
+       :body {:status "error"
+              :message "Not found"}})))
 
 (defn get-revision [db {{:keys [series-slug release-slug revision-id]} :path-params
                         {:strs [accept]} :headers :as _request}]

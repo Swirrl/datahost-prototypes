@@ -10,18 +10,19 @@
 
   See: https://github.com/jimpil/duratom"
   (:require
-    [clojure.string :as str]
-    [duratom.core :as da]
-    [integrant.core :as ig]
-    [malli.core :as m]
-    [meta-merge.core :as mm]
-    [tpximpact.datahost.ldapi.models.shared :as models-shared]
-    [tpximpact.datahost.ldapi.models.series :as series]
-    [tpximpact.datahost.ldapi.models.release :as release]
-    [tpximpact.datahost.ldapi.models.revision :as revision]
-    [tpximpact.datahost.ldapi.models.change :as change]
-    [tpximpact.datahost.ldapi.schemas.release :as s.release]
-    [tpximpact.datahost.ldapi.schemas.series :as s.series])
+   [clojure.string :as str]
+   [duratom.core :as da]
+   [integrant.core :as ig]
+   [malli.core :as m]
+   [meta-merge.core :as mm]
+   [tpximpact.datahost.ldapi.models.shared :as models-shared]
+   [tpximpact.datahost.ldapi.models.series :as series]
+   [tpximpact.datahost.ldapi.models.release :as release]
+   [tpximpact.datahost.ldapi.models.release-schema :as release-schema]
+   [tpximpact.datahost.ldapi.models.revision :as revision]
+   [tpximpact.datahost.ldapi.models.change :as change]
+   [tpximpact.datahost.ldapi.schemas.release :as s.release]
+   [tpximpact.datahost.ldapi.schemas.series :as s.series])
   (:import
     [java.time ZoneId ZonedDateTime]))
 
@@ -44,6 +45,17 @@
 (defn get-release [db series-slug release-slug]
   (let [key (models-shared/release-key series-slug release-slug)]
     (get @db key)))
+
+(def ^:private get-release-schema-params-valid? 
+  (m/validator [:map
+                [:series-slug :string]
+                [:release-slug :string]
+                [:schema-slug :string]]))
+
+(defn get-release-schema 
+  [db params]
+  {:pre [(get-release-schema-params-valid? params)]}
+  (get @db (models-shared/release-schema-key params)))
 
 (defn get-revision [db series-slug release-slug revision-id]
   (let [key (models-shared/revision-key series-slug release-slug revision-id)]
@@ -124,4 +136,14 @@
      :resource-id auto-change-id
      :jsonld-doc (get updated-db change-key)}))
 
+(defn upsert-release-schema!
+  [db {:keys [series-slug release-slug schema-slug] :as api-params} incoming-jsonld-doc]
+  (let [upsert-keys {:series (models-shared/dataset-series-key series-slug)
+                     :release (models-shared/release-key series-slug release-slug)
+                     :release-schema (models-shared/release-schema-key series-slug release-slug schema-slug)}
+        updated-db (upsert-doc! db release-schema/insert-schema 
+                                (assoc api-params :op.upsert/keys upsert-keys)
+                                incoming-jsonld-doc)]
+    {:op (-> updated-db meta :op)
+     :jsonld-doc (get updated-db (:release-schema upsert-keys))}))
 

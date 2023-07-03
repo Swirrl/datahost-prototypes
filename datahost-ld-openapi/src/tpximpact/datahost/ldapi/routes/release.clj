@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.routes.release
   (:require
+   [malli.util :as mu]
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.copy :as copy]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
@@ -28,3 +29,32 @@
                     :body [:map
                            [:status [:enum "error"]]
                            [:message string?]]}}})
+
+(defn get-release-ld-schema-config
+  [db]
+  {:summary copy/get-release-schema-summary
+   :handler (partial handlers/get-release-schema db)
+   :parameters {:path {:series-slug :string
+                       :release-slug :string}}
+   :responses {200 {:description copy/get-release-schema-200-desc
+                    :body map?}
+               404 {:body [:map
+                           [:status [:enum "error"]]
+                           [:message :string]]}}})
+
+(defn put-release-ld-schema-config
+  [db]
+  {:summary copy/put-release-schema-summary
+   :handler (partial handlers/put-release-schema db)
+   :parameters {:body routes-shared/LdSchemaInput
+                :path {:series-slug :string
+                       :release-slug :string
+                       :schema-slug :string}}
+   :responses {200 {:description copy/put-release-schema-200-desc
+                    :body map?}
+               201 {:description copy/put-release-schema-201-desc
+                    :body map?}
+               500 {:description copy/internal-server-error-desc
+                    :body [:map
+                           [:status [:enum "error"]]
+                           [:message :string]]}}})

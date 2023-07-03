@@ -1,7 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
    [clojure.data.json :as json]
-   [clojure.string :as str]
    [clojure.test :refer [deftest is testing]]
    [grafter.matcha.alpha :as matcha]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]

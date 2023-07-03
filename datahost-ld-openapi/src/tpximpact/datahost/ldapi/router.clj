@@ -113,6 +113,11 @@
       {:get (release-routes/get-release-route-config db)
        :put (release-routes/put-release-route-config db)}]
 
+     ["/:series-slug/releases/:release-slug/schemas"
+      {:get (release-routes/get-release-ld-schema-config db)}]
+     ["/:series-slug/releases/:release-slug/schemas/:schema-slug"
+      {:post (release-routes/put-release-ld-schema-config db)}]
+
      ["/:series-slug/releases/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id"
