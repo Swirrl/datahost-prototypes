@@ -28,7 +28,7 @@
                            ;; timestamps, and dcat:seriesMember <release> to series metadata
                            "@type" "dh:Release"
                            "@id" release-slug
-                           "dcat:inSeries" (str "../" series-slug))]
+                           "dcat:inSeries" (models-shared/dataset-series-key series-slug))]
       final-doc)))
 
 (defn- update-release [old-release base-entity api-params jsonld-doc]

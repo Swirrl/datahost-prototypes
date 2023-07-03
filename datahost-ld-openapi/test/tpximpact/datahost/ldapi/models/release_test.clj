@@ -66,7 +66,7 @@
                               "dcterms:title" "Example Release",
                               "@type" "dh:Release"
                               "@id" "release-1",
-                              "dcat:inSeries" (str "../" new-series-id)}]
+                              "dcat:inSeries" new-series-path}]
 
         (testing "Creating a release for a series that does exist works"
           (let [response (PUT (str new-series-path "/releases/release-1")
@@ -159,7 +159,7 @@
                  {"@base" "https://example.org/data/series-1"}]
                 "@id" "release-1"
                 "@type" "dh:Release"
-                "dcat:inSeries" "../my-dataset-series"}
+                "dcat:inSeries" "/data/my-dataset-series"}
                returned-value)))
 
       (testing "canonicalisation is idempotent"
@@ -175,7 +175,7 @@
                 "@id" "release-1"
                 "@type" "dh:Release"
                 "dcterms:title" "My Release"
-                "dcat:inSeries" "../my-dataset-series"}
+                "dcat:inSeries" "/data/my-dataset-series"}
                (sut/normalise-release "https://example.org/data/series-1"
                                       {:series-slug "my-dataset-series"
                                        :release-slug "release-1"}
