@@ -7,28 +7,28 @@
 
 (def internal-server-error-desc "Internal server error")
 
-(defn get-release-route-config [db]
+(defn get-release-route-config [triplestore]
   {:summary "Retrieve metadata for an existing release"
-   :handler (partial handlers/get-release db)
+   :handler (partial handlers/get-release triplestore)
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json" {:body map?}}}
+                     "application/json" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn put-release-route-config [db triplestore]
+(defn put-release-route-config [clock triplestore]
   {:summary "Create or update metadata for a release"
-   :handler (partial handlers/put-release db triplestore)
+   :handler (partial handlers/put-release clock triplestore)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
                        :release-slug string?}
                 :query schema/ApiQueryParams}
    :responses {200 {:description "Release already existed and was successfully updated"
-                    :body map?}
+                    :body string?}
                201 {:description "Release did not exist previously and was successfully created"
-                    :body map?}
+                    :body string?}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]

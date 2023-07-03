@@ -1,8 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
     [clojure.data.json :as json]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter.matcha.alpha :as matcha]
     [grafter.vocabularies.dcterms :refer [dcterms:title]]
@@ -24,17 +22,6 @@
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
-(defn- temp-repo []
-  (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
-
-(defn- read-json-body [{:keys [body] :as response}]
-  (cond (string? body)
-        (json/read-str body)
-
-        (instance? InputStream body)
-        (with-open [r (io/reader body)]
-          (json/read r))))
-
 (defn- create-put-request [series-slug body]
   {:uri (str "/data/" series-slug)
    :request-method :put
@@ -50,7 +37,6 @@
                                                   "dcterms:description" "Description"})
         {:keys [status body] :as response} (handler request)
         new-series-doc (json/read-str body)]
-    (println response)
     (t/is (= 201 status))
     (t/is (= "A title" (get new-series-doc "dcterms:title")))
     (t/is (= "Description" (get new-series-doc "dcterms:description")))
@@ -120,18 +106,12 @@
 
     (let [new-series-id (str "new-series-" (UUID/randomUUID))
           new-series-path (str "/data/" new-series-id)
-          request-ednld {"@context"
-                         ["https://publishmydata.com/def/datahost/context"
-                          {"@base" "https://example.org/data/"}],
-                         "dcterms:title" "A title"
-                         "dcterms:identifier" "foobar"}
-          normalised-ednld {"@context"
-                            ["https://publishmydata.com/def/datahost/context"
-                             {"@base" "https://example.org/data/"}],
-                            "@type" "dh:DatasetSeries"
-                            "dcterms:identifier" "foobar"
-                            "@id" new-series-id
-                            "dh:baseEntity" (str "https://example.org" new-series-path "/")
+          request-ednld {"dcterms:title" "A title"
+                         "dcterms:description" "foobar"}
+          normalised-ednld {"@type" "dh:DatasetSeries"
+                            "dcterms:description" "foobar"
+                            "@id" "new-series"
+                            "dh:baseEntity" "https://example.org/data/new-series"
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"
@@ -140,7 +120,7 @@
                              :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 201 (:status response)))
-          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))
+          (is (= normalised-ednld (dissoc resp-body "@context" "dcterms:issued" "dcterms:modified")))
           (is (= (get resp-body "dcterms:issued")
                  (get resp-body "dcterms:modified")))))
 
@@ -148,7 +128,7 @@
         (let [response (GET new-series-path)
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
-          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
+          (is (= normalised-ednld (dissoc resp-body "@context" "dcterms:issued" "dcterms:modified")))))
 
       (testing "A series can be updated via the API, query params take precedence"
         (let [response (PUT (str new-series-path "?title=A%20new%20title")
@@ -164,7 +144,7 @@
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified")))
-          (is (= "foobar" (get resp-body "dcterms:identifier"))
+          (is (= "foobar" (get resp-body "dcterms:description"))
               "The identifier should be left untouched.")
           (is (= (get resp-body "dcterms:title") "A new title"))
 

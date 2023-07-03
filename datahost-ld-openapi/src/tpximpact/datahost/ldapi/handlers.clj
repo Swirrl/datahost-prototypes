@@ -33,24 +33,24 @@
     {:status (op->response-code op)
      :body jsonld-doc}))
 
-(defn get-release [db {{:keys [series-slug release-slug]} :path-params
+(defn get-release [triplestore {{:keys [series-slug release-slug]} :path-params
                        {:strs [accept]} :headers}]
-  (if-let [release (db/get-release db series-slug release-slug)]
+  (if-let [release (db/get-release triplestore series-slug release-slug)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=release.csv"}
-       :body (or (revision-model/release->csv-stream db release) "")}
+       :body (or (revision-model/release->csv-stream triplestore release) "")}
       {:status 200
        :body release})
     not-found-response))
 
-(defn put-release [db triplestore {{:keys [series-slug]} :path-params
+(defn put-release [clock triplestore {{:keys [series-slug]} :path-params
                        body-params :body-params :as request}]
-  (if-let [_series (db/get-series-by-slug triplestore series-slug)]
+  (if-let [series (db/get-series-by-slug triplestore series-slug)]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
-          {:keys [op jsonld-doc]} (db/upsert-release! db api-params incoming-jsonld-doc)]
+          {:keys [op jsonld-doc]} (db/upsert-release! clock triplestore series api-params incoming-jsonld-doc)]
       {:status (op->response-code op)
        :body jsonld-doc})
     {:status 422
@@ -58,11 +58,11 @@
 
 (defn put-release-schema
   [db {{:keys [series-slug] :as params} :path-params
-       incoming-jsonld-doc :body-params 
+       incoming-jsonld-doc :body-params
        :as request}]
   (if (not (db/get-series-by-slug db series-slug))
     not-found-response
-    
+
     (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! db (get-api-params request) incoming-jsonld-doc)]
       {:status (op->response-code op)
        :body jsonld-doc})))
@@ -77,10 +77,10 @@
   (let [[_ slug] (re-find #"\/data.*\/schemas\/(\S+)$" path)]
     slug))
 
-(defn get-release-schema 
+(defn get-release-schema
   [db {{:keys [series-slug release-slug] :as path-params} :path-params}]
   (let [schema-path (some-> db
-                            (db/get-release series-slug release-slug) 
+                            (db/get-release series-slug release-slug)
                             (get "datahost:hasSchema"))]
     (if-let [schema (db/get-release-schema db (assoc path-params :schema-slug (schema-path->schema-slug schema-path)))]
       {:status 200
