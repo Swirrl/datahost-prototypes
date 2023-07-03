@@ -39,7 +39,7 @@
                       "dcterms:issued" (-> (ZonedDateTime/now (ZoneId/of "UTC"))
                                            (.format models-shared/date-formatter))
                       "dh:appends" appends-file-key
-                      "dh:appliesToRevision" (str ".." (models-shared/revision-key series-slug release-slug revision-id)))]
+                      "dh:appliesToRevision" (models-shared/revision-key series-slug release-slug revision-id))]
       final-doc)))
 
 (def files-root-key "/data/files")

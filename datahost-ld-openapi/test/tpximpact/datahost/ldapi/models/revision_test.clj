@@ -34,7 +34,7 @@
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
         (let [release-id (str "release-" (UUID/randomUUID))
-              release-url (str "/data/" series-slug "/release/" release-id)
+              release-url (str "/data/" series-slug "/releases/" release-id)
               release-resp (PUT release-url
                                 {:content-type :json
                                  :body (json/write-str request-ednld)})]
@@ -54,7 +54,7 @@
                                         "dcterms:title" revision-title,
                                         "@type" "dh:Revision"
                                         "@id" 1,
-                                        "dh:appliesToRelease" (str "../" release-id)}
+                                        "dh:appliesToRelease" release-url}
 
                 revision-resp (POST revision-url
                                     {:content-type :json
@@ -78,11 +78,11 @@
             (testing "Associated Release gets the Revision inverse triple"
               (let [release-resp (GET release-url)
                     release (json/read-str (:body release-resp))]
-                (is (= (str "/data/my-lovely-series/" release-id "/revisions/" inserted-revision-id)
+                (is (= (str "/data/my-lovely-series/releases/" release-id "/revisions/" inserted-revision-id)
                        (first (get release "dh:hasRevision"))))))
 
             (testing "Changes resource created with CSV appends file"
-              ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+              ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
               (let [appends-file (io/file (io/resource csv-1-path))
                     change-ednld {"@context"
                                   ["https://publishmydata.com/def/datahost/context"
@@ -108,7 +108,7 @@
                     "Created with the resource URI provided in the Location header")))
 
             (testing "Second Changes resource created with CSV appends file"
-              ;"/:series-slug/release/:release-slug/revisions/:revision-id/changes"
+              ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
               (let [appends-file (io/file (io/resource csv-2-path))
                     change-ednld {"@context"
                                   ["https://publishmydata.com/def/datahost/context"
@@ -161,7 +161,7 @@
                                             "dcterms:title" revision-title-2,
                                             "@type" "dh:Revision"
                                             "@id" 2,
-                                            "dh:appliesToRelease" (str "../" release-id)}
+                                            "dh:appliesToRelease" release-url}
 
                   revision-resp-2 (POST revision-url-2
                                         {:content-type :json

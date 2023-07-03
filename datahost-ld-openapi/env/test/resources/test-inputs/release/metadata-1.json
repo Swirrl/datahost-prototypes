@@ -3,4 +3,4 @@
  "@id": "2018",
  "dcterms:title": "2018",
 
- "dcat:inSeries": "../my-dataset-series"}
+ "dcat:inSeries": "/data/my-dataset-series"}

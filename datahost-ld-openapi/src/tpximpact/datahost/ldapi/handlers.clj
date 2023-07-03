@@ -71,7 +71,7 @@
           incoming-jsonld-doc body-params
           {:keys [_op jsonld-doc resource-id]} (db/insert-revision! db api-params incoming-jsonld-doc)]
       {:status 201
-       :headers {"Location" (str "/data/" series-slug "/release/" release-slug "/revisions/" resource-id)}
+       :headers {"Location" (str "/data/" series-slug "/releases/" release-slug "/revisions/" resource-id)}
        :body jsonld-doc})
 
     {:status 422
@@ -88,8 +88,8 @@
                          (update :revision-id parse-long))
           {:keys [_op resource-id jsonld-doc]} (db/insert-change! db api-params incoming-jsonld-doc appends)]
     {:status 201
-       ; /data/:series-slug/release/:release-slug/revisions/1/changes/:auto-incrementing-change-id
-       :headers {"Location" (str "/data/" series-slug "/release/" release-slug
+       ; /data/:series-slug/releases/:release-slug/revisions/1/changes/:auto-incrementing-change-id
+       :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
                                  "/revisions/" revision-id "/changes/" resource-id)}
        :body jsonld-doc})
 
