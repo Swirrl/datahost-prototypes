@@ -24,7 +24,7 @@
       (models.shared/validate-context $ base-entity)
       (assoc $ "@type" "dh:TableSchema"
              ;;"@type" "dh:DimensionColumn"
-             "datahost:appliesToRelease" (format "/data/%s/release/%s" 
+             "datahost:appliesToRelease" (format "/data/%s/releases/%s"
                                                  (URLEncoder/encode series-slug "UTF-8") 
                                                  (URLEncoder/encode release-slug "UTF-8"))
              "appropriate-csvw:modeling-of-dialect" "UTF-8,RFC4180")
@@ -68,6 +68,6 @@
            (models.release/upsert-release api-params 
                                           (assoc (get db release-key)
                                                  "datahost:hasSchema"
-                                                 (format "/data/%s/release/%s/schemas/%s"
+                                                 (format "/data/%s/releases/%s/schemas/%s"
                                                          series-slug release-slug schema-slug)))))
      assoc :op op)))

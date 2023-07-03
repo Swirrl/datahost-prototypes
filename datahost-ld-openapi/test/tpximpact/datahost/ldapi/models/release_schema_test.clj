@@ -17,7 +17,7 @@
                                           {"@base" "https://example.org/data/"}],
                               "dcterms:title" "My series"
                               "dcterms:identifier" (format "some-identifier-%s" n)}}))
-    (PUT (format "/data/my-series-%s/release/release-%s" n n)
+    (PUT (format "/data/my-series-%s/releases/release-%s" n n)
          (prepare-req {:content-type :json
                        :body {"@context" ["https://publishmydata.com/debf/datahost/context"
                                           {"@base" (format "https://example.org/data/my-series-%s/" n)}]
@@ -31,7 +31,7 @@
                {"@base" (format "https://example.org/data/my-series-%s/" tag)}]
    "@type" "dh:TableSchema"
    "appropriate-csvw:modeling-of-dialect" "UTF-8,RFC4180"
-   "datahost:appliesToRelease" (format "/data/my-series-%s/release/release-%s" tag tag)
+   "datahost:appliesToRelease" (format "/data/my-series-%s/releases/release-%s" tag tag)
    "dcterms:title" "Fun schema"
    "dh:columns" [{"@type" "dh:DimensionColumn"
                   "csvw:datatype" "string"
@@ -51,7 +51,7 @@
                                          "csvw:name" col-name
                                          "csvw:titles" titles})]
     (testing "Creating a schema"
-      (let [schema-path (format "/data/my-series-%s/release/release-%s/schemas/schema-%s" n n n)
+      (let [schema-path (format "/data/my-series-%s/releases/release-%s/schemas/schema-%s" n n n)
             response (POST schema-path
                            {:content-type :json
                             :body (json/write-str
@@ -67,11 +67,11 @@
         (is (= expected-doc resp-body))
 
         (testing "The release was updated with a reference to the schema"
-          (let [{body :body} (GET (format "/data/my-series-%s/release/release-%s" n n))
+          (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s" n n))
                 body (json/read-str body)]
             (is (= schema-path (get body "datahost:hasSchema")))))
 
         (testing "The schema can be retrieved"
-          (let [{body :body} (GET (format "/data/my-series-%s/release/release-%s/schemas" n n))
+          (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s/schemas" n n))
                 body (json/read-str body)]
             (is (= expected-doc body))))))))
