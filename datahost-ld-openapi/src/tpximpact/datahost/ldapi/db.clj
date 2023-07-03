@@ -66,7 +66,7 @@
                  props))
              {}
              m))
-(defn- series-params->properties [query-params]
+(defn- params->title-description-properties [query-params]
   (let [prop-mapping {:title (compact/expand :dcterms/title)
                       :description (compact/expand :dcterms/description)}]
     (map-properties prop-mapping query-params)))
@@ -116,8 +116,8 @@
   (assoc (update-vals @compact/default-context str)
     "@base" (str models-shared/ld-root)))
 
-(defn- output-context []
-  (assoc (update-vals (compact/sub-context ["dh" "dcterms" "rdf"]) str)
+(defn- output-context [prefixes]
+  (assoc (update-vals (compact/sub-context prefixes) str)
     "@base" (str models-shared/ld-root)))
 
 (defn- annotate-json-resource [json-doc resource-uri resource-type]
@@ -130,8 +130,15 @@
   (let [series-uri (models-shared/dataset-series-uri series-slug)
         series-doc (annotate-json-resource json-doc series-uri (compact/expand :dh/DatasetSeries))
         doc-resource (resource/from-json-ld-doc series-doc)
-        param-properties (series-params->properties api-params)]
+        param-properties (params->title-description-properties api-params)]
     (resource/set-properties doc-resource param-properties)))
+(defn- request->release [series-uri {:keys [release-slug] :as api-params} json-doc]
+  (let [release-uri (models-shared/dataset-release-uri series-uri release-slug)
+        release-doc (annotate-json-resource json-doc release-uri (compact/expand :dh/Release))
+        doc-resource (resource/from-json-ld-doc release-doc)
+        param-properties (params->title-description-properties api-params)
+        base-release (resource/set-properties doc-resource param-properties)]
+    (resource/set-property1 base-release (compact/expand :dcat/inSeries) series-uri)))
 
 (defn- series-update-query [series]
   (let [series-uri (resource/id series)
@@ -178,17 +185,27 @@
 (defn- set-base-entity [series]
   (resource/set-property1 series (compact/expand :dh/baseEntity) (resource/id series)))
 
+(defn- insert-resource [triplestore resource]
+  (with-open [conn (repo/->connection triplestore)]
+    (pr/add conn (resource/->statements resource))))
+
 (defn- insert-series [clock triplestore series]
   ;; TODO: move setting default properties outside?
-  (let [series (->> series (set-timestamps clock) set-base-entity)
-        to-insert (resource/->statements series)]
-    (with-open [conn (repo/->connection triplestore)]
-      (pr/add conn to-insert))
+  (let [series (->> series (set-timestamps clock) set-base-entity)]
+    (insert-resource triplestore series)
     series))
+
+(defn- insert-release [clock triplestore release]
+  (let [release (set-timestamps clock release)]
+    (insert-resource triplestore release)
+    release))
 
 ;; TODO: move this!
 (defn series->response-body [series]
-  (resource/->json-ld series (output-context)))
+  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf"])))
+
+(defn release->response-body [release]
+  (resource/->json-ld release (output-context ["dh" "dcterms" "rdf" "dcat"])))
 
 ;; TODO: return series directly instead of formatting json-ld doc here
 (defn upsert-series!
@@ -205,17 +222,26 @@
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
 
+(defn- update-release [triplestore new-release])
+
+(defn- get-release-by-uri [triplestore release-uri]
+  nil)
+
+(defn- merge-release-updates [clock existing-release request-release])
+
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
-  [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
-  (let [release-key (models-shared/release-key series-slug release-slug)
-        api-params (assoc api-params :op.upsert/keys
-                          {:series (models-shared/dataset-series-key series-slug)
-                           :release release-key})
-        updated-db (upsert-doc! db release/upsert-release api-params incoming-jsonld-doc)]
-    {:op (-> updated-db meta :op)
-     :jsonld-doc (get updated-db release-key)}))
+  [clock triplestore series api-params incoming-jsonld-doc]
+  (let [request-release (request->release (resource/id series) api-params incoming-jsonld-doc)]
+    (if-let [existing-release (get-release-by-uri triplestore (resource/id request-release))]
+      (let [[changed? new-release] (merge-release-updates clock existing-release request-release)]
+        (when changed?
+          (update-release triplestore new-release))
+        {:op (if changed? :update :noop)
+         :jsonld-doc (release->response-body new-release)})
+      (let [created-release (insert-release clock triplestore request-release)]
+        {:op :create :jsonld-doc (release->response-body created-release)}))))
 
 (defn insert-revision! [db {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
   (let [auto-revision-id (-> (swap! db update :revision-id-counter inc) :revision-id-counter)

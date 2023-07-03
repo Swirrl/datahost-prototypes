@@ -13,17 +13,17 @@
    :responses {200 {:body map?}
                404 {:body [:re "Not found"]}}})
 
-(defn put-release-route-config [db triplestore]
+(defn put-release-route-config [clock triplestore]
   {:summary copy/put-release-summary
-   :handler (partial handlers/put-release db triplestore)
+   :handler (partial handlers/put-release clock triplestore)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
                        :release-slug string?}
                 :query schema/ApiQueryParams}
    :responses {200 {:description copy/put-release-200-desc
-                    :body map?}
+                    :body string?}
                201 {:description copy/put-release-201-desc
-                    :body map?}
+                    :body string?}
                500 {:description copy/internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]

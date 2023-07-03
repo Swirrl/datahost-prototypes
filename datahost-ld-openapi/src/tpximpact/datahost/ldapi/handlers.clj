@@ -39,12 +39,12 @@
      :body release}
     not-found-response))
 
-(defn put-release [db triplestore {{:keys [series-slug]} :path-params
+(defn put-release [clock triplestore {{:keys [series-slug]} :path-params
                        body-params :body-params :as request}]
-  (if-let [_series (db/get-series-by-slug triplestore series-slug)]
+  (if-let [series (db/get-series-by-slug triplestore series-slug)]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
-          {:keys [op jsonld-doc]} (db/upsert-release! db api-params incoming-jsonld-doc)]
+          {:keys [op jsonld-doc]} (db/upsert-release! clock triplestore series api-params incoming-jsonld-doc)]
       {:status (op->response-code op)
        :body jsonld-doc})
     {:status 422

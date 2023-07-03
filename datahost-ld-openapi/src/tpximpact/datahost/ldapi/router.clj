@@ -80,7 +80,7 @@
 
      ["/:series-slug/release/:release-slug"
       {:get (release-routes/get-release-route-config db)
-       :put (release-routes/put-release-route-config db triplestore)}]
+       :put (release-routes/put-release-route-config clock triplestore)}]
 
      ["/:series-slug/release/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]

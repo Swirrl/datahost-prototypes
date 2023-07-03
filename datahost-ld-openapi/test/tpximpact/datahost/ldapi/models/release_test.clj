@@ -1,11 +1,14 @@
 (ns tpximpact.datahost.ldapi.models.release-test
   (:require
-   [clj-http.client :as http]
-   [clojure.data.json :as json]
-   [clojure.test :refer [deftest is testing]]
-   [tpximpact.test-helpers :as th]
-   [tpximpact.datahost.ldapi.models.release :as sut])
-  (:import (clojure.lang ExceptionInfo)))
+    [clj-http.client :as http]
+    [clojure.data.json :as json]
+    [clojure.test :refer [deftest is testing] :as t]
+    [grafter-2.rdf4j.repository :as repo]
+    [tpximpact.datahost.ldapi.router :as router]
+    [tpximpact.datahost.time :as time]
+    [tpximpact.test-helpers :as th]
+    [tpximpact.datahost.ldapi.models.release :as sut])
+  (:import [clojure.lang ExceptionInfo]))
 
 (defn- put-series [put-fn]
   (let [jsonld {"@context"
@@ -15,6 +18,41 @@
     (put-fn "/data/new-series"
             {:content-type :json
              :body (json/write-str jsonld)})))
+
+(defn- create-series [handler]
+  (let [request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
+        request {:uri "/data/new-series"
+                 :request-method :put
+                 :headers {"content-type" "application/json"}
+                 :body (json/write-str request-json)}
+        response (handler request)
+        series-doc (json/read-str (:body response))]
+    (get series-doc "@id")))
+
+(defn- temp-repo []
+  (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
+
+(t/deftest put-release-create-test
+  (let [repo (repo/sail-repo)
+        t (time/parse "2023-07-03T11:16:16Z")
+        clock (time/manual-clock t)
+        handler (router/handler clock repo (atom {}))
+        series-slug (create-series handler)
+
+        request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
+        release-request {:uri (format "/data/%s/release/test-release" series-slug)
+                         :request-method :put
+                         :headers {"content-type" "application/json"}
+                         :body (json/write-str request-json)}
+        {:keys [body status] :as response} (handler release-request)
+        release-doc (json/read-str body)]
+    (t/is (= status 201))
+
+    (t/is (= "Release title" (get release-doc "dcterms:title")))
+    (t/is (= "Description" (get release-doc "dcterms:description")))
+    (t/is (= (str t) (get release-doc "dcterms:issued")))
+    (t/is (= (str t) (get release-doc "dcterms:modified")))
+    (t/is (= (format "https://example.org/data/%s" series-slug) (get release-doc "dcat:inSeries")))))
 
 (deftest round-tripping-release-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
@@ -84,7 +122,7 @@
           (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
 
       (testing "A release can be updated, query params take precedence"
-        (let [{body-str-before :body} (GET "/data/new-series/release/release-1 ")
+        (let [{body-str-before :body} (GET "/data/new-series/release/release-1")
               {:keys [body] :as response} (PUT (str "/data/new-series"
                                                     "/release/release-1?title=A%20new%20title")
                                                {:content-type :json

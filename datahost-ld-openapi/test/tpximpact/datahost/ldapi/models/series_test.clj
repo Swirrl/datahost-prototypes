@@ -16,23 +16,11 @@
     [tpximpact.test-helpers :as th])
   (:import
    [clojure.lang ExceptionInfo]
-   [java.io InputStream]
    [java.net URI]))
 
 (defn format-date-time
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
-
-(defn- temp-repo []
-  (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
-
-(defn- read-json-body [{:keys [body] :as response}]
-  (cond (string? body)
-        (json/read-str body)
-
-        (instance? InputStream body)
-        (with-open [r (io/reader body)]
-          (json/read r))))
 
 (defn- create-put-request [series-slug body]
   {:uri (str "/data/" series-slug)
@@ -103,7 +91,7 @@
         update-request (create-put-request "new-series" properties)
         update-response (handler update-request)
         updated-doc (json/read-str (:body update-response))]
-    
+
     (t/is (= initial-doc updated-doc))))
 
 (deftest round-tripping-series-test
