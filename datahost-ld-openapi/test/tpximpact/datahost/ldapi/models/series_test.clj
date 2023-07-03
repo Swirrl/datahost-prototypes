@@ -10,8 +10,9 @@
    [tpximpact.datahost.ldapi.util :as util]
    [tpximpact.test-helpers :as th])
   (:import
-   (clojure.lang ExceptionInfo)
-   (java.net URI)))
+    (clojure.lang ExceptionInfo)
+    (java.net URI)
+    (java.util UUID)))
 
 (defn format-date-time
   [dt]
@@ -28,7 +29,9 @@
             (is (= 404 status))
             (is (= "Not found" body))))))
 
-    (let [request-ednld {"@context"
+    (let [new-series-id (str "new-series-" (UUID/randomUUID))
+          new-series-path (str "/data/" new-series-id)
+          request-ednld {"@context"
                          ["https://publishmydata.com/def/datahost/context"
                           {"@base" "https://example.org/data/"}],
                          "dcterms:title" "A title"
@@ -38,12 +41,12 @@
                              {"@base" "https://example.org/data/"}],
                             "@type" "dh:DatasetSeries"
                             "dcterms:identifier" "foobar"
-                            "@id" "new-series"
-                            "dh:baseEntity" "https://example.org/data/new-series/"
+                            "@id" new-series-id
+                            "dh:baseEntity" (str "https://example.org" new-series-path "/")
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"
-        (let [response (PUT "/data/new-series"
+        (let [response (PUT new-series-path
                             {:content-type :json
                              :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
@@ -53,21 +56,21 @@
                  (get resp-body "dcterms:modified")))))
 
       (testing "A series can be retrieved via the API"
-        (let [response (GET "/data/new-series")
+        (let [response (GET new-series-path)
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
 
       (testing "A series can be updated via the API, query params take precedence"
-        (let [response (PUT "/data/new-series?title=A%20new%20title"
-                                 {:content-type :json
+        (let [response (PUT (str new-series-path "?title=A%20new%20title")
+                            {:content-type :json
                                   :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified"))))
 
-        (let [response (GET "/data/new-series")
+        (let [response (GET new-series-path)
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
@@ -77,7 +80,7 @@
           (is (= (get resp-body "dcterms:title") "A new title"))
 
           (testing "No update when query params same as in existing doc"
-            (let [{body' :body :as response} (PUT "/data/new-series?title=A%20new%20title"
+            (let [{body' :body :as response} (PUT (str new-series-path "?title=A%20new%20title")
                                                   {:content-type :json :body nil})
                   body' (json/read-str body')]
               (is (= 200 (:status response)))

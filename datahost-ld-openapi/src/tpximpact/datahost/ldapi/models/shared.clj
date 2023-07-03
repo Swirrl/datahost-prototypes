@@ -170,7 +170,7 @@
         new-issued (get new-doc "dcterms:issued")]
     (or (nil? old-issued)
         (nil? new-issued)
-        (= old-issued (get new-doc "dcterms:issued")))))
+        (= old-issued new-issued))))
 
 (defn validate-modified-changed
   "Returns true when 'modified' change is valid.
@@ -181,4 +181,4 @@
         new-modified (get new-doc "dcterms:modified")]
     (or (nil? old-modified)
         (nil? new-modified)
-        (not= old-modified (get new-doc "dcterms:modified")))))
+        (not= old-modified new-modified))))
