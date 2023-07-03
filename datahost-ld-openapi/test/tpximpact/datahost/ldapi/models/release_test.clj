@@ -1,114 +1,115 @@
 (ns tpximpact.datahost.ldapi.models.release-test
   (:require
-   [clj-http.client :as http]
    [clojure.data.json :as json]
    [clojure.test :refer [deftest is testing]]
    [tpximpact.test-helpers :as th]
    [tpximpact.datahost.ldapi.models.release :as sut])
-  (:import (clojure.lang ExceptionInfo)))
+  (:import (clojure.lang ExceptionInfo)
+           (java.util UUID)))
 
-(defn- put-series [put-fn]
-  (let [jsonld {"@context"
-                ["https://publishmydata.com/def/datahost/context"
-                 {"@base" "https://example.org/data/"}]
-                "dcterms:title" "A title"}]
-    (put-fn "/data/new-series"
-            {:content-type :json
-             :body (json/write-str jsonld)})))
 
 (deftest round-tripping-release-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
                                 :as sys}
-    (testing "Fetching a release for a series that does not exist returns 'not found'"
-      (try
-        
-        (GET "/data/does-not-exist/release/release-1")
 
-        (catch Throwable ex
-          (let [{:keys [status body]} (ex-data ex)]
-            (is (= 404 status))
-            (is (= "Not found" body))))))
-
-    (testing "Fetching a release that does not exist returns 'not found'"
-      (try
-        (GET "/data/new-series/release/release-1")
-
-        (catch Throwable ex
-          (let [{:keys [status body]} (ex-data ex)]
-            (is (= 404 status))
-            (is (= "Not found" body))))))
-
-    (testing "Creating a release for a series that is not found fails gracefully"
-      (let [jsonld {"@context"
-                    ["https://publishmydata.com/debf/datahost/context"
-                     {"@base" "http://example.org/data/"}]
-                    "dcterms:title" "Example Release"}]
+    (let [new-series-id (str "new-series-" (UUID/randomUUID))
+          new-series-path (str "/data/" new-series-id)]
+      (testing "Fetching a release for a series that does not exist returns 'not found'"
         (try
-          (PUT "/data/new-series/release/release-1"
-               {:content-type :json
-                :body (json/write-str jsonld)})
+
+          (GET (str new-series-path "/release/release-1"))
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
-              (is (= 422 status))
-              (is (= "Series for this release does not exist" body)))))))
+              (is (= 404 status))
+              (is (= "Not found" body))))))
 
-    (put-series PUT)
+      (testing "Fetching a release that does not exist returns 'not found'"
+        (try
+          (GET (str new-series-path "/release/release-1"))
 
-    (let [request-ednld {"@context"
-                         ["https://publishmydata.com/def/datahost/context"
-                          {"@base" "https://example.org/data/new-series/"}]
-                         "dcterms:title" "Example Release"}
-          normalised-ednld {"@context"
-                            ["https://publishmydata.com/def/datahost/context"
-                             {"@base" "https://example.org/data/new-series/"}],
-                            "dcterms:title" "Example Release",
-                            "@type" "dh:Release"
-                            "@id" "release-1",
-                            "dcat:inSeries" "../new-series"}]
+          (catch Throwable ex
+            (let [{:keys [status body]} (ex-data ex)]
+              (is (= 404 status))
+              (is (= "Not found" body))))))
 
-      (testing "Creating a release for a series that does exist works"
-        (let [response (PUT "/data/new-series/release/release-1"
-                            {:content-type :json
-                             :body (json/write-str request-ednld)})
-              body (json/read-str (:body response))]
-          (is (= 201 (:status response)))
-          (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))
-          (is (= (get body "dcterms:issued")
-                 (get body "dcterms:modified")))))
+      (testing "Creating a release for a series that is not found fails gracefully"
+        (let [jsonld {"@context"
+                      ["https://publishmydata.com/debf/datahost/context"
+                       {"@base" "http://example.org/data/"}]
+                      "dcterms:title" "Example Release"}]
+          (try
+            (PUT (str new-series-path "/release/release-1")
+                 {:content-type :json
+                  :body (json/write-str jsonld)})
 
-      (testing "Fetching a release that does exist works"
-        (let [response (GET "/data/new-series/release/release-1 ")
-              body (json/read-str (:body response))]
-          (is (= 200 (:status response)))
-          (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
+            (catch Throwable ex
+              (let [{:keys [status body]} (ex-data ex)]
+                (is (= 422 status))
+                (is (= "Series for this release does not exist" body)))))))
 
-      (testing "A release can be updated, query params take precedence"
-        (let [{body-str-before :body} (GET "/data/new-series/release/release-1 ")
-              {:keys [body] :as response} (PUT (str "/data/new-series"
-                                                    "/release/release-1?title=A%20new%20title")
-                                               {:content-type :json
-                                                :body (json/write-str request-ednld)})
-              body-before (json/read-str body-str-before)
-              body (json/read-str body)]
-          (is (= 200 (:status response)))
-          (is (= "A new title" (get body "dcterms:title")))
-          (is (= (get body-before "dcterms:issued")
-                 (get body "dcterms:issued")))
-          (is (not= (get body "dcterms:modified")
-                    (get body-before "dcterms:modified")))
+      (let [jsonld {"@context"
+                    ["https://publishmydata.com/def/datahost/context"
+                     {"@base" "https://example.org/data/"}]
+                    "dcterms:title" "A title"}]
+        (PUT new-series-path
+                {:content-type :json
+                 :body (json/write-str jsonld)}))
 
-          (testing "No update when query params same as in existing doc"
-            (let [response (PUT (str "/data/new-series"
-                                     "/release/release-1?title=A%20new%20title")
-                                {:content-type :json
-                                 :body nil})
-                  body' (-> response :body json/read-str)]
-              (is (= 200 (:status response)))
-              (is (= "A new title" (get body' "dcterms:title")))
-              (is (= (select-keys body ["dcterms:issued" "dcterms:modified"])
-                     (select-keys body' ["dcterms:issued" "dcterms:modified"]))
-                  "The document shouldn't be modified"))))))))
+      (let [request-ednld {"@context"
+                           ["https://publishmydata.com/def/datahost/context"
+                            {"@base" (str "https://example.org" new-series-path "/")}]
+                           "dcterms:title" "Example Release"}
+            normalised-ednld {"@context"
+                              ["https://publishmydata.com/def/datahost/context"
+                               {"@base" (str "https://example.org" new-series-path "/")}],
+                              "dcterms:title" "Example Release",
+                              "@type" "dh:Release"
+                              "@id" "release-1",
+                              "dcat:inSeries" (str "../" new-series-id)}]
+
+        (testing "Creating a release for a series that does exist works"
+          (let [response (PUT (str new-series-path "/release/release-1")
+                              {:content-type :json
+                               :body (json/write-str request-ednld)})
+                body (json/read-str (:body response))]
+            (is (= 201 (:status response)))
+            (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))
+            (is (= (get body "dcterms:issued")
+                   (get body "dcterms:modified")))))
+
+        (testing "Fetching a release that does exist works"
+          (let [response (GET (str new-series-path "/release/release-1"))
+                body (json/read-str (:body response))]
+            (is (= 200 (:status response)))
+            (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
+
+        (testing "A release can be updated, query params take precedence"
+          (let [{body-str-before :body} (GET (str new-series-path "/release/release-1"))
+                {:keys [body] :as response} (PUT (str new-series-path
+                                                      "/release/release-1?title=A%20new%20title")
+                                                 {:content-type :json
+                                                  :body (json/write-str request-ednld)})
+                body-before (json/read-str body-str-before)
+                body (json/read-str body)]
+            (is (= 200 (:status response)))
+            (is (= "A new title" (get body "dcterms:title")))
+            (is (= (get body-before "dcterms:issued")
+                   (get body "dcterms:issued")))
+            (is (not= (get body "dcterms:modified")
+                      (get body-before "dcterms:modified")))
+
+            (testing "No update when query params same as in existing doc"
+              (let [response (PUT (str new-series-path
+                                       "/release/release-1?title=A%20new%20title")
+                                  {:content-type :json
+                                   :body nil})
+                    body' (-> response :body json/read-str)]
+                (is (= 200 (:status response)))
+                (is (= "A new title" (get body' "dcterms:title")))
+                (is (= (select-keys body ["dcterms:issued" "dcterms:modified"])
+                       (select-keys body' ["dcterms:issued" "dcterms:modified"]))
+                    "The document shouldn't be modified")))))))))
 
 (deftest normalise-release-test
   (testing "invalid cases"
