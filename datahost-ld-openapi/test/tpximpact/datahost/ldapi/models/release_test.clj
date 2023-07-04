@@ -1,13 +1,11 @@
 (ns tpximpact.datahost.ldapi.models.release-test
   (:require
-    [clj-http.client :as http]
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
     [tpximpact.datahost.ldapi.router :as router]
     [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.models.release :as sut])
+    [tpximpact.test-helpers :as th])
   (:import [clojure.lang ExceptionInfo]
            [java.util UUID]))
 
@@ -209,75 +207,3 @@
                 (is (= (select-keys body ["dcterms:issued" "dcterms:modified"])
                        (select-keys body' ["dcterms:issued" "dcterms:modified"]))
                     "The document shouldn't be modified")))))))))
-
-(deftest normalise-release-test
-  (testing "invalid cases"
-    (testing "missing :series-slug"
-      (is (thrown? ExceptionInfo
-                   (sut/normalise-release "https://example.org/data/series-1"
-                                          {}
-                                          {})))
-
-      ;; Invalid for PUT as slug will be part of URI
-      (is (thrown? ExceptionInfo
-                   (sut/normalise-release "https://example.org/data/series-1"
-                                          {}
-                                          {"@id" "release-1"}))))
-
-    (testing "missing :release-slug"
-      (is (thrown? ExceptionInfo
-                   (sut/normalise-release "https://example.org/data/series-1"
-                                          {:series-slug "my-dataset-series"}
-                                          {}))))
-
-    (testing "different base is invalid"
-      (is (thrown? ExceptionInfo
-                   (sut/normalise-release "https://example.org/data/series-1"
-                                          {:series-slug "my-dataset-series"}
-                                          {"@context" ["https://publishmydata.com/def/datahost/context"
-                                                       {"@base" "https://different.base/is/invalid/"}]}))))
-
-    (testing "@id must be slugised in the doc"
-      (is (thrown? clojure.lang.ExceptionInfo
-                   (sut/normalise-release "https://example.org/data/series-1"
-                                          {:series-slug "my-dataset-series"
-                                           :release-slug "2023"}
-                                          {"@context" ["https://publishmydata.com/def/datahost/context",
-                                                       {"@base" "https://example.org/data/"}],
-                                           "@id" "https://example.org/data/my-dataset-series"}))
-          "@id usage in the series document is (for now) restricted to be in slugised form only")))
-
-  (testing "valid cases"
-    (let [returned-value (sut/normalise-release "https://example.org/data/series-1"
-                                                {:series-slug "my-dataset-series"
-                                                 :release-slug "release-1"}
-                                                {})]
-      (testing "canonicalisation works"
-        (is (= {"@context"
-                ["https://publishmydata.com/def/datahost/context"
-                 {"@base" "https://example.org/data/series-1"}]
-                "@id" "release-1"
-                "@type" "dh:Release"
-                "dcat:inSeries" "/data/my-dataset-series"}
-               returned-value)))
-
-      (testing "canonicalisation is idempotent"
-        (is (= returned-value (sut/normalise-release "https://example.org/data/series-1"
-                                                     {:series-slug "my-dataset-series"
-                                                      :release-slug "release-1"}
-                                                     returned-value))))
-
-      (testing "with title metadata"
-        (is (= {"@context"
-                ["https://publishmydata.com/def/datahost/context"
-                 {"@base" "https://example.org/data/series-1"}]
-                "@id" "release-1"
-                "@type" "dh:Release"
-                "dcterms:title" "My Release"
-                "dcat:inSeries" "/data/my-dataset-series"}
-               (sut/normalise-release "https://example.org/data/series-1"
-                                      {:series-slug "my-dataset-series"
-                                       :release-slug "release-1"}
-                                      {"@context" ["https://publishmydata.com/def/datahost/context"
-                                                    {"@base" "https://example.org/data/series-1"}]
-                                        "dcterms:title" "My Release"})))))))

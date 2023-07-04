@@ -14,6 +14,7 @@
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
     [integrant.core :as ig]
+    [malli.core :as m]
     [meta-merge.core :as mm]
     [com.yetanalytics.flint :as f]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]

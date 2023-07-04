@@ -2,7 +2,6 @@
   (:require 
    [clojure.data.json :as json]
    [clojure.test :refer [deftest testing is] :as t]
-   [tpximpact.datahost.ldapi.models.release :as sut]
    [tpximpact.test-helpers :as th]))
 
 (def http-client :tpximpact.datahost.ldapi.test/http-client)
