@@ -2,6 +2,7 @@ const fetch = require('node-fetch');
 const data = require('./data/series.json');
 const FormData = require('form-data');
 const fs = require('fs');
+
 const openAPI = "http://localhost:3000";
 // const openAPI = "https://ldapi-prototype.gss-data.org.uk"
 
@@ -52,7 +53,6 @@ createRelease = async () => {
 }
 
 createRevision = async () => {
-
     for (i = 0; i < data.length; i++) {
         let series = ""
         let releases = data[i].releases
@@ -69,6 +69,7 @@ createRevision = async () => {
           }
         ],
         "dcterms:title": "Revision"}`
+
         for (j = 0; j < releases.length; j++) {
             let id = releases[j].id
             let url = `${openAPI}/data/${series}/releases/${id}/revisions`
@@ -81,6 +82,7 @@ createRevision = async () => {
             let revision = api["@id"]
             console.log(`Created: ${url}/${revision}`)
 
+            //upload files to revision where provided
             if (releases[j].file != null) {
                 const formData = new FormData();
                 file = releases[j].file
@@ -90,7 +92,6 @@ createRevision = async () => {
                     body: formData
                 };
                 try {
-                    // revision = j + 1
                     url = `${url}/${revision}/changes`
                     const fetchResponse = await fetch(url, settings);
                     const data = await fetchResponse.json();
@@ -101,7 +102,6 @@ createRevision = async () => {
                     return e;
                 }
             }
-
         }
     }
 }
