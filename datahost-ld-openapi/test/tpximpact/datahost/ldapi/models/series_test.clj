@@ -2,18 +2,11 @@
   (:require
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is testing] :as t]
-    [grafter.matcha.alpha :as matcha]
-    [grafter.vocabularies.dcterms :refer [dcterms:title]]
     [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.datahost.ldapi.models.series :as sut]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
-    [tpximpact.datahost.ldapi.util :as util]
     [tpximpact.datahost.ldapi.router :as router]
     [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th])
-  (:import
-   [clojure.lang ExceptionInfo]
-   [java.net URI]))
+    [tpximpact.test-helpers :as th]))
 
 (defn format-date-time
   [dt]
@@ -173,78 +166,3 @@
                                                            {"@base" "https://example.org/data/"}]}
                                               (str models-shared/ld-root)))))))
 
-(defn canonicalisation-idempotent? [api-params jsonld]
-  (let [canonicalised-form (sut/normalise-series api-params jsonld)]
-    (= canonicalised-form (sut/normalise-series api-params canonicalised-form))))
-
-(deftest normalise-series-test
-  (testing "Invalid cases"
-    (testing "Missing key detail :series-slug"
-
-      (is (thrown? ExceptionInfo
-                   (sut/normalise-series {}
-                                         {})))
-
-      ;; Invalid for PUT as slug will be part of URI
-      (is (thrown? ExceptionInfo
-                   (sut/normalise-series {}
-                                         {"@id" "my-dataset-series"}))))
-
-    (is (thrown? ExceptionInfo
-                 (sut/normalise-series {:series-slug "my-dataset-series"}
-                                       {"@context" ["https://publishmydata.com/def/datahost/context"
-                                                    {"@base" "https://different.base/is/invalid/"}]})))
-    (is (thrown? clojure.lang.ExceptionInfo
-                 (sut/normalise-series {:series-slug "my-dataset-series"}
-                                       {"@context" ["https://publishmydata.com/def/datahost/context",
-                                                    {"@base" "https://example.org/data/"}],
-                                        "@id" "https://example.org/data/my-dataset-series"}))
-        "@id usage in the series document is (for now) restricted to be in slugised form only"))
-
-  (testing "Valid cases"
-    (let [timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
-          returned-value (sut/normalise-series {:series-slug "my-dataset-series"
-                                                :op/timestamp timestamp}
-                                               {"@id" "my-dataset-series"})]
-      (is (= {"@id" "my-dataset-series"
-              "@context" ["https://publishmydata.com/def/datahost/context"
-                          {"@base" "https://example.org/data/"}]
-              "@type" "dh:DatasetSeries"
-              "dh:baseEntity" "https://example.org/data/my-dataset-series/"
-              ;; "dcterms:issued" (format-date-time timestamp)
-              }
-             returned-value))
-
-      (is (canonicalisation-idempotent? {:series-slug "my-dataset-series"
-                                         :op/timestamp timestamp}
-                                        returned-value)))
-
-    (testing "with title metadata"
-      (let [timestamp (java.time.ZonedDateTime/now (java.time.ZoneId/of "UTC"))
-            ednld (sut/normalise-series {:series-slug "my-dataset-series"
-                                         :op/timestamp timestamp}
-                                        {"@context" ["https://publishmydata.com/def/datahost/context"
-                                                     {"@base" "https://example.org/data/"}]
-                                         "dcterms:title" "My Dataset Series"})]
-
-        (is (= {"@context"
-                ["https://publishmydata.com/def/datahost/context"
-                 {"@base" "https://example.org/data/"}]
-                "@id" "my-dataset-series"
-                "@type" "dh:DatasetSeries"
-                "dcterms:title" "My Dataset Series"
-                "dh:baseEntity" "https://example.org/data/my-dataset-series/"}
-               ednld))
-
-        (testing "as RDF"
-          (let [triples (matcha/index-triples (util/ednld->rdf ednld))]
-            (testing "All emitted triples have the same expected subject"
-              (is (matcha/ask [[(URI. "https://example.org/data/my-dataset-series") dcterms:title ?o]] triples))
-              ;; TODO add some more tests
-              )))))
-
-    ;; TODO add RDFization tests
-    ))
-
-;; PUT /data/:series-slug
-;; GET /data/:series-slug

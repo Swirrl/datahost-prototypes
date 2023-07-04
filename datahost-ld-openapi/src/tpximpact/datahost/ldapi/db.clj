@@ -14,23 +14,15 @@
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
     [integrant.core :as ig]
-    [malli.core :as m]
     [meta-merge.core :as mm]
     [com.yetanalytics.flint :as f]
-    [clojure.data.json :as json]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
-    [tpximpact.datahost.ldapi.models.series :as series]
-    [tpximpact.datahost.ldapi.models.release :as release]
     [tpximpact.datahost.ldapi.models.revision :as revision]
-    [tpximpact.datahost.ldapi.schemas.release :as s.release]
-    [tpximpact.datahost.ldapi.schemas.series :as s.series]
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.resource :as resource])
-  (:import
-   [java.time ZoneId ZonedDateTime Instant OffsetDateTime ZoneOffset]
-   [java.net URI]))
+  (:import [java.net URI]))
 
 (def db-defaults
   {:storage-type :local-file
