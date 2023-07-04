@@ -1,11 +1,13 @@
 (ns tpximpact.datahost.ldapi.routes.revision
   (:require
     [reitit.ring.malli]
+    [reitit.coercion.malli :as rcm]
     [tpximpact.datahost.ldapi.handlers :as handlers]
     [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
 (defn get-revision-route-config [db]
   {:summary "Retrieve metadata for an existing revision"
+   :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-revision db)
    :parameters {:path {:series-slug string?
                        :release-slug string?

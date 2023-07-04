@@ -42,16 +42,16 @@
                 (.getBytes data ^String charset))))))
 
 (def csv-format
-  {:decoder [decode-str]
-   :encoder [encode-str]})
+  (fc/map->Format
+    {:name "text/csv"
+     :decoder [decode-str]
+     :encoder [encode-str]}))
 
-(def muuntaja-csv-format-instance
+(def muuntaja-custom-instance
   (m/create
     (-> (assoc-in
           m/default-options
-          [:formats "text/csv"] csv-format)
-        ;; default would otherwise be application/json
-        (dissoc :default-format))))
+          [:formats "text/csv"] csv-format))))
 
 (defn query-example [triplestore request]
     ;; temporary code to facilitate end-to-end service wire up
@@ -121,8 +121,7 @@
      ["/:series-slug/releases/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config db)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id"
-      {:get (assoc (revision-routes/get-revision-route-config db)
-              :muuntaja muuntaja-csv-format-instance)}]
+      {:get (revision-routes/get-revision-route-config db)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
       {:post (revision-routes/post-revision-changes-route-config db)}]]]
 
@@ -142,7 +141,7 @@
                        :default-values true
                        ;; malli options
                        :options nil})
-           :muuntaja m/instance
+           :muuntaja muuntaja-custom-instance
            :middleware [cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
