@@ -6,7 +6,7 @@
             [tpximpact.datahost.ldapi.router :as sut]))
 
 (defn- get-test-router
-  ([] (get-test-router (time/system-clock)))
+  ([] (get-test-router time/system-clock))
   ([clock]
    (let [triplestore (repo/sail-repo)
          db (atom {})]
