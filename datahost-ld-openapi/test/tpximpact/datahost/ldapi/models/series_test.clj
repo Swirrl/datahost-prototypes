@@ -32,7 +32,7 @@
     (t/is (= "Description" (get new-series-doc "dcterms:description")))
     (t/is (= (str t) (get new-series-doc "dcterms:modified")))
     (t/is (= (str t) (get new-series-doc "dcterms:issued")))
-    (t/is (= (get new-series-doc "dh:baseEntity") "https://example.org/data/new-series/"))
+    (t/is (= (get new-series-doc "dh:baseEntity") "https://example.org/data/new-series"))
 
     ;; fetch created series
     (let [request {:uri "/data/new-series"
@@ -99,7 +99,7 @@
           normalised-ednld {"@type" "dh:DatasetSeries"
                             "dcterms:description" "foobar"
                             "@id" "new-series"
-                            "dh:baseEntity" "https://example.org/data/new-series/"
+                            "dh:baseEntity" "https://example.org/data/new-series"
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"

@@ -187,8 +187,7 @@
         (resource/set-property1 (compact/expand :dcterms/modified) now))))
 
 (defn- set-base-entity [series]
-  (let [base-entity (URI. (str (resource/id series) "/"))]
-    (resource/set-property1 series (compact/expand :dh/baseEntity) base-entity)))
+  (resource/set-property1 series (compact/expand :dh/baseEntity) (resource/id series)))
 
 (defn- insert-resource [triplestore resource]
   (with-open [conn (repo/->connection triplestore)]
