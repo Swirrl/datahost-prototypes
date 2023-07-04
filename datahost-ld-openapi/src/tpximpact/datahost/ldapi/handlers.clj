@@ -33,10 +33,10 @@
     {:status (op->response-code op)
      :body jsonld-doc}))
 
-(defn get-release [db {{:keys [series-slug release-slug]} :path-params :as path-params}]
-  (if-let [release (db/get-release db series-slug release-slug)]
+(defn get-release [triplestore {{:keys [series-slug release-slug]} :path-params :as path-params}]
+  (if-let [release (db/get-release triplestore series-slug release-slug)]
     {:status 200
-     :body release}
+     :body (db/release->response-body release)}
     not-found-response))
 
 (defn put-release [clock triplestore {{:keys [series-slug]} :path-params

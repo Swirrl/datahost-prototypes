@@ -37,7 +37,6 @@
                                                   "dcterms:description" "Description"})
         {:keys [status body] :as response} (handler request)
         new-series-doc (json/read-str body)]
-    (println response)
     (t/is (= 201 status))
     (t/is (= "A title" (get new-series-doc "dcterms:title")))
     (t/is (= "Description" (get new-series-doc "dcterms:description")))
@@ -105,16 +104,10 @@
             (is (= 404 status))
             (is (= "Not found" body))))))
 
-    (let [request-ednld {"@context"
-                         ["https://publishmydata.com/def/datahost/context"
-                          {"@base" "https://example.org/data/"}],
-                         "dcterms:title" "A title"
-                         "dcterms:identifier" "foobar"}
-          normalised-ednld {"@context"
-                            ["https://publishmydata.com/def/datahost/context"
-                             {"@base" "https://example.org/data/"}],
-                            "@type" "dh:DatasetSeries"
-                            "dcterms:identifier" "foobar"
+    (let [request-ednld {"dcterms:title" "A title"
+                         "dcterms:description" "foobar"}
+          normalised-ednld {"@type" "dh:DatasetSeries"
+                            "dcterms:description" "foobar"
                             "@id" "new-series"
                             "dh:baseEntity" "https://example.org/data/new-series/"
                             "dcterms:title" "A title"}]
@@ -125,7 +118,7 @@
                              :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 201 (:status response)))
-          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))
+          (is (= normalised-ednld (dissoc resp-body "@context" "dcterms:issued" "dcterms:modified")))
           (is (= (get resp-body "dcterms:issued")
                  (get resp-body "dcterms:modified")))))
 
@@ -133,7 +126,7 @@
         (let [response (GET "/data/new-series")
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
-          (is (= normalised-ednld (dissoc resp-body "dcterms:issued" "dcterms:modified")))))
+          (is (= normalised-ednld (dissoc resp-body "@context" "dcterms:issued" "dcterms:modified")))))
 
       (testing "A series can be updated via the API, query params take precedence"
         (let [response (PUT "/data/new-series?title=A%20new%20title"
@@ -149,7 +142,7 @@
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified")))
-          (is (= "foobar" (get resp-body "dcterms:identifier"))
+          (is (= "foobar" (get resp-body "dcterms:description"))
               "The identifier should be left untouched.")
           (is (= (get resp-body "dcterms:title") "A new title"))
 

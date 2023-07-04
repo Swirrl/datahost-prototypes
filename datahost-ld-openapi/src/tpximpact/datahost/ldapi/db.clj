@@ -99,9 +99,10 @@
   (let [series-uri (models-shared/dataset-series-uri series-slug)]
     (get-series-by-uri triplestore series-uri)))
 
-(defn get-release [db series-slug release-slug]
-  (let [key (models-shared/release-key series-slug release-slug)]
-    (get @db key)))
+(defn get-release [triplestore series-slug release-slug]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        release-uri (models-shared/dataset-release-uri series-uri release-slug)]
+    (get-release-by-uri triplestore release-uri)))
 
 (defn get-revision [db series-slug release-slug revision-id]
   (let [key (models-shared/revision-key series-slug release-slug revision-id)]
@@ -184,8 +185,9 @@
   (update-resource-title-description-modified triplestore release))
 
 (defn- modified-if-properties-changed [clock existing-resource request-resource diff-properties]
-  (let [existing-properties (resource/get-properties existing-resource diff-properties)
-        request-properties (resource/get-properties request-resource diff-properties)]
+  (let [request-properties (resource/get-properties request-resource diff-properties)
+        ;; NOTE: may only be a partial update so only fetch properties defined on the request
+        existing-properties (resource/get-properties existing-resource (keys request-properties))]
     (if (= existing-properties request-properties)
       [false existing-resource]
       (let [updated (-> existing-resource

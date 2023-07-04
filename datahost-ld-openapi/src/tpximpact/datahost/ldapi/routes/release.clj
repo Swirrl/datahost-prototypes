@@ -5,12 +5,12 @@
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.release :as schema]))
 
-(defn get-release-route-config [db]
+(defn get-release-route-config [triplestore]
   {:summary copy/get-release-summary
-   :handler (partial handlers/get-release db)
+   :handler (partial handlers/get-release triplestore)
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
-   :responses {200 {:body map?}
+   :responses {200 {:body string?}
                404 {:body [:re "Not found"]}}})
 
 (defn put-release-route-config [clock triplestore]

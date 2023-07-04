@@ -14,7 +14,7 @@
   (let [jsonld {"@context"
                 ["https://publishmydata.com/def/datahost/context"
                  {"@base" "https://example.org/data/"}]
-                "dcterms:title" "A title"}]
+                "dcterms:title" "A title" "dcterms:description" "Description"}]
     (put-fn "/data/new-series"
             {:content-type :json
              :body (json/write-str jsonld)})))
@@ -129,7 +129,8 @@
       (let [jsonld {"@context"
                     ["https://publishmydata.com/debf/datahost/context"
                      {"@base" "http://example.org/data/"}]
-                    "dcterms:title" "Example Release"}]
+                    "dcterms:title" "Example Release"
+                    "dcterms:description" "Description"}]
         (try
           (PUT "/data/new-series/release/release-1"
                {:content-type :json
@@ -147,13 +148,9 @@
                           {"@base" "https://example.org/data/new-series/"}]
                          "dcterms:title" "Example Release"
                          "dcterms:description" "Description"}
-          normalised-ednld {"@context"
-                            ["https://publishmydata.com/def/datahost/context"
-                             {"@base" "https://example.org/data/new-series/"}],
-                            "dcterms:title" "Example Release",
-                            "@type" "dh:Release"
-                            "@id" "release-1",
-                            "dcat:inSeries" "../new-series"}]
+          normalised-ednld {"dcterms:title" "Example Release",
+                            "dcterms:description" "Description"
+                            "@type" "dh:Release"}]
 
       (testing "Creating a release for a series that does exist works"
         (let [response (PUT "/data/new-series/release/release-1"
@@ -161,15 +158,15 @@
                              :body (json/write-str request-ednld)})
               body (json/read-str (:body response))]
           (is (= 201 (:status response)))
-          (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))
+          (is (= normalised-ednld (select-keys body (keys normalised-ednld))))
           (is (= (get body "dcterms:issued")
                  (get body "dcterms:modified")))))
 
       (testing "Fetching a release that does exist works"
-        (let [response (GET "/data/new-series/release/release-1 ")
+        (let [response (GET "/data/new-series/release/release-1")
               body (json/read-str (:body response))]
           (is (= 200 (:status response)))
-          (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
+          (is (= normalised-ednld (select-keys body (keys normalised-ednld))))))
 
       (testing "A release can be updated, query params take precedence"
         (let [{body-str-before :body} (GET "/data/new-series/release/release-1")

@@ -79,7 +79,7 @@
        :put (series-routes/put-series-route-config clock triplestore)}]
 
      ["/:series-slug/release/:release-slug"
-      {:get (release-routes/get-release-route-config db)
+      {:get (release-routes/get-release-route-config triplestore)
        :put (release-routes/put-release-route-config clock triplestore)}]
 
      ["/:series-slug/release/:release-slug/revisions"
