@@ -92,11 +92,10 @@ createRevision = async () => {
                 try {
                     // revision = j + 1
                     url = `${url}/${revision}/changes`
-                    console.log(url)
                     const fetchResponse = await fetch(url, settings);
                     const data = await fetchResponse.json();
 
-                    console.log(data)
+                    console.log(`Added data to: ${url}/${revision}`)
                 } catch (e) {
                     console.log(e)
                     return e;
