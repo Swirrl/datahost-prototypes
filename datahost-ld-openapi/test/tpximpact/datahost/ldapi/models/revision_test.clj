@@ -69,8 +69,8 @@
                    (str revision-url "/" inserted-revision-id))
                 "Created with the resource URI provided in the Location header")
 
-            (testing "Fetching an existing Revision as application/json works"
-              (let [response (GET new-revision-location {:headers {"accept" "application/json"}})]
+            (testing "Fetching an existing Revision as default application/json format works"
+              (let [response (GET new-revision-location)]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (json/read-str (:body response)))
                     "responds with JSON")))
@@ -177,7 +177,7 @@
                   "Created with the resource URI provided in the Location header")
 
               (testing "Fetching a second existing revision works"
-                (let [response (GET new-revision-location-2 {:headers {"accept" "application/json"}})]
+                (let [response (GET new-revision-location-2)]
                   (is (= 200 (:status response)))
                   (is (= normalised-revision-ld-2 (json/read-str (:body response))))))))
           )))))
