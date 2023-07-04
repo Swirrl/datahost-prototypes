@@ -56,6 +56,17 @@
      :construct bgps
      :where bgps}))
 
+(defn- get-release-query [release-uri]
+  (let [bgps [[release-uri 'a :dh/Release]
+              [release-uri :dcterms/title '?title]
+              [release-uri :dcterms/description '?description]
+              [release-uri :dcat/inSeries '?series]
+              [release-uri :dcterms/modified '?modified]
+              [release-uri :dcterms/issued '?issued]]]
+    {:prefixes (compact/as-flint-prefixes)
+     :construct bgps
+     :where bgps}))
+
 (def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                :dh (URI. "https://publishmydata.com/def/datahost/")})
 
@@ -71,11 +82,18 @@
                       :description (compact/expand :dcterms/description)}]
     (map-properties prop-mapping query-params)))
 
-(defn get-series-by-uri [triplestore series-uri]
-  (let [q (get-series-query series-uri)
-        statements (datastore/eager-query triplestore (f/format-query q :pretty? true))]
+(defn get-resource-by-construct-query [triplestore query]
+  (let [statements (datastore/eager-query triplestore (f/format-query query :pretty? true))]
     (when (seq statements)
       (resource/from-statements statements))))
+
+(defn get-series-by-uri [triplestore series-uri]
+  (let [q (get-series-query series-uri)]
+    (get-resource-by-construct-query triplestore q)))
+
+(defn get-release-by-uri [triplestore release-uri]
+  (let [q (get-release-query release-uri)]
+    (get-resource-by-construct-query triplestore q)))
 
 (defn get-series-by-slug [triplestore series-slug]
   (let [series-uri (models-shared/dataset-series-uri series-slug)]
@@ -107,11 +125,6 @@
            (assoc api-params :op/timestamp ts)
            incoming-jsonld-doc)))
 
-(defn- diff-resource [r1 r2 property-uris])
-
-(defn- series-changed? [old-series new-series]
-  true)
-
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
     "@base" (str models-shared/ld-root)))
@@ -140,41 +153,56 @@
         base-release (resource/set-properties doc-resource param-properties)]
     (resource/set-property1 base-release (compact/expand :dcat/inSeries) series-uri)))
 
-(defn- series-update-query [series]
-  (let [series-uri (resource/id series)
-        title (resource/get-property1 series (compact/expand :dcterms/title))
-        description (resource/get-property1 series (compact/expand :dcterms/description))
-        modified-at (resource/get-property1 series (compact/expand :dcterms/modified))]
-    (println "title" title ", description" description ", modified" modified-at)
-    (flush)
+(defn- update-resource-title-description-modified-query [resource]
+  (let [resource-uri (resource/id resource)
+        resource-type (resource/get-property1 resource (compact/expand :rdf/type))
+        title (resource/get-property1 resource (compact/expand :dcterms/title))
+        description (resource/get-property1 resource (compact/expand :dcterms/description))
+        modified-at (resource/get-property1 resource (compact/expand :dcterms/modified))]
     {:prefixes {:dcterms "<http://purl.org/dc/terms/>"}
-     :delete [[series-uri :dcterms/title '?title]
-              [series-uri :dcterms/description '?description]
-              [series-uri :dcterms/modified '?modified]]
-     :insert [[series-uri :dcterms/title title]
-              [series-uri :dcterms/description description]
-              [series-uri :dcterms/modified modified-at]]
-     :where [[series-uri :dcterms/title '?title]
-             [series-uri :dcterms/description '?description]
-             [series-uri :dcterms/modified '?modified]]}))
+     :delete [[resource-uri :dcterms/title '?title]
+              [resource-uri :dcterms/description '?description]
+              [resource-uri :dcterms/modified '?modified]]
+     :insert [[resource-uri :dcterms/title title]
+              [resource-uri :dcterms/description description]
+              [resource-uri :dcterms/modified modified-at]]
+     :where [[resource-uri 'a resource-type]
+             [resource-uri :dcterms/title '?title]
+             [resource-uri :dcterms/description '?description]
+             [resource-uri :dcterms/modified '?modified]]}))
 
-(defn- update-series [triplestore series]
-  (let [q (series-update-query series)
+(defn- update-resource-title-description-modified [triplestore resource]
+  (let [q (update-resource-title-description-modified-query resource)
         qs (f/format-update q :pretty? true)]
     (with-open [conn (repo/->connection triplestore)]
       (pr/update! conn qs))))
 
-(defn- merge-series-updates [clock old-series new-properties]
-  (let [diff-properties [(compact/expand :dcterms/title)
-                         (compact/expand :dcterms/description)]
-        new-diff-properties (resource/get-properties new-properties diff-properties)]
-    (if (= (resource/get-properties old-series diff-properties)
-           new-diff-properties)
-      [false old-series]
-      (let [updated (-> old-series
-                        (resource/set-properties new-diff-properties)
+(defn- update-series [triplestore series]
+  (update-resource-title-description-modified triplestore series))
+
+(defn- update-release [triplestore release]
+  (update-resource-title-description-modified triplestore release))
+
+(defn- modified-if-properties-changed [clock existing-resource request-resource diff-properties]
+  (let [existing-properties (resource/get-properties existing-resource diff-properties)
+        request-properties (resource/get-properties request-resource diff-properties)]
+    (if (= existing-properties request-properties)
+      [false existing-resource]
+      (let [updated (-> existing-resource
+                        (resource/set-properties request-properties)
                         (resource/set-property1 (compact/expand :dcterms/modified) (time/now clock)))]
         [true updated]))))
+
+(defn- modified-if-title-description-changed [clock existing-resource request-resource]
+  (let [diff-properties [(compact/expand :dcterms/title)
+                         (compact/expand :dcterms/description)]]
+    (modified-if-properties-changed clock existing-resource request-resource diff-properties)))
+
+(defn- merge-series-updates [clock old-series new-properties]
+  (modified-if-title-description-changed clock old-series new-properties))
+
+(defn- merge-release-updates [clock existing-release request-release]
+  (modified-if-title-description-changed clock existing-release request-release))
 
 (defn- set-timestamps [clock series]
   (let [now (time/now clock)]
@@ -221,13 +249,6 @@
          :jsonld-doc (series->response-body new-series)})
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
-
-(defn- update-release [triplestore new-release])
-
-(defn- get-release-by-uri [triplestore release-uri]
-  nil)
-
-(defn- merge-release-updates [clock existing-release request-release])
 
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to

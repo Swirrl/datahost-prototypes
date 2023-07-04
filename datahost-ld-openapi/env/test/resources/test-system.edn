@@ -7,4 +7,6 @@
  :tpximpact.datahost.ldapi.db/db {:opts {:file-path ".datahost-test-db.edn"}}
 
  :tpximpact.datahost.ldapi.native-datastore/repo 
- {:data-directory #ig/ref :tpximpact.datahost.ldapi.native-datastore.repo/data-directory}}
+ {:data-directory #ig/ref :tpximpact.datahost.ldapi.native-datastore.repo/data-directory}
+
+ :tpximpact.datahost.time/system-clock {}}

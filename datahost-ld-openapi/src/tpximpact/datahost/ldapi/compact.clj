@@ -21,5 +21,8 @@
       (URI. (str prefix (name compact-uri)))
       (throw (ex-info (format "Unknown prefix '%s'" (name prefix-key)) {:prefixes prefixes})))))
 
+(defn as-flint-prefixes []
+  (into {} (map (fn [[prefix uri]] [(keyword prefix) (format "<%s>" (str uri))]) @default-context)))
+
 (add-prefix :dh (URI. "https://publishmydata.com/def/datahost/"))
 (add-grafter-prefixes)
