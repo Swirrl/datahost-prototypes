@@ -108,24 +108,6 @@
   (let [key (models-shared/revision-key series-slug release-slug revision-id)]
     (get @db key)))
 
-(def ^:private UpsertInternalParams
-  [:map
-   [:op.upsert/keys
-    [:or s.series/UpsertKeys s.release/UpsertKeys]]])
-
-(def ^:private upsert-internal-params-valid? (m/validator UpsertInternalParams))
-
-(defn- upsert-doc!
-  "Applies upsert of the JSON-LD document and mutates the db-ref.
-  Returns the value of the db-ref after the upsert."
-  [db-ref update-fn api-params incoming-jsonld-doc]
-  {:pre [(upsert-internal-params-valid? api-params)]}
-  (let [ts (ZonedDateTime/now (ZoneId/of "UTC"))]
-    (swap! db-ref
-           update-fn
-           (assoc api-params :op/timestamp ts)
-           incoming-jsonld-doc)))
-
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
     "@base" (str models-shared/ld-root)))
@@ -213,7 +195,8 @@
         (resource/set-property1 (compact/expand :dcterms/modified) now))))
 
 (defn- set-base-entity [series]
-  (resource/set-property1 series (compact/expand :dh/baseEntity) (resource/id series)))
+  (let [base-entity (URI. (str (resource/id series) "/"))]
+    (resource/set-property1 series (compact/expand :dh/baseEntity) base-entity)))
 
 (defn- insert-resource [triplestore resource]
   (with-open [conn (repo/->connection triplestore)]

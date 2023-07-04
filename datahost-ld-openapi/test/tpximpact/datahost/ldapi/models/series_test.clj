@@ -1,8 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
     [clojure.data.json :as json]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter.matcha.alpha :as matcha]
     [grafter.vocabularies.dcterms :refer [dcterms:title]]
@@ -11,7 +9,6 @@
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.util :as util]
     [tpximpact.datahost.ldapi.router :as router]
-    [reitit.ring :as ring]
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th])
   (:import
@@ -42,7 +39,7 @@
     (t/is (= "Description" (get new-series-doc "dcterms:description")))
     (t/is (= (str t) (get new-series-doc "dcterms:modified")))
     (t/is (= (str t) (get new-series-doc "dcterms:issued")))
-    (t/is (= (get new-series-doc "dh:baseEntity") "https://example.org/data/new-series"))
+    (t/is (= (get new-series-doc "dh:baseEntity") "https://example.org/data/new-series/"))
 
     ;; fetch created series
     (let [request {:uri "/data/new-series"
