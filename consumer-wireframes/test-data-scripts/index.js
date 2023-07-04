@@ -1,5 +1,7 @@
 const fetch = require('node-fetch');
 const data = require('./data/series.json');
+const FormData = require('form-data');
+const fs = require('fs');
 const openAPI = "http://localhost:3000";
 // const openAPI = "https://ldapi-prototype.gss-data.org.uk"
 
@@ -37,7 +39,7 @@ createRelease = async () => {
         for (j = 0; j < releases.length; j++) {
             let title = releases[j].title
             let id = releases[j].id
-            let url = `${openAPI}/data/${series}/release/${id}?title=${title}`
+            let url = `${openAPI}/data/${series}/releases/${id}?title=${title}`
             const response = await fetch(url, {
                 method: 'PUT'
             });
@@ -50,14 +52,6 @@ createRelease = async () => {
 }
 
 createRevision = async () => {
-    body = `
-    {"@context": [
-      "https://publishmydata.com/def/datahost/context",
-      {
-        "@base": "https://example.org/data/population-aged-16-to-64-years-level-3-or-above-qualifications/"
-      }
-    ],
-    "dcterms:title": "Revision"}`
 
     for (i = 0; i < data.length; i++) {
         let series = ""
@@ -67,9 +61,17 @@ createRevision = async () => {
         } else {
             series = data[i].id
         }
+        body = `
+        {"@context": [
+          "https://publishmydata.com/def/datahost/context",
+          {
+            "@base": "https://example.org/data/${series}/"
+          }
+        ],
+        "dcterms:title": "Revision"}`
         for (j = 0; j < releases.length; j++) {
             let id = releases[j].id
-            let url = `${openAPI}/data/${series}/release/${id}/revisions`
+            let url = `${openAPI}/data/${series}/releases/${id}/revisions`
             const response = await fetch(url, {
                 method: 'POST',
                 body: JSON.stringify(body)
@@ -78,6 +80,29 @@ createRevision = async () => {
 
             let revision = api["@id"]
             console.log(`Created: ${url}/${revision}`)
+
+            if (releases[j].file != null) {
+                const formData = new FormData();
+                file = releases[j].file
+                formData.append('appends', fs.createReadStream(file));
+                const settings = {
+                    method: 'POST',
+                    body: formData
+                };
+                try {
+                    // revision = j + 1
+                    url = `${url}/${revision}/changes`
+                    console.log(url)
+                    const fetchResponse = await fetch(url, settings);
+                    const data = await fetchResponse.json();
+
+                    console.log(data)
+                } catch (e) {
+                    console.log(e)
+                    return e;
+                }
+            }
+
         }
     }
 }
