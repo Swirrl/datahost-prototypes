@@ -48,7 +48,33 @@ createRelease = async () => {
 
             url = url.split("?")[0]
             console.log(`Created: ${url}`)
+            
+            const postSchemas = await createSchemas(releases, series)
         }
+    }
+}
+
+createSchemas = async (releases, series) => {
+    if (releases[j].schema != null) {
+        let schemaFile = `./data/${releases[j].schema}`
+        let schema = require(schemaFile);
+        let id = releases[j].id
+        let url = `${openAPI}/data/${series}/releases/${id}/schemas/schema`
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(schema)
+            });
+
+            const api = await response.json();
+        } catch (e) {
+            console.log(e)
+            return e;
+        }
+        console.log(`Added schema to: ${url}`)
     }
 }
 
@@ -81,6 +107,8 @@ createRevision = async () => {
 
             let revision = api["@id"]
             console.log(`Created: ${url}/${revision}`)
+
+
 
             //upload files to revision where provided
             if (releases[j].file != null) {
