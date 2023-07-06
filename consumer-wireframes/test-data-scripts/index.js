@@ -80,7 +80,7 @@ createRevision = async (series) => {
 
         if (releases[j].revisions != null) {
             for (k = 0; k < releases[j].revisions.length; k++) {
-                file = releases[j].revisions[k].file
+                let file = releases[j].revisions[k].file
 
                 await postRevision(url, file)
             }
