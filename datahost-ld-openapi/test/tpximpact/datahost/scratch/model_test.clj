@@ -7,7 +7,7 @@
    [grafter.vocabularies.core :refer [prefixer]]
    [grafter.vocabularies.dcat :refer [dcat]]
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
-   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.ldapi.util.rdf :as util.rdf]
    [tpximpact.datahost.ldapi.models.release :as release]
    [tpximpact.datahost.ldapi.models.series :as series]
    [tpximpact.datahost.ldapi.models.shared :as models.shared])
@@ -21,7 +21,7 @@
 (defn db->matcha [db]
   (->> db
        vals
-       (mapcat util/ednld->rdf)
+       (mapcat util.rdf/ednld->rdf)
        (matcha/index-triples)))
 
 (def dh (prefixer "https://publishmydata.com/def/datahost/"))
