@@ -8,28 +8,37 @@
   (:import (java.io BufferedReader StringReader)
            (java.util UUID)))
 
+(defn- build-csv-multipart [csv-path]
+  (let [appends-file (io/file (io/resource csv-path))]
+    {:tempfile appends-file
+     :size (.length appends-file)
+     :filename (.getName appends-file)
+     :content-type "text/csv;"}))
+
+(defn- doc-with-context [base rest-of-doc]
+  (merge {"@context"
+          ["https://publishmydata.com/def/datahost/context"
+           {"@base" base}]}
+         rest-of-doc))
+
 (deftest round-tripping-revision-test
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client
                                 ld-api-app :tpximpact.datahost.ldapi.router/handler
                                 :as sys}
-
-    (let [csv-1-path "test-inputs/revision/2019.csv"
-          csv-2-path "test-inputs/revision/2020.csv"
+    (let [csv-2019-path "test-inputs/revision/2019.csv"
+          csv-2020-path "test-inputs/revision/2020.csv"
+          csv-2021-path "test-inputs/revision/2021.csv"
+          [csv-1-seq csv-2-seq csv-3-seq] (for [f [csv-2019-path csv-2020-path csv-2021-path]]
+                                            (line-seq (io/reader (io/resource f))))
           series-title "my lovely series"
           series-slug (ld-str/slugify series-title)
-          base (str "https://example.org/data/" series-slug "/")
-          request-ednld {"@context"
-                         ["https://publishmydata.com/def/datahost/context"
-                          {"@base" base}]
-                         "dcterms:title" series-title}]
+          series-base (str "https://example.org/data/" series-slug "/")]
 
       ;; SERIES
       (PUT (str "/data/" (ld-str/slugify series-title))
            {:content-type :json
-            :body (json/write-str {"@context"
-                                   ["https://publishmydata.com/def/datahost/context"
-                                    {"@base" "https://example.org/data/"}]
-                                   "dcterms:title" series-title})})
+            :body (json/write-str (doc-with-context "https://example.org/data/"
+                                                    {"dcterms:title" series-title}))})
 
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
@@ -37,20 +46,18 @@
               release-url (str "/data/" series-slug "/releases/" release-id)
               release-resp (PUT release-url
                                 {:content-type :json
-                                 :body (json/write-str request-ednld)})]
+                                 :body (json/write-str (doc-with-context series-base
+                                                                         {"dcterms:title" "Release 34"}))})]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
           (let [revision-title (str "A revision for release " release-id)
                 revision-url (str release-url "/revisions")
-                revision-ednld {"@context"
-                                ["https://publishmydata.com/def/datahost/context"
-                                 {"@base" base}]
-                                "dcterms:title" revision-title}
+                revision-ednld (doc-with-context series-base {"dcterms:title" revision-title})
 
                 normalised-revision-ld {"@context"
                                         ["https://publishmydata.com/def/datahost/context"
-                                         {"@base" base}],
+                                         {"@base" series-base}],
                                         "dcterms:title" revision-title,
                                         "@type" "dh:Revision"
                                         "@id" 1,
@@ -83,15 +90,8 @@
 
             (testing "Changes resource created with CSV appends file"
               ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-              (let [appends-file (io/file (io/resource csv-1-path))
-                    change-ednld {"@context"
-                                  ["https://publishmydata.com/def/datahost/context"
-                                   {"@base" base}]
-                                  "dcterms:description" "A new change"}
-                    multipart-temp-file-part {:tempfile appends-file
-                                              :size (.length appends-file)
-                                              :filename (.getName appends-file)
-                                              :content-type "text/csv;"}
+              (let [change-ednld (doc-with-context series-base {"dcterms:description" "A new change"})
+                    multipart-temp-file-part (build-csv-multipart csv-2019-path)
                     change-api-response (ld-api-app {:request-method :post
                                                      :uri (str new-revision-location "/changes")
                                                      :multipart-params {:appends multipart-temp-file-part}
@@ -109,15 +109,8 @@
 
             (testing "Second Changes resource created with CSV appends file"
               ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-              (let [appends-file (io/file (io/resource csv-2-path))
-                    change-ednld {"@context"
-                                  ["https://publishmydata.com/def/datahost/context"
-                                   {"@base" base}]
-                                  "dcterms:description" "A new second change"}
-                    multipart-temp-file-part {:tempfile appends-file
-                                              :size (.length appends-file)
-                                              :filename (.getName appends-file)
-                                              :content-type "text/csv;"}
+              (let [change-ednld (doc-with-context series-base {"dcterms:description" "A new second change"})
+                    multipart-temp-file-part (build-csv-multipart csv-2020-path)
                     change-api-response (ld-api-app {:request-method :post
                                                      :uri (str new-revision-location "/changes")
                                                      :multipart-params {:appends multipart-temp-file-part}
@@ -134,30 +127,25 @@
                        (str new-revision-location "/changes/" inserted-change-id))
                     "Created with the resource URI provided in the Location header")))
 
-            (testing "Fetching revision as CSV with multiple CSV append changes"
+            (testing "Fetching Revision as CSV with multiple CSV append changes"
               (let [response (GET new-revision-location {:headers {"accept" "text/csv"}})
-                    csv-1-seq (line-seq (io/reader (io/resource csv-1-path)))
-                    csv-2-seq (line-seq (io/reader (io/resource csv-2-path)))
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
                 ;; length of both csv files minus 1 duplicated header
                 (is (= (+ (count csv-1-seq) (- (count csv-2-seq) 1))
                        (count resp-body-seq))
-                    "responds with concatenated changes CSVs")
+                    "responds with concatenated changes from both CSVs")
                 (is (= (last resp-body-seq) (last csv-2-seq)))
                 (is (= (first resp-body-seq) (first csv-1-seq))))))
 
           (testing "Creation of a second revision for a release"
             (let [revision-title-2 (str "A second revision for release " release-id)
                   revision-url-2 (str release-url "/revisions")
-                  revision-ednld-2 {"@context"
-                                    ["https://publishmydata.com/def/datahost/context"
-                                     {"@base" base}]
-                                    "dcterms:title" revision-title-2}
+                  revision-ednld-2 (doc-with-context series-base {"dcterms:title" revision-title-2})
 
                   normalised-revision-ld-2 {"@context"
                                             ["https://publishmydata.com/def/datahost/context"
-                                             {"@base" base}],
+                                             {"@base" series-base}],
                                             "dcterms:title" revision-title-2,
                                             "@type" "dh:Revision"
                                             "@id" 2,
@@ -176,8 +164,31 @@
                      (str revision-url-2 "/" inserted-revision-id-2))
                   "Created with the resource URI provided in the Location header")
 
-              (testing "Fetching a second existing revision works"
+              (testing "Fetching a second existing revision as default JSON works"
                 (let [response (GET new-revision-location-2)]
                   (is (= 200 (:status response)))
-                  (is (= normalised-revision-ld-2 (json/read-str (:body response))))))))
-          )))))
+                  (is (= normalised-revision-ld-2 (json/read-str (:body response))))))
+
+              (testing "Third Changes resource created against 2nd Revision"
+                (let [change-3-ednld (doc-with-context series-base {"dcterms:description" "A new third change"})
+                      multipart-temp-file-part (build-csv-multipart csv-2021-path)
+                      change-api-response (ld-api-app {:request-method :post
+                                                       :uri (str new-revision-location-2 "/changes")
+                                                       :multipart-params {:appends multipart-temp-file-part}
+                                                       :content-type "application/json"
+                                                       :body (json/write-str change-3-ednld)})
+                      change-3-response-json (json/read-str (slurp (:body change-api-response)))
+                      inserted-change-id (get change-3-response-json "@id")]
+                  (is (= (:status change-api-response) 201))
+                  (is (= 1 inserted-change-id))))
+
+              (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
+                (let [response (GET release-url {:headers {"accept" "text/csv"}})
+                      resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
+                  (is (= 200 (:status response)))
+                  ;; length of all csv files minus 2 duplicated headers
+                  (is (= (+ (count csv-1-seq) (count csv-2-seq) (- (count csv-3-seq) 2))
+                         (count resp-body-seq))
+                      "responds with concatenated changes from all 3 CSVs")
+                  (is (= (last resp-body-seq) (last csv-3-seq)))
+                  (is (= (first resp-body-seq) (first csv-1-seq))))))))))))

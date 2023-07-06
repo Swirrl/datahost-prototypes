@@ -14,7 +14,7 @@
                        :revision-id int?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json" map?}}
+                     "application/json" {:body map?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn post-revision-route-config [db]

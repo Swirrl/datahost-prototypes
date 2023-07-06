@@ -1,13 +1,13 @@
 (ns tpximpact.datahost.ldapi.models.revision
   (:require
-    [clojure.string :as str]
-    [clojure.tools.logging :as log]
-    [ring.util.io :as ring-io]
-    [malli.core :as m]
-    [malli.error :as me]
-    [tablecloth.api :as tc]
-    [tpximpact.datahost.ldapi.schemas.common :refer [registry]]
-    [tpximpact.datahost.ldapi.models.shared :as models-shared])
+   [clojure.string :as str]
+   [clojure.tools.logging :as log]
+   [ring.util.io :as ring-io]
+   [malli.core :as m]
+   [malli.error :as me]
+   [tablecloth.api :as tc]
+   [tpximpact.datahost.ldapi.schemas.common :refer [registry]]
+   [tpximpact.datahost.ldapi.models.shared :as models-shared])
   (:import (java.io ByteArrayInputStream)))
 
 (def RevisionApiParams [:map
@@ -50,20 +50,40 @@
        (ByteArrayInputStream.))))
 
 (defn csv-str->dataset [str]
-  (-> (string->stream str)
-      (tc/dataset {:file-type :csv})))
+  (some-> str
+          (string->stream)
+          (tc/dataset {:file-type :csv})))
+
+(defn revision-appends-file-locations
+  "Given a Revision as a hash map, returns appends file locations"
+  [db revision]
+  (some->> (get revision "dh:hasChange")
+           (map #(get @db %))
+           (map #(get % "dh:appends"))))
+
+(defn csv-file-locations->dataset [db appends-file-locations]
+  (some->> appends-file-locations
+           (map #(csv-str->dataset (get @db %)))
+           (remove nil?)
+           (apply tc/concat)))
+
+(defn write-to-outputstream [tc-dataset]
+  (ring-io/piped-input-stream
+   (fn [out-stream]
+     (tc/write! tc-dataset out-stream {:file-type :csv}))))
 
 (defn revision->csv-stream [db revision]
-  (let [appends-file-keys (some->> (get revision "dh:hasChange")
-                                   (map #(get @db %))
-                                   (map #(get % "dh:appends")))
-        merged-datasets (some->> appends-file-keys
-                                 (map #(csv-str->dataset (get @db %)))
-                                 (apply tc/concat))]
-    (when merged-datasets
-      (ring-io/piped-input-stream
-        (fn [out-stream]
-          (tc/write! merged-datasets out-stream {:file-type :csv}))))))
+  (when-let [merged-datasets (csv-file-locations->dataset db (revision-appends-file-locations db revision))]
+    (write-to-outputstream merged-datasets)))
+
+(defn release->csv-stream [db release]
+  (let [revisions (some->> (get release "dh:hasRevision")
+                           (map #(get @db %)))
+        appends-file-keys (some->> revisions
+                                   (map (partial revision-appends-file-locations db))
+                                   (flatten))]
+    (when-let [merged-datasets (csv-file-locations->dataset db appends-file-keys)]
+      (write-to-outputstream merged-datasets))))
 
 (defn- create-revision [base-entity api-params revision-id jsonld-doc]
   (log/info "Creating revision "

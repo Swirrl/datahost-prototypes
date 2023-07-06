@@ -1,6 +1,5 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-   [malli.core :as m]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.revision :as revision-model]))
@@ -34,10 +33,16 @@
     {:status (op->response-code op)
      :body jsonld-doc}))
 
-(defn get-release [db {{:keys [series-slug release-slug]} :path-params}]
+(defn get-release [db {{:keys [series-slug release-slug]} :path-params
+                       {:strs [accept]} :headers}]
   (if-let [release (db/get-release db series-slug release-slug)]
-    {:status 200
-     :body release}
+    (if (= accept "text/csv")
+      {:status 200
+       :headers {"content-type" "text/csv"
+                 "content-disposition" "attachment ; filename=release.csv"}
+       :body (or (revision-model/release->csv-stream db release) "")}
+      {:status 200
+       :body release})
     not-found-response))
 
 (defn put-release [db {{:keys [series-slug]} :path-params
