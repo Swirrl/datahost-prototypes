@@ -1,20 +1,19 @@
 (ns tpximpact.datahost.ldapi.routes.series
   (:require
    [tpximpact.datahost.ldapi.handlers :as handlers]
-   [tpximpact.datahost.ldapi.routes.copy :as copy]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.series :as schema]))
 
 (defn get-series-route-config [db]
-  {:summary copy/get-series-summary
-   :description copy/get-series-description
+  {:summary "Retrieve metadata for an existing dataset-series"
+   :description "A dataset series is a named dataset regardless of schema, methodology or compatibility changes"
    :handler (partial handlers/get-dataset-series db)
    :parameters {:path {:series-slug string?}}
    :responses {200 {:body routes-shared/JsonLdSchema}
                404 {:body [:re "Not found"]}}})
 
 (defn put-series-route-config [db]
-  {:summary copy/put-series-summary
+  {:summary "Create or update metadata on a dataset-series"
    :handler (partial handlers/put-dataset-series db)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?}
