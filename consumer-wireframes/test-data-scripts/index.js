@@ -3,8 +3,8 @@ const data = require('./data/series.json');
 const FormData = require('form-data');
 const fs = require('fs');
 
-// const openAPI = "http://localhost:3000";
-const openAPI = "https://ldapi-prototype.gss-data.org.uk"
+const openAPI = "http://localhost:3000";
+// const openAPI = "https://ldapi-prototype.gss-data.org.uk"
 
 createSeries = async (series) => {
     let title = data[i].title
@@ -77,39 +77,44 @@ createRevision = async (series) => {
     for (j = 0; j < releases.length; j++) {
         let id = releases[j].id
         let url = `${openAPI}/data/${series}/releases/${id}/revisions`
-        const response = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(body)
-        });
-        const api = await response.json();
 
-        let revision = api["@id"]
-        console.log(`Created: ${url}/${revision}`)
+        if (releases[j].revisions != null) {
+            for (k = 0; k < releases[j].revisions.length; k++) {
+                file = releases[j].revisions[k].file
 
-        await uploadData(releases, revision, url)
-
+                await postRevision(url, file)
+            }
+        }
     }
 }
 
-uploadData = async (releases, revision, url) => {
-    if (releases[j].file != null) {
-        const formData = new FormData();
-        file = releases[j].file
-        formData.append('appends', fs.createReadStream(file));
-        const settings = {
-            method: 'POST',
-            body: formData
-        };
-        try {
-            url = `${url}/${revision}/changes`
-            const fetchResponse = await fetch(url, settings);
-            const data = await fetchResponse.json();
+postRevision = async (url, file) => {
+    const response = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify(body)
+    });
+    const api = await response.json();
+    let revision = api["@id"]
+    console.log(`Created: ${url}/${revision}`)
 
-            console.log(`Added data to: ${url}/${revision}`)
-        } catch (e) {
-            console.log(e)
-            return e;
-        }
+    await uploadData(revision, url, file)
+}
+
+uploadData = async (revision, url, file) => {
+    const formData = new FormData();
+    formData.append('appends', fs.createReadStream(file));
+    const settings = {
+        method: 'POST',
+        body: formData
+    };
+    try {
+        url = `${url}/${revision}/changes`
+        const fetchResponse = await fetch(url, settings);
+        const data = await fetchResponse.json();
+        console.log(`Added data to: ${url}`)
+    } catch (e) {
+        console.log(e)
+        return e;
     }
 }
 

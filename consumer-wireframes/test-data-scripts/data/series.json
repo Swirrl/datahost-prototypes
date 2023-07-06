@@ -7,16 +7,20 @@
     "releases": [{
       "title": "Release 1-1",
       "id": "1-1",
-      "file": "data/2019.csv",
-      "schema": "schema1.json"
+      "schema": "schema1.json",
+      "revisions": [{
+        "file": "data/2019.csv"
+      }, {
+        "file": "data/2020.csv"
+      }, {
+        "file": "data/2021.csv"
+      }]
     }, {
       "title": "Release 1-2",
-      "id": "1-2",
-      "file": "data/2020.csv"
+      "id": "1-2"
     }, {
       "title": "Release 1-3",
-      "id": "1-3",
-      "file": "data/2021.csv"
+      "id": "1-3"
     }]
   },
   {
