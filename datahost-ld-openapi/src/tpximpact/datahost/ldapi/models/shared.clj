@@ -2,7 +2,7 @@
   (:require
    [clojure.set :as set]
    [malli.core :as m]
-   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.ldapi.util.collections :as util.colls]
    [tpximpact.datahost.ldapi.schemas.api :as s.api])
   (:import
    [java.net URI]
@@ -80,7 +80,7 @@
   [api-params jsonld-doc]
   (-> jsonld-doc
       (merge (rename-query-params-to-common-keys api-params))
-      (util/dissoc-by-key keyword?)))
+      (util.colls/dissoc-by-key keyword?)))
 
 (defn validate-id
   "Returns unchanged doc or throws.

@@ -1,14 +1,10 @@
-(ns tpximpact.datahost.ldapi.util
+(ns tpximpact.datahost.ldapi.util.rdf
   (:require
    [grafter-2.rdf4j.io :as rio])
-  (:import [com.github.jsonldjava.core JsonLdProcessor RDFDatasetUtils JsonLdTripleCallback]))
-
-(defn dissoc-by-key [m pred]
-  (reduce (fn [acc k]
-            (if (pred k)
-              (dissoc acc k)
-              acc))
-          m (keys m)))
+  (:import [com.github.jsonldjava.core
+            JsonLdProcessor
+            JsonLdTripleCallback
+            RDFDatasetUtils]))
 
 (defn ednld->rdf
   "Takes a JSON-LD map as an EDN datastructure and converts it into RDF

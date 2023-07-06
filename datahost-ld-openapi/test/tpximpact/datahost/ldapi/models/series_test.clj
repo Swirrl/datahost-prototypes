@@ -6,7 +6,7 @@
    [grafter.vocabularies.dcterms :refer [dcterms:title]]
    [tpximpact.datahost.ldapi.models.series :as sut]
    [tpximpact.datahost.ldapi.models.shared :as models-shared]
-   [tpximpact.datahost.ldapi.util :as util]
+   [tpximpact.datahost.ldapi.util.rdf :as util.rdf]
    [tpximpact.test-helpers :as th])
   (:import
     (clojure.lang ExceptionInfo)
@@ -172,7 +172,7 @@
                ednld))
 
         (testing "as RDF"
-          (let [triples (matcha/index-triples (util/ednld->rdf ednld))]
+          (let [triples (matcha/index-triples (util.rdf/ednld->rdf ednld))]
             (testing "All emitted triples have the same expected subject"
               (is (matcha/ask [[(URI. "https://example.org/data/my-dataset-series") dcterms:title ?o]] triples))
               ;; TODO add some more tests
