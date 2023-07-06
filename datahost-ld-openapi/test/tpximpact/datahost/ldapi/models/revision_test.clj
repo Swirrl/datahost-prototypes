@@ -191,4 +191,17 @@
                          (count resp-body-seq))
                       "responds with concatenated changes from all 3 CSVs")
                   (is (= (last resp-body-seq) (last csv-3-seq)))
-                  (is (= (first resp-body-seq) (first csv-1-seq))))))))))))
+                  (is (= (first resp-body-seq) (first csv-1-seq)))))))
+
+          (testing "Creation of a auto-increment Revision IDs for a release"
+            (let [revision-title (str "One of many revisions for release " release-id)
+                  revision-url-2 (str release-url "/revisions")
+                  revision-ednld-2 (doc-with-context series-base {"dcterms:title" revision-title})
+                  new-revision-ids (for [_n (range 1 11)
+                                         :let [resp (POST revision-url-2
+                                                          {:content-type :json
+                                                           :body (json/write-str revision-ednld-2)})]]
+                                     (get (json/read-str (:body resp)) "@id"))]
+              ;; This Release already has 2 Revisions, so we expect another 10 in the series
+              (is (= new-revision-ids (range 3 13))
+                  "Expected Revision IDs integers increase in an orderly sequence"))))))))
