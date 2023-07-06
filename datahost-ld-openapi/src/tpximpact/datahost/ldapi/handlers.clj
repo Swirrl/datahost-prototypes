@@ -134,3 +134,17 @@
 
     {:status 422
      :body "Revision for this change does not exist"}))
+
+(defn get-change [db {{:keys [series-slug release-slug revision-id change-id]} :path-params
+                        {:strs [accept]} :headers :as _request}]
+  (if-let [change (db/get-change db series-slug release-slug revision-id change-id)]
+    (if (= accept "text/csv")
+      {:status 200
+       :headers {"content-type" "text/csv"
+                 "content-disposition" "attachment ; filename=change.csv"}
+       :body (or (revision-model/change->csv-stream db change) "")}
+
+      {:status 406
+       :headers {}
+       :body "Only text/csv format is available at this time."})
+    not-found-response))

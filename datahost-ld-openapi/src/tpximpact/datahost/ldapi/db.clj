@@ -61,6 +61,10 @@
   (let [key (models-shared/revision-key series-slug release-slug revision-id)]
     (get @db key)))
 
+(defn get-change [db series-slug release-slug revision-id change-id]
+  (let [key (models-shared/change-key series-slug release-slug revision-id change-id)]
+    (get @db key)))
+
 (def ^:private UpsertInternalParams
   [:map
    [:op.upsert/keys
