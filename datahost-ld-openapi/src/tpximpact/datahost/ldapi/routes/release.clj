@@ -1,6 +1,6 @@
 (ns tpximpact.datahost.ldapi.routes.release
   (:require
-   [malli.util :as mu]
+   [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.copy :as copy]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
@@ -9,9 +9,12 @@
 (defn get-release-route-config [db]
   {:summary copy/get-release-summary
    :handler (partial handlers/get-release db)
+   :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
-   :responses {200 {:body map?}
+   :responses {200 {:content
+                    {"text/csv" any?
+                     "application/json" {:body map?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn put-release-route-config [db]
