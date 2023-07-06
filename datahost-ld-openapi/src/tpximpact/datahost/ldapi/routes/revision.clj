@@ -6,7 +6,7 @@
     [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
 (defn get-revision-route-config [db]
-  {:summary "Retrieve metadata for an existing revision"
+  {:summary "Retrieve metadata or CSV contents for an existing revision"
    :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-revision db)
    :parameters {:path {:series-slug string?
@@ -55,3 +55,15 @@
                     :body [:map
                            [:status [:enum "error"]]
                            [:message string?]]}}})
+
+(defn get-revision-changes-route-config [db]
+  {:summary "Retrieve CSV contents for an existing change"
+   :coercion (rcm/create {:transformers {}, :validate false})
+   :handler (partial handlers/get-change db)
+   :parameters {:path {:series-slug string?
+                       :release-slug string?
+                       :revision-id int?
+                       :change-id int?}}
+   :responses {200 {:content
+                    {"text/csv" any?}}
+               404 {:body [:re "Not found"]}}})

@@ -28,8 +28,8 @@
     (let [csv-2019-path "test-inputs/revision/2019.csv"
           csv-2020-path "test-inputs/revision/2020.csv"
           csv-2021-path "test-inputs/revision/2021.csv"
-          [csv-1-seq csv-2-seq csv-3-seq] (for [f [csv-2019-path csv-2020-path csv-2021-path]]
-                                            (line-seq (io/reader (io/resource f))))
+          [csv-2019-seq csv-2020-seq csv-2021-seq] (for [f [csv-2019-path csv-2020-path csv-2021-path]]
+                                                     (line-seq (io/reader (io/resource f))))
           series-title "my lovely series"
           series-slug (ld-str/slugify series-title)
           series-base (str "https://example.org/data/" series-slug "/")]
@@ -101,11 +101,17 @@
                     inserted-change-id (get change-response-json "@id")
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-
                 (is (= (:status change-api-response) 201))
                 (is (= new-change-resource-location
                        (str new-revision-location "/changes/" inserted-change-id))
-                    "Created with the resource URI provided in the Location header")))
+                    "Created with the resource URI provided in the Location header")
+
+                (testing "Change can be retrieved as CSV with text/csv accepts header"
+                  (let [change-response (GET new-change-resource-location {:headers {"accept" "text/csv"}})
+                        change-resp-body-seq (line-seq (BufferedReader. (StringReader. (:body change-response))))]
+                    (is (= 200 (:status change-response)))
+                    (is (= (count csv-2019-seq) (count change-resp-body-seq))
+                        "responds CSV contents")))))
 
             (testing "Second Changes resource created with CSV appends file"
               ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
@@ -120,7 +126,6 @@
                     inserted-change-id (get change-response-json "@id")
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-
                 (is (= (:status change-api-response) 201))
                 (is (= 2 inserted-change-id))
                 (is (= new-change-resource-location
@@ -132,11 +137,11 @@
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
                 ;; length of both csv files minus 1 duplicated header
-                (is (= (+ (count csv-1-seq) (- (count csv-2-seq) 1))
+                (is (= (+ (count csv-2019-seq) (- (count csv-2020-seq) 1))
                        (count resp-body-seq))
                     "responds with concatenated changes from both CSVs")
-                (is (= (last resp-body-seq) (last csv-2-seq)))
-                (is (= (first resp-body-seq) (first csv-1-seq))))))
+                (is (= (last resp-body-seq) (last csv-2020-seq)))
+                (is (= (first resp-body-seq) (first csv-2019-seq))))))
 
           (testing "Creation of a second revision for a release"
             (let [revision-title-2 (str "A second revision for release " release-id)
@@ -187,11 +192,11 @@
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                   (is (= 200 (:status response)))
                   ;; length of all csv files minus 2 duplicated headers
-                  (is (= (+ (count csv-1-seq) (count csv-2-seq) (- (count csv-3-seq) 2))
+                  (is (= (+ (count csv-2019-seq) (count csv-2020-seq) (- (count csv-2021-seq) 2))
                          (count resp-body-seq))
                       "responds with concatenated changes from all 3 CSVs")
-                  (is (= (last resp-body-seq) (last csv-3-seq)))
-                  (is (= (first resp-body-seq) (first csv-1-seq)))))))
+                  (is (= (last resp-body-seq) (last csv-2021-seq)))
+                  (is (= (first resp-body-seq) (first csv-2019-seq)))))))
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-id)

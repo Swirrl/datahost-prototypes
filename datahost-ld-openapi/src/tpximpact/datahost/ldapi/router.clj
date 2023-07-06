@@ -123,8 +123,9 @@
      ["/:series-slug/releases/:release-slug/revisions/:revision-id"
       {:get (revision-routes/get-revision-route-config db)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-      {:post (revision-routes/post-revision-changes-route-config db)}]]]
-
+      {:post (revision-routes/post-revision-changes-route-config db)}]
+     ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes/:change-id"
+      {:get (revision-routes/get-revision-changes-route-config db)}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data

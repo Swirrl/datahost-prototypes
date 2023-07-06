@@ -76,6 +76,10 @@
   (when-let [merged-datasets (csv-file-locations->dataset db (revision-appends-file-locations db revision))]
     (write-to-outputstream merged-datasets)))
 
+(defn change->csv-stream [db change]
+  (when-let [dataset (csv-file-locations->dataset db [(get change "dh:appends")])]
+    (write-to-outputstream dataset)))
+
 (defn release->csv-stream [db release]
   (let [revisions (some->> (get release "dh:hasRevision")
                            (map #(get @db %)))
