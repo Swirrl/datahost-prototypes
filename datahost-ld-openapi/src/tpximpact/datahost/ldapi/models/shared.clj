@@ -39,6 +39,9 @@
 (defn change-key [series-slug release-slug revision-id change-id]
   (str (revision-key series-slug release-slug revision-id) "/changes/" change-id))
 
+(defn revision-uri [series-slug release-slug revision-id]
+  (.resolve ld-root (revision-key series-slug release-slug revision-id)))
+
 ;;; ---- CONTEXT OPS
 
 (defn normalise-context [ednld base]

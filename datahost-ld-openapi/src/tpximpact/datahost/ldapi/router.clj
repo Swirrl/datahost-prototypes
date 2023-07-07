@@ -84,7 +84,7 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(defn router [clock triplestore db]
+(defn router [clock triplestore]
   (ring/router
    [["/triplestore-query"
      ;; TODO remove this route when we have real ones using the triplestore
@@ -114,18 +114,18 @@
        :put (release-routes/put-release-route-config clock triplestore)}]
 
      ["/:series-slug/releases/:release-slug/schemas"
-      {:get (release-routes/get-release-ld-schema-config db)}]
+      {:get (release-routes/get-release-ld-schema-config triplestore)}]
      ["/:series-slug/releases/:release-slug/schemas/:schema-slug"
-      {:post (release-routes/put-release-ld-schema-config db)}]
+      {:post (release-routes/put-release-ld-schema-config triplestore)}]
 
      ["/:series-slug/releases/:release-slug/revisions"
-      {:post (revision-routes/post-revision-route-config db)}]
+      {:post (revision-routes/post-revision-route-config triplestore)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id"
-      {:get (revision-routes/get-revision-route-config db)}]
+      {:get (revision-routes/get-revision-route-config triplestore)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-      {:post (revision-routes/post-revision-changes-route-config db)}]
+      {:post (revision-routes/post-revision-changes-route-config triplestore)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes/:change-id"
-      {:get (revision-routes/get-revision-changes-route-config db)}]]]
+      {:get (revision-routes/get-revision-changes-route-config triplestore)}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -164,9 +164,9 @@
                         ;; multipart
                         multipart/multipart-middleware]}}))
 
-(defn handler [clock triplestore db]
+(defn handler [clock triplestore]
   (ring/ring-handler
-    (router clock triplestore db)
+    (router clock triplestore)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
@@ -179,5 +179,5 @@
     {:executor sieppari/executor}))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [clock triplestore db]}]
-  (handler clock triplestore db))
+  [_ {:keys [clock triplestore]}]
+  (handler clock triplestore))

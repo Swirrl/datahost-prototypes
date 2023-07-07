@@ -89,26 +89,26 @@
        :body {:status "error"
               :message "Not found"}})))
 
-(defn get-revision [db {{:keys [series-slug release-slug revision-id]} :path-params
+(defn get-revision [triplestore {{:keys [series-slug release-slug revision-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
-  (if-let [rev (db/get-revision db series-slug release-slug revision-id)]
+  (if-let [rev (db/get-revision triplestore series-slug release-slug revision-id)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=revision.csv"}
-       :body (or (revision-model/revision->csv-stream db rev) "")}
+       :body (or (revision-model/revision->csv-stream triplestore rev) "")}
 
       {:status 200
        :headers {"content-type" "application/json"}
        :body rev})
     not-found-response))
 
-(defn post-revision [db {{:keys [series-slug release-slug]} :path-params
+(defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params
                          body-params :body-params :as request}]
-  (if-let [_release (db/get-release db series-slug release-slug)]
+  (if-let [_release (db/get-release triplestore series-slug release-slug)]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
-          {:keys [_op jsonld-doc resource-id]} (db/insert-revision! db api-params incoming-jsonld-doc)]
+          {:keys [jsonld-doc resource-id]} (db/insert-revision! triplestore api-params incoming-jsonld-doc)]
       {:status 201
        :headers {"Location" (str "/data/" series-slug "/releases/" release-slug "/revisions/" resource-id)}
        :body jsonld-doc})
