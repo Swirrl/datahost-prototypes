@@ -1,9 +1,63 @@
 (ns tpximpact.datahost.ldapi.models.revision-test
   (:require
     [clojure.data.json :as json]
-    [clojure.test :refer [deftest is testing]]
+    [clojure.test :refer [deftest is testing] :as t]
+    [grafter-2.rdf4j.repository :as repo]
+    [tpximpact.datahost.ldapi.resource :as resource]
+    [tpximpact.datahost.ldapi.router :as router]
+    [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.strings :as ld-str]))
+    [tpximpact.datahost.ldapi.strings :as ld-str])
+  (:import [java.net URI]))
+
+(defn- create-series [handler]
+  (let [series-slug "new-series"
+        request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
+        request {:uri "/data/new-series"
+                 :request-method :put
+                 :headers {"content-type" "application/json"}
+                 :body (json/write-str request-json)}
+        _response (handler request)]
+    series-slug))
+
+(defn- create-release [handler series-slug]
+  (let [release-slug "test-release"
+        request-json {"dcterms:title" "Test release" "dcterms:description" "Description"}
+        request {:uri (format "/data/%s/release/%s" series-slug release-slug)
+                 :request-method :put
+                 :headers {"content-type" "application/json"}
+                 :body (json/write-str request-json)}
+        response (handler request)
+        release-doc (json/read-str (:body response))]
+    [release-slug release-doc]))
+
+(defn- temp-repo []
+  (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
+
+(defn- resource-id [resource-doc]
+  (let [resource (resource/from-json-ld-doc resource-doc)]
+    (resource/id resource)))
+(t/deftest put-revision-create-test
+  (let [repo (temp-repo) #_(repo/sail-repo)
+        t (time/parse "2023-07-03T11:16:16Z")
+        clock (time/manual-clock t)
+        handler (router/handler clock repo)
+        series-slug (create-series handler)
+        [release-slug release-doc] (create-release handler series-slug)
+        release-uri (resource-id release-doc)
+
+        request-json {"dcterms:title" "Test revision" "dcterms:description" "Description"}
+        request {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
+                 :request-method :post
+                 :headers {"content-type" "application/json"}
+                 :body (json/write-str request-json)}
+        {:keys [status body] :as response} (handler request)
+        revision-doc (json/read-str body)]
+    (t/is (= 201 status))
+    (t/is (= "Test revision" (get revision-doc "dcterms:title")))
+    (t/is (= "Description" (get revision-doc "dcterms:description")))
+    (t/is (= release-uri (URI. (get revision-doc "dh:appliesToRelease"))))))
+
 
 (deftest round-tripping-revision-test
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client

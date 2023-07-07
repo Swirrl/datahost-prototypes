@@ -8,9 +8,8 @@
 (defn- get-test-router
   ([] (get-test-router time/system-clock))
   ([clock]
-   (let [triplestore (repo/sail-repo)
-         db (atom {})]
-     (sut/router clock triplestore db))))
+   (let [triplestore (repo/sail-repo)]
+     (sut/router clock triplestore))))
 
 (t/deftest cors-preflight-request-test
   (let [router (get-test-router)

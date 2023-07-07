@@ -1,16 +1,11 @@
 (ns tpximpact.test-helpers
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
-            [duratom.core :as da]
             [tpximpact.datahost.sys :as sys]
             [tpximpact.datahost.ldapi.test-util.http-client :as http-client]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.test/http-client [_ {:keys [port] :as config}]
   (http-client/make-client config))
-
-(defn clean-up-database! [system]
-  (when-let [db (get system :tpximpact.datahost.ldapi.db/db)]
-    (da/destroy db)))
 
 (defn start-system [configs]
   (-> configs
@@ -43,8 +38,7 @@
 
 (defmacro with-system-and-clean-up [system-binding & body]
   `(with-system* {:on-init []
-                  :on-halt [clean-up-database!
-                            ig/halt!]}
+                  :on-halt [ig/halt!]}
                  ~system-binding
                  ~@body))
 
