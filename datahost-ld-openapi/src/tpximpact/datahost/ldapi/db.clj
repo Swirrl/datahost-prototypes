@@ -230,17 +230,16 @@
         {:op :create :jsonld-doc (release->response-body created-release)}))))
 
 (def ^:private revision-graph-uri (URI. "https://publishmydata.com/graph/datahost/revisions"))
+
 (defn- insert-revision-query [revision-uri]
   {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"}
    :insert [[:graph revision-graph-uri
              [[revision-uri :dh/revisionNumber '?next]]]]
-   :where [[:optional [[:where {:select ['?revno]
-                                :where [[:graph revision-graph-uri
-                                         [['?rev :dh/revisionNumber '?revno]]]]
-                                :order-by ['(desc ?revno)]
-                                :limit 1}]]]
-           [:bind ['(coalesce (+ ?revno 1) 1) '?next]]]
-   })
+   :where [[:where {:select [['(max ?revno) '?highest]]
+                    :where [[:graph revision-graph-uri
+                             [['?rev :dh/revisionNumber '?revno]]]]
+                    }]
+           [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
 (defn- select-revision-query []
   {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"}

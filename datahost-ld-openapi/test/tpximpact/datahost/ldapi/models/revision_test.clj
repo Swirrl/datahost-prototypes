@@ -31,14 +31,11 @@
         release-doc (json/read-str (:body response))]
     [release-slug release-doc]))
 
-(defn- temp-repo []
-  (repo/sparql-repo "http://localhost:5820/test/query" "http://localhost:5820/test/update"))
-
 (defn- resource-id [resource-doc]
   (let [resource (resource/from-json-ld-doc resource-doc)]
     (resource/id resource)))
 (t/deftest put-revision-create-test
-  (let [repo (temp-repo) #_(repo/sail-repo)
+  (let [repo (repo/sail-repo)
         t (time/parse "2023-07-03T11:16:16Z")
         clock (time/manual-clock t)
         handler (router/handler clock repo)
