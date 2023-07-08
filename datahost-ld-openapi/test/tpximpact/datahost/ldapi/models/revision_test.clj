@@ -1,13 +1,14 @@
 (ns tpximpact.datahost.ldapi.models.revision-test
   (:require
-    [clojure.data.json :as json]
-    [clojure.test :refer [deftest is testing] :as t]
-    [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.datahost.ldapi.resource :as resource]
-    [tpximpact.datahost.ldapi.router :as router]
-    [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.strings :as ld-str])
+   [clojure.data.json :as json]
+   [clojure.string :as str]
+   [clojure.test :refer [deftest is testing] :as t]
+   [grafter-2.rdf4j.repository :as repo]
+   [tpximpact.datahost.ldapi.resource :as resource]
+   [tpximpact.datahost.ldapi.router :as router]
+   [tpximpact.datahost.time :as time]
+   [tpximpact.test-helpers :as th]
+   [tpximpact.datahost.ldapi.strings :as ld-str])
   (:import [java.net URI]))
 
 (defn- create-series [handler]
@@ -34,6 +35,7 @@
 (defn- resource-id [resource-doc]
   (let [resource (resource/from-json-ld-doc resource-doc)]
     (resource/id resource)))
+
 (t/deftest put-revision-create-test
   (let [repo (repo/sail-repo)
         t (time/parse "2023-07-03T11:16:16Z")
@@ -42,18 +44,30 @@
         series-slug (create-series handler)
         [release-slug release-doc] (create-release handler series-slug)
         release-uri (resource-id release-doc)
-
-        request-json {"dcterms:title" "Test revision" "dcterms:description" "Description"}
-        request {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
-                 :request-method :post
-                 :headers {"content-type" "application/json"}
-                 :body (json/write-str request-json)}
-        {:keys [status body] :as response} (handler request)
+        request1 {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
+                  :request-method :post
+                  :headers {"content-type" "application/json"}
+                  :body (json/write-str {"dcterms:title" "Test revision" "dcterms:description" "Description"})}
+        request2 {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
+                  :request-method :post
+                  :headers {"content-type" "application/json"}
+                  :body (json/write-str {"dcterms:title" "A second test revision" "dcterms:description" "Description"})}
+        {:keys [status body] :as _response} (handler request1)
         revision-doc (json/read-str body)]
-    (t/is (= 201 status))
+    (t/is (= 201 status)
+          "first revision was successfully created")
     (t/is (= "Test revision" (get revision-doc "dcterms:title")))
     (t/is (= "Description" (get revision-doc "dcterms:description")))
-    (t/is (= release-uri (URI. (get revision-doc "dh:appliesToRelease"))))))
+    (t/is (= release-uri (URI. (get revision-doc "dh:appliesToRelease"))))
+    (t/is (str/ends-with? (get revision-doc "@id") "/revisions/1")
+          "auto-increment revision ID is assigned")
+
+    (let [{:keys [status body] :as _response2} (handler request2)
+          revision-doc2 (json/read-str body)]
+      (t/is (= 201 status)
+            "second revision was successfully created")
+      (t/is (str/ends-with? (get revision-doc2 "@id") "/revisions/2")
+            "subsequent revision has next auto-increment revision ID assigned"))))
 
 
 (deftest round-tripping-revision-test

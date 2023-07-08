@@ -19,8 +19,7 @@
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.resource :as resource])
-  (:import [java.net URI]
-           [java.util UUID]))
+  (:import [java.net URI]))
 
 (defn- get-series-query [series-url]
   (let [bgps [[series-url 'a :dh/DatasetSeries]
@@ -229,60 +228,27 @@
       (let [created-release (insert-release clock triplestore request-release)]
         {:op :create :jsonld-doc (release->response-body created-release)}))))
 
-(def ^:private revision-graph-uri (URI. "https://publishmydata.com/graph/datahost/revisions"))
-
-(defn- insert-revision-query [revision-uri]
-  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"}
-   :insert [[:graph revision-graph-uri
-             [[revision-uri :dh/revisionNumber '?next]]]]
-   :where [[:where {:select [['(max ?revno) '?highest]]
-                    :where [[:graph revision-graph-uri
-                             [['?rev :dh/revisionNumber '?revno]]]]
-                    }]
+(defn- select-revision-number-query [release-uri]
+  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
+              :xsd "<http://www.w3.org/2001/XMLSchema#>"}
+   :select ['?next]
+   :where [[:where {:select '[[(max (:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1"))) ?highest]]
+                    :where [[release-uri :dh/hasRevision '?rev]]}]
            [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
-(defn- select-revision-query []
-  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"}
-   :select '*
-   :where [[:optional [[:where {:select ['?revno]
-                                :where [[:graph revision-graph-uri
-                                         [['?rev :dh/revisionNumber '?revno]]]]
-                                :order-by ['(desc ?revno)]
-                                :limit 1}]]]
-           [:bind [1 '?next]]]
-   }
-  )
-
-(defn- insert-revision [triplestore revision-uri]
-  (let [q (insert-revision-query revision-uri)
-        qs (f/format-update q :pretty? true)]
-    (with-open [conn (repo/->connection triplestore)]
-      (pr/update! conn qs))))
-
-(defn- fetch-revision-number-query [revision-uri]
-  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"}
-   :select ['?revno]
-   :where [[:graph revision-graph-uri
-            [[revision-uri :dh/revisionNumber '?revno]]]]
-   :limit 1})
-
-(defn- fetch-revision-number [triplestore revision-uri]
-  (let [q (fetch-revision-number-query revision-uri)
+(defn- fetch-revision-number [triplestore release-uri]
+  (let [q (select-revision-number-query release-uri)
         qs (f/format-query q :pretty? true)
         bindings (with-open [conn (repo/->connection triplestore)]
                    (doall (repo/query conn qs)))]
     (if-let [bs (first bindings)]
-      (:revno bs)
-      (throw (ex-info "Could not find revision" {:revision-uri revision-uri})))))
+      (:next bs)
+      (throw (ex-info "Could not find new revision number for release" {:release-uri release-uri})))))
 
-(defn- new-revision-uri []
-  (let [revision-id (UUID/randomUUID)]
-    (URI. (str "https://publishmydata.com/def/datahost/revision/" revision-id))))
-
-(defn- generate-revision-number [triplestore]
-  (let [revision-uri (new-revision-uri)]
-    (insert-revision triplestore revision-uri)
-    (fetch-revision-number triplestore revision-uri)))
+(defn- generate-revision-number [triplestore {:keys [series-slug release-slug] :as _api-params}]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        release-uri (models-shared/dataset-release-uri series-uri release-slug)]
+    (fetch-revision-number triplestore release-uri)))
 
 (defn- request->revision [revision-number {:keys [series-slug release-slug] :as api-params} json-doc]
   (let [revision-uri (models-shared/revision-uri series-slug release-slug revision-number)
@@ -303,7 +269,7 @@
                 (resource/id revision))])
 
 (defn insert-revision! [triplestore api-params incoming-jsonld-doc]
-  (let [revision-number (generate-revision-number triplestore)
+  (let [revision-number (generate-revision-number triplestore api-params)
         revision (request->revision revision-number api-params incoming-jsonld-doc)]
     (with-open [conn (repo/->connection triplestore)]
       (pr/add conn (concat (resource/->statements revision)
