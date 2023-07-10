@@ -1,6 +1,7 @@
 (ns tpximpact.test-helpers
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
+            [tpximpact.db-cleaner :as dc]
             [tpximpact.datahost.sys :as sys]
             [tpximpact.datahost.ldapi.test-util.http-client :as http-client]))
 
@@ -60,7 +61,7 @@
 
 
 (defmacro with-system-and-clean-up [system-binding & body]
-  `(with-system* {:on-init []
+  `(with-system* {:on-init [dc/clean-db]
                   :on-halt [ig/halt!]}
                  ~system-binding
                  ~@body))
