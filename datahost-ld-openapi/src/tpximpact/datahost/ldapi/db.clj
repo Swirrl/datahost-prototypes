@@ -17,7 +17,6 @@
     [meta-merge.core :as mm]
     [com.yetanalytics.flint :as f]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
-    [tpximpact.datahost.ldapi.models.revision :as revision]
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
     [tpximpact.datahost.ldapi.models.change :as change]
     [tpximpact.datahost.ldapi.models.release-schema :as release-schema]
