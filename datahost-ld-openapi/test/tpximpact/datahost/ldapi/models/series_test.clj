@@ -107,8 +107,8 @@
                          "dcterms:description" "foobar"}
           normalised-ednld {"@type" "dh:DatasetSeries"
                             "dcterms:description" "foobar"
-                            "@id" "new-series"
-                            "dh:baseEntity" "https://example.org/data/new-series"
+                            "@id" new-series-id
+                            "dh:baseEntity" (str "https://example.org" new-series-path)
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"
