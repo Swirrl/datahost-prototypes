@@ -19,7 +19,7 @@
   (.resolve ld-root series-slug))
 
 (defn dataset-release-uri [^URI series-uri release-slug]
-  (URI. (format "%s/release/%s" series-uri release-slug)))
+  (URI. (format "%s/releases/%s" series-uri release-slug)))
 
 (defn dataset-series-key [series-slug]
   (str (.getPath ld-root) series-slug))

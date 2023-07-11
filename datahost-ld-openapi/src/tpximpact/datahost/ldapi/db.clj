@@ -281,6 +281,7 @@
       (:next bs)
       (throw (ex-info "Could not find new revision number for release" {:release-uri release-uri})))))
 
+;; TODO replace with SPARQL query similar to that used in Revisions
 (defn new-child-id [db parent-key child-predicate]
   "Looks at child keys on parent collection. Assumes keys are strings of format
   /x/y/.../1, i.e. paths that end in a stringified integer."
@@ -324,7 +325,8 @@
     (with-open [conn (repo/->connection triplestore)]
       (pr/add conn (concat (resource/->statements revision)
                            (release-revision-statements revision))))
-    {:jsonld-doc (revision->response-body revision)}))
+    {:resource-id revision-number
+     :jsonld-doc (revision->response-body revision)}))
 
 (defn insert-change! [db {:keys [series-slug release-slug revision-id] :as api-params} incoming-jsonld-doc appends-tmp-file]
   (let [auto-change-id (new-child-id db

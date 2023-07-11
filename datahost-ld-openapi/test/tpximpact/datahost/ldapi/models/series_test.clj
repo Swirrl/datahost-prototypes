@@ -5,14 +5,9 @@
     [grafter-2.rdf4j.repository :as repo]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.router :as router]
-    [tpximpact.datahost.ldapi.util.rdf :as util.rdf]
-    [reitit.ring :as ring]
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th])
   (:import
-    [clojure.lang ExceptionInfo]
-    [java.io InputStream]
-    [java.net URI]
     [java.util UUID]))
 
 (defn format-date-time
