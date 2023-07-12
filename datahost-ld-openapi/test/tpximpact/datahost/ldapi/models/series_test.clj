@@ -5,14 +5,9 @@
     [grafter-2.rdf4j.repository :as repo]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.router :as router]
-    [tpximpact.datahost.ldapi.util.rdf :as util.rdf]
-    [reitit.ring :as ring]
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th])
   (:import
-    [clojure.lang ExceptionInfo]
-    [java.io InputStream]
-    [java.net URI]
     [java.util UUID]))
 
 (defn format-date-time
@@ -107,8 +102,8 @@
                          "dcterms:description" "foobar"}
           normalised-ednld {"@type" "dh:DatasetSeries"
                             "dcterms:description" "foobar"
-                            "@id" "new-series"
-                            "dh:baseEntity" "https://example.org/data/new-series"
+                            "@id" new-series-id
+                            "dh:baseEntity" (str "https://example.org" new-series-path)
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"

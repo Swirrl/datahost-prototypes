@@ -29,7 +29,7 @@
     (get series-doc "@id")))
 
 (defn- create-put-request [series-slug release-slug properties]
-  {:uri (format "/data/%s/release/%s" series-slug release-slug)
+  {:uri (format "/data/%s/releases/%s" series-slug release-slug)
    :request-method :put
    :headers {"content-type" "application/json"}
    :body (json/write-str properties)})
@@ -66,7 +66,7 @@
 
         _ (time/set-now clock t2)
 
-        update-request {:uri (format "/data/%s/release/test-release" series-slug)
+        update-request {:uri (format "/data/%s/releases/test-release" series-slug)
                         :request-method :put
                         :headers {"content-type" "application/json"}
                         :body (json/write-str {"dcterms:title" "Updated title" "dcterms:description" "Updated description"})}
@@ -103,8 +103,8 @@
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
                                 :as sys}
 
-    (let [new-series-id (str "new-series-" (UUID/randomUUID))
-          new-series-path (str "/data/" new-series-id)]
+    (let [new-series-slug (str "new-series-" (UUID/randomUUID))
+          new-series-path (str "/data/" new-series-slug)]
       (testing "Fetching a release for a series that does not exist returns 'not found'"
         (try
 
@@ -125,42 +125,34 @@
               (is (= "Not found" body))))))
 
       (testing "Creating a release for a series that is not found fails gracefully"
-        (let [jsonld {"@context"
-                      ["https://publishmydata.com/debf/datahost/context"
-                       {"@base" "http://example.org/data/"}]
-                      "dcterms:title" "Example Release"
-                      "dcterms:description" "Description"}]
-          (try
-            (PUT (str new-series-path "/releases/release-1")
-                 {:content-type :json
-                  :body (json/write-str jsonld)})
-
+        (try
+          (PUT (str "/data/this-series-does-not-exist/releases/release-1")
+               {:content-type :json
+                :body (json/write-str {"dcterms:title" "Example Release"
+                                       "dcterms:description" "Description"})})
             (catch Throwable ex
               (let [{:keys [status body]} (ex-data ex)]
                 (is (= 422 status))
-                (is (= "Series for this release does not exist" body)))))))
+                (is (= "Series for this release does not exist" body))))))
 
-      (let [jsonld {"@context"
-                    ["https://publishmydata.com/def/datahost/context"
-                     {"@base" "https://example.org/data/"}]
-                    "dcterms:title" "A title"}]
-        (PUT new-series-path
-                {:content-type :json
-                 :body (json/write-str jsonld)}))
+      (PUT new-series-path
+           {:content-type :json
+            :body (json/write-str {"dcterms:title" "A title"
+                                   "dcterms:description" "Description"})})
 
-      (let [request-ednld {"@context"
-                           ["https://publishmydata.com/def/datahost/context"
-                            {"@base" (str "https://example.org" new-series-path "/")}]
-                           "dcterms:title" "Example Release"
+      (let [request-ednld {"dcterms:title" "Example Release"
                            "dcterms:description" "Description"}
             normalised-ednld {"@context"
-                              ["https://publishmydata.com/def/datahost/context"
-                               {"@base" (str "https://example.org" new-series-path "/")}],
-                              "dcterms:title" "Example Release",
-                              "dcterms:description" "Description"
+                              {"@base" "https://example.org/data/"
+                               "dcat" "http://www.w3.org/ns/dcat#"
+                               "dcterms" "http://purl.org/dc/terms/"
+                               "dh" "https://publishmydata.com/def/datahost/"
+                               "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
+                              "@id" (str new-series-slug "/releases/release-1")
                               "@type" "dh:Release"
-                              "@id" "release-1",
-                              "dcat:inSeries" new-series-path}]
+                              "dcat:inSeries" (str "https://example.org" new-series-path)
+                              "dcterms:description" "Description"
+                              "dcterms:title" "Example Release"}]
 
         (testing "Creating a release for a series that does exist works"
           (let [response (PUT (str new-series-path "/releases/release-1")
