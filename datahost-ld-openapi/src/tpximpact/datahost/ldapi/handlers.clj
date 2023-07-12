@@ -42,7 +42,7 @@
                  "content-disposition" "attachment ; filename=release.csv"}
        :body (or (revision-model/release->csv-stream triplestore release) "")}
       {:status 200
-       :body release})
+       :body (db/release->response-body release)})
     not-found-response))
 
 (defn put-release [clock triplestore {{:keys [series-slug]} :path-params
@@ -100,7 +100,7 @@
 
       {:status 200
        :headers {"content-type" "application/json"}
-       :body rev})
+       :body (db/revision->response-body rev)})
     not-found-response))
 
 (defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params

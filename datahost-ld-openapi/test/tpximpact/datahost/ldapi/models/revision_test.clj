@@ -40,7 +40,7 @@
     (resource/id resource)))
 
 (defn- get-release-revisions [release-doc]
-  (let [release-revisions (get release-doc "https://publishmydata.com/def/datahost/hasRevision")]
+  (let [release-revisions (get release-doc "dh:hasRevision")]
     (if (coll? release-revisions)
       (set release-revisions)
       #{release-revisions})))
@@ -81,8 +81,8 @@
     (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
                            :headers {"accept" "application/json"}
                            :request-method :get}
-          {:keys [body] :as _response} (handler release-request)
-          release-doc (json/read-str (slurp body))
+          {:keys [body] :as response} (handler release-request)
+          release-doc (json/read-str body)
           release-revisions (get-release-revisions release-doc)]
       (t/is (= #{"https://example.org/data/new-series/releases/test-release/revisions/1"
                  "https://example.org/data/new-series/releases/test-release/revisions/2"}
@@ -153,9 +153,10 @@
                 "Created with the resource URI provided in the Location header")
 
             (testing "Fetching an existing Revision as default application/json format works"
-              (let [response (GET new-revision-location)]
+              (let [response (GET new-revision-location)
+                    revision-doc (json/read-str (:body response))]
                 (is (= 200 (:status response)))
-                (is (= normalised-revision-ld (json/read-str (:body response)))
+                (is (= normalised-revision-ld (select-keys revision-doc (keys normalised-revision-ld)))
                     "responds with JSON")))
 
             (testing "Associated Release gets the Revision inverse triple"
