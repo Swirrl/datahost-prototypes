@@ -40,15 +40,15 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-changes-route-config [db]
+(defn post-revision-changes-route-config [triplestore]
   {:summary "Add changes to a Revision via a CSV file."
-   :handler (partial handlers/post-revision-changes db)
+   :handler (partial handlers/post-change triplestore)
    :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
                 :path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
    :responses {201 {:description "Changes were added to a Revision"
-                    :body map?
+                    :body string?
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"

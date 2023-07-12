@@ -114,27 +114,26 @@
        :body jsonld-doc})
 
     {:status 422
-     :body "Release for this revision does not exist"}))
+     :body   "Release for this revision does not exist"}))
 
-;; TODO: Uploaded change data should be validated against a supplied schema
-(defn post-revision-changes [db {{:keys [series-slug release-slug revision-id]} :path-params
-                                 {{:keys [appends]} :multipart} :parameters
-                                 body-params :body-params :as request}]
-  (if-let [_revision (db/get-revision db series-slug release-slug revision-id)]
-    (let [incoming-jsonld-doc body-params
-          api-params (-> (get-api-params request)
-                         ;; TODO: coercion doesn't seem to be working on revision-id for some reason
-                         (update :revision-id parse-long))
-          {:keys [_op resource-id jsonld-doc]} (db/insert-change! db api-params incoming-jsonld-doc appends)]
-    {:status 201
-       ; /data/:series-slug/releases/:release-slug/revisions/1/changes/:auto-incrementing-change-id
+(defn post-change [triplestore
+                   {{:keys [series-slug release-slug revision-id]} :path-params
+                    {{:keys [appends]} :multipart}                 :parameters
+                    body-params                                    :body-params :as request}]
+  ;; TODO This could be an ASK of the Revision
+  (if-let [_revision (db/get-revision triplestore series-slug release-slug revision-id)]
+    (let [api-params (get-api-params request)
+          incoming-jsonld-doc body-params
+          {:keys [jsonld-doc resource-id]} (db/insert-change! triplestore api-params incoming-jsonld-doc appends)]
+      {:status  201
        :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
                                  "/revisions/" revision-id "/changes/" resource-id)}
-       :body jsonld-doc})
+       :body    jsonld-doc})
 
     {:status 422
-     :body "Revision for this change does not exist"}))
+     :body   "Revision for this change does not exist"}))
 
+; TODO: Change needs to be loaded from triplestore, not duratom
 (defn get-change [db {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
   (if-let [change (db/get-change db series-slug release-slug revision-id change-id)]

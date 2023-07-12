@@ -33,6 +33,9 @@
   ([series-slug release-slug schema-slug]
    (str (release-key series-slug release-slug) "/schemas/" schema-slug)))
 
+(defn dataset-revision-uri [^URI dataset-release-uri revision-id]
+  (URI. (format "%s/revisions/%s" dataset-release-uri revision-id)))
+
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
 
@@ -41,6 +44,9 @@
 
 (defn revision-uri [series-slug release-slug revision-id]
   (.resolve ld-root (revision-key series-slug release-slug revision-id)))
+
+(defn change-uri [series-slug release-slug revision-id change-id]
+  (.resolve ld-root (change-key series-slug release-slug revision-id change-id)))
 
 ;;; ---- CONTEXT OPS
 
