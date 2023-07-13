@@ -1,14 +1,4 @@
 (ns tpximpact.datahost.ldapi.db
-  "Note: current persistence is a temporary solution.
-
-  Current persistence layer has same interface as Clojure's atom. At
-  the moment we make use of the fact that each upsert results in an
-  update of the atom value if the value didn't change. In other words:
-  the atom's' value may be equal but not `identical?`, because the
-  metadata is always updated with `:op` entry.
-  status (`[:enum :noop :update :create]`)
-
-  See: https://github.com/jimpil/duratom"
   (:require
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
@@ -20,7 +10,8 @@
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.resource :as resource])
-  (:import [java.net URI]))
+  (:import [java.net URI]
+           (java.util UUID)))
 
 (defn- get-series-query [series-url]
   (let [bgps [[series-url 'a :dh/DatasetSeries]
@@ -56,6 +47,16 @@
               [revision-uri :dcterms/title '?title]
               [revision-uri :dcterms/description '?description]
               [revision-uri :dh/appliesToRelease '?release]]]
+    {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
+                :dh (URI. "https://publishmydata.com/def/datahost/")}
+     :construct bgps
+     :where bgps}))
+
+(defn- get-change-query [change-uri]
+  (let [bgps [[change-uri 'a :dh/Change]
+              [change-uri :dcterms/description '?description]
+              [change-uri :dh/appends '?appends]
+              [change-uri :dh/appliesToRevision '?revision]]]
     {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                 :dh (URI. "https://publishmydata.com/def/datahost/")}
      :construct bgps
@@ -114,9 +115,19 @@
         q (get-revision-query revision-uri)]
     (get-resource-by-construct-query triplestore q)))
 
-(defn get-change [db series-slug release-slug revision-id change-id]
-  (let [key (models-shared/change-key series-slug release-slug revision-id change-id)]
-    (get @db key)))
+(defn get-change [triplestore series-slug release-slug revision-id change-id]
+  (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)
+        q (get-change-query change-uri)]
+    (get-resource-by-construct-query triplestore q)))
+
+(defn get-file-contents [triplestore file-uri]
+  (let [bgps [[file-uri :dh/fileContents '?contents]]
+        q {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
+                      :dh (URI. "https://publishmydata.com/def/datahost/")}
+           :construct bgps
+           :where bgps}]
+    (-> (get-resource-by-construct-query triplestore q)
+        (get (compact/expand :dh/fileContents)))))
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
@@ -301,17 +312,22 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri))))
 
-(defn- request->change [change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc]
+(defn- new-file-key [filename]
+  (str "files/" (UUID/randomUUID) "/" filename))
+
+(defn- request->change [change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc appends-tmp-file]
   (let [change-uri (models-shared/change-uri series-slug release-slug change-number change-number)
         series-uri (models-shared/dataset-series-uri series-slug)
         release-uri (models-shared/dataset-release-uri series-uri release-slug)
         revision-uri (models-shared/dataset-revision-uri release-uri revision-id)
         change-doc (annotate-json-resource json-doc change-uri (compact/expand :dh/Change))
         doc-resource (resource/from-json-ld-doc change-doc)
-        param-properties (params->title-description-properties api-params)]
+        param-properties (params->title-description-properties api-params)
+        appends-file-key (models-shared/new-dataset-file-uri (:filename appends-tmp-file))]
     (-> doc-resource
         (resource/set-properties param-properties)
-        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
+        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri)
+        (resource/set-property1 (compact/expand :dh/appends) appends-file-key))))
 
 (defn- release-revision-statements
   "Returns a collection of triples connecting a release to a revision"
@@ -336,13 +352,21 @@
     {:resource-id revision-number
      :jsonld-doc (revision->response-body revision)}))
 
-;; TODO: save appends-tmp-file to file system.
+(defn- change-file-statements
+  "Returns a collection of triples connecting a revision to a change"
+  [change appends-tmp-file]
+  [(pr/->Triple (resource/get-property1 change (compact/expand :dh/appends))
+                (compact/expand :dh/fileContents)
+                (-> appends-tmp-file :tempfile slurp))])
+
+;; TODO: save appends-tmp-file to file system and not triplestore.
 (defn insert-change! [triplestore api-params incoming-jsonld-doc appends-tmp-file]
   (let [change-number (generate-change-number triplestore api-params)
-        change (request->change change-number api-params incoming-jsonld-doc)]
+        change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)]
     (with-open [conn (repo/->connection triplestore)]
       (pr/add conn (concat (resource/->statements change)
-                           (revision-change-statements change))))
+                           (revision-change-statements change)
+                           (change-file-statements change appends-tmp-file))))
     {:resource-id change-number
      :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"]))}))
 

@@ -147,3 +147,17 @@
        :headers {}
        :body "Only text/csv format is available at this time."})
     not-found-response))
+
+(defn get-change [triplestore {{:keys [series-slug release-slug revision-id change-id]} :path-params
+                               {:strs [accept]} :headers :as _request}]
+  (if-let [rev (db/get-revision triplestore series-slug release-slug revision-id)]
+    (if (= accept "text/csv")
+      {:status 200
+       :headers {"content-type" "text/csv"
+                 "content-disposition" "attachment ; filename=revision.csv"}
+       :body (or (revision-model/revision->csv-stream triplestore rev) "")}
+
+      {:status 200
+       :headers {"content-type" "application/json"}
+       :body (db/revision->response-body rev)})
+    not-found-response))

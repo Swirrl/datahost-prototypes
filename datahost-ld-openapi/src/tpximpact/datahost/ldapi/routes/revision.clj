@@ -56,10 +56,10 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn get-revision-changes-route-config [db]
+(defn get-revision-changes-route-config [triplestore]
   {:summary "Retrieve CSV contents for an existing change"
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-change db)
+   :handler (partial handlers/get-change triplestore)
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?
