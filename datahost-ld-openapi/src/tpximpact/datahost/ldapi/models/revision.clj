@@ -19,8 +19,6 @@
           (string->stream)
           (tc/dataset {:file-type :csv})))
 
-
-
 (defn csv-file-locations->dataset [triplestore appends-file-locations]
   (some->> appends-file-locations
            (map #(csv-str->dataset (db/get-file-contents triplestore %)))
@@ -33,7 +31,8 @@
      (tc/write! tc-dataset out-stream {:file-type :csv}))))
 
 (defn revision->csv-stream [triplestore revision]
-  (when-let [merged-datasets (csv-file-locations->dataset triplestore (db/revision-appends-file-locations triplestore revision))]
+  (when-let [merged-datasets (csv-file-locations->dataset triplestore
+                                                          (db/revision-appends-file-locations triplestore revision))]
     (write-to-outputstream merged-datasets)))
 
 (defn change->csv-stream [triplestore change]
@@ -42,9 +41,10 @@
       (write-to-outputstream dataset))))
 
 (defn release->csv-stream [triplestore release]
-  (let [revisions (some->> (get release "dh:hasRevision")
-                           (map #(get @triplestore %)))
-        appends-file-keys (some->> revisions
+  ;; TODO: loading of appends file locations could be done in one query
+  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
+        appends-file-keys (some->> revision-uris
+                                   (map #(db/get-revision triplestore %))
                                    (map (partial db/revision-appends-file-locations triplestore))
                                    (flatten))]
     (when-let [merged-datasets (csv-file-locations->dataset triplestore appends-file-keys)]

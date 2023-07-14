@@ -206,7 +206,7 @@
                        (str new-revision-location "/changes/2"))
                     "Created with the resource URI provided in the Location header")))
 
-            #_(testing "Fetching Revision as CSV with multiple CSV append changes"
+            (testing "Fetching Revision as CSV with multiple CSV append changes"
               (let [response (GET new-revision-location {:headers {"accept" "text/csv"}})
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
@@ -214,13 +214,15 @@
                 (is (= (+ (count csv-2019-seq) (- (count csv-2020-seq) 1))
                        (count resp-body-seq))
                     "responds with concatenated changes from both CSVs")
-                (is (= (last resp-body-seq) (last csv-2020-seq)))
-                (is (= (first resp-body-seq) (first csv-2019-seq))))))
+                (is (= (first resp-body-seq) (first csv-2020-seq)))
+                (is (= (second resp-body-seq) (second csv-2020-seq)))
+                (is (str/includes? (last resp-body-seq) ",2019,")))))
 
           (testing "Creation of a second revision for a release"
             (let [revision-title-2 (str "A second revision for release " release-slug)
                   revision-url-2 (str release-url "/revisions")
-                  revision-ednld-2 {"dcterms:title" revision-title-2}
+                  revision-ednld-2 {"dcterms:title" revision-title-2
+                                    "dcterms:description" "This is for the hardcore description readers"}
 
                   revision-resp-2 (POST revision-url-2
                                         {:content-type :json
@@ -228,10 +230,11 @@
                   inserted-revision-id-2 (get (json/read-str (:body revision-resp-2)) "@id")
                   new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
 
+              (is (= 201 (:status revision-resp-2)))
               (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                   "Created with the resource URI provided in the Location header")
 
-              #_(testing "Third Changes resource created against 2nd Revision"
+              (testing "Third Changes resource created against 2nd Revision"
                 (let [change-3-ednld {"dcterms:description" "A new third change"}
                       multipart-temp-file-part (build-csv-multipart csv-2021-path)
                       change-api-response (ld-api-app {:request-method :post
@@ -242,9 +245,9 @@
                       change-3-response-json (json/read-str (:body change-api-response))
                       inserted-change-id (get change-3-response-json "@id")]
                   (is (= (:status change-api-response) 201))
-                  (is (str/ends-with? inserted-change-id "/changes/3"))))
+                  (is (str/ends-with? inserted-change-id "/changes/1"))))
 
-              #_(testing "Fetching Release as CSV with multiple Revision and CSV append changes"
+              (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                   (is (= 200 (:status response)))
@@ -252,8 +255,9 @@
                   (is (= (+ (count csv-2019-seq) (count csv-2020-seq) (- (count csv-2021-seq) 2))
                          (count resp-body-seq))
                       "responds with concatenated changes from all 3 CSVs")
-                  (is (= (last resp-body-seq) (last csv-2021-seq)))
-                  (is (= (first resp-body-seq) (first csv-2019-seq)))))))
+                  (is (= (first resp-body-seq) (first csv-2019-seq)))
+                  (is (str/includes? (last resp-body-seq) ",2019,"))
+                  (is (str/includes? (second resp-body-seq) ",2021,"))))))
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)

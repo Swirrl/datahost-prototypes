@@ -128,10 +128,14 @@
             column-statements (datastore/eager-query triplestore qs)]
         (resource/add-statements schema column-statements)))))
 
-(defn get-revision [triplestore series-slug release-slug revision-id]
-  (let [revision-uri (models-shared/revision-uri series-slug release-slug revision-id)
-        q (get-revision-query revision-uri)]
-    (get-resource-by-construct-query triplestore q)))
+(defn get-revision
+  ([triplestore revision-uri]
+   (let [q (get-revision-query revision-uri)]
+     (get-resource-by-construct-query triplestore q)))
+
+  ([triplestore series-slug release-slug revision-id]
+   (get-revision triplestore
+                 (models-shared/revision-uri series-slug release-slug revision-id))))
 
 (defn get-change
   ([triplestore change-uri]
@@ -153,10 +157,9 @@
 (defn revision-appends-file-locations
   "Given a Revision as a hash map, returns appends file locations"
   [triplestore revision]
-  (some->> (get revision (compact/expand :dh/hasChange))
-           ;; TODO: needs to be triplestore
+  (some->> (resource/get-property revision (compact/expand :dh/hasChange))
            (map #(get-change triplestore %))
-           (map #(get % (compact/expand :dh/appends)))))
+           (map #(resource/get-property1 % (compact/expand :dh/appends)))))
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
