@@ -1,8 +1,9 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-   [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.schemas.api :as s.api]
-   [tpximpact.datahost.ldapi.models.revision :as revision-model]))
+    [tpximpact.datahost.ldapi.db :as db]
+    [tpximpact.datahost.ldapi.models.shared :as models-shared]
+    [tpximpact.datahost.ldapi.schemas.api :as s.api]
+    [tpximpact.datahost.ldapi.models.revision :as revision-model]))
 
 (def not-found-response
   {:status 404
@@ -57,34 +58,22 @@
      :body "Series for this release does not exist"}))
 
 (defn put-release-schema
-  [db {{:keys [series-slug] :as params} :path-params
+  [clock triplestore {{:keys [series-slug] :as params} :path-params
        incoming-jsonld-doc :body-params
        :as request}]
-  (if (not (db/get-series-by-slug db series-slug))
+  (if (not (db/get-series-by-slug triplestore series-slug))
     not-found-response
 
-    (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! db (get-api-params request) incoming-jsonld-doc)]
+    (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore (get-api-params request) incoming-jsonld-doc)]
       {:status (op->response-code op)
        :body jsonld-doc})))
 
-;;; we don't have the schema slug, and we don't use a real db in the
-;;; prototype, so we have to extract it from the path that's in the
-;;; release.
-
-(defn- schema-path->schema-slug
-  "Returns a string or nil"
-  [path]
-  (let [[_ slug] (re-find #"\/data.*\/schemas\/(\S+)$" path)]
-    slug))
-
 (defn get-release-schema
-  [db {{:keys [series-slug release-slug] :as path-params} :path-params}]
-  (let [schema-path (some-> db
-                            (db/get-release series-slug release-slug)
-                            (get "datahost:hasSchema"))]
-    (if-let [schema (db/get-release-schema db (assoc path-params :schema-slug (schema-path->schema-slug schema-path)))]
+  [triplestore {{:keys [series-slug release-slug] :as path-params} :path-params}]
+  (let [release-uri (models-shared/release-uri-from-slugs series-slug release-slug)]
+    (if-let [schema (db/get-release-schema triplestore release-uri)]
       {:status 200
-       :body schema}
+       :body (db/schema->response-body schema)}
       {:status 404
        :body {:status "error"
               :message "Not found"}})))

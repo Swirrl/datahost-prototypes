@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.db
   (:require
+    [clojure.data.json :as json]
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
     [malli.core :as m]
@@ -32,6 +33,7 @@
                [release-uri :dcterms/description '?description]
                [release-uri :dcat/inSeries '?series]
                [release-uri :dh/hasRevision '?revision]
+               [release-uri :dh/hasSchema '?schema]
                [release-uri :dcterms/modified '?modified]
                [release-uri :dcterms/issued '?issued]]
    :where [[release-uri 'a :dh/Release]
@@ -39,6 +41,7 @@
            [release-uri :dcterms/description '?description]
            [release-uri :dcat/inSeries '?series]
            [:optional [[release-uri :dh/hasRevision '?revision]]]
+           [:optional [[release-uri :dh/hasSchema '?schema]]]
            [release-uri :dcterms/modified '?modified]
            [release-uri :dcterms/issued '?issued]]})
 
@@ -62,15 +65,27 @@
      :construct bgps
      :where bgps}))
 
+(defn- get-release-schema-query [release-uri]
+  {:prefixes {:dh (URI. "https://publishmydata.com/def/datahost/")}
+   :construct [['?schema '?p '?o]]
+   :where [[release-uri :dh/hasSchema '?schema]
+           ['?schema '?p '?o]]})
+
+(defn- get-schema-columns-query [schema-uri]
+  {:prefixes {:dh (URI. "https://publishmydata.com/def/datahost/")}
+   :construct [['?col '?p '?o]]
+   :where [[schema-uri :dh/columns '?col]
+           ['?col '?p '?o]]})
+
 (def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                :dh (URI. "https://publishmydata.com/def/datahost/")})
 
 (defn- map-properties [prop-mapping m]
   (reduce-kv (fn [props k v]
                (if-let [prop-uri (get prop-mapping k)]
-                 (resource/add-property props prop-uri v)
+                 (resource/add-properties-property props prop-uri v)
                  props))
-             {}
+             (resource/empty-properties)
              m))
 (defn- params->title-description-properties [query-params]
   (let [prop-mapping {:title (compact/expand :dcterms/title)
@@ -106,9 +121,13 @@
                 [:schema-slug :string]]))
 
 (defn get-release-schema
-  [db params]
-  {:pre [(get-release-schema-params-valid? params)]}
-  (get @db (models-shared/release-schema-key params)))
+  [triplestore release-uri]
+  (let [q (get-release-schema-query release-uri)]
+    (when-let [schema (get-resource-by-construct-query triplestore q)]
+      (let [columns-query (get-schema-columns-query (resource/id schema))
+            qs (f/format-query columns-query :pretty? true)
+            column-statements (datastore/eager-query triplestore qs)]
+        (resource/add-statements schema column-statements)))))
 
 (defn get-revision [triplestore series-slug release-slug revision-id]
   (let [revision-uri (models-shared/revision-uri series-slug release-slug revision-id)
@@ -222,9 +241,9 @@
 (defn- merge-release-updates [clock existing-release request-release]
   (modified-if-title-description-changed clock existing-release request-release))
 
-(defn- set-timestamps [clock series]
+(defn- set-timestamps [clock resource]
   (let [now (time/now clock)]
-    (-> series
+    (-> resource
         (resource/set-property1 (compact/expand :dcterms/issued) now)
         (resource/set-property1 (compact/expand :dcterms/modified) now))))
 
@@ -255,6 +274,28 @@
 
 (defn revision->response-body [revision]
   (resource/->json-ld revision (output-context ["dh" "dcterms" "rdf"])))
+
+(defn- map-by [f items]
+  (into {} (map (fn [v] [(f v) v]) items)))
+(defn schema->response-body [schema]
+  ;; NOTE: Schema documents are modified from the standard json-ld serialisation
+  ;; The top-level @graph node is removed and the column nodes are inlined within
+  ;; the schema node
+  (let [json-ld-str (resource/->json-ld schema (output-context ["dh" "dcterms" "csvw" "appropriate-csvw"]))
+        json-ld-doc (json/read-str json-ld-str)
+        nodes (get json-ld-doc "@graph")
+        is-schema-node? (fn [n] (= "dh:TableSchema" (get n "@type")))
+        schema-node (first (filter is-schema-node? nodes))
+        column-nodes (remove is-schema-node? nodes)
+        base-uri-str (get-in json-ld-doc ["@context" "@base"])
+        node-uri->node (map-by (fn [col] (str base-uri-str (get col "@id"))) column-nodes)
+        inlined-schema (update schema-node "dh:columns" (fn [col-uris]
+                                                          (->> col-uris
+                                                               (map node-uri->node)
+                                                               (sort-by (fn [col] (Integer/parseInt (get col "csvw:number"))))
+                                                               (vec))))
+        inlined-doc (assoc inlined-schema "@context" (get json-ld-doc "@context"))]
+    (json/write-str inlined-doc)))
 
 ;; TODO: return series directly instead of formatting json-ld doc here
 (defn upsert-series!
@@ -341,6 +382,21 @@
         (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri)
         (resource/set-property1 (compact/expand :dh/appends) appends-file-key))))
 
+(defn- request->schema [{:keys [series-slug release-slug schema-slug] :as api-params} json-doc]
+  (let [schema-uri (models-shared/release-schema-uri series-slug release-slug schema-slug)
+        release-uri (models-shared/release-uri-from-slugs series-slug release-slug)
+        schema-doc (annotate-json-resource json-doc schema-uri (compact/expand :dh/TableSchema))
+        schema-doc (update schema-doc "dh:columns" (fn [cols]
+                                                     (map-indexed (fn [index col]
+                                                             (assoc col "@id" (str schema-uri "/columns/" (inc index))
+                                                                        "@type" "dh:DimensionColumn"
+                                                                        "csvw:number" (inc index)))
+                                                           cols)))
+        schema-resource (resource/from-json-ld-doc schema-doc)]
+    (-> schema-resource
+        (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri)
+        (resource/set-property1 (compact/expand :appropriate-csvw/modeling-of-dialect) "UTF-8,RFC4180"))))
+
 (defn- release-revision-statements
   "Returns a collection of triples connecting a release to a revision"
   [revision]
@@ -382,14 +438,24 @@
     {:resource-id change-number
      :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"]))}))
 
+(defn- release-schema-statements [schema]
+  [(pr/->Triple (resource/get-property1 schema (compact/expand :dh/appliesToRelease))
+                (compact/expand :dh/hasSchema)
+                (resource/id schema))])
+(defn- insert-schema [clock triplestore schema]
+  (let [new-schema (set-timestamps clock schema)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/add conn (concat (resource/->statements new-schema)
+                           (release-schema-statements new-schema))))
+    new-schema))
+
 (defn upsert-release-schema!
-  [db {:keys [series-slug release-slug schema-slug] :as api-params} incoming-jsonld-doc]
-  #_(let [upsert-keys {:series (models-shared/dataset-series-key series-slug)
-                     :release (models-shared/release-key series-slug release-slug)
-                     :release-schema (models-shared/release-schema-key series-slug release-slug schema-slug)}
-        updated-db (upsert-doc! db release-schema/insert-schema
-                                (assoc api-params :op.upsert/keys upsert-keys)
-                                incoming-jsonld-doc)]
-    {:op (-> updated-db meta :op)
-     :jsonld-doc (get updated-db (:release-schema upsert-keys))}))
+  [clock triplestore {:keys [series-slug release-slug] :as api-params} incoming-jsonld-doc]
+  (let [request-schema (request->schema api-params incoming-jsonld-doc)
+        release-uri (models-shared/release-uri-from-slugs series-slug release-slug)]
+    (if-let [existing-schema (get-release-schema triplestore release-uri)]
+      {:op :noop
+       :jsonld-doc (schema->response-body existing-schema)}
+      (let [new-schema (insert-schema clock triplestore request-schema)]
+        {:op :create :jsonld-doc (schema->response-body new-schema)}))))
 

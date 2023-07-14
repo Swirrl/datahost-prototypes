@@ -35,29 +35,29 @@
                            [:message string?]]}}})
 
 (defn get-release-ld-schema-config
-  [db]
+  [triplestore]
   {:summary "Retrieve release schema"
-   :handler (partial handlers/get-release-schema db)
+   :handler (partial handlers/get-release-schema triplestore)
    :parameters {:path {:series-slug :string
                        :release-slug :string}}
    :responses {200 {:description "Release schema successfully retrieved"
-                    :body map?}
+                    :body string?}
                404 {:body [:map
                            [:status [:enum "error"]]
                            [:message :string]]}}})
 
 (defn put-release-ld-schema-config
-  [db]
+  [clock triplestore]
   {:summary "Create schema for a release"
-   :handler (partial handlers/put-release-schema db)
+   :handler (partial handlers/put-release-schema clock triplestore)
    :parameters {:body routes-shared/LdSchemaInput
                 :path {:series-slug :string
                        :release-slug :string
                        :schema-slug :string}}
    :responses {200 {:description "Schema already exists."
-                    :body map?}
+                    :body string?}
                201 {:description "Schema successfully created"
-                    :body map?}
+                    :body string?}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]

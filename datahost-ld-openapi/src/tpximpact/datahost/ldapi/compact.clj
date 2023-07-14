@@ -25,4 +25,6 @@
   (into {} (map (fn [[prefix uri]] [(keyword prefix) (format "<%s>" (str uri))]) @default-context)))
 
 (add-prefix :dh (URI. "https://publishmydata.com/def/datahost/"))
+(add-prefix :appropriate-csvw (URI. "https://publishmydata.com/def/appropriate-csvw/"))
+(add-prefix :csvw (URI. "http://www.w3.org/ns/csvw#"))
 (add-grafter-prefixes)

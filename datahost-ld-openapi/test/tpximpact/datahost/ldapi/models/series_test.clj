@@ -127,6 +127,7 @@
                             {:content-type :json
                                   :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
+          (println response)
           (is (= 200 (:status response)))
           (is (not= (get resp-body "dcterms:issued")
                     (get resp-body "dcterms:modified"))))

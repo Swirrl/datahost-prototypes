@@ -13,51 +13,61 @@
 
 (def id-key (keyword "@id"))
 
-(defn merge-properties [resource properties]
-  (merge-with set/union resource properties))
-
-(defn set-properties [resource properties]
-  (merge resource properties))
-
-(defn create-properties [] {})
-
 (defn create [id]
-  {id-key id})
+  {id-key id
+   :subjects {}})
 
 (defn id [resource]
   (get resource id-key))
 
+(defn set-properties [resource properties]
+  (update-in resource [:subjects (id resource)] merge properties))
+
 (defn add-property [resource p o]
-  (update resource p (fnil conj #{}) o))
+  (update-in resource [:subjects (id resource) p] (fnil conj #{}) o))
 
 (defn get-property1 [resource p]
-  (first (get resource p)))
+  (first (get-in resource [:subjects (id resource) p])))
 
 (defn get-properties [resource ps]
-  (select-keys resource ps))
+  (let [subject (get-in resource [:subjects (id resource)])]
+    (select-keys subject ps)))
 
 (defn set-property1 [resource p o]
-  (assoc resource p #{o}))
+  (assoc-in resource [:subjects (id resource) p] #{o}))
 
 (defn add-statement [resource statement]
-  (if (= (id resource) (pr/subject statement))
-    (add-property resource (pr/predicate statement) (pr/object statement))
-    (throw (ex-info "Statement subject must match resource @id" {:id (id resource)
-                                                                 :statement statement}))))
+  (update-in resource [:subjects (pr/subject statement) (pr/predicate statement)] (fnil conj #{}) (pr/object statement)))
+
+(defn add-statements [resource statements]
+  (reduce add-statement resource statements))
 
 (defn ->statements [resource]
-  (let [subject (id resource)
-        properties (dissoc resource id-key)]
-    (mapcat (fn [[p os]]
-              (map (fn [o] (pr/->Triple subject p o)) os))
-            properties)))
+  (mapcat (fn [[s ps]]
+            (mapcat (fn [[p os]]
+                      (map (fn [o] (pr/->Triple s p o)) os))
+                    ps))
+          (:subjects resource)))
+
+(defn- find-root [statements]
+  (let [{:keys [subjects objects]} (reduce (fn [acc s]
+                                             (-> acc
+                                                 (update :subjects conj (pr/subject s))
+                                                 (update :objects conj (pr/object s))))
+                                           {:subjects #{} :objects #{}}
+                                           statements)]
+    (if (= 1 (count subjects))
+      (first subjects)
+      (let [roots (set/difference subjects objects)]
+        ;; root subject is the single subject which does not appear in object position
+        (case (count roots)
+          0 (throw (ex-info "No candidate root object" {}))
+          1 (first roots)
+          2 (throw (ex-info "Multiple candidate root objects" {:candidates roots})))))))
 
 (defn from-statements [statements]
-  (if-let [s (first statements)]
-    (reduce add-statement
-            (create (pr/subject s))
-            statements)
-    (throw (ex-info "At least one statement required for resource" {}))))
+  (let [root (find-root statements)]
+    (add-statements (create root) statements)))
 
 (defn- statements->json-ld
   ([statements] (statements->json-ld statements {}))
@@ -95,3 +105,8 @@
 (defn from-json-ld-doc [json-ld-doc]
   (-> json-ld-doc json-ld-doc->statements from-statements))
 
+(defn empty-properties []
+  {})
+
+(defn add-properties-property [properties p o]
+  (update properties p (fnil conj #{}) o))

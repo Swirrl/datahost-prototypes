@@ -31,11 +31,17 @@
 (defn release-key [series-slug release-slug]
   (str (dataset-series-key series-slug) "/releases/" release-slug))
 
+(defn release-uri-from-slugs [series-slug release-slug]
+  (.resolve ld-root (release-key series-slug release-slug)))
+
 (defn release-schema-key
   ([{:keys [series-slug release-slug schema-slug]}]
    (release-schema-key series-slug release-slug schema-slug))
   ([series-slug release-slug schema-slug]
    (str (release-key series-slug release-slug) "/schemas/" schema-slug)))
+
+(defn release-schema-uri [series-slug release-slug schema-slug]
+  (.resolve ld-root (release-schema-key series-slug release-slug schema-slug)))
 
 (defn dataset-revision-uri [^URI dataset-release-uri revision-id]
   (URI. (format "%s/revisions/%s" dataset-release-uri revision-id)))
