@@ -49,8 +49,8 @@
               [revision-uri :dh/appliesToRelease '?release]]]
     {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                 :dh (URI. "https://publishmydata.com/def/datahost/")}
-     :construct bgps
-     :where bgps}))
+     :construct (conj bgps [revision-uri :dh/hasChange '?change])
+     :where (conj bgps [:optional [[revision-uri :dh/hasChange '?change]]])}))
 
 (defn- get-change-query [change-uri]
   (let [bgps [[change-uri 'a :dh/Change]
@@ -115,10 +115,13 @@
         q (get-revision-query revision-uri)]
     (get-resource-by-construct-query triplestore q)))
 
-(defn get-change [triplestore series-slug release-slug revision-id change-id]
-  (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)
-        q (get-change-query change-uri)]
-    (get-resource-by-construct-query triplestore q)))
+(defn get-change
+  ([triplestore change-uri]
+   (get-resource-by-construct-query triplestore
+                                    (get-change-query change-uri)))
+  ([triplestore series-slug release-slug revision-id change-id]
+   (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
+     (get-change triplestore change-uri))))
 
 (defn get-file-contents [triplestore file-uri]
   (let [bgps [[file-uri :dh/fileContents '?contents]]
@@ -127,7 +130,16 @@
            :construct bgps
            :where bgps}]
     (-> (get-resource-by-construct-query triplestore q)
-        (get (compact/expand :dh/fileContents)))))
+        (get (compact/expand :dh/fileContents))
+        (first))))
+
+(defn revision-appends-file-locations
+  "Given a Revision as a hash map, returns appends file locations"
+  [triplestore revision]
+  (some->> (get revision (compact/expand :dh/hasChange))
+           ;; TODO: needs to be triplestore
+           (map #(get-change triplestore %))
+           (map #(get % (compact/expand :dh/appends)))))
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
@@ -316,7 +328,7 @@
   (str "files/" (UUID/randomUUID) "/" filename))
 
 (defn- request->change [change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc appends-tmp-file]
-  (let [change-uri (models-shared/change-uri series-slug release-slug change-number change-number)
+  (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-number)
         series-uri (models-shared/dataset-series-uri series-slug)
         release-uri (models-shared/dataset-release-uri series-uri release-slug)
         revision-uri (models-shared/dataset-revision-uri release-uri revision-id)
