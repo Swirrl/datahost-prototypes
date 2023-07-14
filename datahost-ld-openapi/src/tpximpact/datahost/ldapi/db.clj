@@ -1,29 +1,17 @@
 (ns tpximpact.datahost.ldapi.db
-  "Note: current persistence is a temporary solution.
-
-  Current persistence layer has same interface as Clojure's atom. At
-  the moment we make use of the fact that each upsert results in an
-  update of the atom value if the value didn't change. In other words:
-  the atom's' value may be equal but not `identical?`, because the
-  metadata is always updated with `:op` entry.
-  status (`[:enum :noop :update :create]`)
-
-  See: https://github.com/jimpil/duratom"
   (:require
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
-    [integrant.core :as ig]
     [malli.core :as m]
-    [meta-merge.core :as mm]
     [com.yetanalytics.flint :as f]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
-    [tpximpact.datahost.ldapi.models.change :as change]
     [tpximpact.datahost.ldapi.models.release-schema :as release-schema]
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.resource :as resource])
-  (:import [java.net URI]))
+  (:import [java.net URI]
+           (java.util UUID)))
 
 (defn- get-series-query [series-url]
   (let [bgps [[series-url 'a :dh/DatasetSeries]
@@ -59,6 +47,16 @@
               [revision-uri :dcterms/title '?title]
               [revision-uri :dcterms/description '?description]
               [revision-uri :dh/appliesToRelease '?release]]]
+    {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
+                :dh (URI. "https://publishmydata.com/def/datahost/")}
+     :construct (conj bgps [revision-uri :dh/hasChange '?change])
+     :where (conj bgps [:optional [[revision-uri :dh/hasChange '?change]]])}))
+
+(defn- get-change-query [change-uri]
+  (let [bgps [[change-uri 'a :dh/Change]
+              [change-uri :dcterms/description '?description]
+              [change-uri :dh/appends '?appends]
+              [change-uri :dh/appliesToRevision '?revision]]]
     {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                 :dh (URI. "https://publishmydata.com/def/datahost/")}
      :construct bgps
@@ -117,9 +115,31 @@
         q (get-revision-query revision-uri)]
     (get-resource-by-construct-query triplestore q)))
 
-(defn get-change [db series-slug release-slug revision-id change-id]
-  (let [key (models-shared/change-key series-slug release-slug revision-id change-id)]
-    (get @db key)))
+(defn get-change
+  ([triplestore change-uri]
+   (get-resource-by-construct-query triplestore
+                                    (get-change-query change-uri)))
+  ([triplestore series-slug release-slug revision-id change-id]
+   (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
+     (get-change triplestore change-uri))))
+
+(defn get-file-contents [triplestore file-uri]
+  (let [bgps [[file-uri :dh/fileContents '?contents]]
+        q {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
+                      :dh (URI. "https://publishmydata.com/def/datahost/")}
+           :construct bgps
+           :where bgps}]
+    (-> (get-resource-by-construct-query triplestore q)
+        (get (compact/expand :dh/fileContents))
+        (first))))
+
+(defn revision-appends-file-locations
+  "Given a Revision as a hash map, returns appends file locations"
+  [triplestore revision]
+  (some->> (get revision (compact/expand :dh/hasChange))
+           ;; TODO: needs to be triplestore
+           (map #(get-change triplestore %))
+           (map #(get % (compact/expand :dh/appends)))))
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
@@ -141,6 +161,7 @@
         doc-resource (resource/from-json-ld-doc series-doc)
         param-properties (params->title-description-properties api-params)]
     (resource/set-properties doc-resource param-properties)))
+
 (defn- request->release [series-uri {:keys [release-slug] :as api-params} json-doc]
   (let [release-uri (models-shared/dataset-release-uri series-uri release-slug)
         release-doc (annotate-json-resource json-doc release-uri (compact/expand :dh/Release))
@@ -264,53 +285,61 @@
       (let [created-release (insert-release clock triplestore request-release)]
         {:op :create :jsonld-doc (release->response-body created-release)}))))
 
-(defn- select-revision-number-query [release-uri]
+(defn- select-auto-increment-query [parent-uri child-pred]
   {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
               :xsd "<http://www.w3.org/2001/XMLSchema#>"}
    :select ['?next]
-   :where [[:where {:select '[[(max (:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1"))) ?highest]]
-                    :where [[release-uri :dh/hasRevision '?rev]]}]
+   :where [[:where {:select '[[(max (:xsd/integer (replace (str ?child) "^.*/([^/]*)$" "$1"))) ?highest]]
+                    :where [[parent-uri child-pred '?child]]}]
            [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
-(defn- fetch-revision-number [triplestore release-uri]
-  (let [q (select-revision-number-query release-uri)
+(defn- fetch-next-child-resource-number [triplestore parent-uri child-pred]
+  (let [q (select-auto-increment-query parent-uri child-pred)
         qs (f/format-query q :pretty? true)
         bindings (with-open [conn (repo/->connection triplestore)]
                    (doall (repo/query conn qs)))]
     (if-let [bs (first bindings)]
       (:next bs)
-      (throw (ex-info "Could not find new revision number for release" {:release-uri release-uri})))))
-
-;; TODO replace with SPARQL query similar to that used in Revisions
-(defn new-child-id [db parent-key child-predicate]
-  "Looks at child keys on parent collection. Assumes keys are strings of format
-  /x/y/.../1, i.e. paths that end in a stringified integer."
-  (let [child-resources (some->> (get-in @db [parent-key child-predicate])
-                                 (map #(get @db %)))
-        child-key-fn #(get % "@id")]
-    (if (empty? child-resources)
-      1
-      (->> child-resources
-           (sort-by child-key-fn)
-           last
-           (child-key-fn)
-           inc))))
+      (throw (ex-info "Couldn't fetch new child number for parent resource" {:resource-uri parent-uri})))))
 
 (defn- generate-revision-number [triplestore {:keys [series-slug release-slug] :as _api-params}]
   (let [series-uri (models-shared/dataset-series-uri series-slug)
         release-uri (models-shared/dataset-release-uri series-uri release-slug)]
-    (fetch-revision-number triplestore release-uri)))
+    (fetch-next-child-resource-number triplestore release-uri :dh/hasRevision)))
+
+(defn- generate-change-number [triplestore {:keys [series-slug release-slug revision-id] :as _api-params}]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        release-uri (models-shared/dataset-release-uri series-uri release-slug)
+        revision-uri (models-shared/dataset-revision-uri release-uri revision-id)]
+    (fetch-next-child-resource-number triplestore revision-uri :dh/hasChange)))
 
 (defn- request->revision [revision-number {:keys [series-slug release-slug] :as api-params} json-doc]
   (let [revision-uri (models-shared/revision-uri series-slug release-slug revision-number)
         series-uri (models-shared/dataset-series-uri series-slug)
         release-uri (models-shared/dataset-release-uri series-uri release-slug)
-        series-doc (annotate-json-resource json-doc revision-uri (compact/expand :dh/Revision))
-        doc-resource (resource/from-json-ld-doc series-doc)
+        revision-doc (annotate-json-resource json-doc revision-uri (compact/expand :dh/Revision))
+        doc-resource (resource/from-json-ld-doc revision-doc)
         param-properties (params->title-description-properties api-params)]
     (-> doc-resource
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri))))
+
+(defn- new-file-key [filename]
+  (str "files/" (UUID/randomUUID) "/" filename))
+
+(defn- request->change [change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc appends-tmp-file]
+  (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-number)
+        series-uri (models-shared/dataset-series-uri series-slug)
+        release-uri (models-shared/dataset-release-uri series-uri release-slug)
+        revision-uri (models-shared/dataset-revision-uri release-uri revision-id)
+        change-doc (annotate-json-resource json-doc change-uri (compact/expand :dh/Change))
+        doc-resource (resource/from-json-ld-doc change-doc)
+        param-properties (params->title-description-properties api-params)
+        appends-file-key (models-shared/new-dataset-file-uri (:filename appends-tmp-file))]
+    (-> doc-resource
+        (resource/set-properties param-properties)
+        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri)
+        (resource/set-property1 (compact/expand :dh/appends) appends-file-key))))
 
 (defn- release-revision-statements
   "Returns a collection of triples connecting a release to a revision"
@@ -318,6 +347,13 @@
   [(pr/->Triple (resource/get-property1 revision (compact/expand :dh/appliesToRelease))
                 (compact/expand :dh/hasRevision)
                 (resource/id revision))])
+
+(defn- revision-change-statements
+  "Returns a collection of triples connecting a revision to a change"
+  [change]
+  [(pr/->Triple (resource/get-property1 change (compact/expand :dh/appliesToRevision))
+                (compact/expand :dh/hasChange)
+                (resource/id change))])
 
 (defn insert-revision! [triplestore api-params incoming-jsonld-doc]
   (let [revision-number (generate-revision-number triplestore api-params)
@@ -328,15 +364,23 @@
     {:resource-id revision-number
      :jsonld-doc (revision->response-body revision)}))
 
-(defn insert-change! [db {:keys [series-slug release-slug revision-id] :as api-params} incoming-jsonld-doc appends-tmp-file]
-  (let [auto-change-id (new-child-id db
-                                     (models-shared/revision-key series-slug release-slug revision-id)
-                                     "dh:hasChange")
-        change-key (models-shared/change-key series-slug release-slug revision-id auto-change-id)
-        updated-db (swap! db change/insert-change api-params auto-change-id incoming-jsonld-doc appends-tmp-file)]
-    {:op (-> updated-db meta :op)
-     :resource-id auto-change-id
-     :jsonld-doc (get updated-db change-key)}))
+(defn- change-file-statements
+  "Returns a collection of triples connecting a revision to a change"
+  [change appends-tmp-file]
+  [(pr/->Triple (resource/get-property1 change (compact/expand :dh/appends))
+                (compact/expand :dh/fileContents)
+                (-> appends-tmp-file :tempfile slurp))])
+
+;; TODO: save appends-tmp-file to file system and not triplestore.
+(defn insert-change! [triplestore api-params incoming-jsonld-doc appends-tmp-file]
+  (let [change-number (generate-change-number triplestore api-params)
+        change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/add conn (concat (resource/->statements change)
+                           (revision-change-statements change)
+                           (change-file-statements change appends-tmp-file))))
+    {:resource-id change-number
+     :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"]))}))
 
 (defn upsert-release-schema!
   [db {:keys [series-slug release-slug schema-slug] :as api-params} incoming-jsonld-doc]

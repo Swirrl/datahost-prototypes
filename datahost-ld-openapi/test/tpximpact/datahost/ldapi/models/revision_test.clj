@@ -81,7 +81,7 @@
     (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
                            :headers {"accept" "application/json"}
                            :request-method :get}
-          {:keys [body] :as response} (handler release-request)
+          {:keys [body]} (handler release-request)
           release-doc (json/read-str body)
           release-revisions (get-release-revisions release-doc)]
       (t/is (= #{"https://example.org/data/new-series/releases/test-release/revisions/1"
@@ -105,11 +105,7 @@
           [csv-2019-seq csv-2020-seq csv-2021-seq] (for [f [csv-2019-path csv-2020-path csv-2021-path]]
                                                      (line-seq (io/reader (io/resource f))))
           series-title "my lovely series"
-          series-slug (ld-str/slugify series-title)
-          series-base (str "https://example.org/data/" series-slug)
-          base (str "https://example.org/data/" series-slug "/")
-          request-ednld {"dcterms:title" series-title
-                         "dcterms:description" "Description"}]
+          series-slug (ld-str/slugify series-title)]
 
       ;; SERIES
       (PUT (str "/data/" series-slug)
@@ -165,50 +161,49 @@
                     release-revisions (get-release-revisions release-doc)]
                 (t/is (= #{(str "https://example.org" release-url "/revisions/1")} release-revisions))))
 
-            ;; TODO: child IDs are no longer generated; needs to be fixed
-            #_(testing "Changes resource created with CSV appends file"
+            (testing "Changes resource created with CSV appends file"
               ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-              (let [change-ednld (doc-with-context series-base {"dcterms:description" "A new change"})
+              (let [change-ednld {"dcterms:description" "A new change"}
                     multipart-temp-file-part (build-csv-multipart csv-2019-path)
                     change-api-response (ld-api-app {:request-method :post
                                                      :uri (str new-revision-location "/changes")
                                                      :multipart-params {:appends multipart-temp-file-part}
                                                      :content-type "application/json"
                                                      :body (json/write-str change-ednld)})
-                    change-response-json (json/read-str (slurp (:body change-api-response)))
-                    inserted-change-id (get change-response-json "@id")
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
                 (is (= (:status change-api-response) 201))
                 (is (= new-change-resource-location
-                       (str new-revision-location "/changes/" inserted-change-id))
+                       (str new-revision-location "/changes/1"))
                     "Created with the resource URI provided in the Location header")
 
                 (testing "Change can be retrieved as CSV with text/csv accepts header"
                   (let [change-response (GET new-change-resource-location {:headers {"accept" "text/csv"}})
                         change-resp-body-seq (line-seq (BufferedReader. (StringReader. (:body change-response))))]
                     (is (= 200 (:status change-response)))
-                    (is (= (count csv-2019-seq) (count change-resp-body-seq))
+                    (is (= (count change-resp-body-seq)
+                           (count csv-2019-seq))
                         "responds CSV contents")))))
 
-            ;; TODO: child IDs are no longer generated; needs to be fixed
-            #_(testing "Second Changes resource created with CSV appends file"
-              ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-              (let [change-ednld (doc-with-context series-base {"dcterms:description" "A new second change"})
+            (testing "Second Changes resource created with CSV appends file"
+              ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
+              (let [change-ednld {"dcterms:description" "A new second change"}
                     multipart-temp-file-part (build-csv-multipart csv-2020-path)
                     change-api-response (ld-api-app {:request-method :post
                                                      :uri (str new-revision-location "/changes")
                                                      :multipart-params {:appends multipart-temp-file-part}
                                                      :content-type "application/json"
                                                      :body (json/write-str change-ednld)})
-                    change-response-json (json/read-str (slurp (:body change-api-response)))
+                    change-response-json (json/read-str (:body change-api-response))
                     inserted-change-id (get change-response-json "@id")
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
                 (is (= (:status change-api-response) 201))
-                (is (= 2 inserted-change-id))
+                ; my-lovely-series/releases/release-xxx/revisions/1/changes/2
+                (is (= inserted-change-id (str inserted-revision-id "/changes/2")))
+                ; /data/my-lovely-series/releases/release-xxx/revisions/1/changes/2
                 (is (= new-change-resource-location
-                       (str new-revision-location "/changes/" inserted-change-id))
+                       (str new-revision-location "/changes/2"))
                     "Created with the resource URI provided in the Location header")))
 
             #_(testing "Fetching Revision as CSV with multiple CSV append changes"
@@ -236,21 +231,19 @@
               (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                   "Created with the resource URI provided in the Location header")
 
-              ;; TODO: child IDs are no longer generated; needs to be fixed
               #_(testing "Third Changes resource created against 2nd Revision"
-                (let [change-3-ednld (doc-with-context series-base {"dcterms:description" "A new third change"})
+                (let [change-3-ednld {"dcterms:description" "A new third change"}
                       multipart-temp-file-part (build-csv-multipart csv-2021-path)
                       change-api-response (ld-api-app {:request-method :post
                                                        :uri (str new-revision-location-2 "/changes")
                                                        :multipart-params {:appends multipart-temp-file-part}
                                                        :content-type "application/json"
                                                        :body (json/write-str change-3-ednld)})
-                      change-3-response-json (json/read-str (slurp (:body change-api-response)))
+                      change-3-response-json (json/read-str (:body change-api-response))
                       inserted-change-id (get change-3-response-json "@id")]
                   (is (= (:status change-api-response) 201))
-                  (is (= 1 inserted-change-id))))
+                  (is (str/ends-with? inserted-change-id "/changes/3"))))
 
-              ;; TODO: child IDs are no longer generated; needs to be fixed
               #_(testing "Fetching Release as CSV with multiple Revision and CSV append changes"
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]

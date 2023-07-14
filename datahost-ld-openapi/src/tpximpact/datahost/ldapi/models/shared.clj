@@ -5,8 +5,9 @@
    [tpximpact.datahost.ldapi.util.collections :as util.colls]
    [tpximpact.datahost.ldapi.schemas.api :as s.api])
   (:import
-   [java.net URI]
-   [java.time ZonedDateTime]))
+    [java.net URI]
+    [java.time ZonedDateTime]
+    (java.util UUID)))
 
 (def ld-root
   "For the prototype this item will come from config or be derived from
@@ -24,6 +25,9 @@
 (defn dataset-series-key [series-slug]
   (str (.getPath ld-root) series-slug))
 
+(defn new-dataset-file-uri [filename]
+  (.resolve ld-root (str "files/" (UUID/randomUUID) "/" filename)))
+
 (defn release-key [series-slug release-slug]
   (str (dataset-series-key series-slug) "/releases/" release-slug))
 
@@ -33,6 +37,9 @@
   ([series-slug release-slug schema-slug]
    (str (release-key series-slug release-slug) "/schemas/" schema-slug)))
 
+(defn dataset-revision-uri [^URI dataset-release-uri revision-id]
+  (URI. (format "%s/revisions/%s" dataset-release-uri revision-id)))
+
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
 
@@ -41,6 +48,9 @@
 
 (defn revision-uri [series-slug release-slug revision-id]
   (.resolve ld-root (revision-key series-slug release-slug revision-id)))
+
+(defn change-uri [series-slug release-slug revision-id change-id]
+  (.resolve ld-root (change-key series-slug release-slug revision-id change-id)))
 
 ;;; ---- CONTEXT OPS
 
