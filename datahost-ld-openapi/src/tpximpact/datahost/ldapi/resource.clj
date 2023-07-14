@@ -26,8 +26,11 @@
 (defn add-property [resource p o]
   (update-in resource [:subjects (id resource) p] (fnil conj #{}) o))
 
+(defn get-property [resource p]
+  (get-in resource [:subjects (id resource) p]))
+
 (defn get-property1 [resource p]
-  (first (get-in resource [:subjects (id resource) p])))
+  (first (get-property resource p)))
 
 (defn get-properties [resource ps]
   (let [subject (get-in resource [:subjects (id resource)])]

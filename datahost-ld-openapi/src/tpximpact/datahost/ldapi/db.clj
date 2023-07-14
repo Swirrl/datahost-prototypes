@@ -7,7 +7,6 @@
     [com.yetanalytics.flint :as f]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
-    [tpximpact.datahost.ldapi.models.release-schema :as release-schema]
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.resource :as resource])
@@ -149,8 +148,7 @@
            :construct bgps
            :where bgps}]
     (-> (get-resource-by-construct-query triplestore q)
-        (get (compact/expand :dh/fileContents))
-        (first))))
+        (resource/get-property1 (compact/expand :dh/fileContents)))))
 
 (defn revision-appends-file-locations
   "Given a Revision as a hash map, returns appends file locations"

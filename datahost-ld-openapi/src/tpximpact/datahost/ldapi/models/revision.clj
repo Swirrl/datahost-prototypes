@@ -2,7 +2,9 @@
   (:require
     [ring.util.io :as ring-io]
     [tablecloth.api :as tc]
-    [tpximpact.datahost.ldapi.db :as db])
+    [tpximpact.datahost.ldapi.compact :as cmp]
+    [tpximpact.datahost.ldapi.db :as db]
+    [tpximpact.datahost.ldapi.resource :as resource])
   (:import (java.io ByteArrayInputStream)))
 
 (defn string->stream
@@ -20,7 +22,7 @@
 
 
 (defn csv-file-locations->dataset [triplestore appends-file-locations]
-  (some->> (first appends-file-locations)
+  (some->> appends-file-locations
            (map #(csv-str->dataset (db/get-file-contents triplestore %)))
            (remove nil?)
            (apply tc/concat)))
@@ -35,8 +37,9 @@
     (write-to-outputstream merged-datasets)))
 
 (defn change->csv-stream [triplestore change]
-  (when-let [dataset (csv-file-locations->dataset triplestore [(get change "dh:appends")])]
-    (write-to-outputstream dataset)))
+  (let [appends (resource/get-property1 change (cmp/expand :dh/appends))]
+    (when-let [dataset (csv-file-locations->dataset triplestore [appends])]
+      (write-to-outputstream dataset))))
 
 (defn release->csv-stream [triplestore release]
   (let [revisions (some->> (get release "dh:hasRevision")
