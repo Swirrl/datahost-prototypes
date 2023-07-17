@@ -12,17 +12,19 @@
   (:import [java.net URI]
            (java.util UUID)))
 
+(def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
+               :dh (URI. "https://publishmydata.com/def/datahost/")})
+
 (defn- get-series-query [series-url]
   (let [bgps [[series-url 'a :dh/DatasetSeries]
               [series-url :dcterms/title '?title]
-              [series-url :dcterms/description '?description]
               [series-url :dh/baseEntity '?baseentity]
               [series-url :dcterms/modified '?modified]
               [series-url :dcterms/issued '?issued]]]
     {:prefixes {:dcterms "<http://purl.org/dc/terms/>"
                 :dh "<https://publishmydata.com/def/datahost/>"}
-     :construct bgps
-     :where bgps}))
+     :construct (conj bgps [series-url :dcterms/description '?description])
+     :where (conj bgps [:optional [[series-url :dcterms/description '?description]]])}))
 
 (defn- get-release-query [release-uri]
   {:prefixes (compact/as-flint-prefixes)
@@ -36,47 +38,33 @@
                [release-uri :dcterms/issued '?issued]]
    :where [[release-uri 'a :dh/Release]
            [release-uri :dcterms/title '?title]
-           [release-uri :dcterms/description '?description]
            [release-uri :dcat/inSeries '?series]
            [:optional [[release-uri :dh/hasRevision '?revision]]]
            [:optional [[release-uri :dh/hasSchema '?schema]]]
+           [:optional [[release-uri :dcterms/description '?description]]]
            [release-uri :dcterms/modified '?modified]
            [release-uri :dcterms/issued '?issued]]})
-
-(defn- get-revision-query [revision-uri]
-  (let [bgps [[revision-uri 'a :dh/Revision]
-              [revision-uri :dcterms/title '?title]
-              [revision-uri :dcterms/description '?description]
-              [revision-uri :dh/appliesToRelease '?release]]]
-    {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
-                :dh (URI. "https://publishmydata.com/def/datahost/")}
-     :construct (conj bgps [revision-uri :dh/hasChange '?change])
-     :where (conj bgps [:optional [[revision-uri :dh/hasChange '?change]]])}))
 
 (defn- get-change-query [change-uri]
   (let [bgps [[change-uri 'a :dh/Change]
               [change-uri :dcterms/description '?description]
               [change-uri :dh/appends '?appends]
               [change-uri :dh/appliesToRevision '?revision]]]
-    {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
-                :dh (URI. "https://publishmydata.com/def/datahost/")}
+    {:prefixes prefixes
      :construct bgps
      :where bgps}))
 
 (defn- get-release-schema-query [release-uri]
-  {:prefixes {:dh (URI. "https://publishmydata.com/def/datahost/")}
+  {:prefixes prefixes
    :construct [['?schema '?p '?o]]
    :where [[release-uri :dh/hasSchema '?schema]
            ['?schema '?p '?o]]})
 
 (defn- get-schema-columns-query [schema-uri]
-  {:prefixes {:dh (URI. "https://publishmydata.com/def/datahost/")}
+  {:prefixes prefixes
    :construct [['?col '?p '?o]]
    :where [[schema-uri :dh/columns '?col]
            ['?col '?p '?o]]})
-
-(def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
-               :dh (URI. "https://publishmydata.com/def/datahost/")})
 
 (defn- map-properties [prop-mapping m]
   (reduce-kv (fn [props k v]
@@ -123,7 +111,16 @@
 
 (defn get-revision
   ([triplestore revision-uri]
-   (let [q (get-revision-query revision-uri)]
+   (let [q (let [bgps [[revision-uri 'a :dh/Revision]
+                       [revision-uri :dcterms/title '?title]
+                       [revision-uri :dh/appliesToRelease '?release]]]
+             {:prefixes prefixes
+              :construct (conj bgps
+                               [revision-uri :dh/hasChange '?change]
+                               [revision-uri :dcterms/description '?description])
+              :where (conj bgps
+                           [:optional [[revision-uri :dh/hasChange '?change]]]
+                           [:optional [[revision-uri :dcterms/description '?description]]])})]
      (get-resource-by-construct-query triplestore q)))
 
   ([triplestore series-slug release-slug revision-id]
@@ -140,8 +137,7 @@
 
 (defn get-file-contents [triplestore file-uri]
   (let [bgps [[file-uri :dh/fileContents '?contents]]
-        q {:prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
-                      :dh (URI. "https://publishmydata.com/def/datahost/")}
+        q {:prefixes prefixes
            :construct bgps
            :where bgps}]
     (-> (get-resource-by-construct-query triplestore q)
@@ -189,7 +185,7 @@
         title (resource/get-property1 resource (compact/expand :dcterms/title))
         description (resource/get-property1 resource (compact/expand :dcterms/description))
         modified-at (resource/get-property1 resource (compact/expand :dcterms/modified))]
-    {:prefixes {:dcterms "<http://purl.org/dc/terms/>"}
+    {:prefixes prefixes
      :delete [[resource-uri :dcterms/title '?title]
               [resource-uri :dcterms/description '?description]
               [resource-uri :dcterms/modified '?modified]]

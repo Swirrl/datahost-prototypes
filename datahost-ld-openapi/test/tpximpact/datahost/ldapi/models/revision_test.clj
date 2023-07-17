@@ -221,12 +221,10 @@
           (testing "Creation of a second revision for a release"
             (let [revision-title-2 (str "A second revision for release " release-slug)
                   revision-url-2 (str release-url "/revisions")
-                  revision-ednld-2 {"dcterms:title" revision-title-2
-                                    "dcterms:description" "This is for the hardcore description readers"}
-
                   revision-resp-2 (POST revision-url-2
                                         {:content-type :json
-                                         :body (json/write-str revision-ednld-2)})
+                                         ;; NOTE: this revision purposefully DOES NOT have dcterms:description
+                                         :body (json/write-str {"dcterms:title" revision-title-2})})
                   inserted-revision-id-2 (get (json/read-str (:body revision-resp-2)) "@id")
                   new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
 
@@ -241,11 +239,10 @@
                                                        :uri (str new-revision-location-2 "/changes")
                                                        :multipart-params {:appends multipart-temp-file-part}
                                                        :content-type "application/json"
-                                                       :body (json/write-str change-3-ednld)})
-                      change-3-response-json (json/read-str (:body change-api-response))
-                      inserted-change-id (get change-3-response-json "@id")]
+                                                       :body (json/write-str change-3-ednld)})]
                   (is (= (:status change-api-response) 201))
-                  (is (str/ends-with? inserted-change-id "/changes/1"))))
+                  (is (str/ends-with? (get (json/read-str (:body change-api-response)) "@id")
+                                      "/changes/1"))))
 
               (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})

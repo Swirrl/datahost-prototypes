@@ -3,7 +3,6 @@
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.router :as router]
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th])
@@ -27,7 +26,7 @@
         handler (router/handler clock repo)
         request (create-put-request "new-series" {"dcterms:title" "A title"
                                                   "dcterms:description" "Description"})
-        {:keys [status body] :as response} (handler request)
+        {:keys [status body]} (handler request)
         new-series-doc (json/read-str body)]
     (t/is (= 201 status))
     (t/is (= "A title" (get new-series-doc "dcterms:title")))
@@ -42,7 +41,19 @@
           {:keys [status] :as response} (handler request)
           series-doc (json/read-str (:body response))]
       (t/is (= 200 status))
-      (t/is (= new-series-doc series-doc)))))
+      (t/is (= new-series-doc series-doc)))
+
+    (let [series2-slug "new-series-without-description"
+          request (create-put-request series2-slug {"dcterms:title" "Another title"})
+          {:keys [status]} (handler request)]
+      (t/is (= 201 status)
+            "Should create series without optional dcterms:description")
+
+      (let [request {:uri (str "/data/" series2-slug)
+                     :request-method :get}
+            {:keys [status]} (handler request)]
+        (t/is (= 200 status)
+              "Should retrieve a series without optional dcterms:description")))))
 
 (t/deftest put-series-update-test
   (let [repo (repo/sail-repo)
