@@ -4,7 +4,6 @@
    [malli.error :as me]
    [tpximpact.datahost.ldapi.schemas.common :refer [registry]]
    [tpximpact.datahost.ldapi.schemas.release-schema :as s.release-schema]
-   [tpximpact.datahost.ldapi.models.release :as models.release]
    [tpximpact.datahost.ldapi.models.shared :as models.shared])
   (:import [java.net URLEncoder]))
 
@@ -51,7 +50,7 @@
   Returned meta data will contain `:op` key."
   [db api-params incoming-jsonld-doc]
   {:pre [(insert-api-params-valid? api-params)]}
-  (let [{:keys [series-slug release-slug schema-slug]
+  #_(let [{:keys [series-slug release-slug schema-slug]
          {series-key :series 
           release-key :release
           schema-key :release-schema} :op.upsert/keys} api-params

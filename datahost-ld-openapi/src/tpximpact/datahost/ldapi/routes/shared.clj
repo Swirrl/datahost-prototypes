@@ -27,8 +27,12 @@
   (mu/merge
    JsonLdBase
    [:map {:closed false}
-    ["dh:columns" [:repeat {:min 1} 
-                   [:map 
+    ["dh:columns" [:repeat {:min 1}
+                   [:map
                     ["csvw:datatype" :string]
                     ["csvw:name" :string]
                     ["csvw:titles" [:sequential :string]]]]]]))
+
+;; TODO: create better resource representation
+(def ResourceSchema
+  [:string])

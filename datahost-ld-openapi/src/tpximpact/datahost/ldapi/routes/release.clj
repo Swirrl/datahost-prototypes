@@ -7,57 +7,57 @@
 
 (def internal-server-error-desc "Internal server error")
 
-(defn get-release-route-config [db]
+(defn get-release-route-config [triplestore]
   {:summary "Retrieve metadata for an existing release"
-   :handler (partial handlers/get-release db)
+   :handler (partial handlers/get-release triplestore)
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json" {:body map?}}}
+                     "application/json" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn put-release-route-config [db]
+(defn put-release-route-config [clock triplestore]
   {:summary "Create or update metadata for a release"
-   :handler (partial handlers/put-release db)
+   :handler (partial handlers/put-release clock triplestore)
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?
                        :release-slug string?}
                 :query schema/ApiQueryParams}
    :responses {200 {:description "Release already existed and was successfully updated"
-                    :body map?}
+                    :body string?}
                201 {:description "Release did not exist previously and was successfully created"
-                    :body map?}
+                    :body string?}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
 (defn get-release-ld-schema-config
-  [db]
+  [triplestore]
   {:summary "Retrieve release schema"
-   :handler (partial handlers/get-release-schema db)
+   :handler (partial handlers/get-release-schema triplestore)
    :parameters {:path {:series-slug :string
                        :release-slug :string}}
    :responses {200 {:description "Release schema successfully retrieved"
-                    :body map?}
+                    :body string?}
                404 {:body [:map
                            [:status [:enum "error"]]
                            [:message :string]]}}})
 
 (defn put-release-ld-schema-config
-  [db]
+  [clock triplestore]
   {:summary "Create schema for a release"
-   :handler (partial handlers/put-release-schema db)
+   :handler (partial handlers/put-release-schema clock triplestore)
    :parameters {:body routes-shared/LdSchemaInput
                 :path {:series-slug :string
                        :release-slug :string
                        :schema-slug :string}}
    :responses {200 {:description "Schema already exists."
-                    :body map?}
+                    :body string?}
                201 {:description "Schema successfully created"
-                    :body map?}
+                    :body string?}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]
