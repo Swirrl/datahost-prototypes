@@ -151,23 +151,3 @@
                      (select-keys body' ["dcterms:issued" "dcterms:modified"]))
                   "The document shouldn't be modified"))))))))
 
-(deftest normalise-context-test
-  (let [expected-context ["https://publishmydata.com/def/datahost/context"
-                          {"@base" "https://example.org/data/"}]]
-
-    (testing "An empty @context is normalised"
-      (is (= expected-context
-             (models-shared/normalise-context {}
-                                              (str models-shared/ld-root)))))
-
-    (testing "A declared context of 'https://publishmydata.com/def/datahost/context' is normalised"
-      (is (= expected-context
-             (models-shared/normalise-context {"@context" "https://publishmydata.com/def/datahost/context"}
-                                              (str models-shared/ld-root)))))
-
-    (testing "A normalised context is idempotent to itself"
-      (is (= expected-context
-             (models-shared/normalise-context {"@context" ["https://publishmydata.com/def/datahost/context",
-                                                           {"@base" "https://example.org/data/"}]}
-                                              (str models-shared/ld-root)))))))
-

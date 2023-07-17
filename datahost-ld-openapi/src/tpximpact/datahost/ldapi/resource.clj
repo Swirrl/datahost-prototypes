@@ -1,6 +1,5 @@
 (ns tpximpact.datahost.ldapi.resource
   (:require
-    [clojure.java.io :as io]
     [grafter-2.rdf.protocols :as rdf]
     [grafter-2.rdf4j.io :as gio]
     [grafter-2.rdf.protocols :as pr]
@@ -8,7 +7,6 @@
     [clojure.set :as set]
     [tpximpact.datahost.ldapi.compact :as compact])
   (:import [java.io StringReader StringWriter]
-           [org.eclipse.rdf4j.rio RioSetting]
            [org.eclipse.rdf4j.rio.helpers JSONLDMode JSONLDSettings]))
 
 (def id-key (keyword "@id"))

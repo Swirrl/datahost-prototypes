@@ -3,7 +3,6 @@
     [clojure.data.json :as json]
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
-    [malli.core :as m]
     [com.yetanalytics.flint :as f]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
@@ -112,12 +111,6 @@
   (let [series-uri (models-shared/dataset-series-uri series-slug)
         release-uri (models-shared/dataset-release-uri series-uri release-slug)]
     (get-release-by-uri triplestore release-uri)))
-
-(def ^:private get-release-schema-params-valid?
-  (m/validator [:map
-                [:series-slug :string]
-                [:release-slug :string]
-                [:schema-slug :string]]))
 
 (defn get-release-schema
   [triplestore release-uri]
