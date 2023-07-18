@@ -129,6 +129,17 @@ removeObservationsForHashing = (data, observationColumn) => {
     return removedObservations
 }
 
+checkHeaders = (original, current) => {
+    let originalHeaders = Object.keys(original[0])
+    let currentHeaders = Object.keys(current[0])
+
+    if (JSON.stringify(originalHeaders) === JSON.stringify(currentHeaders)) {
+        return true
+    } else {
+        console.log("Headers don't match, please check and rerun")
+    }
+}
+
 start = async () => {
 
     console.log("Loading data")
@@ -137,99 +148,106 @@ start = async () => {
     const currentData = await getCurrentData(current)
     console.timeEnd("Loading data");
 
-    console.log("Generating hashed values")
-    console.time("Generating hashed values");
-    let existingDataHash = await fullRowHash(existingData, "old")
-    let currentDataHash = await fullRowHash(currentData)
-    console.timeEnd("Generating hashed values");
+    console.log("Checking headers")
+    const headersMatch = await checkHeaders(existingData, currentData)
 
-
-    console.log("Compare data")
-    console.time("Compare data");
-    let noExact = await compareData(existingDataHash, currentDataHash)
-    console.timeEnd("Compare data");
-
-    let noExactNoHash = await stripOutHash(noExact)
-
-    //if there are no changes don't do anything else
-    if (noExactNoHash != 0) {
-
-        const existingDataDimensions = await removeObservationsForHashing(existingData, observations)
-        const currentDataDimensions = await removeObservationsForHashing(noExactNoHash, observations)
+    if (headersMatch === true) {
+        console.log("Headers match")
 
         console.log("Generating hashed values")
         console.time("Generating hashed values");
-        let existingDataHashDimensions = await fullRowHash(existingDataDimensions, "old")
-        let currentDataHashDimensions = await fullRowHash(currentDataDimensions)
+        let existingDataHash = await fullRowHash(existingData, "old")
+        let currentDataHash = await fullRowHash(currentData)
         console.timeEnd("Generating hashed values");
+
 
         console.log("Compare data")
         console.time("Compare data");
-        let [correctionsIndex, appendsIndex] = await compareDataCorrections(existingDataHashDimensions, currentDataHashDimensions)
+        let noExact = await compareData(existingDataHash, currentDataHash)
         console.timeEnd("Compare data");
 
-        console.log("Generate downloads")
-        console.time("Generate downloads");
-        let corrections = []
-        for (i = 0; i < correctionsIndex.length; i++) {
-            temp = correctionsIndex[i]
-            corrections.push(noExactNoHash[temp])
-        }
+        let noExactNoHash = await stripOutHash(noExact)
 
-        let appends = []
-        for (i = 0; i < appendsIndex.length; i++) {
-            temp = appendsIndex[i]
-            appends.push(noExactNoHash[temp])
-        }
+        //if there are no changes don't do anything else
+        if (noExactNoHash != 0) {
 
+            const existingDataDimensions = await removeObservationsForHashing(existingData, observations)
+            const currentDataDimensions = await removeObservationsForHashing(noExactNoHash, observations)
 
-        if (appends.length != 0) {
-            let appendsHeader = await generateHeaders(Object.keys(appends[0]))
-            const csvWriter = createCsvWriter({
-                path: outputPrefix + "-appends.csv",
-                header: appendsHeader
-            });
+            console.log("Generating hashed values")
+            console.time("Generating hashed values");
+            let existingDataHashDimensions = await fullRowHash(existingDataDimensions, "old")
+            let currentDataHashDimensions = await fullRowHash(currentDataDimensions)
+            console.timeEnd("Generating hashed values");
 
-            if (test === "test") {
-                console.log("Appends:")
-                console.log(appends)
-                console.log("--------")
+            console.log("Compare data")
+            console.time("Compare data");
+            let [correctionsIndex, appendsIndex] = await compareDataCorrections(existingDataHashDimensions, currentDataHashDimensions)
+            console.timeEnd("Compare data");
+
+            console.log("Generate downloads")
+            console.time("Generate downloads");
+            let corrections = []
+            for (i = 0; i < correctionsIndex.length; i++) {
+                temp = correctionsIndex[i]
+                corrections.push(noExactNoHash[temp])
+            }
+
+            let appends = []
+            for (i = 0; i < appendsIndex.length; i++) {
+                temp = appendsIndex[i]
+                appends.push(noExactNoHash[temp])
             }
 
 
-            csvWriter.writeRecords(appends)
-                .then(() => {
-                    console.log('Complete appends file created');
-                }).catch(function (error) {
-                    console.log(error);
+            if (appends.length != 0) {
+                let appendsHeader = await generateHeaders(Object.keys(appends[0]))
+                const csvWriter = createCsvWriter({
+                    path: outputPrefix + "-appends.csv",
+                    header: appendsHeader
                 });
-        }
 
-        if (corrections.length != 0) {
-            let correctionsHeader = await generateHeaders(Object.keys(corrections[0]))
-            const csvWriter2 = createCsvWriter({
-                path: outputPrefix + "-corrections.csv",
-                header: correctionsHeader
-            });
+                if (test === "test") {
+                    console.log("Appends:")
+                    console.log(appends)
+                    console.log("--------")
+                }
 
-            if (test === "test") {
-                console.log("Corrections:")
-                console.log(corrections)
-                console.log("--------")
+
+                csvWriter.writeRecords(appends)
+                    .then(() => {
+                        console.log('Complete appends file created');
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
             }
 
-            csvWriter2.writeRecords(corrections)
-                .then(() => {
-                    console.log('Complete corrections file created');
-                }).catch(function (error) {
-                    console.log(error);
+            if (corrections.length != 0) {
+                let correctionsHeader = await generateHeaders(Object.keys(corrections[0]))
+                const csvWriter2 = createCsvWriter({
+                    path: outputPrefix + "-corrections.csv",
+                    header: correctionsHeader
                 });
 
-            console.timeEnd("Generate downloads");
-            console.timeEnd("Total time");
+                if (test === "test") {
+                    console.log("Corrections:")
+                    console.log(corrections)
+                    console.log("--------")
+                }
+
+                csvWriter2.writeRecords(corrections)
+                    .then(() => {
+                        console.log('Complete corrections file created');
+                    }).catch(function (error) {
+                        console.log(error);
+                    });
+
+                console.timeEnd("Generate downloads");
+                console.timeEnd("Total time");
+            }
+        } else {
+            console.log("No changes between datasets")
         }
-    } else {
-        console.log("No changes between datasets")
     }
 }
 
