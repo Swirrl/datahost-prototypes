@@ -19,7 +19,6 @@ if (test === "test") {
 }
 
 console.time("Total time");
-// const observations = "Aged 16 to 64 years level 3 or above qualifications"
 
 getOldData = async (url) => {
     return new Promise(function (resolve, reject) {

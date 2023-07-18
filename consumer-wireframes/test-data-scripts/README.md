@@ -7,3 +7,7 @@ Designed to be run from a clean DB, will create the series, releases, and revisi
 `npm install`
 
 `node index.js`
+
+
+TODO
+Write script to use delete. Either given a "all" parameter it uses the list endpoint to delete all or takes a URI and deletes that
