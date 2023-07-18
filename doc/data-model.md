@@ -11,7 +11,7 @@ erDiagram
         string title
         string slug_id
         string description
-        dateTime issued
+        dateTime created
         dateTime modified
     }
 
@@ -19,34 +19,48 @@ erDiagram
         string title
         string slug_id
         string description
-        dateTime issued
+        dateTime created
         dateTime modified
     }
 
     SCHEMA {
         int id
         string columns
-        dateTime issued
+        dateTime created
         dateTime modified
     }
 
     REVISION {
         int id
-        string title "necessary?"
-        string description "necessary?"
+        string title
+        string description
     }
 
-    CHANGE {
+    APPEND {
         int id
         string message
-        dateTime issued
-        file appends
-        file deletes
-        file corrections
+        dateTime created
+        file changes
+    }
+
+    DELETE {
+        int id
+        string message
+        dateTime created
+        file changes
+    }
+
+    CORRECTION {
+        int id
+        string message
+        dateTime created
+        file changes
     }
 
     DATASET_SERIES ||--o{ RELEASE : has
     RELEASE ||--o{ REVISION : has
     RELEASE ||--o| SCHEMA : has
-    REVISION ||--o{ CHANGE : has
+    REVISION ||--o| APPEND : has
+    REVISION ||--o| DELETE : has
+    REVISION ||--o| CORRECTION : has
 ```
