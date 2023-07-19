@@ -7,4 +7,11 @@
  :tpximpact.datahost.ldapi.native-datastore/repo 
  {:data-directory #ig/ref :tpximpact.datahost.ldapi.native-datastore.repo/data-directory}
 
- :tpximpact.datahost.time/system-clock {}}
+ :tpximpact.datahost.time/system-clock {}
+
+ :tpximpact.datahost.ldapi.store.temp-file-store/store {}
+
+ :tpximpact.datahost.ldapi.router/handler
+ {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
+  :clock #ig/ref :tpximpact.datahost.time/system-clock
+  :change-store #ig/ref :tpximpact.datahost.ldapi.store.temp-file-store/store}}

@@ -8,9 +8,9 @@
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.compact :as compact]
-    [tpximpact.datahost.ldapi.resource :as resource])
-  (:import [java.net URI]
-           (java.util UUID)))
+    [tpximpact.datahost.ldapi.resource :as resource]
+    [tpximpact.datahost.ldapi.store :as store])
+  (:import [java.net URI]))
 
 (def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                :dh (URI. "https://publishmydata.com/def/datahost/")})
@@ -135,14 +135,6 @@
   ([triplestore series-slug release-slug revision-id change-id]
    (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
      (get-change triplestore change-uri))))
-
-(defn get-file-contents [triplestore file-uri]
-  (let [bgps [[file-uri :dh/fileContents '?contents]]
-        q {:prefixes prefixes
-           :construct bgps
-           :where bgps}]
-    (-> (get-resource-by-construct-query triplestore q)
-        (resource/get-property1 (compact/expand :dh/fileContents)))))
 
 (defn revision-appends-file-locations
   "Given a Revision as a hash map, returns appends file locations"
@@ -356,9 +348,6 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri))))
 
-(defn- new-file-key [filename]
-  (str "files/" (UUID/randomUUID) "/" filename))
-
 (defn- request->change [change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc appends-tmp-file]
   (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-number)
         series-uri (models-shared/dataset-series-uri series-slug)
@@ -366,12 +355,10 @@
         revision-uri (models-shared/dataset-revision-uri release-uri revision-id)
         change-doc (annotate-json-resource json-doc change-uri (compact/expand :dh/Change))
         doc-resource (resource/from-json-ld-doc change-doc)
-        param-properties (params->title-description-properties api-params)
-        appends-file-key (models-shared/new-dataset-file-uri (:filename appends-tmp-file))]
+        param-properties (params->title-description-properties api-params)]
     (-> doc-resource
         (resource/set-properties param-properties)
-        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri)
-        (resource/set-property1 (compact/expand :dh/appends) appends-file-key))))
+        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
 
 (defn- request->schema [{:keys [series-slug release-slug schema-slug] :as api-params} json-doc]
   (let [schema-uri (models-shared/release-schema-uri series-slug release-slug schema-slug)
@@ -411,21 +398,15 @@
     {:resource-id revision-number
      :jsonld-doc (revision->response-body revision)}))
 
-(defn- change-file-statements
-  "Returns a collection of triples connecting a revision to a change"
-  [change appends-tmp-file]
-  [(pr/->Triple (resource/get-property1 change (compact/expand :dh/appends))
-                (compact/expand :dh/fileContents)
-                (-> appends-tmp-file :tempfile slurp))])
-
-;; TODO: save appends-tmp-file to file system and not triplestore.
-(defn insert-change! [triplestore api-params incoming-jsonld-doc appends-tmp-file]
+(defn insert-change! [triplestore change-store api-params incoming-jsonld-doc appends-tmp-file]
   (let [change-number (generate-change-number triplestore api-params)
-        change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)]
+        change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)
+        append-key (store/insert-append change-store appends-tmp-file)
+        change (resource/set-property1 change (compact/expand :dh/appends) append-key)]
+
     (with-open [conn (repo/->connection triplestore)]
       (pr/add conn (concat (resource/->statements change)
-                           (revision-change-statements change)
-                           (change-file-statements change appends-tmp-file))))
+                           (revision-change-statements change))))
     {:resource-id change-number
      :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"]))}))
 

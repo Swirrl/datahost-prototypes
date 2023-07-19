@@ -9,6 +9,7 @@
     [malli.error :as me]
     [tpximpact.datahost.ldapi.resource :as resource]
     [tpximpact.datahost.ldapi.router :as router]
+    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
     [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th]
@@ -49,47 +50,48 @@
       #{release-revisions})))
 
 (t/deftest put-revision-create-test
-  (let [repo (repo/sail-repo)
-        t (time/parse "2023-07-03T11:16:16Z")
-        clock (time/manual-clock t)
-        handler (router/handler clock repo)
-        series-slug (create-series handler)
-        [release-slug release-doc] (create-release handler series-slug)
-        release-uri (resource-id release-doc)
-        request1 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                  :request-method :post
-                  :headers {"content-type" "application/json"}
-                  :body (json/write-str {"dcterms:title" "Test revision" "dcterms:description" "Description"})}
-        request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                  :request-method :post
-                  :headers {"content-type" "application/json"}
-                  :body (json/write-str {"dcterms:title" "A second test revision" "dcterms:description" "Description"})}
-        {:keys [status body] :as _response} (handler request1)
-        revision-doc (json/read-str body)]
-    (t/is (= 201 status)
-          "first revision was successfully created")
-    (t/is (= "Test revision" (get revision-doc "dcterms:title")))
-    (t/is (= "Description" (get revision-doc "dcterms:description")))
-    (t/is (= release-uri (URI. (get revision-doc "dh:appliesToRelease"))))
-    (t/is (str/ends-with? (get revision-doc "@id") "/revisions/1")
-          "auto-increment revision ID is assigned")
-
-    (let [{:keys [status body] :as _response2} (handler request2)
-          revision-doc2 (json/read-str body)]
+  (with-open [temp-store (tfstore/create-temp-file-store)]
+    (let [repo (repo/sail-repo)
+          t (time/parse "2023-07-03T11:16:16Z")
+          clock (time/manual-clock t)
+          handler (router/handler clock repo temp-store)
+          series-slug (create-series handler)
+          [release-slug release-doc] (create-release handler series-slug)
+          release-uri (resource-id release-doc)
+          request1 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                    :request-method :post
+                    :headers {"content-type" "application/json"}
+                    :body (json/write-str {"dcterms:title" "Test revision" "dcterms:description" "Description"})}
+          request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                    :request-method :post
+                    :headers {"content-type" "application/json"}
+                    :body (json/write-str {"dcterms:title" "A second test revision" "dcterms:description" "Description"})}
+          {:keys [status body] :as _response} (handler request1)
+          revision-doc (json/read-str body)]
       (t/is (= 201 status)
-            "second revision was successfully created")
-      (t/is (str/ends-with? (get revision-doc2 "@id") "/revisions/2")
-            "subsequent revision has next auto-increment revision ID assigned"))
+            "first revision was successfully created")
+      (t/is (= "Test revision" (get revision-doc "dcterms:title")))
+      (t/is (= "Description" (get revision-doc "dcterms:description")))
+      (t/is (= release-uri (URI. (get revision-doc "dh:appliesToRelease"))))
+      (t/is (str/ends-with? (get revision-doc "@id") "/revisions/1")
+            "auto-increment revision ID is assigned")
 
-    (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
-                           :headers {"accept" "application/json"}
-                           :request-method :get}
-          {:keys [body]} (handler release-request)
-          release-doc (json/read-str body)
-          release-revisions (get-release-revisions release-doc)]
-      (t/is (= #{"https://example.org/data/new-series/releases/test-release/revisions/1"
-                 "https://example.org/data/new-series/releases/test-release/revisions/2"}
-               release-revisions)))))
+      (let [{:keys [status body] :as _response2} (handler request2)
+            revision-doc2 (json/read-str body)]
+        (t/is (= 201 status)
+              "second revision was successfully created")
+        (t/is (str/ends-with? (get revision-doc2 "@id") "/revisions/2")
+              "subsequent revision has next auto-increment revision ID assigned"))
+
+      (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
+                             :headers {"accept" "application/json"}
+                             :request-method :get}
+            {:keys [body]} (handler release-request)
+            release-doc (json/read-str body)
+            release-revisions (get-release-revisions release-doc)]
+        (t/is (= #{"https://example.org/data/new-series/releases/test-release/revisions/1"
+                   "https://example.org/data/new-series/releases/test-release/revisions/2"}
+                 release-revisions))))))
 
 (defn- build-csv-multipart [csv-path]
   (let [appends-file (io/file (io/resource csv-path))]
