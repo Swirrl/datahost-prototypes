@@ -111,6 +111,19 @@
     {:status 200
      :body response-body}))
 
+(defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
+  (let [release-triples (db/get-releases triplestore series-slug)
+        releases (->> (matcha/build [(keyword "@id") ?s]
+                                    {?p ?o}
+                                    [[?s ?p ?o]]
+                                    (matcha/index-triples release-triples))
+                      (sort-by (comp str (keyword "@id")))
+                      (reverse))
+        response-body (-> (json-ld/compact releases (assoc json-ld/simple-context "@base" "https://example.org/data/"))
+                          (.toString))]
+    {:status 200
+     :body response-body}))
+
 (defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params
                          body-params :body-params :as request}]
   (if-let [_release (db/get-release triplestore series-slug release-slug)]

@@ -17,6 +17,13 @@
                      "application/json" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
+(defn get-release-list-route-config [triplestore]
+  {:summary "All releases metadata in the given series"
+   :handler (partial handlers/get-release-list triplestore)
+   :parameters {:path {:series-slug string?}}
+   :responses {200 {:body string?}
+               404 {:body [:re "Not found"]}}})
+
 (defn get-revision-list-route-config [triplestore]
   {:summary "All revisions metadata in the given release"
    :handler (partial handlers/get-revision-list triplestore)

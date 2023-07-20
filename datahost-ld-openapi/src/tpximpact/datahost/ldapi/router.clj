@@ -112,6 +112,9 @@
       {:get (series-routes/get-series-route-config triplestore)
        :put (series-routes/put-series-route-config clock triplestore)}]
 
+     ["/:series-slug/releases"
+      {:get (revision-routes/get-release-list-route-config triplestore)}]
+
      ["/:series-slug/releases/:release-slug"
       {:get (release-routes/get-release-route-config triplestore change-store)
        :put (release-routes/put-release-route-config clock triplestore)}]

@@ -152,6 +152,28 @@
     (datastore/eager-query triplestore
                            (f/format-query q :pretty? true))))
 
+(defn get-releases
+  "Returns all Releases for a Series in triple form"
+  [triplestore series-slug]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        q (let [bgps [['?release 'a :dh/Release]
+                      ['?release :dcterms/title '?title]
+                      ['?release :dcat/inSeries series-uri]
+                      ['?release :dcterms/modified '?modified]
+                      ['?release :dcterms/issued '?issued]]]
+            {:prefixes prefixes
+             :construct (conj bgps
+                              ['?release :dh/hasRevision '?revision]
+                              ['?release :dh/hasSchema '?schema]
+                              ['?release :dcterms/description '?description])
+             :where (conj bgps
+                          [:optional [['?release :dh/hasRevision '?revision]]]
+                          [:optional [['?release :dh/hasSchema '?schema]]]
+                          [:optional [['?release :dcterms/description '?description]]])
+             :order-by '[(asc ?release)]})]
+    (datastore/eager-query triplestore
+                           (f/format-query q :pretty? true))))
+
 (defn get-change
   ([triplestore change-uri]
    (get-resource-by-construct-query triplestore
