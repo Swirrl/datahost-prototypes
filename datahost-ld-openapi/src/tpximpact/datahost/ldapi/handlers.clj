@@ -3,7 +3,9 @@
    [clojure.tools.logging :as log]
    [malli.core :as m]
    [malli.error :as me]
+   [grafter.matcha.alpha :as matcha]
    [tpximpact.datahost.ldapi.db :as db]
+   [tpximpact.datahost.ldapi.json-ld :as json-ld]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.revision :as revision-model]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
@@ -96,6 +98,19 @@
        :body (db/revision->response-body rev)})
     not-found-response))
 
+(defn get-revision-list [triplestore {{:keys [series-slug release-slug]} :path-params}]
+  (let [revision-triples (db/get-revisions triplestore series-slug release-slug)
+        revisions (->> (matcha/build [(keyword "@id") ?s]
+                                     {?p ?o}
+                                     [[?s ?p ?o]]
+                                     (matcha/index-triples revision-triples))
+                       (sort-by (comp str (keyword "@id")))
+                       (reverse))
+        response-body (-> (json-ld/compact revisions (assoc json-ld/simple-context "@base" "https://example.org/data/"))
+                          (.toString))]
+    {:status 200
+     :body response-body}))
+
 (defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params
                          body-params :body-params :as request}]
   (if-let [_release (db/get-release triplestore series-slug release-slug)]
@@ -124,10 +139,10 @@
 (defn post-change [triplestore
                    change-store
                    {{:keys [series-slug release-slug revision-id]} :path-params
-                    {{:keys [appends]} :multipart}                 :parameters
-                    body-params                                    :body-params :as request}]
-  ;; TODO This could be an ASK of the Revision
-  (if-let [_revision (db/get-revision triplestore series-slug release-slug revision-id)]
+                    {{:keys [appends]} :multipart} :parameters
+                    body-params :body-params :as request}]
+  (if (db/resource-exists? triplestore
+                           (models-shared/revision-uri series-slug release-slug revision-id))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
@@ -140,13 +155,13 @@
                         (some? release-schema) (nil? validation-err)))
       (if validation-err
         validation-err
-        {:status  201
+        {:status 201
          :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
                                    "/revisions/" revision-id "/changes/" resource-id)}
-         :body    jsonld-doc}))
+         :body jsonld-doc}))
 
     {:status 422
-     :body   "Revision for this change does not exist"}))
+     :body "Revision for this change does not exist"}))
 
 (defn get-change [triplestore change-store {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]

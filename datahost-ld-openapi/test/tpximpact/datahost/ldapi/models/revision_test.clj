@@ -18,6 +18,11 @@
            [java.util UUID]
            [java.io BufferedReader StringReader]))
 
+(defn submap?
+  "Checks whether m contains all entries in sub."
+  [^java.util.Map m ^java.util.Map sub]
+  (.containsAll (.entrySet m) (.entrySet sub)))
+
 (defn- create-series [handler]
   (let [series-slug (str "new-series-" (UUID/randomUUID))
         request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
@@ -91,7 +96,20 @@
           release-revisions (get-release-revisions release-doc)]
       (t/is (= #{(format "https://example.org/data/%s/releases/%s/revisions/1" series-slug release-slug)
                  (format "https://example.org/data/%s/releases/%s/revisions/2" series-slug release-slug)}
-               release-revisions)))))
+               release-revisions)))
+
+    (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                                 :headers {"accept" "application/json"}
+                                 :request-method :get}
+          {:keys [body status]} (handler all-revisions-request)
+          release-doc (json/read-str body)]
+      (t/is (= status 200))
+      (t/is (-> (get release-doc "@graph")
+                (nth 0)
+                (submap? {"dcterms:title" "A second test revision"})))
+      (t/is (-> (get release-doc "@graph")
+                (nth 1)
+                (submap? {"dcterms:title" "Test revision"}))))))
 
 (defn- build-csv-multipart [csv-path]
   (let [appends-file (io/file (io/resource csv-path))]

@@ -1,16 +1,17 @@
 (ns tpximpact.datahost.ldapi.db
   (:require
     [clojure.data.json :as json]
+    [com.yetanalytics.flint :as f]
     [grafter-2.rdf.protocols :as pr]
     [grafter-2.rdf4j.repository :as repo]
-    [com.yetanalytics.flint :as f]
+    [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.models.shared :as models-shared]
     [tpximpact.datahost.ldapi.native-datastore :as datastore]
     [tpximpact.datahost.time :as time]
-    [tpximpact.datahost.ldapi.compact :as compact]
     [tpximpact.datahost.ldapi.resource :as resource]
     [tpximpact.datahost.ldapi.store :as store])
-  (:import [java.net URI]))
+  (:import (java.net URI)
+           (java.util UUID)))
 
 (def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
                :dh (URI. "https://publishmydata.com/def/datahost/")})
@@ -25,6 +26,11 @@
                 :dh "<https://publishmydata.com/def/datahost/>"}
      :construct (conj bgps [series-url :dcterms/description '?description])
      :where (conj bgps [:optional [[series-url :dcterms/description '?description]]])}))
+
+(defn resource-exists? [triplestore uri]
+  (datastore/eager-query triplestore
+                         (f/format-query {:ask []
+                                          :where [[uri '?p '?o]]} :pretty? true)))
 
 (defn- get-release-query [release-uri]
   {:prefixes (compact/as-flint-prefixes)
@@ -127,6 +133,24 @@
   ([triplestore series-slug release-slug revision-id]
    (get-revision triplestore
                  (models-shared/revision-uri series-slug release-slug revision-id))))
+(defn get-revisions
+  "Returns all Revisions for a Release in triple form"
+  [triplestore series-slug release-slug]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        release-uri (models-shared/dataset-release-uri series-uri release-slug)
+        q (let [bgps [['?revision_uri 'a :dh/Revision]
+                      ['?revision_uri :dcterms/title '?title]
+                      ['?revision_uri :dh/appliesToRelease release-uri]]]
+            {:prefixes prefixes
+             :construct (conj bgps
+                              ['?revision_uri :dh/hasChange '?change]
+                              ['?revision_uri :dcterms/description '?description])
+             :where (conj bgps
+                          [:optional [['?revision_uri :dh/hasChange '?change]]]
+                          [:optional [['?revision_uri :dcterms/description '?description]]])
+             :order-by '[(asc ?revision_uri)]})]
+    (datastore/eager-query triplestore
+                           (f/format-query q :pretty? true))))
 
 (defn get-change
   ([triplestore change-uri]

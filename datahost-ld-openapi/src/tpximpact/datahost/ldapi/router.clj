@@ -99,7 +99,7 @@
                       :info {:title "Prototype OpenData API"
                              :description (str "Source viewable in GitHub "
                                                "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
-                             :version "0.0.2"}
+                             :version "0.0.3"}
                       ;; used in /secure APIs below
                       :components {:securitySchemes {"auth" {:type :apiKey
                                                              :in :header
@@ -122,7 +122,8 @@
       {:post (release-routes/put-release-ld-schema-config clock triplestore)}]
 
      ["/:series-slug/releases/:release-slug/revisions"
-      {:post (revision-routes/post-revision-route-config triplestore)}]
+      {:post (revision-routes/post-revision-route-config triplestore)
+       :get (revision-routes/get-revision-list-route-config triplestore)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id"
       {:get (revision-routes/get-revision-route-config triplestore change-store)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
