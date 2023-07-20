@@ -45,20 +45,25 @@ getCurrentData = async (url) => {
 }
 
 fullRowHash = async (data, type) => {
+    let temp = structuredClone(data)
 
-    let temp = []
-    for (i = 0; i < data.length; i++) {
-        let toHash = JSON.stringify(data[i])
-        toHash = toHash.toLowerCase()
-        let rowHash = crypto.createHash('sha1').update(toHash).digest('hex');
-        //we only need the hash for the old data so just produce an array of those
-        if (type === "old") {
+    //we only need the hash for the old data so just produce an array of those
+    if (type === "old") {
+        for (i = 0; i < data.length; i++) {
+            let toHash = JSON.stringify(data[i])
+            toHash = toHash.toLowerCase()
+            let rowHash = crypto.createHash('sha1').update(toHash).digest('hex');
             temp[i] = rowHash;
-        } else {
-            temp = data
+        }
+    } else {
+        for (i = 0; i < data.length; i++) {
+            let toHash = JSON.stringify(data[i])
+            toHash = toHash.toLowerCase()
+            let rowHash = crypto.createHash('sha1').update(toHash).digest('hex');
             temp[i]["fullHash"] = rowHash;
         }
     }
+
     return temp
 }
 
@@ -242,9 +247,9 @@ start = async () => {
                         console.log(error);
                     });
 
-                console.timeEnd("Generate downloads");
-                console.timeEnd("Total time");
             }
+            console.timeEnd("Generate downloads");
+            console.timeEnd("Total time");
         } else {
             console.log("No changes between datasets")
         }
