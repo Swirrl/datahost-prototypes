@@ -24,6 +24,12 @@
      :body (db/series->response-body series)}
     not-found-response))
 
+(defn triples->ld-resource-collection [matcha-db]
+  (matcha/build [(keyword "@id") ?s]
+                {?p ?o}
+                [[?s ?p ?o]]
+                matcha-db))
+
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
   [op]
@@ -98,12 +104,22 @@
        :body (db/revision->response-body rev)})
     not-found-response))
 
+(defn get-series-list [triplestore _request]
+  (let [series (->> (db/get-all-series triplestore)
+                    (matcha/index-triples)
+                    (triples->ld-resource-collection)
+                    ;; TODO - should sort by issued?
+                    (sort-by (comp str (keyword "@id")))
+                    (reverse))
+        response-body (-> (json-ld/compact series (assoc json-ld/simple-context "@base" "https://example.org/data/"))
+                          (.toString))]
+    {:status 200
+     :body response-body}))
+
 (defn get-revision-list [triplestore {{:keys [series-slug release-slug]} :path-params}]
-  (let [revision-triples (db/get-revisions triplestore series-slug release-slug)
-        revisions (->> (matcha/build [(keyword "@id") ?s]
-                                     {?p ?o}
-                                     [[?s ?p ?o]]
-                                     (matcha/index-triples revision-triples))
+  (let [revisions (->> (db/get-revisions triplestore series-slug release-slug)
+                       (matcha/index-triples)
+                       (triples->ld-resource-collection)
                        (sort-by (comp str (keyword "@id")))
                        (reverse))
         response-body (-> (json-ld/compact revisions (assoc json-ld/simple-context "@base" "https://example.org/data/"))
@@ -112,11 +128,10 @@
      :body response-body}))
 
 (defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
-  (let [release-triples (db/get-releases triplestore series-slug)
-        releases (->> (matcha/build [(keyword "@id") ?s]
-                                    {?p ?o}
-                                    [[?s ?p ?o]]
-                                    (matcha/index-triples release-triples))
+  (let [releases (->> (db/get-releases triplestore series-slug)
+                      (matcha/index-triples)
+                      (triples->ld-resource-collection)
+                      ;; TODO - should sort by issued?
                       (sort-by (comp str (keyword "@id")))
                       (reverse))
         response-body (-> (json-ld/compact releases (assoc json-ld/simple-context "@base" "https://example.org/data/"))

@@ -22,8 +22,7 @@
               [series-url :dh/baseEntity '?baseentity]
               [series-url :dcterms/modified '?modified]
               [series-url :dcterms/issued '?issued]]]
-    {:prefixes {:dcterms "<http://purl.org/dc/terms/>"
-                :dh "<https://publishmydata.com/def/datahost/>"}
+    {:prefixes prefixes
      :construct (conj bgps [series-url :dcterms/description '?description])
      :where (conj bgps [:optional [[series-url :dcterms/description '?description]]])}))
 
@@ -133,6 +132,22 @@
   ([triplestore series-slug release-slug revision-id]
    (get-revision triplestore
                  (models-shared/revision-uri series-slug release-slug revision-id))))
+
+(defn get-all-series
+  "Returns all Series in triple from"
+  [triplestore]
+  (let [q (let [bgps [['?series 'a :dh/DatasetSeries]
+                      ['?series :dcterms/title '?title]
+                      ['?series :dh/baseEntity '?baseentity]
+                      ['?series :dcterms/modified '?modified]
+                      ['?series :dcterms/issued '?issued]]]
+            {:prefixes prefixes
+             :construct (conj bgps ['?series :dcterms/description '?description])
+             :where (conj bgps [:optional [['?series :dcterms/description '?description]]])
+             :order-by '[(asc ?issued)]})]
+    (datastore/eager-query triplestore
+                           (f/format-query q :pretty? true))))
+
 (defn get-revisions
   "Returns all Revisions for a Release in triple form"
   [triplestore series-slug release-slug]

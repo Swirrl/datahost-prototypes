@@ -4,6 +4,12 @@
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.series :as schema]))
 
+(defn get-series-list-route-config [triplestore]
+  {:summary "All series metadata in the database"
+   :handler (partial handlers/get-series-list triplestore)
+   :responses {200 {:body string?}
+               404 {:body [:re "Not found"]}}})
+
 (defn get-series-route-config [triplestore]
   {:summary "Retrieve metadata for an existing dataset-series"
    :description "A dataset series is a named dataset regardless of schema, methodology or compatibility changes"
