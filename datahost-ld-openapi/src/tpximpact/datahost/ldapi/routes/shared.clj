@@ -22,16 +22,23 @@
     [:map
      ["dh:baseEntity" {:optional true} string?]])))
 
+(def LdSchemaInputColumn
+  [:map 
+   ["csvw:datatype" [:or
+                     [:enum :integer :string :double]
+                     ;; [:map]
+                     ]]
+   ["csvw:name" :string]
+   ["csvw:titles" [:or
+                   :string
+                   [:sequential :string]]]])
+
 (def LdSchemaInput
   "Schema for new schema documents"
   (mu/merge
    JsonLdBase
    [:map {:closed false}
-    ["dh:columns" [:repeat {:min 1}
-                   [:map
-                    ["csvw:datatype" :string]
-                    ["csvw:name" :string]
-                    ["csvw:titles" [:sequential :string]]]]]]))
+    ["dh:columns" [:repeat {:min 1} LdSchemaInputColumn]]]))
 
 ;; TODO: create better resource representation
 (def ResourceSchema

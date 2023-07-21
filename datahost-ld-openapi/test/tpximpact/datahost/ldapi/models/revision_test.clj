@@ -5,8 +5,11 @@
     [clojure.string :as str]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
+    [malli.core :as m]
+    [malli.error :as me]
     [tpximpact.datahost.ldapi.resource :as resource]
     [tpximpact.datahost.ldapi.router :as router]
+    [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th]
     [tpximpact.datahost.ldapi.strings :as ld-str])
@@ -120,7 +123,25 @@
               release-resp (PUT release-url
                                 {:content-type :json
                                  :body (json/write-str {"dcterms:title" "Release 34"
-                                                        "dcterms:description" "Description 34"})})]
+                                                        "dcterms:description" "Description 34"})})
+              schema-req-body {"@context" ["https://publishmydata.com/def/datahost/context"
+                                           {"@base" (format "https://example.org/data/%s/"
+                                                            series-slug)}]
+                               "dcterms:title" "Test schema"
+                               "dh:columns"
+                               (let [csvw-type (fn [col-name titles datatype]
+                                                 {"csvw:datatype" datatype
+                                                  "csvw:name" col-name
+                                                  "csvw:titles" titles})]
+                                 ;; we put schema only on 2 columns
+                                 [(csvw-type "measure_type" ["Measure type"] :string)
+                                  (csvw-type "year" "Year" :integer)])}
+              _ (when-not (m/validate LdSchemaInput schema-req-body)
+                  (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))
+                                  {:schema schema-req-body})))
+              _ (POST (str release-url "/schemas/schema-1")
+                      {:content-type :json
+                       :body (json/write-str schema-req-body)})]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
@@ -172,17 +193,17 @@
                                                      :body (json/write-str change-ednld)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-                (is (= (:status change-api-response) 201))
-                (is (= new-change-resource-location
-                       (str new-revision-location "/changes/1"))
+                (is (= 201 (:status change-api-response) ))
+                (is (= (str new-revision-location "/changes/1")
+                       new-change-resource-location)
                     "Created with the resource URI provided in the Location header")
 
                 (testing "Change can be retrieved as CSV with text/csv accepts header"
                   (let [change-response (GET new-change-resource-location {:headers {"accept" "text/csv"}})
                         change-resp-body-seq (line-seq (BufferedReader. (StringReader. (:body change-response))))]
                     (is (= 200 (:status change-response)))
-                    (is (= (count change-resp-body-seq)
-                           (count csv-2019-seq))
+                    (is (= (count csv-2019-seq)
+                           (count change-resp-body-seq))
                         "responds CSV contents")))))
 
             (testing "Second Changes resource created with CSV appends file"
