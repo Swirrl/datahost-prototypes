@@ -108,7 +108,7 @@
 
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
               :tags ["linked data api"]}
-     ["/"
+     [""
       {:get (series-routes/get-series-list-route-config triplestore)}]
 
      ["/:series-slug"

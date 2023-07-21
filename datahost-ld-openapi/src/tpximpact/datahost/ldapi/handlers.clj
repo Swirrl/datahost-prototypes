@@ -105,13 +105,13 @@
     not-found-response))
 
 (defn get-series-list [triplestore _request]
-  (let [series (->> (db/get-all-series triplestore)
+  (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
+        series (->> (db/get-all-series triplestore)
                     (matcha/index-triples)
                     (triples->ld-resource-collection)
-                    ;; TODO - should sort by issued?
-                    (sort-by (comp str (keyword "@id")))
+                    (sort-by #(get % issued-uri))
                     (reverse))
-        response-body (-> (json-ld/compact series (assoc json-ld/simple-context "@base" "https://example.org/data/"))
+        response-body (-> (json-ld/compact series (assoc json-ld/simple-context "@base" models-shared/ld-root))
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -122,19 +122,21 @@
                        (triples->ld-resource-collection)
                        (sort-by (comp str (keyword "@id")))
                        (reverse))
-        response-body (-> (json-ld/compact revisions (assoc json-ld/simple-context "@base" "https://example.org/data/"))
+        response-body (-> (json-ld/compact revisions (assoc json-ld/simple-context
+                                                       "@base" models-shared/ld-root
+                                                       "dcat" "http://www.w3.org/ns/dcat#"))
                           (.toString))]
     {:status 200
      :body response-body}))
 
 (defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
-  (let [releases (->> (db/get-releases triplestore series-slug)
+  (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
+        releases (->> (db/get-releases triplestore series-slug)
                       (matcha/index-triples)
                       (triples->ld-resource-collection)
-                      ;; TODO - should sort by issued?
-                      (sort-by (comp str (keyword "@id")))
+                      (sort-by #(get % issued-uri))
                       (reverse))
-        response-body (-> (json-ld/compact releases (assoc json-ld/simple-context "@base" "https://example.org/data/"))
+        response-body (-> (json-ld/compact releases (assoc json-ld/simple-context "@base" models-shared/ld-root))
                           (.toString))]
     {:status 200
      :body response-body}))

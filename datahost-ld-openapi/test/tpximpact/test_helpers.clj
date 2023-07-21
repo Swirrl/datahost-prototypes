@@ -68,3 +68,8 @@
 
 (defn truncate-string [s n]
   (subs s 0 (min (count s) n)))
+
+(defn submap?
+  "Checks whether m contains all entries in sub."
+  [^java.util.Map m ^java.util.Map sub]
+  (.containsAll (.entrySet m) (.entrySet sub)))

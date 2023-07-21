@@ -25,5 +25,3 @@
       (.compactArrays true)
       (.compactToRelative true)
       (.get)))
-
-

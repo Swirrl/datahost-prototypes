@@ -13,8 +13,17 @@
   (:import (java.net URI)
            (java.util UUID)))
 
-(def prefixes {:dcterms (URI. "http://purl.org/dc/terms/")
-               :dh (URI. "https://publishmydata.com/def/datahost/")})
+(def default-prefixes {:dcat (URI. "http://www.w3.org/ns/dcat#")
+                       :dcterms (URI. "http://purl.org/dc/terms/")
+                       :owl (URI. "http://www.w3.org/2002/07/owl#")
+                       :qb (URI. "http://purl.org/linked-data/cube#")
+                       :rdf (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+                       :rdfs (URI. "http://www.w3.org/2000/01/rdf-schema#")
+                       :skos (URI. "http://www.w3.org/2004/02/skos/core#")
+                       :void (URI. "http://rdfs.org/ns/void#")
+                       :xsd (URI. "http://www.w3.org/2001/XMLSchema#")
+                       :foaf (URI. "http://xmlns.com/foaf/0.1/")
+                       :dh (URI. "https://publishmydata.com/def/datahost/")})
 
 (defn- get-series-query [series-url]
   (let [bgps [[series-url 'a :dh/DatasetSeries]
@@ -22,7 +31,7 @@
               [series-url :dh/baseEntity '?baseentity]
               [series-url :dcterms/modified '?modified]
               [series-url :dcterms/issued '?issued]]]
-    {:prefixes prefixes
+    {:prefixes default-prefixes
      :construct (conj bgps [series-url :dcterms/description '?description])
      :where (conj bgps [:optional [[series-url :dcterms/description '?description]]])}))
 
@@ -55,18 +64,18 @@
               [change-uri :dcterms/description '?description]
               [change-uri :dh/appends '?appends]
               [change-uri :dh/appliesToRevision '?revision]]]
-    {:prefixes prefixes
+    {:prefixes default-prefixes
      :construct bgps
      :where bgps}))
 
 (defn- get-release-schema-query [release-uri]
-  {:prefixes prefixes
+  {:prefixes default-prefixes
    :construct [['?schema '?p '?o]]
    :where [[release-uri :dh/hasSchema '?schema]
            ['?schema '?p '?o]]})
 
 (defn- get-schema-columns-query [schema-uri]
-  {:prefixes prefixes
+  {:prefixes default-prefixes
    :construct [['?col '?p '?o]]
    :where [[schema-uri :dh/columns '?col]
            ['?col '?p '?o]]})
@@ -120,7 +129,7 @@
    (let [q (let [bgps [[revision-uri 'a :dh/Revision]
                        [revision-uri :dcterms/title '?title]
                        [revision-uri :dh/appliesToRelease '?release]]]
-             {:prefixes prefixes
+             {:prefixes default-prefixes
               :construct (conj bgps
                                [revision-uri :dh/hasChange '?change]
                                [revision-uri :dcterms/description '?description])
@@ -141,7 +150,7 @@
                       ['?series :dh/baseEntity '?baseentity]
                       ['?series :dcterms/modified '?modified]
                       ['?series :dcterms/issued '?issued]]]
-            {:prefixes prefixes
+            {:prefixes default-prefixes
              :construct (conj bgps ['?series :dcterms/description '?description])
              :where (conj bgps [:optional [['?series :dcterms/description '?description]]])
              :order-by '[(asc ?issued)]})]
@@ -156,7 +165,7 @@
         q (let [bgps [['?revision_uri 'a :dh/Revision]
                       ['?revision_uri :dcterms/title '?title]
                       ['?revision_uri :dh/appliesToRelease release-uri]]]
-            {:prefixes prefixes
+            {:prefixes default-prefixes
              :construct (conj bgps
                               ['?revision_uri :dh/hasChange '?change]
                               ['?revision_uri :dcterms/description '?description])
@@ -176,7 +185,7 @@
                       ['?release :dcat/inSeries series-uri]
                       ['?release :dcterms/modified '?modified]
                       ['?release :dcterms/issued '?issued]]]
-            {:prefixes prefixes
+            {:prefixes default-prefixes
              :construct (conj bgps
                               ['?release :dh/hasRevision '?revision]
                               ['?release :dh/hasSchema '?schema]
@@ -239,7 +248,7 @@
         title (resource/get-property1 resource (compact/expand :dcterms/title))
         description (resource/get-property1 resource (compact/expand :dcterms/description))
         modified-at (resource/get-property1 resource (compact/expand :dcterms/modified))]
-    {:prefixes prefixes
+    {:prefixes default-prefixes
      :delete [[resource-uri :dcterms/title '?title]
               [resource-uri :dcterms/description '?description]
               [resource-uri :dcterms/modified '?modified]]
