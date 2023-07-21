@@ -1,5 +1,4 @@
-{"@context": ["https://publishmydata.com/def/datahost/context",
-              {"@base": "https://example.org/data/"}],
+{
  "dh:columns": [
      {"csvw:name": "year",
       "csvw:datatype": "integer",

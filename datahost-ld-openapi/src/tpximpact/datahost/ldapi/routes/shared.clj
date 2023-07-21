@@ -4,21 +4,23 @@
 
 
 (def JsonLdBase
-  "Common entries in JSON-LD documents."
+  "Common entries in JSON-LD documents.
+
+  Note: we don't require users to pass @context, since we accept a
+  relaxed JSON-LD subset."
   [:map {:closed false}
    ["dcterms:title" {:optional true} string?]
    ["dcterms:description" {:optional true} string?]
    ["@type" {:optional true} string?]
    ["@id" {:optional true} string?]
-   ["@context" [:or :string
-                [:tuple :string [:map
-                                 ["@base" string?]]]]]])
+   ;; ["@context" [:or :string [:tuple :string [:map ["@base" string?]]]]]
+   ])
 
 (def JsonLdSchema
   "Datahost specific JSON-LD documents"
   (:maybe
    (mu/merge
-    JsonLdBase
+    JsonLdBase 
     [:map
      ["dh:baseEntity" {:optional true} string?]])))
 

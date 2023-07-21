@@ -124,10 +124,7 @@
                                 {:content-type :json
                                  :body (json/write-str {"dcterms:title" "Release 34"
                                                         "dcterms:description" "Description 34"})})
-              schema-req-body {"@context" ["https://publishmydata.com/def/datahost/context"
-                                           {"@base" (format "https://example.org/data/%s/"
-                                                            series-slug)}]
-                               "dcterms:title" "Test schema"
+              schema-req-body {"dcterms:title" "Test schema"
                                "dh:columns"
                                (let [csvw-type (fn [col-name titles datatype]
                                                  {"csvw:datatype" datatype
