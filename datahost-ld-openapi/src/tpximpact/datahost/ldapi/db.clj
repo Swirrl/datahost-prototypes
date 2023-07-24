@@ -104,6 +104,7 @@
   [triplestore release-uri]
   (let [q (get-release-schema-query release-uri)]
     (when-let [schema (get-resource-by-construct-query triplestore q)]
+      (assert (resource/id schema))
       (let [columns-query (get-schema-columns-query (resource/id schema))
             qs (f/format-query columns-query :pretty? true)
             column-statements (datastore/eager-query triplestore qs)]

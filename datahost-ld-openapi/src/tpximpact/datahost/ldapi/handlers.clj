@@ -1,9 +1,13 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-    [tpximpact.datahost.ldapi.db :as db]
-    [tpximpact.datahost.ldapi.models.shared :as models-shared]
-    [tpximpact.datahost.ldapi.schemas.api :as s.api]
-    [tpximpact.datahost.ldapi.models.revision :as revision-model]))
+   [clojure.tools.logging :as log]
+   [malli.core :as m]
+   [malli.error :as me]
+   [tpximpact.datahost.ldapi.db :as db]
+   [tpximpact.datahost.ldapi.schemas.api :as s.api]
+   [tpximpact.datahost.ldapi.models.revision :as revision-model]
+   [tpximpact.datahost.ldapi.models.shared :as models.shared]
+   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]))
 
 (def not-found-response
   {:status 404
@@ -59,9 +63,9 @@
 
 (defn put-release-schema
   [clock triplestore {{:keys [series-slug] :as params} :path-params
-       incoming-jsonld-doc :body-params
-       :as request}]
-  (if (not (db/get-series-by-slug triplestore series-slug))
+                      incoming-jsonld-doc :body-params
+                      :as request}]
+   (if (not (db/get-series-by-slug triplestore series-slug))
     not-found-response
 
     (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore (get-api-params request) incoming-jsonld-doc)]
@@ -69,14 +73,14 @@
        :body jsonld-doc})))
 
 (defn get-release-schema
-  [triplestore {{:keys [series-slug release-slug] :as path-params} :path-params}]
-  (let [release-uri (models-shared/release-uri-from-slugs series-slug release-slug)]
-    (if-let [schema (db/get-release-schema triplestore release-uri)]
-      {:status 200
-       :body (db/schema->response-body schema)}
-      {:status 404
-       :body {:status "error"
-              :message "Not found"}})))
+    [triplestore {{:keys [series-slug release-slug] :as path-params} :path-params}]
+    (let [release-uri (models.shared/release-uri-from-slugs series-slug release-slug)]
+      (if-let [schema (db/get-release-schema triplestore release-uri)]
+        {:status 200
+         :body (db/schema->response-body schema)}
+        {:status 404
+         :body {:status "error"
+                :message "Not found"}})))
 
 (defn get-revision [triplestore {{:keys [series-slug release-slug revision-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
@@ -105,6 +109,18 @@
     {:status 422
      :body   "Release for this revision does not exist"}))
 
+(defn- dataset-validation-error!
+  "Returns nill on success, error response on validation failure."
+  [release-schema appends]
+  (try
+    (let [dataset (data-validation/as-dataset (:tempfile appends) {})
+          schema (data-validation/make-row-schema release-schema)
+          {:keys [explanation]} (data-validation/validate-dataset dataset schema
+                                                                  {:fail-fast? true})]
+      (when (some? explanation)
+        {:status 400
+         :body explanation}))))
+
 (defn post-change [triplestore
                    {{:keys [series-slug release-slug revision-id]} :path-params
                     {{:keys [appends]} :multipart}                 :parameters
@@ -113,11 +129,20 @@
   (if-let [_revision (db/get-revision triplestore series-slug release-slug revision-id)]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
-          {:keys [jsonld-doc resource-id]} (db/insert-change! triplestore api-params incoming-jsonld-doc appends)]
-      {:status  201
-       :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
-                                 "/revisions/" revision-id "/changes/" resource-id)}
-       :body    jsonld-doc})
+          release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
+          validation-err (when (some? release-schema)
+                           (dataset-validation-error! release-schema appends))
+          {:keys [jsonld-doc resource-id]} (when-not validation-err
+                                             (db/insert-change! triplestore api-params
+                                                                incoming-jsonld-doc appends))]
+      (log/info (format "post-change: validation: found-schema? = %s change-valid? = "
+                        (some? release-schema) (nil? validation-err)))
+      (if validation-err
+        validation-err
+        {:status  201
+         :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
+                                   "/revisions/" revision-id "/changes/" resource-id)}
+         :body    jsonld-doc}))
 
     {:status 422
      :body   "Revision for this change does not exist"}))
