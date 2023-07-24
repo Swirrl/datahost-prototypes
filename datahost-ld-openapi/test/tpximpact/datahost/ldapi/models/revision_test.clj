@@ -105,7 +105,7 @@
                   (th/submap? {"dcterms:title" "A second test revision"})))
         (t/is (-> (get release-doc "contents")
                   (nth 1)
-                  (th/submap? {"dcterms:title" "Test revision"})))))))
+                  (th/submap? {"dcterms:title" "Test revision"}))))))))
 
 (defn- build-csv-multipart [csv-path]
   (let [appends-file (io/file (io/resource csv-path))]
