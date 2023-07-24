@@ -8,7 +8,7 @@
 
      The file parameter should be a map with at least the following keys:
      :tempfile - An IOFactory instance containing the append data
-     :filename - The name of the uploaded file on teh request")
+     :filename - The name of the uploaded file on the request")
 
   (get-append [this append-key]
     "Retrieves append data using the key returned by insert-append. If the
