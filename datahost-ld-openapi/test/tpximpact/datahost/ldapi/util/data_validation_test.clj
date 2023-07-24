@@ -49,13 +49,14 @@
       (testing "Validating data"
         (let [ds (util.data-validation/as-dataset (io/resource "test-inputs/revision/2020.csv") {})
               row-schema (util.data-validation/make-row-schema schema)]
-          (is (thrown? Exception
-                       (util.data-validation/validate-dataset
-                        ds
-                        row-schema
-                        {:fail-fast? true})))
+          (is (contains? (util.data-validation/validate-dataset
+                          ds
+                          row-schema
+                          {:fail-fast? true})
+                         :explanation))
 
-          (is (some? (util.data-validation/validate-dataset
-                      ds
-                      row-schema
-                      {:fail-fast? false}))))))))
+          (is (contains? (util.data-validation/validate-dataset
+                          ds
+                          row-schema
+                          {:fail-fast? false})
+                         :dataset)))))))

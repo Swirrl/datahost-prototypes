@@ -114,16 +114,12 @@
   [release-schema appends]
   (try
     (let [dataset (data-validation/as-dataset (:tempfile appends) {})
-          schema (data-validation/make-row-schema release-schema)]
-      (data-validation/validate-dataset dataset schema {:fail-fast? true})
-      nil)
-    (catch Exception ex
-      (log/info "Change validation failure:" (ex-message ex))
-      (let [ex-type (-> ex ex-data :type)]
-        (if (= ex-type :dataset.validation/error)
-          {:status 400
-           :body (:explanation (ex-data ex))}
-          (throw (ex-info "Change validation failed" {:appends appends} ex)))))))
+          schema (data-validation/make-row-schema release-schema)
+          {:keys [explanation]} (data-validation/validate-dataset dataset schema
+                                                                  {:fail-fast? true})]
+      (when (some? explanation)
+        {:status 400
+         :body explanation}))))
 
 (defn post-change [triplestore
                    {{:keys [series-slug release-slug revision-id]} :path-params

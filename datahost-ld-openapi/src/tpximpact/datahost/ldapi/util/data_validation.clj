@@ -125,6 +125,11 @@
 
 (defn validate-dataset
   "Validates a dataset row by row using the passed schema.
+  Returns:
+  - {:dataset DS} dataset with invalid rows with extra 'valid' colum
+    when :fail-fast? = false or when the dataset is valid.
+  - {:explanation ...} on failure, only when :fail-fast = true. Explanation,
+    will contain the schema error as returned by `me/humanize`
 
   The `schema` parameter should be malli tuple schema, where each
   component is a schema for appropriate column. Each component schema
@@ -133,9 +138,7 @@
 
   Options:
   
-  - :fail-fast? (boolean) - throw on first validation error? The
-  `ex-data` will contain :schema :and :columns (ordered as in
-  schema)."
+  - :fail-fast? (boolean) - terminate validation on first failure."
   [dataset schema {:keys [fail-fast?] :as options}]
   (when-not (validate-dataset-options-valid? options)
     (throw (ex-info "Invalid options" {:options options})))
@@ -153,13 +156,18 @@
     (assert (every? some? column-names)
             "Could not extract column names from row schema")
     (validate-found-columns schema column-names (tc/column-names dataset))
-    (-> dataset
-        (tc/map-columns "valid"
-                        :boolean
-                        column-names
-                        (fn col-mapper [& args]
-                          (validator-fn (vec args))))
-        (ds/filter (fn [{:strs [valid]}] (not valid))))))
+    (try
+      {:dataset (-> dataset
+                    (tc/map-columns "valid"
+                                    :boolean
+                                    column-names
+                                    (fn col-mapper [& args]
+                                      (validator-fn (vec args))))
+                    (ds/filter (fn [{:strs [valid]}] (not valid))))}
+      (catch clojure.lang.ExceptionInfo ex
+        (if-not (= :dataset.validation/error (-> ex ex-data :type))
+          (throw ex)
+          (ex-data ex))))))
 
 (defmulti -as-dataset
   "Coerce given value (e.g. CSV string or CSV java.io.File ) to a dataset"
