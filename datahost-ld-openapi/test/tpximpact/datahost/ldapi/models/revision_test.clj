@@ -100,10 +100,10 @@
             {:keys [body status]} (handler all-revisions-request)
             release-doc (json/read-str body)]
         (t/is (= status 200))
-        (t/is (-> (get release-doc "@graph")
+        (t/is (-> (get release-doc "contents")
                   (nth 0)
                   (th/submap? {"dcterms:title" "A second test revision"})))
-        (t/is (-> (get release-doc "@graph")
+        (t/is (-> (get release-doc "contents")
                   (nth 1)
                   (th/submap? {"dcterms:title" "Test revision"})))))))
 

@@ -147,10 +147,10 @@
               {:keys [body status]} (GET "/data")
               series-doc (json/read-str body)]
           (t/is (= status 200))
-          (t/is (-> (get series-doc "@graph")
+          (t/is (-> (get series-doc "contents")
                     (nth 0)
                     (th/submap? {"dcterms:title" "A second title"})))
-          (t/is (-> (get series-doc "@graph")
+          (t/is (-> (get series-doc "contents")
                     (nth 1)
                     (th/submap? {"dcterms:title" "A title"})))))
 

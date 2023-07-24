@@ -183,10 +183,10 @@
           (let [{:keys [body status]} (GET (str new-series-path "/releases"))
                 releases-doc (json/read-str body)]
             (t/is (= status 200))
-            (t/is (-> (get releases-doc "@graph")
+            (t/is (-> (get releases-doc "contents")
                       (nth 0)
                       (th/submap? {"dcterms:title" "A Second Release"})))
-            (t/is (-> (get releases-doc "@graph")
+            (t/is (-> (get releases-doc "contents")
                       (nth 1)
                       (th/submap? {"dcterms:title" "Example Release"})))))
 

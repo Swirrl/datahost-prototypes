@@ -6,7 +6,13 @@
 
 (def simple-context {:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                      :dh "https://publishmydata.com/def/datahost/"
+                     :dcat "http://www.w3.org/ns/dcat#"
                      :dcterms "http://purl.org/dc/terms/"})
+
+(def simple-collection-context
+  (merge simple-context
+         {:contents {"@id" "dh:collection-contents",
+                     "@container" "@set"}}))
 
 (defn ->json-document
   ^JsonDocument [edn]

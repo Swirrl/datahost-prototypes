@@ -70,7 +70,7 @@
      :body "Series for this release does not exist"}))
 
 (defn put-release-schema
-  [clock triplestore {{:keys [series-slug] :as params} :path-params
+  [clock triplestore {{:keys [series-slug]} :path-params
                       incoming-jsonld-doc :body-params
                       :as request}]
    (if (not (db/get-series-by-slug triplestore series-slug))
@@ -81,7 +81,7 @@
        :body jsonld-doc})))
 
 (defn get-release-schema
-    [triplestore {{:keys [series-slug release-slug] :as path-params} :path-params}]
+    [triplestore {{:keys [series-slug release-slug]} :path-params}]
     (let [release-uri (models.shared/release-uri-from-slugs series-slug release-slug)]
       (if-let [schema (db/get-release-schema triplestore release-uri)]
         {:status 200
@@ -104,6 +104,9 @@
        :body (db/revision->response-body rev)})
     not-found-response))
 
+(defn- wrap-ld-collection-contents [coll]
+  {"https://publishmydata.com/def/datahost/collection-contents" coll})
+
 (defn get-series-list [triplestore _request]
   (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
         series (->> (db/get-all-series triplestore)
@@ -111,7 +114,8 @@
                     (triples->ld-resource-collection)
                     (sort-by #(get % issued-uri))
                     (reverse))
-        response-body (-> (json-ld/compact series (assoc json-ld/simple-context "@base" models-shared/ld-root))
+        response-body (-> (wrap-ld-collection-contents series)
+                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -122,9 +126,8 @@
                        (triples->ld-resource-collection)
                        (sort-by (comp str (keyword "@id")))
                        (reverse))
-        response-body (-> (json-ld/compact revisions (assoc json-ld/simple-context
-                                                       "@base" models-shared/ld-root
-                                                       "dcat" "http://www.w3.org/ns/dcat#"))
+        response-body (-> (wrap-ld-collection-contents revisions)
+                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -136,7 +139,8 @@
                       (triples->ld-resource-collection)
                       (sort-by #(get % issued-uri))
                       (reverse))
-        response-body (-> (json-ld/compact releases (assoc json-ld/simple-context "@base" models-shared/ld-root))
+        response-body (-> (wrap-ld-collection-contents releases)
+                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -172,7 +176,7 @@
                     {{:keys [appends]} :multipart} :parameters
                     body-params :body-params :as request}]
   (if (db/resource-exists? triplestore
-                           (models-shared/revision-uri series-slug release-slug revision-id))
+                           (models.shared/revision-uri series-slug release-slug revision-id))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
