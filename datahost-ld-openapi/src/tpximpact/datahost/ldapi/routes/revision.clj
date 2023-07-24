@@ -5,10 +5,10 @@
     [tpximpact.datahost.ldapi.handlers :as handlers]
     [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
-(defn get-revision-route-config [triplestore]
+(defn get-revision-route-config [triplestore change-store]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-revision triplestore)
+   :handler (partial handlers/get-revision triplestore change-store)
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
@@ -40,9 +40,9 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-changes-route-config [triplestore]
+(defn post-revision-changes-route-config [triplestore change-store]
   {:summary "Add changes to a Revision via a CSV file."
-   :handler (partial handlers/post-change triplestore)
+   :handler (partial handlers/post-change triplestore change-store)
    :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
                 :path {:series-slug string?
                        :release-slug string?
@@ -56,10 +56,10 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn get-revision-changes-route-config [triplestore]
+(defn get-revision-changes-route-config [triplestore change-store]
   {:summary "Retrieve CSV contents for an existing change"
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-change triplestore)
+   :handler (partial handlers/get-change triplestore change-store)
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?

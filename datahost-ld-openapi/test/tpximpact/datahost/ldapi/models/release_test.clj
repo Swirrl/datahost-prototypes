@@ -5,9 +5,9 @@
     [grafter-2.rdf4j.repository :as repo]
     [tpximpact.datahost.ldapi.router :as router]
     [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th])
-  (:import [clojure.lang ExceptionInfo]
-           [java.util UUID]))
+    [tpximpact.test-helpers :as th]
+    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore])
+  (:import [java.util UUID]))
 
 (defn- put-series [put-fn]
   (let [jsonld {"@context"
@@ -35,69 +35,73 @@
    :body (json/write-str properties)})
 
 (t/deftest put-release-create-test
-  (let [repo (repo/sail-repo)
-        t (time/parse "2023-07-03T11:16:16Z")
-        clock (time/manual-clock t)
-        handler (router/handler clock repo)
-        series-slug (create-series handler)
+  (with-open [temp-store (tfstore/create-temp-file-store)]
+    (let [repo (repo/sail-repo)
+          t (time/parse "2023-07-03T11:16:16Z")
+          clock (time/manual-clock t)
+          handler (router/handler clock repo temp-store)
+          series-slug (create-series handler)
 
-        request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
-        release-request (create-put-request series-slug "test-release" request-json)
-        {:keys [body status] :as response} (handler release-request)
-        release-doc (json/read-str body)]
-    (t/is (= status 201))
+          request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
+          release-request (create-put-request series-slug "test-release" request-json)
+          {:keys [body status] :as response} (handler release-request)
+          release-doc (json/read-str body)]
 
-    (t/is (= "Release title" (get release-doc "dcterms:title")))
-    (t/is (= "Description" (get release-doc "dcterms:description")))
-    (t/is (= (str t) (get release-doc "dcterms:issued")))
-    (t/is (= (str t) (get release-doc "dcterms:modified")))
-    (t/is (= (format "https://example.org/data/%s" series-slug) (get release-doc "dcat:inSeries")))))
+      (t/is (= status 201))
+
+      (t/is (= "Release title" (get release-doc "dcterms:title")))
+      (t/is (= "Description" (get release-doc "dcterms:description")))
+      (t/is (= (str t) (get release-doc "dcterms:issued")))
+      (t/is (= (str t) (get release-doc "dcterms:modified")))
+      (t/is (= (format "https://example.org/data/%s" series-slug) (get release-doc "dcat:inSeries"))))))
 
 (t/deftest put-release-update-test
-  (let [repo (repo/sail-repo)
-        t1 (time/parse "2023-07-03T14:35:55Z")
-        t2 (time/parse "2023-07-03T16:02:34Z")
-        clock (time/manual-clock t1)
-        handler (router/handler clock repo)
+  (with-open [temp-store (tfstore/create-temp-file-store)]
+    (let [repo (repo/sail-repo)
+          t1 (time/parse "2023-07-03T14:35:55Z")
+          t2 (time/parse "2023-07-03T16:02:34Z")
+          clock (time/manual-clock t1)
+          handler (router/handler clock repo temp-store)
 
-        series-slug (create-series handler)
-        create-request (create-put-request series-slug "test-release" {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
-        _create-response (handler create-request)
+          series-slug (create-series handler)
+          create-request (create-put-request series-slug "test-release" {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
+          _create-response (handler create-request)
 
-        _ (time/set-now clock t2)
+          _ (time/set-now clock t2)
 
-        update-request {:uri (format "/data/%s/releases/test-release" series-slug)
-                        :request-method :put
-                        :headers {"content-type" "application/json"}
-                        :body (json/write-str {"dcterms:title" "Updated title" "dcterms:description" "Updated description"})}
-        {:keys [status body] :as update-response} (handler update-request)
-        updated-doc (json/read-str body)]
-    (t/is (= 200 status))
-    (t/is (= "Updated title" (get updated-doc "dcterms:title")))
-    (t/is (= "Updated description" (get updated-doc "dcterms:description")))
-    (t/is (= (str t1) (get updated-doc "dcterms:issued")))
-    (t/is (= (str t2) (get updated-doc "dcterms:modified")))))
+          update-request {:uri (format "/data/%s/releases/test-release" series-slug)
+                          :request-method :put
+                          :headers {"content-type" "application/json"}
+                          :body (json/write-str {"dcterms:title" "Updated title" "dcterms:description" "Updated description"})}
+          {:keys [status body] :as update-response} (handler update-request)
+          updated-doc (json/read-str body)]
+      (t/is (= 200 status))
+      (t/is (= "Updated title" (get updated-doc "dcterms:title")))
+      (t/is (= "Updated description" (get updated-doc "dcterms:description")))
+      (t/is (= (str t1) (get updated-doc "dcterms:issued")))
+      (t/is (= (str t2) (get updated-doc "dcterms:modified"))))))
 
 (t/deftest put-release-no-changes-test
-  (let [repo (repo/sail-repo)
-        t1 (time/parse "2023-07-04T08:54:11Z")
-        t2 (time/parse "2023-07-04T10:33:24Z")
-        clock (time/manual-clock t1)
-        handler (router/handler clock repo)
+  (with-open [temp-store (tfstore/create-temp-file-store)]
+    (let [repo (repo/sail-repo)
+          t1 (time/parse "2023-07-04T08:54:11Z")
+          t2 (time/parse "2023-07-04T10:33:24Z")
+          clock (time/manual-clock t1)
+          handler (router/handler clock repo temp-store)
 
-        series-slug (create-series handler)
+          series-slug (create-series handler)
 
-        properties {"dcterms:title" "Title" "dcterms:description" "Description"}
-        create-request (create-put-request series-slug "new-series" properties)
-        create-response (handler create-request)
-        initial-doc (json/read-str (:body create-response))
+          properties {"dcterms:title" "Title" "dcterms:description" "Description"}
+          create-request (create-put-request series-slug "new-series" properties)
+          create-response (handler create-request)
+          initial-doc (json/read-str (:body create-response))
 
-        _ (time/set-now clock t2)
+          _ (time/set-now clock t2)
 
-        update-request (create-put-request series-slug "new-series" properties)
-        update-response (handler update-request)
-        updated-doc (json/read-str (:body update-response))]
-    (t/is (= initial-doc updated-doc))))
+          update-request (create-put-request series-slug "new-series" properties)
+          update-response (handler update-request)
+          updated-doc (json/read-str (:body update-response))]
+      (t/is (= initial-doc updated-doc)))))
 
 (deftest round-tripping-release-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client

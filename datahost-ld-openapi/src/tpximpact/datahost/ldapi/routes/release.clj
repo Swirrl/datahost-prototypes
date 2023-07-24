@@ -7,9 +7,9 @@
 
 (def internal-server-error-desc "Internal server error")
 
-(defn get-release-route-config [triplestore]
+(defn get-release-route-config [triplestore change-store]
   {:summary "Retrieve metadata for an existing release"
-   :handler (partial handlers/get-release triplestore)
+   :handler (partial handlers/get-release triplestore change-store)
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path {:series-slug string?
                        :release-slug string?}}

@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
+    [clojure.java.io :as io]
     [com.yetanalytics.flint :as fl]
     [integrant.core :as ig]
     [reitit.dev.pretty :as pretty]
@@ -21,7 +22,9 @@
     [tpximpact.datahost.ldapi.routes.release :as release-routes]
     [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
     [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-    [ring.middleware.cors :as cors])
+    [ring.middleware.cors :as cors]
+    [tpximpact.datahost.ldapi.store.triplestore :as tstore]
+    [tpximpact.datahost.ldapi.store.file :as fstore])
   (:import (java.io InputStream InputStreamReader OutputStream)))
 
 (defn decode-str [options]
@@ -84,7 +87,7 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(defn router [clock triplestore]
+(defn router [clock triplestore change-store]
   (ring/router
    [["/triplestore-query"
      ;; TODO remove this route when we have real ones using the triplestore
@@ -110,7 +113,7 @@
        :put (series-routes/put-series-route-config clock triplestore)}]
 
      ["/:series-slug/releases/:release-slug"
-      {:get (release-routes/get-release-route-config triplestore)
+      {:get (release-routes/get-release-route-config triplestore change-store)
        :put (release-routes/put-release-route-config clock triplestore)}]
 
      ["/:series-slug/releases/:release-slug/schemas"
@@ -121,11 +124,11 @@
      ["/:series-slug/releases/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config triplestore)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id"
-      {:get (revision-routes/get-revision-route-config triplestore)}]
+      {:get (revision-routes/get-revision-route-config triplestore change-store)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-      {:post (revision-routes/post-revision-changes-route-config triplestore)}]
+      {:post (revision-routes/post-revision-changes-route-config triplestore change-store)}]
      ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes/:change-id"
-      {:get (revision-routes/get-revision-changes-route-config triplestore)}]]]
+      {:get (revision-routes/get-revision-changes-route-config triplestore change-store)}]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -164,9 +167,9 @@
                         ;; multipart
                         multipart/multipart-middleware]}}))
 
-(defn handler [clock triplestore]
+(defn handler [clock triplestore change-store]
   (ring/ring-handler
-    (router clock triplestore)
+    (router clock triplestore change-store)
     (ring/routes
       (swagger-ui/create-swagger-ui-handler
         {:path "/"
@@ -179,5 +182,5 @@
     {:executor sieppari/executor}))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [clock triplestore]}]
-  (handler clock triplestore))
+  [_ {:keys [clock triplestore change-store]}]
+  (handler clock triplestore change-store))

@@ -38,14 +38,14 @@
     {:status (op->response-code op)
      :body jsonld-doc}))
 
-(defn get-release [triplestore {{:keys [series-slug release-slug]} :path-params
+(defn get-release [triplestore change-store {{:keys [series-slug release-slug]} :path-params
                        {:strs [accept]} :headers}]
   (if-let [release (db/get-release triplestore series-slug release-slug)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=release.csv"}
-       :body (or (revision-model/release->csv-stream triplestore release) "")}
+       :body (or (revision-model/release->csv-stream triplestore change-store release) "")}
       {:status 200
        :body (db/release->response-body release)})
     not-found-response))
@@ -82,14 +82,14 @@
          :body {:status "error"
                 :message "Not found"}})))
 
-(defn get-revision [triplestore {{:keys [series-slug release-slug revision-id]} :path-params
+(defn get-revision [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
   (if-let [rev (db/get-revision triplestore series-slug release-slug revision-id)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=revision.csv"}
-       :body (or (revision-model/revision->csv-stream triplestore rev) "")}
+       :body (or (revision-model/revision->csv-stream triplestore change-store rev) "")}
 
       {:status 200
        :headers {"content-type" "application/json"}
@@ -122,6 +122,7 @@
          :body explanation}))))
 
 (defn post-change [triplestore
+                   change-store
                    {{:keys [series-slug release-slug revision-id]} :path-params
                     {{:keys [appends]} :multipart}                 :parameters
                     body-params                                    :body-params :as request}]
@@ -133,7 +134,7 @@
           validation-err (when (some? release-schema)
                            (dataset-validation-error! release-schema appends))
           {:keys [jsonld-doc resource-id]} (when-not validation-err
-                                             (db/insert-change! triplestore api-params
+                                             (db/insert-change! triplestore change-store api-params
                                                                 incoming-jsonld-doc appends))]
       (log/info (format "post-change: validation: found-schema? = %s change-valid? = "
                         (some? release-schema) (nil? validation-err)))
@@ -147,14 +148,14 @@
     {:status 422
      :body   "Revision for this change does not exist"}))
 
-(defn get-change [triplestore {{:keys [series-slug release-slug revision-id change-id]} :path-params
+(defn get-change [triplestore change-store {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
   (if-let [change (db/get-change triplestore series-slug release-slug revision-id change-id)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=change.csv"}
-       :body (or (revision-model/change->csv-stream triplestore change) "")}
+       :body (or (revision-model/change->csv-stream change-store change) "")}
 
       {:status 406
        :headers {}

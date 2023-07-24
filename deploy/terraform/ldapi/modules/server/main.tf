@@ -2,6 +2,7 @@ locals {
   gcloud_zone = "europe-west2-a"
   service_account_id = "${var.name}-account"
   data_disk_name = "${var.name}-data"
+  files_disk_name = "${var.name}-files"
 }
 
 module "gce_container_spec" {
@@ -15,6 +16,11 @@ module "gce_container_spec" {
         mountPath = "/cache"
         name = "ldapi-data"
         readOnly = false
+      },
+      {
+        mountPath = "/files"
+        name = "ldapi-files"
+        readOnly = false
       }
     ]
   }
@@ -24,6 +30,13 @@ module "gce_container_spec" {
       name = "ldapi-data"
       gcePersistentDisk = {
         pdName = "data"
+        fsType = "ext4"
+      }
+    },
+    {
+      name = "ldapi-files"
+      gcePersistentDisk = {
+        pdName = "files"
         fsType = "ext4"
       }
     }
@@ -51,6 +64,13 @@ resource "google_compute_disk" "datahost_ldapi_data" {
   size = 10
 }
 
+resource "google_compute_disk" "datahost_ldapi_files" {
+  name = local.files_disk_name
+  type = "pd-ssd"
+  zone = var.zone
+  size = 50
+}
+
 resource "google_compute_instance" "datahost_ldapi_instance" {
   name = "${var.name}-${substr(var.digest, 0, 8)}"
   machine_type = "e2-small"
@@ -66,6 +86,12 @@ resource "google_compute_instance" "datahost_ldapi_instance" {
   attached_disk {
     source = google_compute_disk.datahost_ldapi_data.self_link
     device_name = "data"
+    mode = "READ_WRITE"
+  }
+
+  attached_disk {
+    source = google_compute_disk.datahost_ldapi_files.self_link
+    device_name = "files"
     mode = "READ_WRITE"
   }
 
