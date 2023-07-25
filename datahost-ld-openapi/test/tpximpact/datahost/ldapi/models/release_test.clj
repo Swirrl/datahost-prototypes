@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.release-test
   (:require
+    [clojure.data :as c.data]
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
@@ -181,14 +182,15 @@
                                        "dcterms:description" "Description 2"})})
 
           (let [{:keys [body status]} (GET (str new-series-path "/releases"))
-                releases-doc (json/read-str body)]
+                releases-doc (json/read-str body)
+                releases-coll (get releases-doc "contents")
+                [missing1 _extra1 _matching1] (->> (first releases-coll)
+                                                   (c.data/diff {"dcterms:title" "A Second Release"}))
+                [missing2 _extra2 _matching2] (->> (second releases-coll)
+                                                   (c.data/diff {"dcterms:title" "Example Release"}))]
             (t/is (= status 200))
-            (t/is (-> (get releases-doc "contents")
-                      (nth 0)
-                      (th/submap? {"dcterms:title" "A Second Release"})))
-            (t/is (-> (get releases-doc "contents")
-                      (nth 1)
-                      (th/submap? {"dcterms:title" "Example Release"})))))
+            (t/is (= nil missing1))
+            (t/is (= nil missing2))))
 
         (testing "A release can be updated, query params take precedence"
           (let [{body-str-before :body} (GET (str new-series-path "/releases/release-1"))

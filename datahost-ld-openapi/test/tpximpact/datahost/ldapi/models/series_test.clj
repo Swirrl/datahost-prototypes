@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
+    [clojure.data :as c.data]
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
@@ -145,14 +146,15 @@
                               :body (json/write-str {"dcterms:title" "A second title"
                                                      "dcterms:description" "Description 2"})})
               {:keys [body status]} (GET "/data")
-              series-doc (json/read-str body)]
+              series-doc (json/read-str body)
+              series-coll (get series-doc "contents")
+              [missing1 _extra1 _matching1] (->> (first series-coll)
+                                                 (c.data/diff {"dcterms:title" "A second title"}))
+              [missing2 _extra2 _matching2] (->> (second series-coll)
+                                                 (c.data/diff {"dcterms:title" "A title"}))]
           (t/is (= status 200))
-          (t/is (-> (get series-doc "contents")
-                    (nth 0)
-                    (th/submap? {"dcterms:title" "A second title"})))
-          (t/is (-> (get series-doc "contents")
-                    (nth 1)
-                    (th/submap? {"dcterms:title" "A title"})))))
+          (t/is (= nil missing1))
+          (t/is (= nil missing2))))
 
       (testing "A series can be updated via the API, query params take precedence"
         (let [response (PUT (str new-series-path "?title=A%20new%20title")

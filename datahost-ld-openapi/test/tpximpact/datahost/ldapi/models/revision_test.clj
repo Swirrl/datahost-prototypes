@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.revision-test
   (:require
+    [clojure.data :as c.data]
     [clojure.data.json :as json]
     [clojure.java.io :as io]
     [clojure.string :as str]
@@ -79,14 +80,15 @@
                                      :headers {"accept" "application/json"}
                                      :request-method :get}
               {:keys [body status]} (handler all-revisions-request)
-              release-doc (json/read-str body)]
+              release-doc (json/read-str body)
+              [missing _extra _matching] (->> (get release-doc "contents")
+                                              (first)
+                                              (c.data/diff {"dcterms:title" "Test revision"
+                                                            "dcterms:description" "Description"
+                                                            "@type" "dh:Revision"}))]
           (t/is (= status 200))
           (t/is (= (count (get release-doc "contents")) 1))
-          (t/is (-> (get release-doc "contents")
-                    (first)
-                    (th/submap? {"dcterms:title" "Test revision"
-                                 "dcterms:description" "Description"
-                                 "@type" "dh:Revision"})))))
+          (t/is (= nil missing))))
 
       (let [request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
                       :request-method :post
@@ -100,30 +102,32 @@
         (t/is (str/ends-with? (get revision-doc2 "@id") "/revisions/2")
               "subsequent revision has next auto-increment revision ID assigned"))
 
-    (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
-                           :headers {"accept" "application/json"}
-                           :request-method :get}
-          {:keys [body]} (handler release-request)
-          release-doc (json/read-str body)
-          release-revisions (get-release-revisions release-doc)]
-      (t/is (= #{(format "https://example.org/data/%s/releases/%s/revisions/1" series-slug release-slug)
-                 (format "https://example.org/data/%s/releases/%s/revisions/2" series-slug release-slug)}
-               release-revisions)))
+      (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
+                             :headers {"accept" "application/json"}
+                             :request-method :get}
+            {:keys [body]} (handler release-request)
+            release-doc (json/read-str body)
+            release-revisions (get-release-revisions release-doc)]
+        (t/is (= #{(format "https://example.org/data/%s/releases/%s/revisions/1" series-slug release-slug)
+                   (format "https://example.org/data/%s/releases/%s/revisions/2" series-slug release-slug)}
+                 release-revisions)))
 
-    (testing "Multiple revisions can be can be retrieved via the list API"
-      (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                                   :headers {"accept" "application/json"}
-                                   :request-method :get}
-            {:keys [body status]} (handler all-revisions-request)
-            release-doc (json/read-str body)]
-        (t/is (= status 200))
-        (t/is (= (count (get release-doc "contents")) 2))
-        (t/is (-> (get release-doc "contents")
-                  (nth 0)
-                  (th/submap? {"dcterms:title" "A second test revision"})))
-        (t/is (-> (get release-doc "contents")
-                  (nth 1)
-                  (th/submap? {"dcterms:title" "Test revision"}))))))))
+      (testing "Multiple revisions can be can be retrieved via the list API"
+        (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                                     :headers {"accept" "application/json"}
+                                     :request-method :get}
+              {:keys [body status]} (handler all-revisions-request)
+              release-doc (json/read-str body)
+              [missing1 _extra1 _matching1] (->> (get release-doc "contents")
+                                                 (first)
+                                                 (c.data/diff {"dcterms:title" "A second test revision"}))
+              [missing2 _extra2 _matching2] (->> (get release-doc "contents")
+                                                 (second)
+                                                 (c.data/diff {"dcterms:title" "Test revision"}))]
+          (t/is (= status 200))
+          (t/is (= (count (get release-doc "contents")) 2))
+          (t/is (= nil missing1))
+          (t/is (= nil missing2)))))))
 
 (defn- build-csv-multipart [csv-path]
   (let [appends-file (io/file (io/resource csv-path))]
