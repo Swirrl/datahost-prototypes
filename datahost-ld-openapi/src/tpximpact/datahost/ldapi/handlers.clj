@@ -1,6 +1,7 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [clojure.tools.logging :as log]
+   [grafter.vocabularies.rdf :as vocab.rdf]
    [grafter.matcha.alpha :as matcha]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.json-ld :as json-ld]
@@ -23,10 +24,13 @@
     not-found-response))
 
 (defn triples->ld-resource-collection [matcha-db]
-  (matcha/build [(keyword "@id") ?s]
-                {?p ?o}
-                [[?s ?p ?o]]
-                matcha-db))
+  (->> (matcha/build [(keyword "@id") ?s]
+                     {?p ?o
+                      (keyword "@type") ?t}
+                     [[?s ?p ?o]
+                      (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
+                     matcha-db)
+       (map #(dissoc % vocab.rdf/rdf:a))))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
