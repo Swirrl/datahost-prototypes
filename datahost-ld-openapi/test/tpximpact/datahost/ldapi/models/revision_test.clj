@@ -84,7 +84,9 @@
           (t/is (= (count (get release-doc "contents")) 1))
           (t/is (-> (get release-doc "contents")
                     (first)
-                    (th/submap? {"dcterms:title" "Test revision"})))))
+                    (th/submap? {"dcterms:title" "Test revision"
+                                 "dcterms:description" "Description"
+                                 "@type" "dh:Revision"})))))
 
       (let [request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
                       :request-method :post

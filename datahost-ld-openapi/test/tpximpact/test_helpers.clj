@@ -1,5 +1,6 @@
 (ns tpximpact.test-helpers
-  (:require [clojure.test :refer :all]
+  (:require [clojure.data :as c.data]
+            [clojure.test :refer :all]
             [integrant.core :as ig]
             [tpximpact.db-cleaner :as dc]
             [tpximpact.datahost.sys :as sys]
@@ -70,6 +71,6 @@
   (subs s 0 (min (count s) n)))
 
 (defn submap?
-  "Checks whether m contains all entries in sub."
-  [^java.util.Map m ^java.util.Map sub]
-  (.containsAll (.entrySet m) (.entrySet sub)))
+  "Checks whether map a contains all entries in map b."
+  [a b]
+  (= b (last (c.data/diff a b))))
