@@ -62,10 +62,6 @@
                     :request-method :post
                     :headers {"content-type" "application/json"}
                     :body (json/write-str {"dcterms:title" "Test revision" "dcterms:description" "Description"})}
-          request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                    :request-method :post
-                    :headers {"content-type" "application/json"}
-                    :body (json/write-str {"dcterms:title" "A second test revision" "dcterms:description" "Description"})}
           {:keys [status body] :as _response} (handler request1)
           revision-doc (json/read-str body)]
       (t/is (= 201 status)
@@ -76,7 +72,26 @@
       (t/is (str/ends-with? (get revision-doc "@id") "/revisions/1")
             "auto-increment revision ID is assigned")
 
-      (let [{:keys [status body] :as _response2} (handler request2)
+      (testing "A single revision can be can be retrieved via the list API"
+        ;; NOTE: this test is essential for ensuring that single item collections
+        ;; are serialized within an array wrapper and not as a hash-map
+        (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                                     :headers {"accept" "application/json"}
+                                     :request-method :get}
+              {:keys [body status]} (handler all-revisions-request)
+              release-doc (json/read-str body)]
+          (t/is (= status 200))
+          (t/is (= (count (get release-doc "contents")) 1))
+          (t/is (-> (get release-doc "contents")
+                    (first)
+                    (th/submap? {"dcterms:title" "Test revision"})))))
+
+      (let [request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                      :request-method :post
+                      :headers {"content-type" "application/json"}
+                      :body (json/write-str {"dcterms:title" "A second test revision"
+                                             "dcterms:description" "Description"})}
+            {:keys [status body] :as _response2} (handler request2)
             revision-doc2 (json/read-str body)]
         (t/is (= 201 status)
               "second revision was successfully created")
@@ -93,13 +108,14 @@
                  (format "https://example.org/data/%s/releases/%s/revisions/2" series-slug release-slug)}
                release-revisions)))
 
-    (testing "Multiple revisions can be can be retrieved via the API"
+    (testing "Multiple revisions can be can be retrieved via the list API"
       (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
                                    :headers {"accept" "application/json"}
                                    :request-method :get}
             {:keys [body status]} (handler all-revisions-request)
             release-doc (json/read-str body)]
         (t/is (= status 200))
+        (t/is (= (count (get release-doc "contents")) 2))
         (t/is (-> (get release-doc "contents")
                   (nth 0)
                   (th/submap? {"dcterms:title" "A second test revision"})))

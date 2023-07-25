@@ -1,8 +1,6 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [clojure.tools.logging :as log]
-   [malli.core :as m]
-   [malli.error :as me]
    [grafter.matcha.alpha :as matcha]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.json-ld :as json-ld]
