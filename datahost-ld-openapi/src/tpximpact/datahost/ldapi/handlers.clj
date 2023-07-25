@@ -1,9 +1,10 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [clojure.tools.logging :as log]
-   [malli.core :as m]
-   [malli.error :as me]
+   [grafter.vocabularies.rdf :as vocab.rdf]
+   [grafter.matcha.alpha :as matcha]
    [tpximpact.datahost.ldapi.db :as db]
+   [tpximpact.datahost.ldapi.json-ld :as json-ld]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.revision :as revision-model]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
@@ -21,6 +22,15 @@
     {:status 200
      :body (db/series->response-body series)}
     not-found-response))
+
+(defn triples->ld-resource-collection [matcha-db]
+  (->> (matcha/build [(keyword "@id") ?s]
+                     {?p ?o
+                      (keyword "@type") ?t}
+                     [[?s ?p ?o]
+                      (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
+                     matcha-db)
+       (map #(dissoc % vocab.rdf/rdf:a))))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
@@ -62,7 +72,7 @@
      :body "Series for this release does not exist"}))
 
 (defn put-release-schema
-  [clock triplestore {{:keys [series-slug] :as params} :path-params
+  [clock triplestore {{:keys [series-slug]} :path-params
                       incoming-jsonld-doc :body-params
                       :as request}]
    (if (not (db/get-series-by-slug triplestore series-slug))
@@ -73,7 +83,7 @@
        :body jsonld-doc})))
 
 (defn get-release-schema
-    [triplestore {{:keys [series-slug release-slug] :as path-params} :path-params}]
+    [triplestore {{:keys [series-slug release-slug]} :path-params}]
     (let [release-uri (models.shared/release-uri-from-slugs series-slug release-slug)]
       (if-let [schema (db/get-release-schema triplestore release-uri)]
         {:status 200
@@ -95,6 +105,47 @@
        :headers {"content-type" "application/json"}
        :body (db/revision->response-body rev)})
     not-found-response))
+
+(defn- wrap-ld-collection-contents [coll]
+  {"https://publishmydata.com/def/datahost/collection-contents" coll})
+
+(defn get-series-list [triplestore _request]
+  (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
+        series (->> (db/get-all-series triplestore)
+                    (matcha/index-triples)
+                    (triples->ld-resource-collection)
+                    (sort-by #(get % issued-uri))
+                    (reverse))
+        response-body (-> (wrap-ld-collection-contents series)
+                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (.toString))]
+    {:status 200
+     :body response-body}))
+
+(defn get-revision-list [triplestore {{:keys [series-slug release-slug]} :path-params}]
+  (let [revisions (->> (db/get-revisions triplestore series-slug release-slug)
+                       (matcha/index-triples)
+                       (triples->ld-resource-collection)
+                       (sort-by (comp str (keyword "@id")))
+                       (reverse))
+        response-body (-> (wrap-ld-collection-contents revisions)
+                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (.toString))]
+    {:status 200
+     :body response-body}))
+
+(defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
+  (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
+        releases (->> (db/get-releases triplestore series-slug)
+                      (matcha/index-triples)
+                      (triples->ld-resource-collection)
+                      (sort-by #(get % issued-uri))
+                      (reverse))
+        response-body (-> (wrap-ld-collection-contents releases)
+                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (.toString))]
+    {:status 200
+     :body response-body}))
 
 (defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params
                          body-params :body-params :as request}]
@@ -124,10 +175,10 @@
 (defn post-change [triplestore
                    change-store
                    {{:keys [series-slug release-slug revision-id]} :path-params
-                    {{:keys [appends]} :multipart}                 :parameters
-                    body-params                                    :body-params :as request}]
-  ;; TODO This could be an ASK of the Revision
-  (if-let [_revision (db/get-revision triplestore series-slug release-slug revision-id)]
+                    {{:keys [appends]} :multipart} :parameters
+                    body-params :body-params :as request}]
+  (if (db/resource-exists? triplestore
+                           (models.shared/revision-uri series-slug release-slug revision-id))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
@@ -140,13 +191,13 @@
                         (some? release-schema) (nil? validation-err)))
       (if validation-err
         validation-err
-        {:status  201
+        {:status 201
          :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
                                    "/revisions/" revision-id "/changes/" resource-id)}
-         :body    jsonld-doc}))
+         :body jsonld-doc}))
 
     {:status 422
-     :body   "Revision for this change does not exist"}))
+     :body "Revision for this change does not exist"}))
 
 (defn get-change [triplestore change-store {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]

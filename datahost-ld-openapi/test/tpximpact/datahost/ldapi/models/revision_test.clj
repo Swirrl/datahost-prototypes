@@ -19,9 +19,9 @@
            [java.io BufferedReader StringReader]))
 
 (defn- create-series [handler]
-  (let [series-slug "new-series"
+  (let [series-slug (str "new-series-" (UUID/randomUUID))
         request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
-        request {:uri "/data/new-series"
+        request {:uri (str "/data/" series-slug)
                  :request-method :put
                  :headers {"content-type" "application/json"}
                  :body (json/write-str request-json)}
@@ -29,7 +29,7 @@
     series-slug))
 
 (defn- create-release [handler series-slug]
-  (let [release-slug "test-release"
+  (let [release-slug (str "test-release-" (UUID/randomUUID))
         request-json {"dcterms:title" "Test release" "dcterms:description" "Description"}
         request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
                  :request-method :put
@@ -62,10 +62,6 @@
                     :request-method :post
                     :headers {"content-type" "application/json"}
                     :body (json/write-str {"dcterms:title" "Test revision" "dcterms:description" "Description"})}
-          request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                    :request-method :post
-                    :headers {"content-type" "application/json"}
-                    :body (json/write-str {"dcterms:title" "A second test revision" "dcterms:description" "Description"})}
           {:keys [status body] :as _response} (handler request1)
           revision-doc (json/read-str body)]
       (t/is (= 201 status)
@@ -76,22 +72,58 @@
       (t/is (str/ends-with? (get revision-doc "@id") "/revisions/1")
             "auto-increment revision ID is assigned")
 
-      (let [{:keys [status body] :as _response2} (handler request2)
+      (testing "A single revision can be can be retrieved via the list API"
+        ;; NOTE: this test is essential for ensuring that single item collections
+        ;; are serialized within an array wrapper and not as a hash-map
+        (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                                     :headers {"accept" "application/json"}
+                                     :request-method :get}
+              {:keys [body status]} (handler all-revisions-request)
+              release-doc (json/read-str body)]
+          (t/is (= status 200))
+          (t/is (= (count (get release-doc "contents")) 1))
+          (t/is (-> (get release-doc "contents")
+                    (first)
+                    (th/submap? {"dcterms:title" "Test revision"
+                                 "dcterms:description" "Description"
+                                 "@type" "dh:Revision"})))))
+
+      (let [request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                      :request-method :post
+                      :headers {"content-type" "application/json"}
+                      :body (json/write-str {"dcterms:title" "A second test revision"
+                                             "dcterms:description" "Description"})}
+            {:keys [status body] :as _response2} (handler request2)
             revision-doc2 (json/read-str body)]
         (t/is (= 201 status)
               "second revision was successfully created")
         (t/is (str/ends-with? (get revision-doc2 "@id") "/revisions/2")
               "subsequent revision has next auto-increment revision ID assigned"))
 
-      (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
-                             :headers {"accept" "application/json"}
-                             :request-method :get}
-            {:keys [body]} (handler release-request)
-            release-doc (json/read-str body)
-            release-revisions (get-release-revisions release-doc)]
-        (t/is (= #{"https://example.org/data/new-series/releases/test-release/revisions/1"
-                   "https://example.org/data/new-series/releases/test-release/revisions/2"}
-                 release-revisions))))))
+    (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
+                           :headers {"accept" "application/json"}
+                           :request-method :get}
+          {:keys [body]} (handler release-request)
+          release-doc (json/read-str body)
+          release-revisions (get-release-revisions release-doc)]
+      (t/is (= #{(format "https://example.org/data/%s/releases/%s/revisions/1" series-slug release-slug)
+                 (format "https://example.org/data/%s/releases/%s/revisions/2" series-slug release-slug)}
+               release-revisions)))
+
+    (testing "Multiple revisions can be can be retrieved via the list API"
+      (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+                                   :headers {"accept" "application/json"}
+                                   :request-method :get}
+            {:keys [body status]} (handler all-revisions-request)
+            release-doc (json/read-str body)]
+        (t/is (= status 200))
+        (t/is (= (count (get release-doc "contents")) 2))
+        (t/is (-> (get release-doc "contents")
+                  (nth 0)
+                  (th/submap? {"dcterms:title" "A second test revision"})))
+        (t/is (-> (get release-doc "contents")
+                  (nth 1)
+                  (th/submap? {"dcterms:title" "Test revision"}))))))))
 
 (defn- build-csv-multipart [csv-path]
   (let [appends-file (io/file (io/resource csv-path))]
@@ -287,5 +319,5 @@
                                      (get (json/read-str (:body resp)) "@id"))]
               ;; This Release already has 2 Revisions, so we expect another 10 in the series
               (is (= new-revision-ids (for [i (range 3 13)]
-                                        (str series-slug "/releases/" release-slug "/revisions/" i)))
+                                        (format "%s/releases/%s/revisions/%d" series-slug release-slug i)))
                   "Expected Revision IDs integers increase in an orderly sequence"))))))))

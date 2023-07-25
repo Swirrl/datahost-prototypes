@@ -32,7 +32,7 @@
   (get-append [_this append-key]
     (let [file-uri append-key
           bgps [[file-uri :dh/fileContents '?contents]]
-          q {:prefixes  db/prefixes
+          q {:prefixes  db/default-prefixes
              :construct bgps
              :where     bgps}
           append-contents (-> (db/get-resource-by-construct-query triplestore q)

@@ -174,6 +174,22 @@
             (is (= 200 (:status response)))
             (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
 
+        (testing "Multiple releases can be can be retrieved via the API"
+          (PUT (str new-series-path "/releases/release-2")
+               {:content-type :json
+                :body (json/write-str {"dcterms:title" "A Second Release"
+                                       "dcterms:description" "Description 2"})})
+
+          (let [{:keys [body status]} (GET (str new-series-path "/releases"))
+                releases-doc (json/read-str body)]
+            (t/is (= status 200))
+            (t/is (-> (get releases-doc "contents")
+                      (nth 0)
+                      (th/submap? {"dcterms:title" "A Second Release"})))
+            (t/is (-> (get releases-doc "contents")
+                      (nth 1)
+                      (th/submap? {"dcterms:title" "Example Release"})))))
+
         (testing "A release can be updated, query params take precedence"
           (let [{body-str-before :body} (GET (str new-series-path "/releases/release-1"))
                 {:keys [body] :as response} (PUT (str new-series-path

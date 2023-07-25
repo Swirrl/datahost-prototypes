@@ -137,6 +137,23 @@
           (is (= 200 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "@context" "dcterms:issued" "dcterms:modified")))))
 
+      (testing "Multiple series can be retrieved"
+        (let [new-series2-id (str "another-new-series-" (UUID/randomUUID))
+              new-series-path (str "/data/" new-series2-id)
+              _response2 (PUT new-series-path
+                             {:content-type :json
+                              :body (json/write-str {"dcterms:title" "A second title"
+                                                     "dcterms:description" "Description 2"})})
+              {:keys [body status]} (GET "/data")
+              series-doc (json/read-str body)]
+          (t/is (= status 200))
+          (t/is (-> (get series-doc "contents")
+                    (nth 0)
+                    (th/submap? {"dcterms:title" "A second title"})))
+          (t/is (-> (get series-doc "contents")
+                    (nth 1)
+                    (th/submap? {"dcterms:title" "A title"})))))
+
       (testing "A series can be updated via the API, query params take precedence"
         (let [response (PUT (str new-series-path "?title=A%20new%20title")
                             {:content-type :json

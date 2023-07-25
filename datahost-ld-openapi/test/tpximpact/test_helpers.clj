@@ -1,5 +1,6 @@
 (ns tpximpact.test-helpers
-  (:require [clojure.test :refer :all]
+  (:require [clojure.data :as c.data]
+            [clojure.test :refer :all]
             [integrant.core :as ig]
             [tpximpact.db-cleaner :as dc]
             [tpximpact.datahost.sys :as sys]
@@ -68,3 +69,8 @@
 
 (defn truncate-string [s n]
   (subs s 0 (min (count s) n)))
+
+(defn submap?
+  "Checks whether map a contains all entries in map b."
+  [a b]
+  (= b (last (c.data/diff a b))))
