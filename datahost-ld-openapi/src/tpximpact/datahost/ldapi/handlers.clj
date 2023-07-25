@@ -161,7 +161,7 @@
      :body   "Release for this revision does not exist"}))
 
 (defn- dataset-validation-error!
-  "Returns nill on success, error response on validation failure."
+  "Returns nil on success, error response on validation failure."
   [release-schema appends]
   (try
     (let [dataset (data-validation/as-dataset (:tempfile appends) {})
