@@ -1,5 +1,9 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
+    [buddy.auth.backends.httpbasic :as http-basic]
+    [buddy.auth.middleware :as buddy]
+    [buddy.auth :refer [authenticated?]]
+    [buddy.hashers :as hashers]
     [integrant.core :as ig]
     [reitit.dev.pretty :as pretty]
     [reitit.interceptor.sieppari :as sieppari]
@@ -57,6 +61,33 @@
        (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
        (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
 
+(defn authenticate-user [users authdata]
+  (let [username (:username authdata)
+        password (:password authdata)]
+    (when-let [passhash (get users username)]
+      (:valid (hashers/verify password passhash)))))
+
+(defn basic-auth-backend [context]
+  (http-basic/http-basic-backend
+   {:realm  (:realm context)
+    :authfn (fn [_request auth-data]
+              (authenticate-user (:users context) auth-data))}))
+
+(def authenticated-methods #{:delete :patch :post :put})
+
+(defn basic-auth-middleware [auth]
+  (let [backend (basic-auth-backend auth)]
+    (fn [handler]
+      (fn [request]
+        (if (contains? authenticated-methods (:request-method request))
+          (let [request (buddy/authentication-request request backend)]
+            (if (authenticated? request)
+              (handler request)
+              {:status 401
+               :headers {"Content-Type" "text/plain"}
+               :body "Unauthorized"}))
+          (handler request))))))
+
 (def cors-middleware
   "Defines a CORS middleware for a route"
   {:name ::cors
@@ -68,7 +99,7 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(defn router [clock triplestore change-store]
+(defn router [clock triplestore change-store auth]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
@@ -148,22 +179,26 @@
                         ;; coercing request parameters
                         coercion/coerce-request-middleware
                         ;; multipart
-                        multipart/multipart-middleware]}}))
+                        multipart/multipart-middleware
 
-(defn handler [clock triplestore change-store]
+                        (if auth
+                          (basic-auth-middleware auth)
+                          identity)]}}))
+
+(defn handler [clock triplestore change-store auth]
   (ring/ring-handler
-    (router clock triplestore change-store)
-    (ring/routes
-      (swagger-ui/create-swagger-ui-handler
-        {:path "/"
-         :config {:validatorUrl nil
-                  :urls [{:name "swagger", :url "swagger.json"}
-                         {:name "openapi", :url "openapi.json"}]
-                  :urls.primaryName "openapi"
-                  :operationsSorter "alpha"}})
-      (ring/create-default-handler))
-    {:executor sieppari/executor}))
+   (router clock triplestore change-store auth)
+   (ring/routes
+    (swagger-ui/create-swagger-ui-handler
+     {:path "/"
+      :config {:validatorUrl nil
+               :urls [{:name "swagger", :url "swagger.json"}
+                      {:name "openapi", :url "openapi.json"}]
+               :urls.primaryName "openapi"
+               :operationsSorter "alpha"}})
+    (ring/create-default-handler))
+   {:executor sieppari/executor}))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [clock triplestore change-store]}]
-  (handler clock triplestore change-store))
+  [_ {:keys [clock triplestore change-store auth]}]
+  (handler clock triplestore change-store auth))

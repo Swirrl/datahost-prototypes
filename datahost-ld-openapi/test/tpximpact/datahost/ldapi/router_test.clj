@@ -14,7 +14,7 @@
   ([clock]
    (let [triplestore (repo/sail-repo)
          change-store (fstore/->FileChangeStore (io/file "/Users/lee/data/filestore-tmp"))]
-     (sut/router clock triplestore change-store))))
+     (sut/router clock triplestore change-store nil))))
 
 (t/deftest cors-preflight-request-test
   (let [router (get-test-router)
