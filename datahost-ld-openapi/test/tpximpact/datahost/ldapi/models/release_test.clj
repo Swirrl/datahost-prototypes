@@ -45,7 +45,7 @@
 
           request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
           release-request (create-put-request series-slug "test-release" request-json)
-          {:keys [body status] :as response} (handler release-request)
+          {:keys [body status]} (handler release-request)
           release-doc (json/read-str body)]
 
       (t/is (= status 201))
@@ -73,8 +73,9 @@
           update-request {:uri (format "/data/%s/releases/test-release" series-slug)
                           :request-method :put
                           :headers {"content-type" "application/json"}
-                          :body (json/write-str {"dcterms:title" "Updated title" "dcterms:description" "Updated description"})}
-          {:keys [status body] :as update-response} (handler update-request)
+                          :body (json/write-str {"dcterms:title" "Updated title"
+                                                 "dcterms:description" "Updated description"})}
+          {:keys [status body]} (handler update-request)
           updated-doc (json/read-str body)]
       (t/is (= 200 status))
       (t/is (= "Updated title" (get updated-doc "dcterms:title")))

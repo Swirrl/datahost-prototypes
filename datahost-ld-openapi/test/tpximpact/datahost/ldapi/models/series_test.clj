@@ -9,11 +9,13 @@
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th])
   (:import
+    (java.time ZonedDateTime)
+    (java.time.format DateTimeFormatter)
     [java.util UUID]))
 
 (defn format-date-time
   [dt]
-  (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
+  (.format ^ZonedDateTime dt DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
 (defn- create-put-request [series-slug body]
   {:uri (str "/data/" series-slug)
@@ -72,7 +74,7 @@
           _ (time/set-now clock t2)
           update-request (create-put-request "new-series" {"dcterms:title" "Updated Title"
                                                            "dcterms:description" "Updated Description"})
-          {:keys [status body] :as update-response} (handler update-request)
+          {:keys [status body] :as _update-response} (handler update-request)
           updated-doc (json/read-str body)]
       (t/is (= 200 status))
       (t/is (= "Updated Title" (get updated-doc "dcterms:title")))

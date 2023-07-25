@@ -1,7 +1,5 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
-    [clojure.java.io :as io]
-    [com.yetanalytics.flint :as fl]
     [integrant.core :as ig]
     [reitit.dev.pretty :as pretty]
     [reitit.interceptor.sieppari :as sieppari]
@@ -13,7 +11,6 @@
     [reitit.ring.middleware.parameters :as parameters]
     [reitit.swagger :as swagger]
     [reitit.swagger-ui :as swagger-ui]
-    [tpximpact.datahost.ldapi.native-datastore :as datastore]
     [reitit.coercion.malli :as rcm]
     [muuntaja.core :as m]
     [muuntaja.format.core :as fc]
@@ -22,18 +19,16 @@
     [tpximpact.datahost.ldapi.routes.release :as release-routes]
     [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
     [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-    [ring.middleware.cors :as cors]
-    [tpximpact.datahost.ldapi.store.triplestore :as tstore]
-    [tpximpact.datahost.ldapi.store.file :as fstore])
+    [ring.middleware.cors :as cors])
   (:import (java.io InputStream InputStreamReader OutputStream)))
 
-(defn decode-str [options]
+(defn decode-str [_options]
   (reify
     fc/Decode
     (decode [_ data charset]
       (slurp (InputStreamReader. ^InputStream data ^String charset)))))
 
-(defn encode-str [options]
+(defn encode-str [_options]
   (reify
     fc/EncodeToBytes
     (encode-to-bytes [_ data charset]
@@ -56,20 +51,6 @@
           m/default-options
           [:formats "text/csv"] csv-format))))
 
-(defn query-example [triplestore request]
-    ;; temporary code to facilitate end-to-end service wire up
-  (let [qry {:prefixes {:dcat "<http://www.w3.org/ns/dcat#>"
-                        :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}
-             :select '[?label ?g]
-             :where [[:graph datastore/background-data-graph
-                      '[[?datasets a :dcat/Catalog]
-                        [?datasets :rdfs/label ?label]]]]}
-
-        results (datastore/eager-query triplestore (fl/format-query qry :pretty? true))]
-    {:status 200
-     :headers {"Content-Type" "text/plain"}
-     :body (-> results first :label)}))
-
 (def leave-keys-alone-muuntaja-coercer
   (m/create
    (-> m/default-options
@@ -89,11 +70,7 @@
 
 (defn router [clock triplestore change-store]
   (ring/router
-   [["/triplestore-query"
-     ;; TODO remove this route when we have real ones using the triplestore
-     {:get {:no-doc true
-            :handler #(query-example triplestore %)}}]
-    ["/openapi.json"
+   [["/openapi.json"
      {:get {:no-doc true
             :openapi {:openapi "3.0.0"
                       :info {:title "Prototype OpenData API"
