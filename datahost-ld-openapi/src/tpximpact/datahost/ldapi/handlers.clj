@@ -175,9 +175,16 @@
 (defn post-change [triplestore
                    change-store
                    {{:keys [series-slug release-slug revision-id]} :path-params
-                    {{:keys [appends]} :multipart} :parameters
-                    body-params :body-params :as request}]
-  (if (db/resource-exists? triplestore
+                    {{:keys [appends]} :multipart}                 :parameters
+                    body-params                                    :body-params :as request}]
+  ;; TODO This could be an ASK of the Revision
+  (cond
+    (db/resource-exists? triplestore
+                         (models.shared/change-uri series-slug release-slug revision-id 1))
+    {:status 422
+     :body "A change is already associated with the revision."}
+    
+    (if (db/resource-exists? triplestore
                            (models.shared/revision-uri series-slug release-slug revision-id))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
@@ -196,6 +203,7 @@
                                    "/revisions/" revision-id "/changes/" resource-id)}
          :body jsonld-doc}))
 
+    :else
     {:status 422
      :body "Revision for this change does not exist"}))
 
