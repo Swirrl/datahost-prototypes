@@ -1,14 +1,17 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
-   [clojure.data :as c.data]
-   [clojure.data.json :as json]
-   [clojure.test :refer [deftest is testing] :as t]
-   [grafter-2.rdf4j.repository :as repo]
-   [tpximpact.datahost.ldapi.router :as router]
-   [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
-   [tpximpact.datahost.system-uris :as su]
-   [tpximpact.datahost.time :as time]
-   [tpximpact.test-helpers :as th])
+    [clojure.data :as c.data :refer [diff]]
+    [clojure.data.json :as json]
+    [clojure.test :refer [deftest is testing] :as t]
+    [com.yetanalytics.flint :as fl]
+    [grafter-2.rdf4j.repository :as repo]
+    [tpximpact.datahost.ldapi.router :as router]
+    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
+    [tpximpact.datahost.system-uris :as su]
+    [tpximpact.datahost.time :as time]
+    [tpximpact.test-helpers :as th]
+    [tpximpact.datahost.ldapi.client.ring :as ring-client]
+    [tpximpact.datahost.ldapi.models.resources :as resources])
   (:import
    (java.net URI)
    (java.time ZonedDateTime Instant)
@@ -201,3 +204,245 @@
               (is (= (update-vals (select-keys resp-body ["dcterms:issued" "dcterms:modified"]) #(Instant/parse %))
                      (update-vals (select-keys body' ["dcterms:issued" "dcterms:modified"]) #(Instant/parse %)))
                   "The document shouldn't be modified"))))))))
+
+(defn- create-series [client series-info]
+  (ring-client/create-resource client (time/system-now) series-info))
+
+(defn- create-child [client parent child-info]
+  (let [child-create (resources/set-parent child-info parent)]
+    (ring-client/create-resource client (time/system-now) child-create)))
+
+(defn- resource-exists-in-db? [ring-client resource]
+  (let [system-uris (ring-client/system-uris ring-client)
+        repo (ring-client/repo ring-client)
+        resource-uri (resources/resource-uri system-uris resource)
+        q {:ask []
+           :where [[resource-uri '?p '?o]]}]
+    (with-open [conn (repo/->connection repo)]
+      (repo/query conn (fl/format-query q :pretty? true)))))
+
+(t/deftest create-delete-series-test
+  (with-open [client (ring-client/create-client)]
+    (let [series-info (resources/create-series "test" {"dcterms:title" "Test" "dcterms:description" "Test"})
+          series (create-series client series-info)]
+
+      ;; series should exist in db initially
+      (t/is (resource-exists-in-db? client series))
+
+      (ring-client/delete-resource client (time/system-now) series)
+
+      ;; series should not be found via API
+      (let [fetched-series (ring-client/get-resource client series)]
+        (t/is (nil? fetched-series)))
+
+      ;; series should be deleted from db
+      (t/is (= false (resource-exists-in-db? client series))))))
+
+(t/deftest create-delete-series-with-releases-test
+  (with-open [client (ring-client/create-client)]
+    (let [series-info (resources/create-series "test" {"dcterms:title" "Test series" "dcterms:description" "Test"})
+          release-info (resources/create-release "release" {"dcterms:title" "Release" "dcterms:description" "Test"})
+          series (create-series client series-info)
+
+          release (create-child client series release-info)]
+
+      ;; release should exist in db initially
+      (t/is (resource-exists-in-db? client release))
+
+      (ring-client/delete-resource client (time/system-now) series)
+
+      ;; series and release should not be found via API
+      (let [fetched-release (ring-client/get-resource client release)
+            fetched-series (ring-client/get-resource client series)]
+        (t/is (nil? fetched-release))
+        (t/is (nil? fetched-series)))
+
+      ;; series and release should not exist in db
+      (t/is (= false (resource-exists-in-db? client series)))
+      (t/is (= false (resource-exists-in-db? client release))))))
+
+(t/deftest create-delete-series-with-release-with-schema-test
+  (with-open [client (ring-client/create-client)]
+    (let [series-info (resources/create-series "test" {"dcterms:title" "Series" "dcterms:description" "Test"})
+          release-info (resources/create-release "release" {"dcterms:title" "Release" "dcterms:description" "Test"})
+          schema-info (resources/create-schema {"dcterms:title" "Fun schema"
+                                                "dh:columns"    [{"@type"         "dh:DimensionColumn"
+                                                                  "csvw:datatype" "string"
+                                                                  "csvw:name"     "foo_bar"
+                                                                  "csvw:titles"   "Foo Bar"}
+                                                                 {"@type"         "dh:MeasureColumn"
+                                                                  "csvw:datatype" "string"
+                                                                  "csvw:name"     "height"
+                                                                  "csvw:titles"   "Height"}]})
+
+          series (create-series client series-info)
+          release (create-child client series release-info)
+          schema (create-child client release schema-info)]
+
+      ;; series, release and schema should exist in db
+      (t/is (resource-exists-in-db? client series))
+      (t/is (resource-exists-in-db? client release))
+      (t/is (resource-exists-in-db? client schema))
+
+      (ring-client/delete-resource client (time/system-now) series)
+
+      ;; series, release and schema should not be found via API
+      (let [fetched-schema (ring-client/get-resource client schema)
+            fetched-release (ring-client/get-resource client release)
+            fetched-series (ring-client/get-resource client series)]
+        (t/is (nil? fetched-schema))
+        (t/is (nil? fetched-release))
+        (t/is (nil? fetched-series)))
+
+      ;; series, release and schema should not exist in db
+      (t/is (= false (resource-exists-in-db? client series)))
+      (t/is (= false (resource-exists-in-db? client release)))
+      (t/is (= false (resource-exists-in-db? client schema))))))
+
+(t/deftest create-delete-series-with-revision-test
+  (with-open [client (ring-client/create-client)]
+    (let [series-info (resources/create-series "test" {"dcterms:title" "Series" "dcterms:description" "Test"})
+          release-info (resources/create-release "release" {"dcterms:title" "Release" "dcterms:description" "Test"})
+          revision-info (resources/create-revision {"dcterms:title" "Revision"
+                                                    "dcterms:description" "Test revision"})
+
+          series (create-series client series-info)
+          release (create-child client series release-info)
+          revision (create-child client release revision-info)]
+
+      ;; series, release and revision should exist in db
+      (t/is (resource-exists-in-db? client series))
+      (t/is (resource-exists-in-db? client release))
+      (t/is (resource-exists-in-db? client revision))
+
+      (ring-client/delete-resource client (time/system-now) series)
+
+      ;; series, release and revision should not resolve via API
+      (let [fetched-revision (ring-client/get-resource client revision)
+            fetched-release (ring-client/get-resource client release)
+            fetched-series (ring-client/get-resource client series)]
+        (t/is (nil? fetched-revision))
+        (t/is (nil? fetched-release))
+        (t/is (nil? fetched-series)))
+
+      ;; series, release and revision should not exist in db
+      (t/is (= false (resource-exists-in-db? client series)))
+      (t/is (= false (resource-exists-in-db? client release)))
+      (t/is (= false (resource-exists-in-db? client revision))))))
+
+(t/deftest create-delete-series-with-change-test
+  (with-open [client (ring-client/create-client)]
+    (let [series-info (resources/create-series "test" {"dcterms:title" "Series" "dcterms:description" "Test"})
+          release-info (resources/create-release "release" {"dcterms:title" "Release" "dcterms:description" "Test"})
+          revision-info (resources/create-revision {"dcterms:title" "Revision"
+                                                    "dcterms:description" "Test revision"})
+          schema-info (resources/create-schema {"dcterms:title" "Fun schema"
+                                                "dh:columns"    [{"@type"         "dh:DimensionColumn"
+                                                                  "csvw:datatype" "string"
+                                                                  "csvw:name"     "col1"
+                                                                  "csvw:titles"   "col1"}
+                                                                 {"@type"         "dh:DimensionColumn"
+                                                                  "csvw:datatype" "string"
+                                                                  "csvw:name"     "col2"
+                                                                  "csvw:titles"   "col2"}
+                                                                 {"@type"         "dh:MeasureColumn"
+                                                                  "csvw:datatype" "string"
+                                                                  "csvw:name"     "col3"
+                                                                  "csvw:titles"   "col3"}]})
+          change-info (resources/create-change :dh/ChangeKindAppend [["col1" "col2" "col3"]
+                                                                     ["a" "b" "c"]
+                                                                     ["1" "2" "3"]]
+                                               {"dcterms:description" "Test change"})
+
+          series (create-series client series-info)
+          release (create-child client series release-info)
+          schema (create-child client release schema-info)
+          revision (create-child client release revision-info)
+          change (create-child client revision change-info)]
+
+      ;; series, release, schema, revision and change should exist in db
+      (t/is (resource-exists-in-db? client series))
+      (t/is (resource-exists-in-db? client release))
+      (t/is (resource-exists-in-db? client schema))
+      (t/is (resource-exists-in-db? client revision))
+      (t/is (resource-exists-in-db? client change))
+
+      (ring-client/delete-resource client (time/system-now) series)
+
+      ;; series, release, schema, revision and change should not resolve via API
+      (let [fetched-change (ring-client/get-resource client change)
+            fetched-revision (ring-client/get-resource client revision)
+            fetched-release (ring-client/get-resource client release)
+            fetched-schema (ring-client/get-resource client schema)
+            fetched-series (ring-client/get-resource client series)]
+        (t/is (nil? fetched-change))
+        (t/is (nil? fetched-revision))
+        (t/is (nil? fetched-release))
+        (t/is (nil? fetched-schema))
+        (t/is (nil? fetched-series)))
+
+      ;; series, release, schema, revision and change should not exist in db
+      (t/is (= false (resource-exists-in-db? client series)))
+      (t/is (= false (resource-exists-in-db? client release)))
+      (t/is (= false (resource-exists-in-db? client schema)))
+      (t/is (= false (resource-exists-in-db? client revision)))
+      (t/is (= false (resource-exists-in-db? client change))))))
+
+(t/deftest delete-series-with-shared-change-test
+  ;; test that creates two series with their own releases, revisions and a
+  ;; shared schema. Both contain a change with the same contents - these
+  ;; changes should have the same address within the store. The test deletes
+  ;; one of the series (and therefore its associated change) and checks that
+  ;; the contents of the change in the other series can still be fetched
+  (with-open [client (ring-client/create-client)]
+    (let [series1-info (resources/create-series "series1" {"dcterms:title" "Series 1" "dcterms:description" "Series 1"})
+          series2-info (resources/create-series "series2" {"dcterms:title" "Series 2" "dcterms:description" "Series 2"})
+
+          release1-info (resources/create-release "release1" {"dcterms:title" "Release 1" "dcterms:description" "Release 1"})
+          release2-info (resources/create-release "release2" {"dcterms:title" "Release 2" "dcterms:description" "Release 2"})
+
+          schema-columns [{"@type"         "dh:DimensionColumn"
+                           "csvw:datatype" "string"
+                           "csvw:name"     "col1"
+                           "csvw:titles"   "col1"}
+                          {"@type"         "dh:DimensionColumn"
+                           "csvw:datatype" "string"
+                           "csvw:name"     "col2"
+                           "csvw:titles"   "col2"}
+                          {"@type"         "dh:MeasureColumn"
+                           "csvw:datatype" "string"
+                           "csvw:name"     "col3"
+                           "csvw:titles"   "col3"}]
+
+          schema1-info (resources/create-schema {"dcterms:title" "Schema 1"
+                                                 "dh:columns" schema-columns})
+          schema2-info (resources/create-schema {"dcterms:title" "Schema 2"
+                                                 "dh:columns" schema-columns})
+
+          revision1-info (resources/create-revision {"dcterms:title" "Revision 1" "dcterms:description" "Revision 1"})
+          revision2-info (resources/create-revision {"dcterms:title" "Revision 2" "dcterms:description" "Revision 2"})
+
+          change-data [["col1" "col2" "col3"]
+                       ["a" "b" "c"]
+                       ["1" "2" "3"]]
+
+          change1-info (resources/create-change :dh/ChangeKindAppend change-data {"dcterms:description" "Change 1"})
+          change2-info (resources/create-change :dh/ChangeKindAppend change-data {"dcterms:description" "Change 2"})
+
+          series1 (ring-client/create-resource client (time/system-now) series1-info)
+          release1 (create-child client series1 release1-info)
+          schema1 (create-child client release1 schema1-info)
+          revision1 (create-child client release1 revision1-info)
+          change1 (create-child client revision1 change1-info)
+
+          series2 (ring-client/create-resource client (time/system-now) series2-info)
+          release2 (create-child client series2 release2-info)
+          schema2 (create-child client release2 schema2-info)
+          revision2 (create-child client release2 revision2-info)
+          change2 (create-child client revision2 change2-info)]
+
+      (ring-client/delete-resource client (time/system-now) series1)
+
+      ;; change for series2 should still exist
+      (let [fetched-change (ring-client/get-resource client change2)]
+        (t/is (some? fetched-change))))))
