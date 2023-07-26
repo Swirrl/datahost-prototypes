@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
+    [clojure.data :refer [diff]]
     [clojure.data.json :as json]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
@@ -15,6 +16,12 @@
     [java.lang AutoCloseable]
     [java.util UUID]
     [java.time Duration Instant LocalDateTime OffsetDateTime ZoneOffset ZonedDateTime]))
+
+(defn- create-put-request [series-slug body]
+  {:uri (str "/data/" series-slug)
+   :request-method :put
+   :headers {"content-type" "application/json"}
+   :body (json/write-str body)})
 
 (def title-gen gen/string-alphanumeric)
 (def description-gen gen/string-alphanumeric)
@@ -96,10 +103,31 @@
    :resource resource
    :at at})
 
+(defn update-op [resource at]
+  {:op :update
+   :resource resource
+   :at at})
+
 (defrecord RingClient [handler clock store]
   AutoCloseable
   (close [_this]
     (.close store)))
+
+(defn submit-op [{:keys [handler clock] :as client} {:keys [resource at] :as op}]
+  (time/set-now clock at)
+  (let [body (into {} (remove (fn [[k v]] (keyword? k)) resource))
+        request (create-put-request (:slug resource) body)
+        {:keys [status body] :as response} (handler request)]
+    (if (contains? #{200 201} status)
+      (json/read-str body)
+      (throw (ex-info "Request failed" {:request request :response response})))))
+
+(defn get-series [{:keys [handler]} series-slug]
+  (let [request {:request-method :get
+                 :uri (str "/data/" series-slug)
+                 :headers {"accept" "application/json"}}
+        response (handler request)]
+    (json/read-str (:body response))))
 
 (defn- create-client []
   (let [store (tfstore/create-temp-file-store)
@@ -109,14 +137,39 @@
         handler (router/handler clock repo store)]
     (->RingClient handler clock store)))
 
+(t/deftest creaty-test
+  (with-open [client (create-client)]
+    (let [start-time (time/parse "2023-07-25T14:05:21Z")
+          series (gen/generate series-gen)
+          op (create-op series start-time)
+          series-doc (submit-op client op)
+          fetched-doc (get-series client (:slug series))
+          expected (merge (select-keys series ["dcterms:title" "dcterms:description"])
+                          {"dcterms:issued" (str start-time)
+                           "dcterms:modified" (str start-time)})
+          [missing _ _] (diff expected fetched-doc)]
+      (t/is (= nil missing))
+      (t/is (= series-doc fetched-doc)))))
+
 (t/deftest mutaty-test
   (with-open [client (create-client)]
     (let [start-time (time/parse "2023-07-25T14:05:21Z")
-          initial (gen/sample series-gen)
-          updates (gen/sample (series-updates-gen initial))
-          ops (concat [(create-op initial start-time)])])
-    )
-  )
+          initial (gen/generate series-gen)
+          updates (gen/generate (series-updates-gen initial))
+          update-times (gen/generate (n-mutations-gen start-time tick-gen (count updates)))
+          ops (concat [(create-op initial start-time)]
+                      (mapv update-op updates update-times))
+          last-update-time (last update-times)
+          last-series (last updates)
+          expected (merge (select-keys last-series ["dcterms:title" "dcterms:description"])
+                          {"dcterms:issued" (str start-time)
+                           "dcterms:modified" (str last-update-time)})]
+      (doseq [op ops]
+        (submit-op client op))
+
+      (let [series (get-series client (:slug initial))
+            [missing _ _] (diff expected series)]
+        (t/is (= nil missing))))))
 
 {:op :create
  :resource {:type :series
@@ -144,11 +197,7 @@
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))
 
-(defn- create-put-request [series-slug body]
-  {:uri (str "/data/" series-slug)
-   :request-method :put
-   :headers {"content-type" "application/json"}
-   :body (json/write-str body)})
+
 
 (t/deftest put-series-create-test
   (with-open [temp-store (tfstore/create-temp-file-store)]
