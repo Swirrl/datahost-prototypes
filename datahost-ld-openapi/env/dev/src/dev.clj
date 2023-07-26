@@ -18,4 +18,4 @@
 (def start go)
 
 (integrant.repl/set-prep!
-  #(sys/prep-config (sys/load-configs ["ldapi/base-system.edn"])))
+  #(sys/prep-config (sys/load-configs ["ldapi/base-system.edn" "ldapi/env.edn"])))
