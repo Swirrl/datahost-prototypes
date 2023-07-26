@@ -72,7 +72,7 @@ jobs:
       - checkout
       - run:
           name: "Deploy Open API docker image to registry"
-          command: "clojure -T:build docker :image-type :registry > ldapi_container_digest"
+          command: "clojure -T:build docker :image-type :registry :to :remote > ldapi_container_digest"
           working_directory: datahost-ld-openapi
           project-dir: datahost-ld-openapi
       - persist_to_workspace:
