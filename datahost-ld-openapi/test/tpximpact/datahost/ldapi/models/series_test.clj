@@ -113,21 +113,36 @@
   (close [_this]
     (.close store)))
 
-(defn submit-op [{:keys [handler clock] :as client} {:keys [resource at] :as op}]
+(defn submit-op [{:keys [handler clock] :as client} {:keys [op resource at]}]
   (time/set-now clock at)
-  (let [body (into {} (remove (fn [[k v]] (keyword? k)) resource))
-        request (create-put-request (:slug resource) body)
+  (let [request (case op
+                  :delete {:request-method :delete
+                           :uri (str "/data/" (:slug resource))}
+                  (let [body (into {} (remove (fn [[k v]] (keyword? k)) resource))]
+                    (create-put-request (:slug resource) body)))
         {:keys [status body] :as response} (handler request)]
-    (if (contains? #{200 201} status)
-      (json/read-str body)
-      (throw (ex-info "Request failed" {:request request :response response})))))
+    (cond
+      (>= status 400)
+      (throw (ex-info "Request failed" {:request request :response response}))
+
+      (= :delete op)
+      nil
+
+      :else
+      (json/read-str body))))
+
+(defn delete-op [resource at]
+  {:op :delete
+   :resource resource
+   :at at})
 
 (defn get-series [{:keys [handler]} series-slug]
   (let [request {:request-method :get
                  :uri (str "/data/" series-slug)
                  :headers {"accept" "application/json"}}
-        response (handler request)]
-    (json/read-str (:body response))))
+        {:keys [status body] :as reponse} (handler request)]
+    (when (= 200 status)
+      (json/read-str body))))
 
 (defn- create-client []
   (let [store (tfstore/create-temp-file-store)
@@ -170,6 +185,17 @@
       (let [series (get-series client (:slug initial))
             [missing _ _] (diff expected series)]
         (t/is (= nil missing))))))
+
+(t/deftest create-deletey-test
+  (with-open [client (create-client)]
+    (let [create-time (time/parse "2023-07-26T17:21:03Z")
+          delete-time (gen/generate (tick-gen create-time))
+          series (gen/generate series-gen)
+          _series-doc (submit-op client (create-op series create-time))]
+      (submit-op client (delete-op series delete-time))
+
+      (let [fetched-doc (get-series client (:slug series))]
+        (t/is (nil? fetched-doc))))))
 
 {:op :create
  :resource {:type :series

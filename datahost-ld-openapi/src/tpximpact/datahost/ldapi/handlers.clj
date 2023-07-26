@@ -38,6 +38,13 @@
     {:status (op->response-code op)
      :body jsonld-doc}))
 
+(defn delete-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
+  (if-let [_series (db/get-series-by-slug triplestore series-slug)]
+    (do
+      (db/delete-series! triplestore series-slug)
+      {:status 204})
+    not-found-response))
+
 (defn get-release [triplestore change-store {{:keys [series-slug release-slug]} :path-params
                        {:strs [accept]} :headers}]
   (if-let [release (db/get-release triplestore series-slug release-slug)]

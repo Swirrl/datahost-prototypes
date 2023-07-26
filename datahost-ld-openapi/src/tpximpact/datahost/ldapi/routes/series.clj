@@ -26,3 +26,11 @@
                     :body [:map
                            [:status [:enum "error"]]
                            [:message string?]]}}})
+
+(defn delete-series-route-config [triplestore]
+  {:summary "Delete a series and all its child resources"
+   :handler (partial handlers/delete-dataset-series triplestore)
+   :parameters {:path {:series-slug string?}}
+   :responses {204 {:description "Series existed and was successfully deleted"}
+               404 {:description "Series does not exist"}}}
+  )

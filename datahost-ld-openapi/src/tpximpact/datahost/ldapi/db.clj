@@ -190,6 +190,11 @@
              [resource-uri :dcterms/description '?description]
              [resource-uri :dcterms/modified '?modified]]}))
 
+(defn- submit-update [triplestore update-query]
+  (let [qs (f/format-update update-query :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/update! conn qs))))
+
 (defn- update-resource-title-description-modified [triplestore resource]
   (let [q (update-resource-title-description-modified-query resource)
         qs (f/format-update q :pretty? true)]
@@ -294,6 +299,16 @@
          :jsonld-doc (series->response-body new-series)})
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
+
+(defn delete-series-query [series-uri]
+  {:delete [[series-uri '?p '?o]]
+   :where [[series-uri '?p '?o]]})
+
+(defn delete-series!
+  [triplestore series-slug]
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        query (delete-series-query series-uri)]
+    (submit-update triplestore query)))
 
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to

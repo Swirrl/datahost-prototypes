@@ -110,7 +110,8 @@
               :tags ["linked data api"]}
      ["/:series-slug"
       {:get (series-routes/get-series-route-config triplestore)
-       :put (series-routes/put-series-route-config clock triplestore)}]
+       :put (series-routes/put-series-route-config clock triplestore)
+       :delete (series-routes/delete-series-route-config triplestore)}]
 
      ["/:series-slug/releases/:release-slug"
       {:get (release-routes/get-release-route-config triplestore change-store)
