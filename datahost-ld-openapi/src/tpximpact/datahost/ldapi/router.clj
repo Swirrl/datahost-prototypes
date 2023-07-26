@@ -108,10 +108,7 @@
                              :description (str "Source viewable in GitHub "
                                                "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
                              :version "0.0.3"}
-                      ;; used in /secure APIs below
-                      :components {:securitySchemes {"auth" {:type :apiKey
-                                                             :in :header
-                                                             :name "Example-Api-Key"}}}}
+                      :components {:securitySchemes {"basic" {:type "http" :scheme "basic"}}}}
             :handler (openapi/create-openapi-handler)}}]
 
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer

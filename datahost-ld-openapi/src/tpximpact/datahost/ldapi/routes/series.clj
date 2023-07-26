@@ -24,6 +24,7 @@
    :parameters {:body routes-shared/JsonLdSchema
                 :path {:series-slug string?}
                 :query schema/ApiQueryParams}
+   :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Series already existed and was successfully updated"
                     :body routes-shared/ResourceSchema}
                201 {:description "Series did not exist previously and was successfully created"

@@ -46,6 +46,7 @@
                         [:description {:title "Description"
                                        :description "Description of revision"
                                        :optional true} string?]]}
+   :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Revision was successfully created"
                     :body string?
                     ;; headers is not currently supported
@@ -62,6 +63,7 @@
                 :path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
+   :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Changes were added to a Revision"
                     :body string?
                     ;; headers is not currently supported
