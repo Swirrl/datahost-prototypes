@@ -6,9 +6,139 @@
     [tpximpact.datahost.ldapi.router :as router]
     [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
     [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th])
+    [tpximpact.test-helpers :as th]
+    [clojure.test.check.generators :as gen]
+    [com.gfredericks.test.chuck.generators :as cgen]
+    [malli.core :as m]
+    [malli.generator :as mg])
   (:import
-    [java.util UUID]))
+    [java.lang AutoCloseable]
+    [java.util UUID]
+    [java.time Duration Instant LocalDateTime OffsetDateTime ZoneOffset ZonedDateTime]))
+
+(def title-gen gen/string-alphanumeric)
+(def description-gen gen/string-alphanumeric)
+
+(def series-slug-gen (cgen/string-from-regex #"\w(-?\w{0,5}){0,2}"))
+
+(def series-gen
+  (gen/hash-map :type (gen/return :series)
+                :slug series-slug-gen
+                "dcterms:title" title-gen
+                "dcterms:description" description-gen))
+
+(defn- update-key-gen [resource k value-gen]
+  (let [existing-value (get resource k)
+        new-value-gen (gen/such-that (fn [v] (not= v existing-value)) value-gen)]
+    (gen/fmap (fn [new-value]
+                (assoc resource k new-value))
+              new-value-gen)))
+
+(defn update-title-gen [resource]
+  (update-key-gen resource "dcterms:title" title-gen))
+
+(defn update-description-gen [resource]
+  (update-key-gen resource "dcterms:description" description-gen))
+
+(defn mutate-title-description-gen [resource]
+  (let [mutators [update-title-gen
+                  update-description-gen]]
+    (gen/bind (gen/elements mutators) (fn [mf] (mf resource)))))
+
+(defn- maybe-add-mutation-gen [versions mutator decision-gen]
+  {:pre [(seq versions)]}
+  (let [last-version (last versions)]
+    (gen/bind decision-gen (fn [mutate?]
+                             (if mutate?
+                               (gen/bind (mutator last-version) (fn [version] (maybe-add-mutation-gen (conj versions version) mutator decision-gen)))
+                               (gen/return versions))))))
+(defn mutations-gen [initial mutator]
+  (maybe-add-mutation-gen [initial] mutator gen/boolean))
+
+(defn series-updates-gen [series]
+  (mutations-gen series mutate-title-description-gen))
+
+(defn- instant-gen
+  ([]
+   (let [local-now (ZonedDateTime/now)
+         min-date (.minusWeeks local-now 1)
+         max-date (.plusWeeks local-now 1)]
+     (instant-gen (Instant/from min-date) (Instant/from max-date))))
+  ([^Instant min  ^Instant max]
+   (gen/fmap (fn [secs] (Instant/ofEpochSecond secs)) (gen/choose (.getEpochSecond min) (.getEpochSecond max)))))
+
+(defn- instant->utc-offset-datetime [^Instant i]
+  (OffsetDateTime/ofInstant i ZoneOffset/UTC))
+
+(defn- datetime-gen
+  ([] (gen/fmap instant->utc-offset-datetime (instant-gen)))
+  ([^OffsetDateTime min ^OffsetDateTime max]
+   (gen/fmap instant->utc-offset-datetime (instant-gen (.toInstant min) (.toInstant max)))))
+
+(defn- duration-gen
+  ([] (duration-gen 0 (.getSeconds (Duration/ofDays 1))))
+  ([min-seconds max-seconds]
+   (gen/fmap (fn [secs] (Duration/ofSeconds secs)) (gen/choose min-seconds max-seconds))))
+
+(defn- tick-gen [^OffsetDateTime current]
+  (gen/fmap (fn [^Duration d] (.plus current d)) (duration-gen)))
+
+(defn- n-mutations-gen [initial mutator n]
+  (letfn [(gen-remaining [versions n]
+            (if (pos? n)
+              (gen/bind (mutator (last versions)) (fn [next]
+                                                    (gen-remaining (conj versions next) (dec n))))
+              (gen/return versions)))]
+    (gen/bind (mutator initial) (fn [first] (gen-remaining [first] (dec n))))))
+
+(defn create-op [resource at]
+  {:op :create
+   :resource resource
+   :at at})
+
+(defrecord RingClient [handler clock store]
+  AutoCloseable
+  (close [_this]
+    (.close store)))
+
+(defn- create-client []
+  (let [store (tfstore/create-temp-file-store)
+        repo (repo/sail-repo)
+        t (time/parse "2023-06-29T10:11:07Z")
+        clock (time/manual-clock t)
+        handler (router/handler clock repo store)]
+    (->RingClient handler clock store)))
+
+(t/deftest mutaty-test
+  (with-open [client (create-client)]
+    (let [start-time (time/parse "2023-07-25T14:05:21Z")
+          initial (gen/sample series-gen)
+          updates (gen/sample (series-updates-gen initial))
+          ops (concat [(create-op initial start-time)])])
+    )
+  )
+
+{:op :create
+ :resource {:type :series
+            :slug "foo-bar"
+            "dcterms:title" "title"
+            "dcterms:description" "desc"}
+ :submitted-at nil}
+
+{:op :update
+ :previous {}
+ :resource {}
+ :submitted-at nil}
+
+{:op :delete
+ :resource {}
+ :submitted-at nil}
+
+(def Series
+  [:map
+   [:slug [:re nil]]
+   ["dcterms:title" [:string {:min 1 :max 200}]]
+   ["dcterms:description" [:string {:min 1 :max 200}]]])
 
 (defn format-date-time
   [dt]
