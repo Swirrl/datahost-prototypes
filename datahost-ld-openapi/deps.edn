@@ -25,7 +25,9 @@
  :aliases
  {:run {:main-opts ["-m" "tpximpact.datahost.ldapi"]}
 
-  :ldapi/docker {:extra-paths ["env/docker/resources"]
+  :auth/basic {:extra-paths ["env/auth/resources"]}
+
+  :ldapi/docker {:extra-paths ["env/docker/resources" "env/auth/resources"]
                  :jvm-opts ["-Xmx4g"
                             "-Dcom.sun.management.jmxremote.ssl=false"
                             "-Dcom.sun.management.jmxremote.authenticate=false"
