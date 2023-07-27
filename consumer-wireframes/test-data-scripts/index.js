@@ -32,7 +32,7 @@ createRelease = async (series) => {
         });
         const api = await response.json();
 
-        url = url.split("?")[0]
+        url = `${openAPI}/data/${api["@id"]}`
         console.log(`Created: ${url}`)
 
         await createSchemas(releases, series)
@@ -89,18 +89,19 @@ createRevision = async (series) => {
 }
 
 postRevision = async (url, file) => {
+    url = url + "?title=Revision"
     const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify(body)
     });
     const api = await response.json();
     let revision = api["@id"]
-    console.log(`Created: ${url}/${revision}`)
+    console.log(`Created: ${openAPI}/data/${revision}`)
 
-    await uploadData(revision, url, file)
+    await uploadData(revision, file)
 }
 
-uploadData = async (revision, url, file) => {
+uploadData = async (revision, file) => {
     const formData = new FormData();
     formData.append('appends', fs.createReadStream(file));
     const settings = {
@@ -108,7 +109,7 @@ uploadData = async (revision, url, file) => {
         body: formData
     };
     try {
-        url = `${url}/${revision}/changes`
+        url = `${openAPI}/data/${revision}/changes?description=appends`
         const fetchResponse = await fetch(url, settings);
         const data = await fetchResponse.json();
         console.log(`Added data to: ${url}`)

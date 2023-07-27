@@ -1,19 +1,13 @@
 {
-    "@context": ["https://publishmydata.com/debf/datahost/context",
-        {
-            "@base": "https://example.org/data/dataset-1/"
-        }
-    ],
-    "dcterms:title": "Fun schema",
-    "dh:columns": [{
-            "csvw:datatype": "string",
-            "csvw:name": "foo_bar",
-            "csvw:titles": ["Foo Bar"]
-        },
-        {
-            "csvw:datatype": "string",
-            "csvw:name": "height",
-            "csvw:titles": ["Height"]
-        }
-    ]
-}
+    "dh:columns": [
+        {"csvw:name": "year",
+         "csvw:datatype": "integer",
+         "csvw:titles": "Year"},
+        {"csvw:name": "measure",
+         "csvw:datatype": "string",
+         "csvw:titles": ["Unit of Measure"]},
+        {"csvw:name": "uppper_confidence_interval",
+         "csvw:datatype": "double",
+         "csvw:required": true,
+         "csvw:titles": "Upper Confidence Interval"}
+    ]}

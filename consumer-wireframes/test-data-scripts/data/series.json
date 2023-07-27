@@ -7,7 +7,7 @@
     "releases": [{
       "title": "Release 1-1",
       "id": "1-1",
-      "schema": "schema1.json",
+      "schema": "release_1-1.json",
       "revisions": [{
         "file": "data/2019.csv"
       }, {
