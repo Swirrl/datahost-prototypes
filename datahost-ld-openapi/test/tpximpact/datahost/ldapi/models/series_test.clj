@@ -28,7 +28,7 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-06-29T10:11:07Z")
           clock (time/manual-clock t)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
           request (create-put-request "new-series" {"dcterms:title" "A title"
                                                     "dcterms:description" "Description"})
           {:keys [status body]} (handler request)
@@ -66,7 +66,7 @@
           t1 (time/parse "2023-06-30T11:36:18Z")
           t2 (time/parse "2023-06-30T14:25:33Z")
           clock (time/manual-clock t1)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
           create-request (create-put-request "new-series" {"dcterms:title" "Initial Title"
                                                            "dcterms:description" "Initial Description"})
           _initial-response (handler create-request)
@@ -88,7 +88,7 @@
           t1 (time/parse "2023-06-30T13:37:00Z")
           t2 (time/parse "2023-06-30T15:08:03Z")
           clock (time/manual-clock t1)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
 
           properties {"dcterms:title" "Title" "dcterms:description" "Description"}
           create-request (create-put-request "new-series" properties)
@@ -186,4 +186,3 @@
               (is (= (select-keys resp-body ["dcterms:issued" "dcterms:modified"])
                      (select-keys body' ["dcterms:issued" "dcterms:modified"]))
                   "The document shouldn't be modified"))))))))
-

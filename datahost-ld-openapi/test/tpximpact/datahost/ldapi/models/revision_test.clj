@@ -59,7 +59,7 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-07-03T11:16:16Z")
           clock (time/manual-clock t)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
           series-slug (create-series handler)
           [release-slug release-doc] (create-release handler series-slug)
           release-uri (resource-id release-doc)

@@ -23,7 +23,8 @@
     [tpximpact.datahost.ldapi.routes.release :as release-routes]
     [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
     [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-    [ring.middleware.cors :as cors])
+    [ring.middleware.cors :as cors]
+    [clojure.spec.alpha :as s])
   (:import (java.io InputStream InputStreamReader OutputStream)))
 
 (defn decode-str [_options]
@@ -99,7 +100,7 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(defn router [clock triplestore change-store auth]
+(defn router [{:keys [clock triplestore change-store auth]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
@@ -182,9 +183,10 @@
                           (basic-auth-middleware auth)
                           identity)]}}))
 
-(defn handler [clock triplestore change-store auth]
+(defn handler [opts]
+  {:pre [(:clock opts) (:triplestore opts) (:change-store opts)]}
   (ring/ring-handler
-   (router clock triplestore change-store auth)
+   (router opts)
    (ring/routes
     (swagger-ui/create-swagger-ui-handler
      {:path "/"
@@ -196,6 +198,10 @@
     (ring/create-default-handler))
    {:executor sieppari/executor}))
 
+(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
+  (s/keys :req-un [::clock ::triplestore ::change-store]
+          :opt-un [::auth]))
+
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [clock triplestore change-store auth]}]
-  (handler clock triplestore change-store auth))
+  [_ {:keys [clock triplestore change-store auth] :as opts}]
+  (handler opts))

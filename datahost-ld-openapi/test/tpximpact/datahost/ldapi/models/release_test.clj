@@ -40,7 +40,7 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-07-03T11:16:16Z")
           clock (time/manual-clock t)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
           series-slug (create-series handler)
 
           request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
@@ -62,7 +62,7 @@
           t1 (time/parse "2023-07-03T14:35:55Z")
           t2 (time/parse "2023-07-03T16:02:34Z")
           clock (time/manual-clock t1)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
 
           series-slug (create-series handler)
           create-request (create-put-request series-slug "test-release" {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
@@ -89,7 +89,7 @@
           t1 (time/parse "2023-07-04T08:54:11Z")
           t2 (time/parse "2023-07-04T10:33:24Z")
           clock (time/manual-clock t1)
-          handler (router/handler clock repo temp-store)
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
 
           series-slug (create-series handler)
 
