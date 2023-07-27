@@ -78,7 +78,7 @@ fullRowHash = async (data) => {
 compareData = async (old, current) => {
     deletes = []
     for (i = 0; i < old.length; i++) {
-        if (i % 10000 === 0) {
+        if (i % 25000 === 0 && i > 1) {
             console.log(`Compared: ${i}`)
         }
         let hash = old[i]
@@ -104,44 +104,68 @@ generateHeaders = async (row) => {
 
 start = async () => {
     //get files
+    console.log("Loading data")
+    console.time("Loading data");
     const existingData = await getOldData(original)
     const currentData = await getCurrentData(current)
+    console.timeEnd("Loading data");
 
     //remove observations
+    console.log("Removing observations")
+    console.time("Removing observations");
     const existingDataDimensions = await removeObservationsForHashing(existingData, observations)
     const currentDataDimensions = await removeObservationsForHashing(currentData, observations)
+    console.timeEnd("Removing observations");
 
     //hash rows to array
+    console.log("Generating hashed values")
+    console.time("Generating hashed values");
     let existingDataHash = await fullRowHash(existingDataDimensions)
     let currentDataHash = await fullRowHash(currentDataDimensions)
+    console.timeEnd("Generating hashed values");
 
     //compare array and get index of deletes
+    console.log("Compare data")
+    console.time("Compare data");
     let deletesIndex = await compareData(existingDataHash, currentDataHash)
+    console.timeEnd("Compare data");
 
     //find indexed objects in original file
+    console.log("Lookup deleted values")
+    console.time("Lookup deleted values");
     let deletes = []
     for (i = 0; i < deletesIndex.length; i++) {
         temp = deletesIndex[i]
         deletes.push(existingData[temp])
     }
+    console.timeEnd("Lookup deleted values");
 
-    console.log(deletes)
+    if (deletes.length != 0) {
+        if (test === "test") {
+            console.log("Deletes:")
+            console.log(deletes)
+            console.log("--------")
+        }
 
-    //write file to csv
-    let deletesHeader = await generateHeaders(Object.keys(deletes[0]))
-    const csvWriter2 = createCsvWriter({
-        path: outputPrefix + "-deletes.csv",
-        header: deletesHeader
-    });
-
-    csvWriter2.writeRecords(deletes)
-        .then(() => {
-            console.log('Complete deletes file created');
-        }).catch(function (error) {
-            console.log(error);
+        //write file to csv
+        let deletesHeader = await generateHeaders(Object.keys(deletes[0]))
+        const csvWriter2 = createCsvWriter({
+            path: outputPrefix + "-deletes.csv",
+            header: deletesHeader
         });
 
-console.timeEnd("Total time");
+        csvWriter2.writeRecords(deletes)
+            .then(() => {
+                console.log('Complete deletes file created');
+            }).catch(function (error) {
+                console.log(error);
+            });
+            console.timeEnd("Total time");
+    } else {
+        console.timeEnd("Total time");
+        console.log("No deleted values found")
+    }
+    
 }
 
 start()

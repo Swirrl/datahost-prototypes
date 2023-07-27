@@ -137,11 +137,12 @@ removeObservationsForHashing = (data, observationColumn) => {
 checkHeaders = (original, current) => {
     let originalHeaders = Object.keys(original[0])
     let currentHeaders = Object.keys(current[0])
-
     if (JSON.stringify(originalHeaders) === JSON.stringify(currentHeaders)) {
         return true
     } else {
         console.log("Headers don't match, please check and rerun")
+        console.log(JSON.stringify(originalHeaders))
+        console.log(JSON.stringify(currentHeaders))
     }
 }
 
@@ -163,6 +164,7 @@ start = async () => {
         console.time("Generating hashed values");
         let existingDataHash = await fullRowHash(existingData, "old")
         let currentDataHash = await fullRowHash(currentData)
+        console.log(currentDataHash)
         console.timeEnd("Generating hashed values");
 
 
