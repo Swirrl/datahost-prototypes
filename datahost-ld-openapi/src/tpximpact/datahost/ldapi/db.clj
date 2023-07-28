@@ -195,6 +195,11 @@
     (with-open [conn (repo/->connection triplestore)]
       (pr/update! conn qs))))
 
+(defn- submit-updates [triplestore update-queries]
+  (let [qs (f/format-updates update-queries :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/update! conn qs))))
+
 (defn- update-resource-title-description-modified [triplestore resource]
   (let [q (update-resource-title-description-modified-query resource)
         qs (f/format-update q :pretty? true)]
@@ -300,6 +305,12 @@
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
 
+(defn delete-series-releases-query [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :delete [['?release '?p '?o]]
+   :where [['?release :dcat/inSeries series-uri]
+           ['?release '?p '?o]]})
+
 (defn delete-series-query [series-uri]
   {:delete [[series-uri '?p '?o]]
    :where [[series-uri '?p '?o]]})
@@ -307,8 +318,9 @@
 (defn delete-series!
   [triplestore series-slug]
   (let [series-uri (models-shared/dataset-series-uri series-slug)
-        query (delete-series-query series-uri)]
-    (submit-update triplestore query)))
+        queries [(delete-series-releases-query series-uri)
+                 (delete-series-query series-uri)]]
+    (submit-updates triplestore queries)))
 
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to

@@ -6,13 +6,23 @@
 (def title-gen gen/string-alphanumeric)
 (def description-gen gen/string-alphanumeric)
 
-(def series-slug-gen (cgen/string-from-regex #"\w(-?\w{0,5}){0,2}"))
+(def slug-gen (cgen/string-from-regex #"\w(-?\w{0,5}){0,2}"))
 
 (def series-gen
   (gen/hash-map :type (gen/return :series)
-                :slug series-slug-gen
+                :slug slug-gen
                 "dcterms:title" title-gen
                 "dcterms:description" description-gen))
+
+(def release-gen
+  (gen/hash-map :type (gen/return :release)
+                :slug slug-gen
+                "dcterms:title" title-gen
+                "dcterms:description" description-gen))
+
+(def release-deps-gen
+  (gen/fmap (fn [[series release]]
+              (assoc release :parent series)) (gen/tuple series-gen release-gen)))
 
 (defn- update-key-gen [resource k value-gen]
   (let [existing-value (get resource k)

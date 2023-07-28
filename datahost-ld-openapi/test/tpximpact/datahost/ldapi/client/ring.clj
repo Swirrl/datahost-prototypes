@@ -12,13 +12,24 @@
   (close [_this]
     (.close store)))
 
+(defmulti resource-path (fn [resource] (:type resource)))
+
+(defmethod resource-path :series [{:keys [slug]}]
+  (str "/data/" slug))
+
+(defmethod resource-path :release [{:keys [slug parent]}]
+  (str (resource-path parent) "/releases/" slug))
+
+(defmethod resource-path :default [resource]
+  (throw (ex-info (str "Unsupported resource type: " (:type resource)) {:resource resource})))
+
 (defn submit-op [{:keys [handler clock] :as client} {:keys [op resource at]}]
   (time/set-now clock at)
   (let [request (case op
                   :delete {:request-method :delete
-                           :uri (str "/data/" (:slug resource))}
+                           :uri (resource-path resource)}
                   (let [body (into {} (remove (fn [[k _v]] (keyword? k)) resource))]
-                    {:uri (str "/data/" (:slug resource))
+                    {:uri (resource-path resource)
                      :request-method :put
                      :headers {"content-type" "application/json"}
                      :body (json/write-str body)}))
@@ -41,3 +52,18 @@
         handler (router/handler clock repo store)]
     (->RingClient handler clock store)))
 
+(defn get-resource [{:keys [handler] :as client} resource]
+  (let [request {:request-method :get
+                 :uri (resource-path resource)
+                 :headers {"accept" "application/json"}}
+        {:keys [status body] :as _response} (handler request)]
+    (when (= 200 status)
+      (json/read-str body))))
+
+(defn get-series [{:keys [handler]} series-slug]
+  (let [request {:request-method :get
+                 :uri (str "/data/" series-slug)
+                 :headers {"accept" "application/json"}}
+        {:keys [status body] :as response} (handler request)]
+    (when (= 200 status)
+      (json/read-str body))))

@@ -34,13 +34,18 @@
    :resource resource
    :at at})
 
-(defn get-series [{:keys [handler]} series-slug]
-  (let [request {:request-method :get
-                 :uri (str "/data/" series-slug)
-                 :headers {"accept" "application/json"}}
-        {:keys [status body] :as reponse} (handler request)]
-    (when (= 200 status)
-      (json/read-str body))))
+(defn flatten-resource [resource]
+  (loop [result (list resource)
+         current resource]
+    (if-let [p (:parent current)]
+      (recur (conj result p) p)
+      result)))
+
+(defn find-parent [{:keys [parent type] :as resource} parent-type]
+  (cond
+    (= type parent-type) resource
+    (some? parent) (recur parent parent-type)
+    :else (throw (ex-info "Could not find parent with type" {:type parent-type}))))
 
 (t/deftest creaty-test
   (with-open [client (ring-client/create-client)]
@@ -48,7 +53,7 @@
           series (gen/generate rgen/series-gen)
           op (create-op series start-time)
           series-doc (ring-client/submit-op client op)
-          fetched-doc (get-series client (:slug series))
+          fetched-doc (ring-client/get-resource client series)
           expected (merge (select-keys series ["dcterms:title" "dcterms:description"])
                           {"dcterms:issued" (str start-time)
                            "dcterms:modified" (str start-time)})
@@ -72,7 +77,7 @@
       (doseq [op ops]
         (ring-client/submit-op client op))
 
-      (let [series (get-series client (:slug initial))
+      (let [series (ring-client/get-resource client initial)
             [missing _ _] (diff expected series)]
         (t/is (= nil missing))))))
 
@@ -84,8 +89,44 @@
           _series-doc (ring-client/submit-op client (create-op series create-time))]
       (ring-client/submit-op client (delete-op series delete-time))
 
-      (let [fetched-doc (get-series client (:slug series))]
+      (let [fetched-doc (ring-client/get-resource client series)]
         (t/is (nil? fetched-doc))))))
+
+(t/deftest create-release-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          release (gen/generate rgen/release-deps-gen)
+          resources (flatten-resource release)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          create-ops (mapv create-op resources create-times)]
+      (doseq [op create-ops]
+        (ring-client/submit-op client op))
+
+      ;; all resources should be created
+      (doseq [resource resources]
+        (let [fetched (ring-client/get-resource client resource)
+              expected (into {} (remove (fn [[k _v]] (keyword? k)) fetched))
+              [missing _ _] (diff expected fetched)]
+          (t/is (= nil missing)))))))
+
+(t/deftest create-release-delete-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          release (gen/generate rgen/release-deps-gen)
+          resources (flatten-resource release)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          delete-time (gen/generate (rgen/tick-gen (last create-times)))
+          create-ops (mapv create-op resources create-times)
+          series (find-parent release :series)]
+      (doseq [op create-ops]
+        (ring-client/submit-op client op))
+
+      (ring-client/submit-op client (delete-op series delete-time))
+
+      ;; all resources should be deleted
+      (doseq [resource resources]
+        (let [fetched (ring-client/get-resource client resource)]
+          (t/is (nil? fetched)))))))
 
 (defn format-date-time
   [dt]
