@@ -23,26 +23,48 @@
 (defmethod resource-path :schema [{:keys [slug parent]}]
   (str (resource-path parent) "/schemas/" slug))
 
+(defmethod resource-path :revision [revision]
+  (:location revision))
+
 (defmethod resource-path :default [resource]
   (throw (ex-info (str "Unsupported resource type: " (:type resource)) {:resource resource})))
+
+(defmulti create-resource-path (fn [resource] (:type resource)))
+
+(defmethod create-resource-path :default [resource]
+  (resource-path resource))
+
+(defmethod create-resource-path :revision [{:keys [parent] :as revision}]
+  (str (create-resource-path parent) "/revisions"))
 
 (defmulti resource-create-method (fn [resource] (:type resource)))
 (defmethod resource-create-method :default [_resource] :put)
 (defmethod resource-create-method :schema [_schema] :post)
+(defmethod resource-create-method :revision [_revision] :post)
 
 (defn resource->doc [resource]
   (into {} (remove (fn [[k _v]] (keyword? k)) resource)))
+
+(defmulti resource-created (fn [_create-response _doc resource] (:type resource)))
+(defmethod resource-created :default [_create-response _doc resource]
+  resource)
+
+(defmethod resource-created :revision [create-response _doc revision]
+  (assoc revision :location (get-in create-response [:headers "Location"])))
 
 (defn submit-op [{:keys [handler clock] :as client} {:keys [op resource at]}]
   (time/set-now clock at)
   (let [request (case op
                   :delete {:request-method :delete
                            :uri (resource-path resource)}
-                  (let [body (resource->doc resource)]
-                    {:uri (resource-path resource)
-                     :request-method (resource-create-method resource)
-                     :headers {"content-type" "application/json"}
-                     :body (json/write-str body)}))
+                  :create {:uri (create-resource-path resource)
+                           :request-method (resource-create-method resource)
+                           :headers {"content-type" "application/json"}
+                           :body (json/write-str (resource->doc resource))}
+                  :update {:uri (resource-path resource)
+                           :request-method :put
+                           :headers {"content-type" "application/json"}
+                           :body (json/write-str (resource->doc resource))})
         {:keys [status body] :as response} (handler request)]
     (cond
       (>= status 400)
@@ -52,7 +74,8 @@
       nil
 
       :else
-      (json/read-str body))))
+      (let [doc (json/read-str body)]
+        (resource-created response doc resource)))))
 
 (defn create-client []
   (let [store (tfstore/create-temp-file-store)
@@ -67,13 +90,5 @@
                  :uri (resource-path resource)
                  :headers {"accept" "application/json"}}
         {:keys [status body] :as _response} (handler request)]
-    (when (= 200 status)
-      (json/read-str body))))
-
-(defn get-series [{:keys [handler]} series-slug]
-  (let [request {:request-method :get
-                 :uri (str "/data/" series-slug)
-                 :headers {"accept" "application/json"}}
-        {:keys [status body] :as response} (handler request)]
     (when (= 200 status)
       (json/read-str body))))

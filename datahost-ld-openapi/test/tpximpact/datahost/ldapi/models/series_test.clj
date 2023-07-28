@@ -164,6 +164,43 @@
         (let [fetched (ring-client/get-resource client resource)]
           (t/is (nil? fetched)))))))
 
+(defn create-resources [client resources create-times]
+  (mapv (fn [resource create-time]
+          (ring-client/submit-op client (create-op resource create-time)))
+        resources
+        create-times))
+(t/deftest create-revision-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          revision (gen/generate rgen/revision-deps-gen)
+          resources (flatten-resource revision)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          resources (create-resources client resources create-times)]
+
+      ;; all resources should be created
+      (doseq [resource resources]
+        (let [fetched (ring-client/get-resource client resource)
+              expected (into {} (remove (fn [[k _v]] (keyword? k)) fetched))
+              [missing _ _] (diff expected fetched)]
+          (t/is (empty? missing)))))))
+
+(t/deftest create-delete-revision-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          revision (gen/generate rgen/revision-deps-gen)
+          resources (flatten-resource revision)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          delete-time (gen/generate (rgen/tick-gen (last create-times)))
+          series (find-parent revision :series)
+          resources (create-resources client resources create-times)]
+
+      (ring-client/submit-op client (delete-op series delete-time))
+
+      ;; all resources should be deleted
+      (doseq [resource resources]
+        (let [fetched (ring-client/get-resource client resource)]
+          (t/is (nil? fetched)))))))
+
 (defn format-date-time
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))

@@ -118,3 +118,14 @@
               (assoc schema :parent release))
             (gen/tuple release-deps-gen schema-gen)))
 
+(def revision-gen
+  (gen/hash-map
+    :type (gen/return :revision)
+    "dcterms:title" title-gen
+    "dcterms:description" description-gen))
+
+(def revision-deps-gen
+  (gen/fmap (fn [[release revision]]
+              (assoc revision :parent release))
+            (gen/tuple release-deps-gen revision-gen)))
+
