@@ -20,17 +20,27 @@
 (defmethod resource-path :release [{:keys [slug parent]}]
   (str (resource-path parent) "/releases/" slug))
 
+(defmethod resource-path :schema [{:keys [slug parent]}]
+  (str (resource-path parent) "/schemas/" slug))
+
 (defmethod resource-path :default [resource]
   (throw (ex-info (str "Unsupported resource type: " (:type resource)) {:resource resource})))
+
+(defmulti resource-create-method (fn [resource] (:type resource)))
+(defmethod resource-create-method :default [_resource] :put)
+(defmethod resource-create-method :schema [_schema] :post)
+
+(defn resource->doc [resource]
+  (into {} (remove (fn [[k _v]] (keyword? k)) resource)))
 
 (defn submit-op [{:keys [handler clock] :as client} {:keys [op resource at]}]
   (time/set-now clock at)
   (let [request (case op
                   :delete {:request-method :delete
                            :uri (resource-path resource)}
-                  (let [body (into {} (remove (fn [[k _v]] (keyword? k)) resource))]
+                  (let [body (resource->doc resource)]
                     {:uri (resource-path resource)
-                     :request-method :put
+                     :request-method (resource-create-method resource)
                      :headers {"content-type" "application/json"}
                      :body (json/write-str body)}))
         {:keys [status body] :as response} (handler request)]

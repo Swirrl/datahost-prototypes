@@ -305,6 +305,14 @@
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series)}))))
 
+(defn delete-series-releases-schemas [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :delete [['?schema '?p '?o]
+            ['?release :dh/hasSchema '?schema]]
+   :where [['?release :dcat/inSeries series-uri]
+           ['?release :dh/hasSchema '?schema]
+           ['?schema '?p '?o]]})
+
 (defn delete-series-releases-query [series-uri]
   {:prefixes (compact/as-flint-prefixes)
    :delete [['?release '?p '?o]]
@@ -318,7 +326,8 @@
 (defn delete-series!
   [triplestore series-slug]
   (let [series-uri (models-shared/dataset-series-uri series-slug)
-        queries [(delete-series-releases-query series-uri)
+        queries [(delete-series-releases-schemas series-uri)
+                 (delete-series-releases-query series-uri)
                  (delete-series-query series-uri)]]
     (submit-updates triplestore queries)))
 

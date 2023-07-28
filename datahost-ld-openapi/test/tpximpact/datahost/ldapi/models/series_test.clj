@@ -128,6 +128,42 @@
         (let [fetched (ring-client/get-resource client resource)]
           (t/is (nil? fetched)))))))
 
+(t/deftest create-schema-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          release (gen/generate rgen/schema-deps-gen)
+          resources (flatten-resource release)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          create-ops (mapv create-op resources create-times)]
+      (doseq [op create-ops]
+        (ring-client/submit-op client op))
+
+      ;; all resources should be created
+      (doseq [resource resources]
+        (let [fetched (ring-client/get-resource client resource)
+              expected (into {} (remove (fn [[k _v]] (keyword? k)) fetched))
+              [missing _ _] (diff expected fetched)]
+          (t/is (empty? missing)))))))
+
+(t/deftest create-delete-schema-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          schema (gen/generate rgen/schema-deps-gen)
+          resources (flatten-resource schema)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          delete-time (gen/generate (rgen/tick-gen (last create-times)))
+          create-ops (mapv create-op resources create-times)
+          series (find-parent schema :series)]
+      (doseq [op create-ops]
+        (ring-client/submit-op client op))
+
+      (ring-client/submit-op client (delete-op series delete-time))
+
+      ;; all resources should be deleted
+      (doseq [resource resources]
+        (let [fetched (ring-client/get-resource client resource)]
+          (t/is (nil? fetched)))))))
+
 (defn format-date-time
   [dt]
   (.format ^java.time.ZonedDateTime dt java.time.format.DateTimeFormatter/ISO_OFFSET_DATE_TIME))

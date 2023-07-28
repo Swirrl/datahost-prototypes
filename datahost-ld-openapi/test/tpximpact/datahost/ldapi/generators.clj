@@ -1,6 +1,8 @@
 (ns tpximpact.datahost.ldapi.generators
-  (:require [com.gfredericks.test.chuck.generators :as cgen]
-            [clojure.test.check.generators :as gen])
+  (:require
+    [clojure.string :as string]
+    [com.gfredericks.test.chuck.generators :as cgen]
+    [clojure.test.check.generators :as gen])
   (:import [java.time Duration Instant OffsetDateTime ZoneOffset ZonedDateTime]))
 
 (def title-gen gen/string-alphanumeric)
@@ -93,4 +95,26 @@
                                                     (gen-remaining (conj versions next) (dec n))))
               (gen/return versions)))]
     (gen/bind (mutator initial) (fn [first] (gen-remaining [first] (dec n))))))
+
+(def word-gen (cgen/string-from-regex #"[A-Za-z]+"))
+(def schema-column-name-gen word-gen)
+(def schema-column-title-gen
+  (gen/fmap (fn [words] (string/join " " words)) (gen/vector word-gen 1 4)))
+
+(def schema-column-gen
+  (gen/hash-map "csvw:datatype" (gen/return "string")
+                "csvw:name" schema-column-name-gen
+                "csvw:titles" (gen/vector schema-column-title-gen 1 3)))
+(def schema-gen
+  (gen/hash-map
+    :type (gen/return :schema)
+    :slug slug-gen
+    "dcterms:title" title-gen
+    "dcterms:description" description-gen
+    "dh:columns" (gen/vector schema-column-gen 1 5)))
+
+(def schema-deps-gen
+  (gen/fmap (fn [[release schema]]
+              (assoc schema :parent release))
+            (gen/tuple release-deps-gen schema-gen)))
 
