@@ -382,8 +382,7 @@
         {:op :create :jsonld-doc (release->response-body created-release)}))))
 
 (defn- select-auto-increment-query [parent-uri child-pred]
-  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
-              :xsd "<http://www.w3.org/2001/XMLSchema#>"}
+  {:prefixes (select-keys default-prefixes [:dh :xsd])
    :select ['?next]
    :where [[:where {:select '[[(max (:xsd/integer (replace (str ?child) "^.*/([^/]*)$" "$1"))) ?highest]]
                     :where [[parent-uri child-pred '?child]]}]
@@ -480,21 +479,19 @@
 (defn- insert-change-statement*
   "Statement for: insert only when the revision has no changes already."
   [revision-uri change-uri statements]
-  (let [st {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
-                       :xsd "<http://www.w3.org/2001/XMLSchema#>"}
-            :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
-            :where
-            [[:where {:select [['(max (:xsd/integer (replace (str ?e) "^.*/([^/]*)$" "$1"))) '?last]]
-                      :where [['?e (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                               (compact/expand :dh/Change)]]}]
-             [:filter (list 'not-exists
-                            [['?e
-                              (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                              (compact/expand :dh/Change)]
-                             ['?e 
-                              (compact/expand :dh/appliesToRevision)
-                              revision-uri]])]]}]
-    st))
+  {:prefixes (select-keys default-prefixes [:dh :xsd])
+   :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
+   :where
+   [[:where {:select [['(max (:xsd/integer (replace (str ?e) "^.*/([^/]*)$" "$1"))) '?last]]
+             :where [['?e (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                      (compact/expand :dh/Change)]]}]
+    [:filter (list 'not-exists
+                   [['?e
+                     (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                     (compact/expand :dh/Change)]
+                    ['?e 
+                     (compact/expand :dh/appliesToRevision)
+                     revision-uri]])]]})
 
 (defn insert-change! [triplestore change-store api-params incoming-jsonld-doc appends-tmp-file]
   (let [change-number 1                 ;one append per revision
