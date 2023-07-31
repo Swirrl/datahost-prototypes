@@ -177,15 +177,14 @@
                    {{:keys [series-slug release-slug revision-id]} :path-params
                     {{:keys [appends]} :multipart}                 :parameters
                     body-params                                    :body-params :as request}]
-  ;; TODO This could be an ASK of the Revision
   (cond
     (db/resource-exists? triplestore
                          (models.shared/change-uri series-slug release-slug revision-id 1))
     {:status 422
      :body "A change is already associated with the revision."}
     
-    (if (db/resource-exists? triplestore
-                           (models.shared/revision-uri series-slug release-slug revision-id))
+    (db/resource-exists? triplestore
+                         (models.shared/revision-uri series-slug release-slug revision-id))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
