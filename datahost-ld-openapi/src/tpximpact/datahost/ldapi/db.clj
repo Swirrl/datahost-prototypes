@@ -11,7 +11,9 @@
     [tpximpact.datahost.ldapi.resource :as resource]
     [tpximpact.datahost.ldapi.store :as store])
   (:import (java.net URI)
-           (java.util UUID)))
+           (java.util UUID)
+           (org.eclipse.rdf4j.common.transaction IsolationLevels)
+           (org.eclipse.rdf4j.repository RepositoryConnection)))
 
 (def default-prefixes {:dcat (URI. "http://www.w3.org/ns/dcat#")
                        :dcterms (URI. "http://purl.org/dc/terms/")
@@ -387,6 +389,14 @@
                     :where [[parent-uri child-pred '?child]]}]
            [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
+(defn- select-max-n-query [parent-uri child-pred]
+  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
+              :xsd "<http://www.w3.org/2001/XMLSchema#>"}
+   :select ['?n]
+   :where [[:where {:select '[[(max (:xsd/integer (replace (str ?child) "^.*/([^/]*)$" "$1"))) ?highest]]
+                    :where [[parent-uri child-pred '?child]]}]
+           [:bind ['(coalesce ?highest 0) '?n]]]})
+
 (defn- fetch-next-child-resource-number [triplestore parent-uri child-pred]
   (let [q (select-auto-increment-query parent-uri child-pred)
         qs (f/format-query q :pretty? true)
@@ -468,17 +478,57 @@
     {:resource-id revision-number
      :jsonld-doc (revision->response-body revision)}))
 
+(defn- insert-change-statement*
+  "Statement for: insert only when the revision has no changes already."
+  [revision-uri change-uri statements]
+  (let [st {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
+                       :xsd "<http://www.w3.org/2001/XMLSchema#>"}
+            :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
+            :where
+            [[:where {:select [['(max (:xsd/integer (replace (str ?e) "^.*/([^/]*)$" "$1"))) '?last]]
+                      :where [['?e (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                               (compact/expand :dh/Change)]]}]
+             [:filter (list 'not-exists
+                            [['?e
+                              (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
+                              (compact/expand :dh/Change)]
+                             ['?e 
+                              (compact/expand :dh/appliesToRevision)
+                              revision-uri]])]]}]
+    st))
+
 (defn insert-change! [triplestore change-store api-params incoming-jsonld-doc appends-tmp-file]
-  (let [change-number (generate-change-number triplestore api-params)
+  (let [change-number 1                 ;one append per revision
         change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)
         append-key (store/insert-append change-store appends-tmp-file)
-        change (resource/set-property1 change (compact/expand :dh/appends) append-key)]
+        change (resource/set-property1 change (compact/expand :dh/appends) append-key)
 
-    (with-open [conn (repo/->connection triplestore)]
-      (pr/add conn (concat (resource/->statements change)
-                           (revision-change-statements change))))
-    {:resource-id change-number
-     :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"]))}))
+        rev-uri (resource/get-property1 change (compact/expand :dh/appliesToRevision))
+        change-uri (resource/id change)
+
+        last-change-num (fn [conn]
+                          (-> (doall
+                               (repo/query conn
+                                           (f/format-query
+                                            (select-max-n-query rev-uri (compact/expand :dh/hasChange)))))
+                              first
+                              :n))
+
+        {:keys [before after]}
+        (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
+          (.setIsolationLevel conn IsolationLevels/READ_COMMITTED)
+          (repo/with-transaction conn
+            (let [before (last-change-num conn)
+                  statements (concat (resource/->statements change) (revision-change-statements change))
+                  _ (pr/update! conn
+                                (f/format-update (insert-change-statement* rev-uri change-uri
+                                                                           statements)))
+                  after (last-change-num conn)]
+              {:before before :after after})))]
+    (if (and (= 0N before) (= 1N after))
+      {:resource-id change-number
+       :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"]))}
+      {:message "Change already exists."})))
 
 (defn- release-schema-statements [schema]
   [(pr/->Triple (resource/get-property1 schema (compact/expand :dh/appliesToRelease))
