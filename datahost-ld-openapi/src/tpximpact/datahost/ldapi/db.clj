@@ -390,8 +390,7 @@
            [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
 (defn- select-max-n-query [parent-uri child-pred]
-  {:prefixes {:dh "<https://publishmydata.com/def/datahost/>"
-              :xsd "<http://www.w3.org/2001/XMLSchema#>"}
+  {:prefixes (select-keys default-prefixes [:dh :xsd])
    :select ['?n]
    :where [[:where {:select '[[(max (:xsd/integer (replace (str ?child) "^.*/([^/]*)$" "$1"))) ?highest]]
                     :where [[parent-uri child-pred '?child]]}]
