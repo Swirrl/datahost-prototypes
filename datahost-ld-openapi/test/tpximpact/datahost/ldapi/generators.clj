@@ -1,9 +1,12 @@
 (ns tpximpact.datahost.ldapi.generators
   (:require
     [clojure.string :as string]
+    [clojure.java.io :as io]
     [com.gfredericks.test.chuck.generators :as cgen]
-    [clojure.test.check.generators :as gen])
-  (:import [java.time Duration Instant OffsetDateTime ZoneOffset ZonedDateTime]))
+    [clojure.test.check.generators :as gen]
+    [clojure.data.csv :as csv])
+  (:import (java.io StringWriter)
+           [java.time Duration Instant OffsetDateTime ZoneOffset ZonedDateTime]))
 
 (def title-gen gen/string-alphanumeric)
 (def description-gen gen/string-alphanumeric)
@@ -128,4 +131,26 @@
   (gen/fmap (fn [[release revision]]
               (assoc revision :parent release))
             (gen/tuple release-deps-gen revision-gen)))
+
+(defn- column->heading-gen [column]
+  (gen/elements (get column "csvw:titles")))
+
+(defn- column->value-gen [column]
+  (let [type-gens {"string" gen/string-ascii}
+        type-name (get column "csvw:datatype")]
+    (if-let [gen (get type-gens type-name)]
+      gen
+      (throw (ex-info (format "Generator for datatype '%s' not found" type-name) {:column column})))))
+
+(defn schema->appends-gen [schema]
+  (let [columns (get schema "dh:columns")
+        headers-gen (apply gen/tuple (map column->heading-gen columns))
+        row-gen (apply gen/tuple (map column->value-gen columns))
+        rows-gen (gen/vector row-gen 0 10)]
+    (gen/fmap (fn [[header rows]]
+                (with-open [w (StringWriter.)]
+                  (csv/write-csv w (cons header rows))
+                  (.flush w)
+                  (str w)))
+              (gen/tuple headers-gen rows-gen))))
 
