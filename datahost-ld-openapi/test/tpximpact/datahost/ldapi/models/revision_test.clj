@@ -174,7 +174,7 @@
               _ (when-not (m/validate LdSchemaInput schema-req-body)
                   (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))
                                   {:schema schema-req-body})))
-              _ (POST (str release-url "/schemas/schema-1")
+              _ (POST (str release-url "/schema")
                       {:content-type :json
                        :body (json/write-str schema-req-body)})]
           (is (= 201 (:status release-resp)))

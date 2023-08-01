@@ -49,7 +49,7 @@
                                          "csvw:name" col-name
                                          "csvw:titles" titles})]
     (testing "Creating a schema"
-      (let [schema-path (format "/data/my-series-%s/releases/release-%s/schemas/schema-%s" n n n)
+      (let [schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
             schema-uri (str "https://example.org" schema-path)
             response (POST schema-path
                            {:content-type :json
@@ -63,7 +63,7 @@
             expected-doc (schema-doc n)
             [missing _extra _matching] (diff expected-doc resp-body)]
         (is (= 201 (:status response)))
-        (t/is (= nil missing))
+        (is (= nil missing))
 
         (testing "The release was updated with a reference to the schema"
           (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s" n n))
@@ -71,7 +71,7 @@
             (is (= schema-uri (get body "dh:hasSchema")))))
 
         (testing "The schema can be retrieved"
-          (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s/schemas" n n))
+          (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s/schema" n n))
                 body (json/read-str body)
                 [missing _extra _matching] (diff expected-doc body)]
             (is (= nil missing))))))))
