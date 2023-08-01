@@ -228,7 +228,8 @@
                                                      :body (json/write-str change-ednld)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-                (is (= 201 (:status change-api-response) ))
+                
+                (is (= 201 (:status change-api-response)))
                 (is (= (str new-revision-location "/changes/1")
                        new-change-resource-location)
                     "Created with the resource URI provided in the Location header")
@@ -241,7 +242,7 @@
                            (count change-resp-body-seq))
                         "responds CSV contents")))))
 
-            (testing "Second Changes resource created with CSV appends file"
+            (testing "Ensure we can't add more than 1 change to a revision."
               ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
               (let [change-ednld {"dcterms:description" "A new second change"}
                     multipart-temp-file-part (build-csv-multipart csv-2020-path)
@@ -250,28 +251,20 @@
                                                      :multipart-params {:appends multipart-temp-file-part}
                                                      :content-type "application/json"
                                                      :body (json/write-str change-ednld)})
-                    change-response-json (json/read-str (:body change-api-response))
-                    inserted-change-id (get change-response-json "@id")
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
-
-                (is (= (:status change-api-response) 201))
-                ; my-lovely-series/releases/release-xxx/revisions/1/changes/2
-                (is (= inserted-change-id (str inserted-revision-id "/changes/2")))
-                ; /data/my-lovely-series/releases/release-xxx/revisions/1/changes/2
-                (is (= new-change-resource-location
-                       (str new-revision-location "/changes/2"))
-                    "Created with the resource URI provided in the Location header")))
+                (is (= 422 (:status change-api-response)))
+                (is (nil? new-change-resource-location))))
 
             (testing "Fetching Revision as CSV with multiple CSV append changes"
               (let [response (GET new-revision-location {:headers {"accept" "text/csv"}})
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
-                ;; length of both csv files minus 1 duplicated header
-                (is (= (+ (count csv-2019-seq) (- (count csv-2020-seq) 1))
+                ;; length of one csv file
+                (is (= (count csv-2019-seq)
                        (count resp-body-seq))
                     "responds with concatenated changes from both CSVs")
                 (is (= (first resp-body-seq) (first csv-2020-seq)))
-                (is (= (second resp-body-seq) (second csv-2020-seq)))
+                ;;(is (= (second resp-body-seq) (second csv-2020-seq)))
                 (is (str/includes? (last resp-body-seq) ",2019,")))))
 
           (testing "Creation of a second revision for a release"
@@ -296,7 +289,7 @@
                                                        :multipart-params {:appends multipart-temp-file-part}
                                                        :content-type "application/json"
                                                        :body (json/write-str change-3-ednld)})]
-                  (is (= (:status change-api-response) 201))
+                  (is (= 201 (:status change-api-response)))
                   (is (str/ends-with? (get (json/read-str (:body change-api-response)) "@id")
                                       "/changes/1"))))
 
@@ -304,8 +297,8 @@
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                   (is (= 200 (:status response)))
-                  ;; length of all csv files minus 2 duplicated headers
-                  (is (= (+ (count csv-2019-seq) (count csv-2020-seq) (- (count csv-2021-seq) 2))
+                  ;; length of all csv files minus duplicated headers
+                  (is (= (+ (count csv-2019-seq) (- (count csv-2021-seq) 1))
                          (count resp-body-seq))
                       "responds with concatenated changes from all 3 CSVs")
                   (is (= (first resp-body-seq) (first csv-2019-seq)))

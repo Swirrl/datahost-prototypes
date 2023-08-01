@@ -175,27 +175,38 @@
 (defn post-change [triplestore
                    change-store
                    {{:keys [series-slug release-slug revision-id]} :path-params
-                    {{:keys [appends]} :multipart} :parameters
-                    body-params :body-params :as request}]
-  (if (db/resource-exists? triplestore
-                           (models.shared/revision-uri series-slug release-slug revision-id))
+                    {{:keys [appends]} :multipart}                 :parameters
+                    body-params                                    :body-params :as request}]
+  (cond
+    (db/resource-exists? triplestore
+                         (models.shared/change-uri series-slug release-slug revision-id 1))
+    {:status 422
+     :body "A change is already associated with the revision."}
+    
+    (db/resource-exists? triplestore
+                         (models.shared/revision-uri series-slug release-slug revision-id))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
           validation-err (when (some? release-schema)
                            (dataset-validation-error! release-schema appends))
-          {:keys [jsonld-doc resource-id]} (when-not validation-err
-                                             (db/insert-change! triplestore change-store api-params
-                                                                incoming-jsonld-doc appends))]
+          {:keys [jsonld-doc resource-id message]} (when-not validation-err
+                                                     (db/insert-change! triplestore change-store api-params
+                                                                        incoming-jsonld-doc appends))]
       (log/info (format "post-change: validation: found-schema? = %s change-valid? = "
                         (some? release-schema) (nil? validation-err)))
-      (if validation-err
-        validation-err
-        {:status 201
+      (cond
+        (some? validation-err) validation-err
+
+        (some? message) {:status 422 :body message}
+        
+        :else                           ; success
+        {:status  201
          :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
                                    "/revisions/" revision-id "/changes/" resource-id)}
          :body jsonld-doc}))
 
+    :else
     {:status 422
      :body "Revision for this change does not exist"}))
 
