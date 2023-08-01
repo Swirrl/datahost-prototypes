@@ -228,7 +228,8 @@
                                                      :body (json/write-str change-ednld)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-                (is (= 201 (:status change-api-response) ))
+                
+                (is (= 201 (:status change-api-response)))
                 (is (= (str new-revision-location "/changes/1")
                        new-change-resource-location)
                     "Created with the resource URI provided in the Location header")
@@ -251,7 +252,7 @@
                                                      :content-type "application/json"
                                                      :body (json/write-str change-ednld)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
-                (is (= (:status change-api-response) 422))
+                (is (= 422 (:status change-api-response)))
                 (is (nil? new-change-resource-location))))
 
             (testing "Fetching Revision as CSV with multiple CSV append changes"
@@ -288,7 +289,7 @@
                                                        :multipart-params {:appends multipart-temp-file-part}
                                                        :content-type "application/json"
                                                        :body (json/write-str change-3-ednld)})]
-                  (is (= (:status change-api-response) 201))
+                  (is (= 201 (:status change-api-response)))
                   (is (str/ends-with? (get (json/read-str (:body change-api-response)) "@id")
                                       "/changes/1"))))
 

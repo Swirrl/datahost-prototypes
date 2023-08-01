@@ -190,14 +190,18 @@
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
           validation-err (when (some? release-schema)
                            (dataset-validation-error! release-schema appends))
-          {:keys [jsonld-doc resource-id]} (when-not validation-err
-                                             (db/insert-change! triplestore change-store api-params
-                                                                incoming-jsonld-doc appends))]
+          {:keys [jsonld-doc resource-id message]} (when-not validation-err
+                                                     (db/insert-change! triplestore change-store api-params
+                                                                        incoming-jsonld-doc appends))]
       (log/info (format "post-change: validation: found-schema? = %s change-valid? = "
                         (some? release-schema) (nil? validation-err)))
-      (if validation-err
-        validation-err
-        {:status 201
+      (cond
+        (some? validation-err) validation-err
+
+        (some? message) {:status 422 :body message}
+        
+        :else                           ; success
+        {:status  201
          :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
                                    "/revisions/" revision-id "/changes/" resource-id)}
          :body jsonld-doc}))
