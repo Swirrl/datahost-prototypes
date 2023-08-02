@@ -2,6 +2,7 @@
   (:require
     [clojure.data :refer [diff]]
     [clojure.data.json :as json]
+    [clojure.pprint :as pprint]
     [clojure.test :refer [deftest is testing] :as t]
     [grafter-2.rdf4j.repository :as repo]
     [tpximpact.datahost.ldapi.router :as router]
@@ -166,6 +167,7 @@
 
 (defn create-resources [client resources create-times]
   (mapv (fn [resource create-time]
+          (println resource)
           (ring-client/submit-op client (create-op resource create-time)))
         resources
         create-times))
@@ -202,23 +204,126 @@
         (let [fetched (ring-client/get-resource client resource)]
           (t/is (nil? fetched)))))))
 
+(defn- get-children [resource]
+  (case (:type resource)
+    :series (:releases resource)
+    :release (let [{:keys [schema revisions]} resource]
+               (if (some? schema)
+                 (cons schema revisions)
+                 revisions))
+    :revision (:changes resource)
+    nil))
+
+(defn- get-descendent-count [resource]
+  (let [children (get-children resource)
+        child-counts (map get-descendent-count children)]
+    (inc (apply + child-counts))))
+
+(defn- big-flatten-resources [root]
+  (tree-seq (fn [resource]
+              (contains? #{:series :release :revision} (:type resource)))
+            get-children
+            root))
+
+(defn- split-all [splits coll]
+  (let [result (reduce (fn [{:keys [remaining acc]} n]
+                         (let [[x rest] (split-at n remaining)]
+                           {:remaining rest :acc (conj acc x)}))
+                       {:remaining coll :acc (vector)}
+                       splits)]
+    (:acc result)))
+
+(defmulti create-resource (fn [_client resource _create-times] (:type resource)))
+(defmethod create-resource :series [client {:keys [releases] :as series} create-times]
+  (let [[[create-series] rest] (split-at 1 create-times)
+        created-series (ring-client/submit-op client (create-op series create-series))
+        subtree-sizes (map get-descendent-count releases)
+        subtree-create-times (split-all subtree-sizes rest)
+        created-releases (mapv (fn [release create-times]
+                                 (let [with-parent (rgen/set-parent release created-series)]
+                                   (create-resource client with-parent create-times)))
+                               releases
+                               subtree-create-times)]
+    (assoc created-series :releases created-releases)))
+
+(defmethod create-resource :release [client {:keys [schema revisions] :as release} create-times]
+  (let [[[create-release-time] create-children-times] (split-at 1 create-times)
+        created-release (ring-client/submit-op client (create-op release create-release-time))
+        [created-schema create-revision-times] (if (nil? schema)
+                                                 [nil create-children-times]
+                                                 (let [with-parent (rgen/set-parent schema created-release)
+                                                       [[create-schema-time] rest] (split-at 1 create-children-times)
+                                                       created-schema (ring-client/submit-op client (create-op with-parent create-schema-time))]
+                                                   [created-schema rest]))
+        subtree-sizes (map get-descendent-count revisions)
+        subtree-create-times (split-all subtree-sizes create-revision-times)
+        created-revisions (mapv (fn [revision create-times]
+                                  (let [with-parent (rgen/set-parent revision created-release)]
+                                    (create-resource client with-parent create-times)))
+                                revisions
+                                subtree-create-times)]
+    (assoc created-release :schema created-schema :revisions created-revisions)))
+
+(defmethod create-resource :schema [client schema create-times]
+  (let [create-time (first create-times)]
+    (ring-client/submit-op client (create-op schema create-time))))
+
+(defmethod create-resource :revision [client {:keys [changes] :as revision} create-times]
+  (let [[[create-revision-time] create-change-times] (split-at 1 create-times)
+        created-revision (ring-client/submit-op client (create-op revision create-revision-time))
+        created-changes (mapv (fn [change create-time]
+                                (let [with-parent (rgen/set-parent change created-revision)]
+                                  (create-resource client with-parent [create-time])))
+                              changes
+                              create-change-times)]
+    (assoc created-revision :changes created-changes)))
+
+(defmethod create-resource :change [client change create-times]
+  (let [create-time (first create-times)]
+    (ring-client/submit-op client (create-op change create-time))))
+
+(defmethod create-resource :default [_client resource _create-times]
+  #_(pprint/pprint resource)
+  (throw (ex-info "Unsupported resource type" resource)))
+
+(t/deftest create-changes-test
+  (with-open [client (ring-client/create-client)]
+    (let [start-time (time/parse "2023-07-27T18:02:32Z")
+          series (gen/generate rgen/big-series-gen)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (get-descendent-count series)))
+          series (create-resource client series create-times)]
+
+      (println "Created" (get-descendent-count series) "resources")
+
+      ;; all resources should be created
+      (doseq [resource (big-flatten-resources series)]
+        (let [fetched (ring-client/get-resource client resource)
+              expected (ring-client/resource->doc resource)
+              [missing _ _] (diff expected fetched)]
+          (when (seq missing)
+            (println "Expected:")
+            (pprint/pprint expected)
+            (println "Actual:")
+            (pprint/pprint fetched)
+            (println "Missing:")
+            (pprint/pprint missing))
+          (t/is (= nil (seq missing))))))))
+
 (t/deftest create-delete-change-test
   (with-open [client (ring-client/create-client)]
     (let [start-time (time/parse "2023-07-27T18:02:32Z")
-          revision (gen/generate rgen/revision-deps-gen)
-          resources (flatten-resource revision)
-          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (count resources)))
+          series (gen/generate rgen/big-series-gen)
+          create-times (gen/generate (rgen/n-mutations-gen start-time rgen/tick-gen (get-descendent-count series)))
           delete-time (gen/generate (rgen/tick-gen (last create-times)))
-          series (find-parent revision :series)
-          resources (create-resources client resources create-times)]
+          series (create-resource client series create-times)]
 
+      (println "Created" (get-descendent-count series) "resources")
       (ring-client/submit-op client (delete-op series delete-time))
 
       ;; all resources should be deleted
-      (doseq [resource resources]
+      (doseq [resource (big-flatten-resources series)]
         (let [fetched (ring-client/get-resource client resource)]
-          (t/is (nil? fetched))))))
-  )
+          (t/is (nil? fetched)))))))
 
 (defn format-date-time
   [dt]

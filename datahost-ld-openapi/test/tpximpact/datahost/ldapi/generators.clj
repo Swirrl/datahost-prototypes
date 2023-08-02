@@ -1,17 +1,19 @@
 (ns tpximpact.datahost.ldapi.generators
   (:require
+    [clojure.pprint :as pprint]
     [clojure.string :as string]
     [clojure.java.io :as io]
     [com.gfredericks.test.chuck.generators :as cgen]
     [clojure.test.check.generators :as gen]
     [clojure.data.csv :as csv])
-  (:import (java.io StringWriter)
+  (:import (clojure.lang IDeref)
+           (java.io StringWriter)
            [java.time Duration Instant OffsetDateTime ZoneOffset ZonedDateTime]))
 
 (def title-gen gen/string-alphanumeric)
 (def description-gen gen/string-alphanumeric)
 
-(def slug-gen (cgen/string-from-regex #"\w(-?\w{0,5}){0,2}"))
+(def slug-gen (cgen/string-from-regex #"[a-z]{8,10}"))
 
 (def series-gen
   (gen/hash-map :type (gen/return :series)
@@ -107,7 +109,7 @@
 (def schema-column-gen
   (gen/hash-map "csvw:datatype" (gen/return "string")
                 "csvw:name" schema-column-name-gen
-                "csvw:titles" (gen/vector schema-column-title-gen 1 3)))
+                "csvw:titles" (gen/vector schema-column-title-gen 1)))
 (def schema-gen
   (gen/hash-map
     :type (gen/return :schema)
@@ -153,4 +155,50 @@
                   (.flush w)
                   (str w)))
               (gen/tuple headers-gen rows-gen))))
+
+(defrecord OpaqueRef [value]
+  IDeref
+  (deref [_this] value)
+  Object
+  (toString [_this] (str (:type value))))
+
+(defmethod print-method OpaqueRef [r w]
+  (.append w (str r)))
+
+(defmethod pprint/simple-dispatch OpaqueRef [ref]
+  (pprint/write-out (str (get-in ref [:value :type]))))
+
+(defn set-parent [child parent]
+  (assoc child :parent (->OpaqueRef parent)))
+
+(defn schema->change-gen [mschema]
+  (let [appends-gen (schema->appends-gen mschema)]
+    (gen/hash-map :type (gen/return :change)
+                  :change-type (gen/return :append)
+                  :data appends-gen)))
+
+(defn- change-gen [schema revision]
+  (gen/let [schema (if (some? schema)
+                     (gen/return schema)
+                     schema-gen)
+            change (schema->change-gen schema)]
+    (set-parent change revision)))
+
+(defn- big-revision-gen [{:keys [schema] :as release}]
+  (gen/let [revision revision-gen]
+    (let [revision (set-parent revision release)]
+      (gen/let [changes (gen/vector (change-gen schema revision))]
+        (assoc revision :changes changes)))))
+
+(defn- big-release-gen [series]
+  (gen/let [release release-gen
+            mschema (gen/frequency [[4 schema-gen] [1 (gen/return nil)]])]
+    (let [release (set-parent release series)
+          release (assoc release :schema (some-> mschema (set-parent release)))]
+      (gen/let [revisions (gen/vector (big-revision-gen release))]
+        (assoc release :revisions revisions)))))
+(def big-series-gen
+  (gen/let [series series-gen
+            releases (gen/vector (big-release-gen series) 0 5)]
+    (assoc series :releases releases)))
 

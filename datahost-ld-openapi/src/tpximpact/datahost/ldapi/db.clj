@@ -270,6 +270,9 @@
 
 (defn- map-by [f items]
   (into {} (map (fn [v] [(f v) v]) items)))
+
+(defn- column-number [col]
+  (Integer/parseInt (get col "csvw:number")))
 (defn schema->response-body [schema]
   ;; NOTE: Schema documents are modified from the standard json-ld serialisation
   ;; The top-level @graph node is removed and the column nodes are inlined within
@@ -285,7 +288,7 @@
         inlined-schema (update schema-node "dh:columns" (fn [col-uris]
                                                           (->> col-uris
                                                                (map node-uri->node)
-                                                               (sort-by (fn [col] (Integer/parseInt (get col "csvw:number"))))
+                                                               (sort-by column-number)
                                                                (vec))))
         inlined-doc (assoc inlined-schema "@context" (get json-ld-doc "@context"))]
     (json/write-str inlined-doc)))
