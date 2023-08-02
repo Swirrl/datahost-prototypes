@@ -512,7 +512,7 @@
 
         {:keys [before after]}
         (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
-          (.setIsolationLevel conn IsolationLevels/READ_COMMITTED)
+          (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
           (repo/with-transaction conn
             (let [before (last-change-num conn)
                   statements (concat (resource/->statements change) (revision-change-statements change))
