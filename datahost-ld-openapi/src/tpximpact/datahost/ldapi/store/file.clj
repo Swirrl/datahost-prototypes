@@ -52,7 +52,7 @@
       file-digest))
 
   (get-append [_this append-key]
-    (let [location (file-location root-dir append-key)]
+    (let [location (file-location root-dir (.toString append-key))]
       (if (.exists location)
         (io/input-stream location)
         (throw (ex-info "Append not found for key" {:key append-key}))))))
