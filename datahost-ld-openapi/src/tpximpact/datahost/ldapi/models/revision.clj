@@ -12,6 +12,7 @@
 
 (defn csv-file-locations->dataset [change-store append-keys]
   (some->> append-keys
+           (remove nil?)
            (map #(input-stream->dataset (store/get-append change-store %)))
            (apply tc/concat)))
 
