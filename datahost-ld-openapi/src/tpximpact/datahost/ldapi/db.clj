@@ -11,7 +11,6 @@
     [tpximpact.datahost.ldapi.resource :as resource]
     [tpximpact.datahost.ldapi.store :as store])
   (:import (java.net URI)
-           (java.util UUID)
            (org.eclipse.rdf4j.common.transaction IsolationLevels)
            (org.eclipse.rdf4j.repository RepositoryConnection)))
 
@@ -138,7 +137,8 @@
               :where (conj bgps
                            [:optional [[revision-uri :dh/hasChange '?change]]]
                            [:optional [[revision-uri :dcterms/description '?description]]])})]
-     (get-resource-by-construct-query triplestore q)))
+     (datastore/eager-query triplestore
+                            (f/format-query q :pretty? true))))
 
   ([triplestore series-slug release-slug revision-id]
    (get-revision triplestore
@@ -211,9 +211,9 @@
 (defn revision-appends-file-locations
   "Given a Revision as a hash map, returns appends file locations"
   [triplestore revision]
-  (some->> (resource/get-property revision (compact/expand :dh/hasChange))
-           (map #(get-change triplestore %))
-           (map #(resource/get-property1 % (compact/expand :dh/appends)))))
+  (some->> (get revision (compact/expand :dh/hasChange))
+           (get-change triplestore)
+           (#(resource/get-property1 % (compact/expand :dh/appends)))))
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)

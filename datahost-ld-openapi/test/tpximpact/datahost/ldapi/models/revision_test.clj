@@ -19,6 +19,10 @@
            [java.util UUID]
            [java.io BufferedReader StringReader]))
 
+(defn find-first
+  [f coll]
+  (first (filter f coll)))
+
 (defn- create-series [handler]
   (let [series-slug (str "new-series-" (UUID/randomUUID))
         request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
@@ -295,15 +299,16 @@
 
               (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
-                      resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
+                      resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
+                      valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
                   (is (= 200 (:status response)))
                   ;; length of all csv files minus duplicated headers
                   (is (= (+ (count csv-2019-seq) (- (count csv-2021-seq) 1))
                          (count resp-body-seq))
                       "responds with concatenated changes from all 3 CSVs")
                   (is (= (first resp-body-seq) (first csv-2019-seq)))
-                  (is (str/includes? (last resp-body-seq) ",2019,"))
-                  (is (str/includes? (second resp-body-seq) ",2021,"))))))
+                  (is (= (find-first #(= % valid-row-sample) resp-body-seq)
+                         valid-row-sample))))))
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)
