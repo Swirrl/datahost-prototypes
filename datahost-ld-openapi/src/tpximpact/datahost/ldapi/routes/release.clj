@@ -25,6 +25,7 @@
                 :path {:series-slug string?
                        :release-slug string?}
                 :query schema/ApiQueryParams}
+   :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Release already existed and was successfully updated"
                     :body string?}
                201 {:description "Release did not exist previously and was successfully created"
@@ -53,6 +54,7 @@
    :parameters {:body routes-shared/LdSchemaInput
                 :path {:series-slug :string
                        :release-slug :string}}
+   :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Schema already exists."
                     :body string?}
                201 {:description "Schema successfully created"

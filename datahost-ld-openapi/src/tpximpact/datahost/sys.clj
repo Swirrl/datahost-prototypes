@@ -25,9 +25,14 @@
          (ig/read-string {:readers readers}))
     {}))
 
+(defn classpath-resources [n]
+  (->> n
+       (.getResources (.getContextClassLoader (Thread/currentThread)))
+       (enumeration-seq)))
+
 (defn load-configs [configs]
-  (->> configs
-       (map (comp load-system-config io/resource))
+  (->> (mapcat classpath-resources configs)
+       (map load-system-config)
        (apply mm/meta-merge)))
 
 (defn prep-config

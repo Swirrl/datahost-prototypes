@@ -34,6 +34,15 @@ To run tests, from this directory run:
 $ clojure -X:dev:test
 ```
 
+## Basic Auth
+
+To turn on basic authentication in any environment, include the `:auth/basic`
+profile, E.G.,
+
+``` shell
+$ clojure -X:auth/basic:dev
+```
+
 ## License
 
 Copyright © 2023 TPXimpact Ltd
