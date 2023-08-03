@@ -40,7 +40,7 @@ To turn on basic authentication in any environment, include the `:auth/basic`
 profile, E.G.,
 
 ``` shell
-$ clojure -X:auth/basic:cider:dev
+$ clojure -X:auth/basic:dev
 ```
 
 ## License
