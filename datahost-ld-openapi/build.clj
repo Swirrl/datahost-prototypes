@@ -18,36 +18,45 @@
 
 (def repo "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public")
 
-(defn docker [opts]
+(defn docker
+  "Builds a docker image to run the application. The following options are supported:
+    :image-type - The type of image to create. Valid options are :docker, :tar or :registry. The default
+                  is :docker if not specified.
+    :to         - Where the build image should be published. If set to :remote the image will be published
+                  to the public swirrl-devops-infrastructure repository. The GCLOUD_SERVICE_KEY environment
+                  variable should also be set to a service account key with permission to write to the
+                  destination repository. Images are not published by default."
+  [opts]
   (let [tags (->> ["rev-parse HEAD"
                    "describe --tags --always"
                    "branch --show-current"]
                   (map #(tag (b/git-process {:git-args %})))
                   (remove nil?))
         image-type (get opts :image-type :docker)
-        ^JibContainer container (pack/docker
-                                  {:basis (b/create-basis {:project "deps.edn" :aliases [:ldapi/docker]})
-                                   ;; If we don't include a tag in the :image-name, then pack implicitly
-                                   ;; tags the image with latest, even when we specify additional tags. So
-                                   ;; choose a tag arbitrarily to be part of the :image-name, and then
-                                   ;; provide the rest in :tags.
-                                   :image-name (str repo "/datahost-ld-openapi:" (first tags))
-                                   :tags (set (rest tags))
-                                   :image-type image-type
+        build-args {:basis (b/create-basis {:project "deps.edn" :aliases [:ldapi/docker]})
+                    ;; If we don't include a tag in the :image-name, then pack implicitly
+                    ;; tags the image with latest, even when we specify additional tags. So
+                    ;; choose a tag arbitrarily to be part of the :image-name, and then
+                    ;; provide the rest in :tags.
+                    :image-name (str repo "/datahost-ld-openapi:" (first tags))
+                    :tags (set (rest tags))
+                    :image-type image-type
 
-                                   :base-image "eclipse-temurin:17" ;; An openJDK 17 base docker provided by https://github.com/adoptium/containers#containers
+                    :base-image "eclipse-temurin:17" ;; An openJDK 17 base docker provided by https://github.com/adoptium/containers#containers
+                    }
+        publish-args {:platforms #{:linux/amd64 :linux/arm64}
 
-                                   :platforms #{:linux/amd64 :linux/arm64}
-
-                                   ;; NOTE Not as documented!
-                                   ;; The docstring states that these should be
-                                   ;;     :to-registry {:username ... :password ...}
-                                   ;; but alas, that is a lie.
-                                   ;; https://github.com/juxt/pack.alpha/issues/101
-                                   :to-registry-username "_json_key"
-                                   :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")
-
-                                   })]
+                      ;; NOTE Not as documented!
+                      ;; The docstring states that these should be
+                      ;;     :to-registry {:username ... :password ...}
+                      ;; but alas, that is a lie.
+                      ;; https://github.com/juxt/pack.alpha/issues/101
+                      :to-registry-username "_json_key"
+                      :to-registry-password (System/getenv "GCLOUD_SERVICE_KEY")}
+        args (if (= :remote (:to opts))
+               (merge build-args publish-args)
+               build-args)
+        ^JibContainer container (pack/docker args)]
     (println (.. container (getDigest) (getHash)))))
 
 (defn clean [_]
