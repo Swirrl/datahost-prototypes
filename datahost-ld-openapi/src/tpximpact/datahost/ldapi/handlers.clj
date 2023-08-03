@@ -32,7 +32,10 @@
      :body (db/series->response-body series)}
     not-found-response))
 
-(defn triples->ld-resource [matcha-db]
+(defn triples->ld-resource
+  "Given triples returned from a DB query, transform them into a single resource
+   map (e.g. Release or Revision) that's ready for JSON serialization"
+  [matcha-db]
   (-> (matcha/build-1 [(keyword "@id") ?s]
                       {?p ?o
                        (keyword "@type") ?t}
@@ -41,7 +44,10 @@
                       matcha-db)
       (dissoc vocab.rdf/rdf:a)))
 
-(defn triples->ld-resource-collection [matcha-db]
+(defn triples->ld-resource-collection
+  "Given triples returned from a DB query, transform them into a collection of
+  resource maps (e.g. seq of Revisions) that are ready for JSON serialization"
+  [matcha-db]
   (->> (matcha/build [(keyword "@id") ?s]
                      {?p ?o
                       (keyword "@type") ?t}
@@ -55,12 +61,10 @@
 
 (defn csv-file-locations->dataset [change-store append-keys]
   (if (sequential? append-keys)
-    (some->> append-keys
-             (remove nil?)
+    (some->> (remove nil? append-keys)
              (map #(input-stream->dataset (store/get-append change-store %)))
              (apply tc/concat))
-    (some->> append-keys
-             (store/get-append change-store)
+    (some->> (store/get-append change-store append-keys)
              (input-stream->dataset))))
 
 (defn release->csv-stream [triplestore change-store release]
@@ -255,11 +259,11 @@
         (some? validation-err) validation-err
 
         (some? message) {:status 422 :body message}
-        
-        :else                           ; success
-        {:status  201
-         :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
-                                   "/revisions/" revision-id "/changes/" resource-id)}
+
+        :else-success
+        {:status 201
+         :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
+                                      series-slug release-slug revision-id resource-id)}
          :body jsonld-doc}))
 
     :else
