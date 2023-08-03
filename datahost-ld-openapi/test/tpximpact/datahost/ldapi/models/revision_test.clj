@@ -308,7 +308,9 @@
                       "responds with concatenated changes from all 3 CSVs")
                   (is (= (first resp-body-seq) (first csv-2019-seq)))
                   (is (= (find-first #(= % valid-row-sample) resp-body-seq)
-                         valid-row-sample))))))
+                         valid-row-sample))
+                  (is (str/includes? (second resp-body-seq) ",2019,"))
+                  (is (str/includes? (last resp-body-seq) ",2021,"))))))
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)
