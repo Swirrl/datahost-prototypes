@@ -41,25 +41,6 @@
                          (f/format-query {:ask []
                                           :where [[uri '?p '?o]]} :pretty? true)))
 
-(defn- get-release-query [release-uri]
-  {:prefixes (compact/as-flint-prefixes)
-   :construct [[release-uri 'a :dh/Release]
-               [release-uri :dcterms/title '?title]
-               [release-uri :dcterms/description '?description]
-               [release-uri :dcat/inSeries '?series]
-               [release-uri :dh/hasRevision '?revision]
-               [release-uri :dh/hasSchema '?schema]
-               [release-uri :dcterms/modified '?modified]
-               [release-uri :dcterms/issued '?issued]]
-   :where [[release-uri 'a :dh/Release]
-           [release-uri :dcterms/title '?title]
-           [release-uri :dcat/inSeries '?series]
-           [:optional [[release-uri :dh/hasRevision '?revision]]]
-           [:optional [[release-uri :dh/hasSchema '?schema]]]
-           [:optional [[release-uri :dcterms/description '?description]]]
-           [release-uri :dcterms/modified '?modified]
-           [release-uri :dcterms/issued '?issued]]})
-
 (defn- get-change-query [change-uri]
   (let [bgps [[change-uri 'a :dh/Change]
               [change-uri :dcterms/description '?description]
@@ -102,9 +83,28 @@
   (let [q (get-series-query series-uri)]
     (get-resource-by-construct-query triplestore q)))
 
-(defn get-release-by-uri [triplestore release-uri]
-  (let [q (get-release-query release-uri)]
-    (get-resource-by-construct-query triplestore q)))
+(defn get-release-by-uri
+  "Loads a Release in triple form"
+  [triplestore release-uri]
+  (let [q {:prefixes (compact/as-flint-prefixes)
+           :construct [[release-uri 'a :dh/Release]
+                       [release-uri :dcterms/title '?title]
+                       [release-uri :dcterms/description '?description]
+                       [release-uri :dcat/inSeries '?series]
+                       [release-uri :dh/hasRevision '?revision]
+                       [release-uri :dh/hasSchema '?schema]
+                       [release-uri :dcterms/modified '?modified]
+                       [release-uri :dcterms/issued '?issued]]
+           :where [[release-uri 'a :dh/Release]
+                   [release-uri :dcterms/title '?title]
+                   [release-uri :dcat/inSeries '?series]
+                   [:optional [[release-uri :dh/hasRevision '?revision]]]
+                   [:optional [[release-uri :dh/hasSchema '?schema]]]
+                   [:optional [[release-uri :dcterms/description '?description]]]
+                   [release-uri :dcterms/modified '?modified]
+                   [release-uri :dcterms/issued '?issued]]}]
+    (datastore/eager-query triplestore
+                           (f/format-query q :pretty? true))))
 
 (defn get-series-by-slug [triplestore series-slug]
   (let [series-uri (models-shared/dataset-series-uri series-slug)]
@@ -379,7 +379,8 @@
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [clock triplestore series api-params incoming-jsonld-doc]
   (let [request-release (request->release (resource/id series) api-params incoming-jsonld-doc)]
-    (if-let [existing-release (get-release-by-uri triplestore (resource/id request-release))]
+    (if-let [existing-release (some->> (get-release-by-uri triplestore (resource/id request-release))
+                                       (resource/from-statements))]
       (let [[changed? new-release] (merge-release-updates clock existing-release request-release)]
         (when changed?
           (update-release triplestore new-release))

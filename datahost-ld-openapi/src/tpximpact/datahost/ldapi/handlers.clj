@@ -65,7 +65,7 @@
 
 (defn release->csv-stream [triplestore change-store release]
   ;; TODO: loading of appends file locations could be done in one query
-  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
+  (let [revision-uris (get release (cmp/expand :dh/hasRevision))
         appends-file-keys (some->> revision-uris
                                    (map #(db/get-revision triplestore %))
                                    (apply concat)
@@ -94,15 +94,18 @@
      :body jsonld-doc}))
 
 (defn get-release [triplestore change-store {{:keys [series-slug release-slug]} :path-params
-                       {:strs [accept]} :headers}]
-  (if-let [release (db/get-release triplestore series-slug release-slug)]
+                                             {:strs [accept]} :headers}]
+  (if-let [release (->> (db/get-release triplestore series-slug release-slug)
+                        (matcha/index-triples)
+                        (triples->ld-resource))]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=release.csv"}
        :body (or (release->csv-stream triplestore change-store release) "")}
       {:status 200
-       :body (db/release->response-body release)})
+       :body (-> (json-ld/compact release (assoc json-ld/simple-context "@base" models.shared/ld-root))
+                 (.toString))})
     not-found-response))
 
 (defn put-release [clock triplestore {{:keys [series-slug]} :path-params
