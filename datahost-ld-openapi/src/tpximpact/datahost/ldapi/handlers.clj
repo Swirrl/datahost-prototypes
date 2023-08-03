@@ -32,7 +32,10 @@
      :body (db/series->response-body series)}
     not-found-response))
 
-(defn triples->ld-resource [matcha-db]
+(defn triples->ld-resource
+  "Given triples returned from a DB query, transform them into a single resource
+   map (e.g. Release or Revision) that's ready for JSON serialization"
+  [matcha-db]
   (-> (matcha/build-1 [(keyword "@id") ?s]
                       {?p ?o
                        (keyword "@type") ?t}
@@ -41,7 +44,10 @@
                       matcha-db)
       (dissoc vocab.rdf/rdf:a)))
 
-(defn triples->ld-resource-collection [matcha-db]
+(defn triples->ld-resource-collection
+  "Given triples returned from a DB query, transform them into a collection of
+  resource maps (e.g. seq of Revisions) that are ready for JSON serialization"
+  [matcha-db]
   (->> (matcha/build [(keyword "@id") ?s]
                      {?p ?o
                       (keyword "@type") ?t}
@@ -55,17 +61,15 @@
 
 (defn csv-file-locations->dataset [change-store append-keys]
   (if (sequential? append-keys)
-    (some->> append-keys
-             (remove nil?)
+    (some->> (remove nil? append-keys)
              (map #(input-stream->dataset (store/get-append change-store %)))
              (apply tc/concat))
-    (some->> append-keys
-             (store/get-append change-store)
+    (some->> (store/get-append change-store append-keys)
              (input-stream->dataset))))
 
 (defn release->csv-stream [triplestore change-store release]
   ;; TODO: loading of appends file locations could be done in one query
-  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
+  (let [revision-uris (get release (cmp/expand :dh/hasRevision))
         appends-file-keys (some->> revision-uris
                                    (map #(db/get-revision triplestore %))
                                    (apply concat)
@@ -94,15 +98,18 @@
      :body jsonld-doc}))
 
 (defn get-release [triplestore change-store {{:keys [series-slug release-slug]} :path-params
-                       {:strs [accept]} :headers}]
-  (if-let [release (db/get-release triplestore series-slug release-slug)]
+                                             {:strs [accept]} :headers}]
+  (if-let [release (->> (db/get-release triplestore series-slug release-slug)
+                        (matcha/index-triples)
+                        (triples->ld-resource))]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=release.csv"}
        :body (or (release->csv-stream triplestore change-store release) "")}
       {:status 200
-       :body (db/release->response-body release)})
+       :body (-> (json-ld/compact release (assoc json-ld/simple-context "@base" models.shared/ld-root))
+                 (.toString))})
     not-found-response))
 
 (defn put-release [clock triplestore {{:keys [series-slug]} :path-params
@@ -252,11 +259,11 @@
         (some? validation-err) validation-err
 
         (some? message) {:status 422 :body message}
-        
-        :else                           ; success
-        {:status  201
-         :headers {"Location" (str "/data/" series-slug "/releases/" release-slug
-                                   "/revisions/" revision-id "/changes/" resource-id)}
+
+        :else-success
+        {:status 201
+         :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
+                                      series-slug release-slug revision-id resource-id)}
          :body jsonld-doc}))
 
     :else
