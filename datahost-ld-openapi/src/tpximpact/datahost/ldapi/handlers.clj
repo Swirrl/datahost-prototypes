@@ -72,7 +72,7 @@
         appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
                                (map :appends))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
-      (write-to-outputstream merged-datasets))))
+      (write-dataset-to-outputstream merged-datasets))))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
@@ -149,31 +149,26 @@
 
 (defn revision->csv-stream [triplestore change-store revision]
   (let [rev-id (resource/id revision)
-        release-id (resource/get-property1 revision (cmp/expand :dh/appliesToRelease))
-        appends (->> (db/get-appends triplestore release-id (revision-number rev-id))
-                     (map :appends))]
-    (when-let [merged-datasets (csv-file-locations->dataset change-store appends)]
-      (write-to-outputstream merged-datasets))))
+        release-id (get revision (cmp/expand :dh/appliesToRelease))
+        appends (db/get-appends triplestore release-id (revision-number rev-id))]
+    (when-let [merged-datasets (csv-file-locations->dataset change-store (map :appends appends))]
+      (write-dataset-to-outputstream merged-datasets))))
 
-(defn revision->csv-stream [triplestore change-store revision]
-  (when-let [merged-datasets (csv-file-locations->dataset change-store
-                                                          (db/revision-appends-file-locations triplestore revision))]
-    (write-dataset-to-outputstream merged-datasets)))
-
-(defn get-revision [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
-                                              {:strs [accept]} :headers :as _request}]
-  (if-let [rev (->> (db/get-revision triplestore series-slug release-slug revision-id)
-                    (matcha/index-triples)
-                    (triples->ld-resource))]
+(defn get-revision
+  [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
+                             {:strs [accept]} :headers :as _request}]
+  (if-let [revision-ld (->> (db/get-revision triplestore series-slug release-slug revision-id)
+                         matcha/index-triples
+                         triples->ld-resource)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=revision.csv"}
-       :body (or (revision->csv-stream triplestore change-store rev) "")}
+       :body (or (revision->csv-stream triplestore change-store revision-ld) "")}
 
       {:status 200
        :headers {"content-type" "application/json"}
-       :body (-> (json-ld/compact rev (assoc json-ld/simple-context "@base" models.shared/ld-root))
+       :body (-> (json-ld/compact revision-ld (assoc json-ld/simple-context "@base" models.shared/ld-root))
                  (.toString))})
     not-found-response))
 
