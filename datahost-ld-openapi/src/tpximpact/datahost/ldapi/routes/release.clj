@@ -52,8 +52,7 @@
    :handler (partial handlers/put-release-schema clock triplestore)
    :parameters {:body routes-shared/LdSchemaInput
                 :path {:series-slug :string
-                       :release-slug :string
-                       :schema-slug :string}}
+                       :release-slug :string}}
    :responses {200 {:description "Schema already exists."
                     :body string?}
                201 {:description "Schema successfully created"

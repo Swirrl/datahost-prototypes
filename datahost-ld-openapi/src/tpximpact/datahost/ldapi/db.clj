@@ -445,16 +445,16 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
 
-(defn- request->schema [{:keys [series-slug release-slug schema-slug] :as api-params} json-doc]
-  (let [schema-uri (models-shared/release-schema-uri series-slug release-slug schema-slug)
+(defn- request->schema [{:keys [series-slug release-slug] :as api-params} json-doc]
+  (let [schema-uri (models-shared/release-schema-uri series-slug release-slug)
         release-uri (models-shared/release-uri-from-slugs series-slug release-slug)
         schema-doc (annotate-json-resource json-doc schema-uri (compact/expand :dh/TableSchema))
         schema-doc (update schema-doc "dh:columns" (fn [cols]
-                                                     (map-indexed (fn [index col]
-                                                             (assoc col "@id" (str schema-uri "/columns/" (inc index))
-                                                                        "@type" "dh:DimensionColumn"
-                                                                        "csvw:number" (inc index)))
-                                                           cols)))
+                                                     (map-indexed (fn mapper [index col]
+                                                                    (assoc col "@id" (str schema-uri "/columns/" (inc index))
+                                                                           "@type" "dh:DimensionColumn"
+                                                                           "csvw:number" (inc index)))
+                                                                  cols)))
         schema-resource (resource/from-json-ld-doc schema-doc)]
     (-> schema-resource
         (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri)
@@ -537,6 +537,7 @@
   [(pr/->Triple (resource/get-property1 schema (compact/expand :dh/appliesToRelease))
                 (compact/expand :dh/hasSchema)
                 (resource/id schema))])
+
 (defn- insert-schema [clock triplestore schema]
   (let [new-schema (set-timestamps clock schema)]
     (with-open [conn (repo/->connection triplestore)]

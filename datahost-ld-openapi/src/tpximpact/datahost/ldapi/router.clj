@@ -99,10 +99,9 @@
       {:get (release-routes/get-release-route-config triplestore change-store)
        :put (release-routes/put-release-route-config clock triplestore)}]
 
-     ["/:series-slug/releases/:release-slug/schemas"
-      {:get (release-routes/get-release-ld-schema-config triplestore)}]
-     ["/:series-slug/releases/:release-slug/schemas/:schema-slug"
-      {:post (release-routes/put-release-ld-schema-config clock triplestore)}]
+     ["/:series-slug/releases/:release-slug/schema"
+      {:get (release-routes/get-release-ld-schema-config triplestore)
+       :post (release-routes/put-release-ld-schema-config clock triplestore)}]
 
      ["/:series-slug/releases/:release-slug/revisions"
       {:post (revision-routes/post-revision-route-config triplestore)
