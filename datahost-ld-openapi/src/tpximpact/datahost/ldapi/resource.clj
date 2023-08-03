@@ -76,7 +76,7 @@
    (let [prefixes (update-vals prefixes str)
          sw (StringWriter.)
          w (gio/rdf-writer sw :format :jsonld :prefixes prefixes)]
-     (.. w (getWriterConfig) (set JSONLDSettings/JSONLD_MODE JSONLDMode/COMPACT))
+     (.set (.getWriterConfig w) JSONLDSettings/JSONLD_MODE JSONLDMode/COMPACT)
      (when (seq statements)
        (pr/add w statements))
      (.flush sw)
