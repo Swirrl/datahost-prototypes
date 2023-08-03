@@ -71,6 +71,7 @@
                                    (apply concat)
                                    (matcha/index-triples)
                                    (triples->ld-resource-collection)
+                                   (sort-by (comp str (keyword "@id")))
                                    (map (partial db/revision-appends-file-locations triplestore))
                                    (flatten))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
