@@ -68,18 +68,11 @@
              (input-stream->dataset))))
 
 (defn release->csv-stream [triplestore change-store release]
-  ;; TODO: loading of appends file locations could be done in one query
-  (let [revision-uris (get release (cmp/expand :dh/hasRevision))
-        appends-file-keys (some->> revision-uris
-                                   (map #(db/get-revision triplestore %))
-                                   (apply concat)
-                                   (matcha/index-triples)
-                                   (triples->ld-resource-collection)
-                                   (sort-by (comp str (keyword "@id")))
-                                   (map (partial db/revision-appends-file-locations triplestore))
-                                   (flatten))]
+  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
+        appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
+                               (map :appends))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
-      (write-dataset-to-outputstream merged-datasets))))
+      (write-to-outputstream merged-datasets))))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
@@ -143,6 +136,24 @@
         {:status 404
          :body {:status "error"
                 :message "Not found"}})))
+
+(defn- revision-number
+  "Returns a number or throws."
+  [rev-id]
+  (let [path (.getPath ^java.net.URI rev-id)]
+    (try
+      (Long/parseLong (-> (re-find #"^.*/([^/]*)$" path) next first))
+      (catch java.lang.NumberFormatException ex
+        (throw (ex-info (format "Could not extract revision number from given id: %s" rev-id)
+                        {:revision-id rev-id} ex))))))
+
+(defn revision->csv-stream [triplestore change-store revision]
+  (let [rev-id (resource/id revision)
+        release-id (resource/get-property1 revision (cmp/expand :dh/appliesToRelease))
+        appends (->> (db/get-appends triplestore release-id (revision-number rev-id))
+                     (map :appends))]
+    (when-let [merged-datasets (csv-file-locations->dataset change-store appends)]
+      (write-to-outputstream merged-datasets))))
 
 (defn revision->csv-stream [triplestore change-store revision]
   (when-let [merged-datasets (csv-file-locations->dataset change-store

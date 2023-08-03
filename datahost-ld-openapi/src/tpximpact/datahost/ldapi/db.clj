@@ -215,6 +215,28 @@
            (get-change triplestore)
            (#(resource/get-property1 % (compact/expand :dh/appends)))))
 
+(defn- get-appends-query
+  [release-uri max-rev]
+  {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh]))
+   :select ['?rev '?appends '?rev_number]
+   :where (cond-> [['?rev :dh/appliesToRelease release-uri]
+                   ['?rev :dh/hasChange '?change]
+                   ['?change :dh/appends '?appends]
+                   [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]]
+            (some? max-rev) (conj [:filter (list '<= '?rev_number max-rev)]))
+   :order-by ['(asc ?rev_number)]})
+
+(defn get-appends
+  "Returns records for all appends, optionally up to `?max-rev` (int)
+  revision (inclusive).
+
+  The returned seq will contain maps of shape
+       {:rev_num Number :rev URI :appends FILE-KEY}"
+  ([triplestore release-uri] (get-appends triplestore nil))
+  ([triplestore release-uri ?max-rev]
+   {:pre [(or (nil? ?max-rev) (pos? ?max-rev))]}
+   (datastore/eager-query triplestore (f/format-query (get-appends-query release-uri ?max-rev)))))
+
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
     "@base" (str models-shared/ld-root)))

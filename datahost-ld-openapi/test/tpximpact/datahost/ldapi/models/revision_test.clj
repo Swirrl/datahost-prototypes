@@ -305,12 +305,25 @@
                   ;; length of all csv files minus duplicated headers
                   (is (= (+ (count csv-2019-seq) (- (count csv-2021-seq) 1))
                          (count resp-body-seq))
-                      "responds with concatenated changes from all 3 CSVs")
+                      "responds with concatenated changes from all uploaded CSVs")
                   (is (= (first resp-body-seq) (first csv-2019-seq)))
-                  (is (= (find-first #(= % valid-row-sample) resp-body-seq)
-                         valid-row-sample))
+                  (is (str/includes? (last resp-body-seq) ",2021,"))
                   (is (str/includes? (second resp-body-seq) ",2019,"))
-                  (is (str/includes? (last resp-body-seq) ",2021,"))))))
+                  (is (= (find-first #(= % valid-row-sample) resp-body-seq)
+                         valid-row-sample))))
+
+              (testing "Fetching Revision as accumulated CSV from all revisions so far."
+                (let [response (GET (str release-url "/revisions/2") {:headers {"accept" "text/csv"}})
+                      resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
+                  (is (= 200 (:status response)))
+                  ;; length of all csv files minus duplicated headers
+                  (is (= (+ (count csv-2019-seq) (- (count csv-2021-seq) 1))
+                         (count resp-body-seq))
+                      "responds with concatenated changes from all uploaded CSVs")
+                  (is (= (first resp-body-seq) (first csv-2019-seq)))
+                  (is (str/includes? (last resp-body-seq) ",2021,"))
+                  (is (str/includes? (second resp-body-seq) ",2019,"))))))
+          
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)
