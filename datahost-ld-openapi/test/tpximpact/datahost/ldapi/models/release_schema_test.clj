@@ -77,10 +77,10 @@
             (is (= nil missing))))))))
 
 (t/deftest one-column-schema-test
-  (let [n (format "%03d" (rand-int 100))
+  (let [n (format "%03d" (rand-int 1000))
         _ (setup-release n)
         {:keys [GET POST]} (get @th/*system* http-client)
-        schema-path (format "/data/my-series-%s/releases/release-%s/schemas/schema-%s" n n n)
+        schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
         schema {"dcterms:title" "Fun schema"
                 "dcterms:description" "Description"
                 "dh:columns" [{"csvw:datatype" "string"
@@ -90,7 +90,7 @@
                                {:content-type :json
                                 :body (json/write-str schema)})
 
-        fetch-response (GET (format "/data/my-series-%s/releases/release-%s/schemas" n n))
+        fetch-response (GET (format "/data/my-series-%s/releases/release-%s/schema" n n))
         fetched-doc (json/read-str (:body fetch-response))
         [missing _ _ ] (diff schema fetched-doc)]
     (t/is (= nil missing))))
