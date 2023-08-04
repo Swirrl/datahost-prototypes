@@ -4,7 +4,6 @@
     [clojure.repl :refer :all]
     [clojure.tools.namespace.repl :refer [refresh] :as tns]
     [integrant.repl :refer [clear halt go init prep reset]]
-    [integrant.repl.state :refer [config system]]
     [tpximpact.datahost.sys :as sys]))
 
 ;; temp disable this line if working on the dev namespace, obviously.

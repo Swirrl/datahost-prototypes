@@ -43,7 +43,7 @@
 
 (defn set-now
   "Sets the time on the manual clock to the given instant"
-  [{:keys [current] :as manual-clock} now]
+  [{:keys [current] :as _manual-clock} now]
   (reset! current now)
   nil)
 

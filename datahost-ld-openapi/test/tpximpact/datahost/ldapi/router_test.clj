@@ -5,7 +5,6 @@
     [grafter-2.rdf4j.repository :as repo]
     [reitit.ring :as ring]
     [tpximpact.datahost.ldapi.store.file :as fstore]
-    [tpximpact.datahost.ldapi.store.triplestore :as tstore]
     [tpximpact.datahost.time :as time]
     [tpximpact.datahost.ldapi.router :as sut]))
 
@@ -25,7 +24,7 @@
                  :headers {"access-control-request-headers" "content-type"
                            "access-control-request-method" "PUT"
                            "origin" origin}}
-        {:keys [status headers] :as response} (handler request)]
+        {:keys [status headers] :as _response} (handler request)]
     (t/is (= 200 status))
     (t/is (= origin (get headers "Access-Control-Allow-Origin")))))
 
@@ -40,6 +39,6 @@
                            "origin" origin}
                  :body {"@context" {"dcterms" "http://wat"}
                         "dcterms:title" "Test"}}
-        {:keys [status headers] :as response} (handler request)]
+        {:keys [status headers] :as _response} (handler request)]
     (t/is (= 201 status))
     (t/is (= origin (get headers "Access-Control-Allow-Origin")))))

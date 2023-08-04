@@ -460,7 +460,7 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
 
-(defn- request->schema [{:keys [series-slug release-slug] :as api-params} json-doc]
+(defn- request->schema [{:keys [series-slug release-slug]} json-doc]
   (let [schema-uri (models-shared/release-schema-uri series-slug release-slug)
         release-uri (models-shared/release-uri-from-slugs series-slug release-slug)
         schema-doc (annotate-json-resource json-doc schema-uri (compact/expand :dh/TableSchema))
@@ -500,7 +500,7 @@
 
 (defn- insert-change-statement*
   "Statement for: insert only when the revision has no changes already."
-  [revision-uri change-uri statements]
+  [revision-uri statements]
   {:prefixes (select-keys default-prefixes [:dh :xsd])
    :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
    :where
@@ -539,8 +539,7 @@
             (let [before (last-change-num conn)
                   statements (concat (resource/->statements change) (revision-change-statements change))
                   _ (pr/update! conn
-                                (f/format-update (insert-change-statement* rev-uri change-uri
-                                                                           statements)))
+                                (f/format-update (insert-change-statement* rev-uri statements)))
                   after (last-change-num conn)]
               {:before before :after after})))]
     (if (and (= 0N before) (= 1N after))
