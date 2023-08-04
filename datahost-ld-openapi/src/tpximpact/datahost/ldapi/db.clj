@@ -208,13 +208,6 @@
    (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
      (get-change triplestore change-uri))))
 
-(defn revision-appends-file-locations
-  "Given a Revision as a hash map, returns appends file locations"
-  [triplestore revision]
-  (some->> (get revision (compact/expand :dh/hasChange))
-           (get-change triplestore)
-           (#(resource/get-property1 % (compact/expand :dh/appends)))))
-
 (defn- get-appends-query
   [release-uri max-rev]
   {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh]))

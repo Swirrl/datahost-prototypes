@@ -12,7 +12,8 @@
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
-   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]))
+   [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
+  (:import (java.net URI)))
 
 (def not-found-response
   {:status 404
@@ -68,8 +69,7 @@
              (input-stream->dataset))))
 
 (defn release->csv-stream [triplestore change-store release]
-  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
-        appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
+  (let [appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
                                (map :appends))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
       (write-dataset-to-outputstream merged-datasets))))
@@ -140,10 +140,10 @@
 (defn- revision-number
   "Returns a number or throws."
   [rev-id]
-  (let [path (.getPath ^java.net.URI rev-id)]
+  (let [path (.getPath ^URI rev-id)]
     (try
       (Long/parseLong (-> (re-find #"^.*/([^/]*)$" path) next first))
-      (catch java.lang.NumberFormatException ex
+      (catch NumberFormatException ex
         (throw (ex-info (format "Could not extract revision number from given id: %s" rev-id)
                         {:revision-id rev-id} ex))))))
 
