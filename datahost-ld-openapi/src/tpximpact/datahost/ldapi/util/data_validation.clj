@@ -34,7 +34,7 @@
 
   At the moment only the simplest cases are supported, and the
   \"csvw:datatype\" field can be set to \"string\",\"double\",
-  \"integer\". Additionally, the schcema can contain
+  \"integer\". Additionally, the schema can contain
   \"csvw:required\".
 
   Example:
