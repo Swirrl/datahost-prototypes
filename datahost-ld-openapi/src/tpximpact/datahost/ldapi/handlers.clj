@@ -68,16 +68,9 @@
              (input-stream->dataset))))
 
 (defn release->csv-stream [triplestore change-store release]
-  ;; TODO: loading of appends file locations could be done in one query
-  (let [revision-uris (get release (cmp/expand :dh/hasRevision))
-        appends-file-keys (some->> revision-uris
-                                   (map #(db/get-revision triplestore %))
-                                   (apply concat)
-                                   (matcha/index-triples)
-                                   (triples->ld-resource-collection)
-                                   (sort-by (comp str (keyword "@id")))
-                                   (map (partial db/revision-appends-file-locations triplestore))
-                                   (flatten))]
+  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
+        appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
+                               (map :appends))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
       (write-dataset-to-outputstream merged-datasets))))
 
@@ -144,25 +137,38 @@
          :body {:status "error"
                 :message "Not found"}})))
 
-(defn revision->csv-stream [triplestore change-store revision]
-  (when-let [merged-datasets (csv-file-locations->dataset change-store
-                                                          (db/revision-appends-file-locations triplestore revision))]
-    (write-dataset-to-outputstream merged-datasets)))
+(defn- revision-number
+  "Returns a number or throws."
+  [rev-id]
+  (let [path (.getPath ^java.net.URI rev-id)]
+    (try
+      (Long/parseLong (-> (re-find #"^.*/([^/]*)$" path) next first))
+      (catch java.lang.NumberFormatException ex
+        (throw (ex-info (format "Could not extract revision number from given id: %s" rev-id)
+                        {:revision-id rev-id} ex))))))
 
-(defn get-revision [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
-                                              {:strs [accept]} :headers :as _request}]
-  (if-let [rev (->> (db/get-revision triplestore series-slug release-slug revision-id)
-                    (matcha/index-triples)
-                    (triples->ld-resource))]
+(defn revision->csv-stream [triplestore change-store revision]
+  (let [rev-id (resource/id revision)
+        release-id (get revision (cmp/expand :dh/appliesToRelease))
+        appends (db/get-appends triplestore release-id (revision-number rev-id))]
+    (when-let [merged-datasets (csv-file-locations->dataset change-store (map :appends appends))]
+      (write-dataset-to-outputstream merged-datasets))))
+
+(defn get-revision
+  [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
+                             {:strs [accept]} :headers :as _request}]
+  (if-let [revision-ld (->> (db/get-revision triplestore series-slug release-slug revision-id)
+                         matcha/index-triples
+                         triples->ld-resource)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=revision.csv"}
-       :body (or (revision->csv-stream triplestore change-store rev) "")}
+       :body (or (revision->csv-stream triplestore change-store revision-ld) "")}
 
       {:status 200
        :headers {"content-type" "application/json"}
-       :body (-> (json-ld/compact rev (assoc json-ld/simple-context "@base" models.shared/ld-root))
+       :body (-> (json-ld/compact revision-ld (assoc json-ld/simple-context "@base" models.shared/ld-root))
                  (.toString))})
     not-found-response))
 
