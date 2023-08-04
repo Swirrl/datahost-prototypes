@@ -101,7 +101,7 @@
                  "content-disposition" "attachment ; filename=release.csv"}
        :body (or (release->csv-stream triplestore change-store release) "")}
       {:status 200
-       :body (-> (json-ld/compact release (assoc json-ld/simple-context "@base" models.shared/ld-root))
+       :body (-> (json-ld/compact release json-ld/simple-context)
                  (.toString))})
     not-found-response))
 
@@ -168,7 +168,7 @@
 
       {:status 200
        :headers {"content-type" "application/json"}
-       :body (-> (json-ld/compact revision-ld (assoc json-ld/simple-context "@base" models.shared/ld-root))
+       :body (-> (json-ld/compact revision-ld json-ld/simple-context)
                  (.toString))})
     not-found-response))
 
@@ -183,7 +183,7 @@
                     (sort-by #(get % issued-uri))
                     (reverse))
         response-body (-> (wrap-ld-collection-contents series)
-                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -195,7 +195,7 @@
                        (sort-by (comp str (keyword "@id")))
                        (reverse))
         response-body (-> (wrap-ld-collection-contents revisions)
-                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -208,7 +208,7 @@
                       (sort-by #(get % issued-uri))
                       (reverse))
         response-body (-> (wrap-ld-collection-contents releases)
-                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
     {:status 200
      :body response-body}))
