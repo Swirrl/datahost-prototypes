@@ -54,13 +54,13 @@
   [json-cols title]
   (cond
     ;;(string? title) title
-    
+
     (and (set? title) (= 1 (count title)))
     (first title)
-    
-    :default (throw (ex-info (format "Unsupported column name value: %s" title
-                                     {:title title
-                                      :columns json-cols})))))
+
+    :default (throw (ex-info (format "Unsupported column name value: %s" title)
+                             {:title title
+                              :columns json-cols}))))
 
 ;;(set! *warn-on-reflection* true)
 
