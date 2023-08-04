@@ -41,15 +41,6 @@
                          (f/format-query {:ask []
                                           :where [[uri '?p '?o]]} :pretty? true)))
 
-(defn- get-change-query [change-uri]
-  (let [bgps [[change-uri 'a :dh/Change]
-              [change-uri :dcterms/description '?description]
-              [change-uri :dh/appends '?appends]
-              [change-uri :dh/appliesToRevision '?revision]]]
-    {:prefixes default-prefixes
-     :construct bgps
-     :where bgps}))
-
 (defn- get-release-schema-query [release-uri]
   {:prefixes default-prefixes
    :construct [['?schema '?p '?o]]
@@ -201,9 +192,17 @@
                            (f/format-query q :pretty? true))))
 
 (defn get-change
+  "Returns a single Revision Change in triple form"
   ([triplestore change-uri]
-   (get-resource-by-construct-query triplestore
-                                    (get-change-query change-uri)))
+   (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
+                                    [change-uri :dcterms/description '?description]
+                                    [change-uri :dh/appends '?appends]
+                                    [change-uri :dh/appliesToRevision '?revision]]]
+                          {:prefixes default-prefixes
+                           :construct bgps
+                           :where bgps})
+                        :pretty? true)
+        (datastore/eager-query triplestore)))
   ([triplestore series-slug release-slug revision-id change-id]
    (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
      (get-change triplestore change-uri))))

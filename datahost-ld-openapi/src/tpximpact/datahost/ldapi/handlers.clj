@@ -158,8 +158,8 @@
   [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
                              {:strs [accept]} :headers :as _request}]
   (if-let [revision-ld (->> (db/get-revision triplestore series-slug release-slug revision-id)
-                         matcha/index-triples
-                         triples->ld-resource)]
+                            matcha/index-triples
+                            triples->ld-resource)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
@@ -277,13 +277,15 @@
      :body "Revision for this change does not exist"}))
 
 (defn change->csv-stream [change-store change]
-  (let [appends (resource/get-property1 change (cmp/expand :dh/appends))]
+  (let [appends (get change (cmp/expand :dh/appends))]
     (when-let [dataset (csv-file-locations->dataset change-store [appends])]
       (write-dataset-to-outputstream dataset))))
 
 (defn get-change [triplestore change-store {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
-  (if-let [change (db/get-change triplestore series-slug release-slug revision-id change-id)]
+  (if-let [change (->> (db/get-change triplestore series-slug release-slug revision-id change-id)
+                       matcha/index-triples
+                       triples->ld-resource)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
