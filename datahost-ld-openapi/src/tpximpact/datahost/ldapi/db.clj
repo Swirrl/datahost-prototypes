@@ -225,7 +225,7 @@
 
   The returned seq will contain maps of shape
        {:rev_num Number :rev URI :appends FILE-KEY}"
-  ([triplestore release-uri] (get-appends triplestore nil))
+  ([triplestore release-uri] (get-appends triplestore release-uri nil))
   ([triplestore release-uri ?max-rev]
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
    (datastore/eager-query triplestore (f/format-query (get-appends-query release-uri ?max-rev)))))
