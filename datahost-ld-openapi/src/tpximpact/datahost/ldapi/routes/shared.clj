@@ -1,6 +1,5 @@
 (ns tpximpact.datahost.ldapi.routes.shared
-  (:require [malli.core :as m]
-            [malli.util :as mu]))
+  (:require [malli.util :as mu]))
 
 
 (def JsonLdBase

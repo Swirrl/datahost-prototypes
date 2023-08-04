@@ -202,6 +202,5 @@
   (s/keys :req-un [::clock ::triplestore ::change-store]
           :opt-un [::auth]))
 
-(defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler
-  [_ {:keys [clock triplestore change-store auth] :as opts}]
+(defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler [_ opts]
   (handler opts))

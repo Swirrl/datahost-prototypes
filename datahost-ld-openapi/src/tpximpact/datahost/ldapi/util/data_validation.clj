@@ -8,8 +8,10 @@
    [tablecloth.api :as tc]
    [tech.v3.dataset :as ds]
    [tpximpact.datahost.ldapi.resource :as resource])
-  (:import [java.net URI]))
-
+  (:import (clojure.lang ExceptionInfo)
+           (java.io ByteArrayInputStream File)
+           [java.net URL]
+           [java.net URI]))
 
 (def MakeRowSchemaOptions
   [:map])
@@ -34,7 +36,7 @@
 
   At the moment only the simplest cases are supported, and the
   \"csvw:datatype\" field can be set to \"string\",\"double\",
-  \"integer\". Additionally, the schcema can contain
+  \"integer\". Additionally, the schema can contain
   \"csvw:required\".
 
   Example:
@@ -54,15 +56,13 @@
   [json-cols title]
   (cond
     ;;(string? title) title
-    
+
     (and (set? title) (= 1 (count title)))
     (first title)
-    
-    :default (throw (ex-info (format "Unsupported column name value: %s" title
-                                     {:title title
-                                      :columns json-cols})))))
 
-;;(set! *warn-on-reflection* true)
+    :default (throw (ex-info (format "Unsupported column name value: %s" title)
+                             {:title title
+                              :columns json-cols}))))
 
 (defn- schema-columns
   [json-ld-schema]
@@ -164,7 +164,7 @@
                                     (fn col-mapper [& args]
                                       (validator-fn (vec args))))
                     (ds/filter (fn [{:strs [valid]}] (not valid))))}
-      (catch clojure.lang.ExceptionInfo ex
+      (catch ExceptionInfo ex
         (if-not (= :dataset.validation/error (-> ex ex-data :type))
           (throw ex)
           (ex-data ex))))))
@@ -179,14 +179,14 @@
   (-> v
       slurp
       (.getBytes ^String encoding)
-      (java.io.ByteArrayInputStream.)
+      (ByteArrayInputStream.)
       (tc/dataset {:file-type file-type})))
 
-(defmethod -as-dataset java.io.File [v opts]
-  (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^java.io.File v)))
+(defmethod -as-dataset File [v opts]
+  (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^File v)))
 
-(defmethod -as-dataset java.net.URL [v opts]
-  (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^java.net.URL v)))
+(defmethod -as-dataset URL [v opts]
+  (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^URL v)))
 
 (def AsDatasetOpts
   [:map

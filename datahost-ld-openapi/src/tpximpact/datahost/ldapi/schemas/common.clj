@@ -4,7 +4,7 @@
    [malli.core :as m])
   (:import
    [java.net URI URISyntaxException]
-   [java.time ZonedDateTime]))
+   [java.time ZoneId ZonedDateTime]))
 
 (def ^:private custom-registry-keys
   (let [slug-error-msg "should contain alpha numeric characters and hyphens only."]
@@ -20,11 +20,11 @@
                                               true
                                               (catch URISyntaxException _ex
                                                 false))))})
-     :datahost/timestamp (let [utc-tz (java.time.ZoneId/of "UTC")]
+     :datahost/timestamp (let [utc-tz (ZoneId/of "UTC")]
                            (m/-simple-schema
                             {:type :datahost/timestamp
                              :pred (fn timestamp-pred [ts]
-                                     (and (instance? java.time.ZonedDateTime ts)
+                                     (and (instance? ZonedDateTime ts)
                                           (= (.getZone ^ZonedDateTime ts) utc-tz)))}))}))
 
 (def registry

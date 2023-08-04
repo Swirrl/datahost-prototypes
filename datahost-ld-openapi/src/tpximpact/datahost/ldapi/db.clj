@@ -41,15 +41,6 @@
                          (f/format-query {:ask []
                                           :where [[uri '?p '?o]]} :pretty? true)))
 
-(defn- get-change-query [change-uri]
-  (let [bgps [[change-uri 'a :dh/Change]
-              [change-uri :dcterms/description '?description]
-              [change-uri :dh/appends '?appends]
-              [change-uri :dh/appliesToRevision '?revision]]]
-    {:prefixes default-prefixes
-     :construct bgps
-     :where bgps}))
-
 (defn- get-release-schema-query [release-uri]
   {:prefixes default-prefixes
    :construct [['?schema '?p '?o]]
@@ -201,19 +192,20 @@
                            (f/format-query q :pretty? true))))
 
 (defn get-change
+  "Returns a single Revision Change in triple form"
   ([triplestore change-uri]
-   (get-resource-by-construct-query triplestore
-                                    (get-change-query change-uri)))
+   (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
+                                    [change-uri :dcterms/description '?description]
+                                    [change-uri :dh/appends '?appends]
+                                    [change-uri :dh/appliesToRevision '?revision]]]
+                          {:prefixes default-prefixes
+                           :construct bgps
+                           :where bgps})
+                        :pretty? true)
+        (datastore/eager-query triplestore)))
   ([triplestore series-slug release-slug revision-id change-id]
    (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
      (get-change triplestore change-uri))))
-
-(defn revision-appends-file-locations
-  "Given a Revision as a hash map, returns appends file locations"
-  [triplestore revision]
-  (some->> (get revision (compact/expand :dh/hasChange))
-           (get-change triplestore)
-           (#(resource/get-property1 % (compact/expand :dh/appends)))))
 
 (defn- get-appends-query
   [release-uri max-rev]
@@ -232,7 +224,7 @@
 
   The returned seq will contain maps of shape
        {:rev_num Number :rev URI :appends FILE-KEY}"
-  ([triplestore release-uri] (get-appends triplestore nil))
+  ([triplestore release-uri] (get-appends triplestore release-uri nil))
   ([triplestore release-uri ?max-rev]
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
    (datastore/eager-query triplestore (f/format-query (get-appends-query release-uri ?max-rev)))))
@@ -468,7 +460,7 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
 
-(defn- request->schema [{:keys [series-slug release-slug] :as api-params} json-doc]
+(defn- request->schema [{:keys [series-slug release-slug]} json-doc]
   (let [schema-uri (models-shared/release-schema-uri series-slug release-slug)
         release-uri (models-shared/release-uri-from-slugs series-slug release-slug)
         schema-doc (annotate-json-resource json-doc schema-uri (compact/expand :dh/TableSchema))
@@ -508,7 +500,7 @@
 
 (defn- insert-change-statement*
   "Statement for: insert only when the revision has no changes already."
-  [revision-uri change-uri statements]
+  [revision-uri statements]
   {:prefixes (select-keys default-prefixes [:dh :xsd])
    :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
    :where
@@ -547,8 +539,7 @@
             (let [before (last-change-num conn)
                   statements (concat (resource/->statements change) (revision-change-statements change))
                   _ (pr/update! conn
-                                (f/format-update (insert-change-statement* rev-uri change-uri
-                                                                           statements)))
+                                (f/format-update (insert-change-statement* rev-uri statements)))
                   after (last-change-num conn)]
               {:before before :after after})))]
     (if (and (= 0N before) (= 1N after))

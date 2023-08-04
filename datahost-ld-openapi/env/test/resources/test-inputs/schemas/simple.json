@@ -6,7 +6,7 @@
      {"csvw:name": "measure",
       "csvw:datatype": "string",
       "csvw:titles": ["Unit of Measure"]},
-     {"csvw:name": "uppper_confidence_interval",
+     {"csvw:name": "upper_confidence_interval",
       "csvw:datatype": "double",
       "csvw:required": true,
       "csvw:titles": "Upper Confidence Interval"}

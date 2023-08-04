@@ -5,7 +5,7 @@
             [tpximpact.datahost.sys :as sys]
             [tpximpact.datahost.ldapi.test-util.http-client :as http-client]))
 
-(defmethod ig/init-key :tpximpact.datahost.ldapi.test/http-client [_ {:keys [port] :as config}]
+(defmethod ig/init-key :tpximpact.datahost.ldapi.test/http-client [_ config]
   (http-client/make-client config))
 
 (defn start-system [configs]

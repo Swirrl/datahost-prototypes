@@ -7,10 +7,9 @@
    [malli.core :as m]
    [malli.error :as me]
    [malli.transform :as mt]
-   [tablecloth.api :as tc]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
-   [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput] :as routes.shared]
+   [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
    [tpximpact.datahost.ldapi.util.data-validation :as util.data-validation]
    [tpximpact.datahost.time :as time]))
 

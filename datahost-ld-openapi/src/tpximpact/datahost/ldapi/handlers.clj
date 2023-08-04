@@ -12,7 +12,8 @@
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
-   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]))
+   [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
+  (:import (java.net URI)))
 
 (def not-found-response
   {:status 404
@@ -68,8 +69,7 @@
              (input-stream->dataset))))
 
 (defn release->csv-stream [triplestore change-store release]
-  (let [revision-uris (resource/get-property release (cmp/expand :dh/hasRevision))
-        appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
+  (let [appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
                                (map :appends))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
       (write-dataset-to-outputstream merged-datasets))))
@@ -101,7 +101,7 @@
                  "content-disposition" "attachment ; filename=release.csv"}
        :body (or (release->csv-stream triplestore change-store release) "")}
       {:status 200
-       :body (-> (json-ld/compact release (assoc json-ld/simple-context "@base" models.shared/ld-root))
+       :body (-> (json-ld/compact release json-ld/simple-context)
                  (.toString))})
     not-found-response))
 
@@ -140,10 +140,10 @@
 (defn- revision-number
   "Returns a number or throws."
   [rev-id]
-  (let [path (.getPath ^java.net.URI rev-id)]
+  (let [path (.getPath ^URI rev-id)]
     (try
       (Long/parseLong (-> (re-find #"^.*/([^/]*)$" path) next first))
-      (catch java.lang.NumberFormatException ex
+      (catch NumberFormatException ex
         (throw (ex-info (format "Could not extract revision number from given id: %s" rev-id)
                         {:revision-id rev-id} ex))))))
 
@@ -158,8 +158,8 @@
   [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
                              {:strs [accept]} :headers :as _request}]
   (if-let [revision-ld (->> (db/get-revision triplestore series-slug release-slug revision-id)
-                         matcha/index-triples
-                         triples->ld-resource)]
+                            matcha/index-triples
+                            triples->ld-resource)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
@@ -168,7 +168,7 @@
 
       {:status 200
        :headers {"content-type" "application/json"}
-       :body (-> (json-ld/compact revision-ld (assoc json-ld/simple-context "@base" models.shared/ld-root))
+       :body (-> (json-ld/compact revision-ld json-ld/simple-context)
                  (.toString))})
     not-found-response))
 
@@ -183,7 +183,7 @@
                     (sort-by #(get % issued-uri))
                     (reverse))
         response-body (-> (wrap-ld-collection-contents series)
-                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -195,7 +195,7 @@
                        (sort-by (comp str (keyword "@id")))
                        (reverse))
         response-body (-> (wrap-ld-collection-contents revisions)
-                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -208,7 +208,7 @@
                       (sort-by #(get % issued-uri))
                       (reverse))
         response-body (-> (wrap-ld-collection-contents releases)
-                          (json-ld/compact (assoc json-ld/simple-collection-context "@base" models.shared/ld-root))
+                          (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
     {:status 200
      :body response-body}))
@@ -277,13 +277,15 @@
      :body "Revision for this change does not exist"}))
 
 (defn change->csv-stream [change-store change]
-  (let [appends (resource/get-property1 change (cmp/expand :dh/appends))]
+  (let [appends (get change (cmp/expand :dh/appends))]
     (when-let [dataset (csv-file-locations->dataset change-store [appends])]
       (write-dataset-to-outputstream dataset))))
 
 (defn get-change [triplestore change-store {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
-  (if-let [change (db/get-change triplestore series-slug release-slug revision-id change-id)]
+  (if-let [change (->> (db/get-change triplestore series-slug release-slug revision-id change-id)
+                       matcha/index-triples
+                       triples->ld-resource)]
     (if (= accept "text/csv")
       {:status 200
        :headers {"content-type" "text/csv"
