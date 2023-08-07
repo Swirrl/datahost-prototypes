@@ -15,7 +15,7 @@
                        :release-slug string?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json" {:body string?}}}
+                     "application/json+ld" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn put-release-route-config [clock triplestore]
@@ -27,9 +27,11 @@
                 :query schema/ApiQueryParams}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Release already existed and was successfully updated"
-                    :body string?}
+                    :content {"application/json+ld"
+                              {:body string?}}}
                201 {:description "Release did not exist previously and was successfully created"
-                    :body string?}
+                    :content {"application/json+ld"
+                              {:body string?}}}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]
@@ -42,7 +44,8 @@
    :parameters {:path {:series-slug :string
                        :release-slug :string}}
    :responses {200 {:description "Release schema successfully retrieved"
-                    :body string?}
+                    :content {"application/json+ld"
+                              {:body string?}}}
                404 {:body [:map
                            [:status [:enum "error"]]
                            [:message :string]]}}})
@@ -56,9 +59,11 @@
                        :release-slug :string}}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Schema already exists."
-                    :body string?}
+                    :content {"application/json+ld"
+                              {:body string?}}}
                201 {:description "Schema successfully created"
-                    :body string?}
+                    :content {"application/json+ld"
+                              {:body string?}}}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]

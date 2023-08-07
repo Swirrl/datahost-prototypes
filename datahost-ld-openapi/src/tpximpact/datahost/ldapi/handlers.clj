@@ -19,6 +19,9 @@
   {:status 404
    :body "Not found"})
 
+(defn- as-json-ld [response]
+  (assoc-in response [:headers "content-type"] "application/json+ld"))
+
 (defn get-api-params [{:keys [path-params query-params]}]
   (-> query-params (update-keys keyword) (merge path-params)))
 
@@ -29,8 +32,8 @@
 
 (defn get-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
   (if-let [series (db/get-series-by-slug triplestore series-slug)]
-    {:status 200
-     :body (db/series->response-body series)}
+    (as-json-ld {:status 200
+                 :body (db/series->response-body series)})
     not-found-response))
 
 (defn triples->ld-resource
@@ -87,8 +90,8 @@
   (let [api-params (get-api-params request)
         incoming-jsonld-doc body-params
         {:keys [op jsonld-doc]} (db/upsert-series! clock triplestore api-params incoming-jsonld-doc)]
-    {:status (op->response-code op)
-     :body jsonld-doc}))
+    (as-json-ld {:status (op->response-code op)
+                 :body jsonld-doc})))
 
 (defn get-release [triplestore change-store {{:keys [series-slug release-slug]} :path-params
                                              {:strs [accept]} :headers}]
@@ -100,9 +103,9 @@
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=release.csv"}
        :body (or (release->csv-stream triplestore change-store release) "")}
-      {:status 200
-       :body (-> (json-ld/compact release json-ld/simple-context)
-                 (.toString))})
+      (as-json-ld {:status 200
+                   :body (-> (json-ld/compact release json-ld/simple-context)
+                             (.toString))}))
     not-found-response))
 
 (defn put-release [clock triplestore {{:keys [series-slug]} :path-params
@@ -111,8 +114,8 @@
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           {:keys [op jsonld-doc]} (db/upsert-release! clock triplestore series api-params incoming-jsonld-doc)]
-      {:status (op->response-code op)
-       :body jsonld-doc})
+      (as-json-ld {:status (op->response-code op)
+                   :body jsonld-doc}))
     {:status 422
      :body "Series for this release does not exist"}))
 
@@ -123,16 +126,18 @@
    (if (not (db/get-series-by-slug triplestore series-slug))
     not-found-response
 
-    (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore (get-api-params request) incoming-jsonld-doc)]
-      {:status (op->response-code op)
-       :body jsonld-doc})))
+    (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore
+                                                             (get-api-params request)
+                                                             incoming-jsonld-doc)]
+      (as-json-ld {:status (op->response-code op)
+                   :body jsonld-doc}))))
 
 (defn get-release-schema
     [triplestore {{:keys [series-slug release-slug]} :path-params}]
     (let [release-uri (models.shared/release-uri-from-slugs series-slug release-slug)]
       (if-let [schema (db/get-release-schema triplestore release-uri)]
-        {:status 200
-         :body (db/schema->response-body schema)}
+        (as-json-ld {:status 200
+                     :body (db/schema->response-body schema)})
         {:status 404
          :body {:status "error"
                 :message "Not found"}})))
@@ -166,10 +171,9 @@
                  "content-disposition" "attachment ; filename=revision.csv"}
        :body (or (revision->csv-stream triplestore change-store revision-ld) "")}
 
-      {:status 200
-       :headers {"content-type" "application/json"}
-       :body (-> (json-ld/compact revision-ld json-ld/simple-context)
-                 (.toString))})
+      (as-json-ld {:status 200
+                   :body (-> (json-ld/compact revision-ld json-ld/simple-context)
+                             (.toString))}))
     not-found-response))
 
 (defn- wrap-ld-collection-contents [coll]
@@ -185,8 +189,8 @@
         response-body (-> (wrap-ld-collection-contents series)
                           (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
-    {:status 200
-     :body response-body}))
+    (as-json-ld {:status 200
+                 :body response-body})))
 
 (defn get-revision-list [triplestore {{:keys [series-slug release-slug]} :path-params}]
   (let [revisions (->> (db/get-revisions triplestore series-slug release-slug)
@@ -197,8 +201,8 @@
         response-body (-> (wrap-ld-collection-contents revisions)
                           (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
-    {:status 200
-     :body response-body}))
+    (as-json-ld {:status 200
+                 :body response-body})))
 
 (defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
   (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
@@ -210,8 +214,8 @@
         response-body (-> (wrap-ld-collection-contents releases)
                           (json-ld/compact json-ld/simple-collection-context)
                           (.toString))]
-    {:status 200
-     :body response-body}))
+    (as-json-ld {:status 200
+                 :body response-body})))
 
 (defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params
                                   body-params :body-params :as request}]
@@ -219,9 +223,10 @@
                         (models.shared/dataset-release-uri release-slug))]
     (if (db/resource-exists? triplestore release-uri)
       (let [{:keys [jsonld-doc resource-id]} (db/insert-revision! triplestore (get-api-params request) body-params)]
-        {:status 201
-         :headers {"Location" (format "/data/%s/releases/%s/revisions/%s" series-slug release-slug resource-id)}
-         :body jsonld-doc})
+        (as-json-ld {:status 201
+                     :headers {"Location" (format "/data/%s/releases/%s/revisions/%s"
+                                                  series-slug release-slug resource-id)}
+                     :body jsonld-doc}))
 
       {:status 422
        :body "Release for this revision does not exist"})))
@@ -267,10 +272,10 @@
         (some? message) {:status 422 :body message}
 
         :else-success
-        {:status 201
-         :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
-                                      series-slug release-slug revision-id resource-id)}
-         :body jsonld-doc}))
+        (as-json-ld {:status 201
+                     :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
+                                                  series-slug release-slug revision-id resource-id)}
+                     :body jsonld-doc})))
 
     :else
     {:status 422
