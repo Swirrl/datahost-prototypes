@@ -8,7 +8,8 @@
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th]
     [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore])
-  (:import [java.util UUID]))
+  (:import (java.time Instant)
+           [java.util UUID]))
 
 (defn- put-series [put-fn]
   (let [jsonld {"@context"
@@ -110,11 +111,13 @@
                                 :as sys}
 
     (let [new-series-slug (str "new-series-" (UUID/randomUUID))
-          new-series-path (str "/data/" new-series-slug)]
+          new-series-path (str "/data/" new-series-slug)
+          release-1-id (str "release-" (UUID/randomUUID))
+          release-1-path (str new-series-path "/releases/" release-1-id)]
       (testing "Fetching a release for a series that does not exist returns 'not found'"
         (try
 
-          (GET (str new-series-path "/releases/release-1"))
+          (GET release-1-path)
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
@@ -123,7 +126,7 @@
 
       (testing "Fetching a release that does not exist returns 'not found'"
         (try
-          (GET (str new-series-path "/releases/release-1"))
+          (GET release-1-path)
 
           (catch Throwable ex
             (let [{:keys [status body]} (ex-data ex)]
@@ -132,7 +135,7 @@
 
       (testing "Creating a release for a series that is not found fails gracefully"
         (try
-          (PUT (str "/data/this-series-does-not-exist/releases/release-1")
+          (PUT (str "/data/this-series-does-not-exist/releases/release-xyz")
                {:content-type :json
                 :body (json/write-str {"dcterms:title" "Example Release"
                                        "dcterms:description" "Description"})})
@@ -154,14 +157,14 @@
                                "dcterms" "http://purl.org/dc/terms/"
                                "dh" "https://publishmydata.com/def/datahost/"
                                "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
-                              "@id" (str new-series-slug "/releases/release-1")
+                              "@id" (str new-series-slug "/releases/" release-1-id)
                               "@type" "dh:Release"
                               "dcat:inSeries" (str "https://example.org" new-series-path)
                               "dcterms:description" "Description"
                               "dcterms:title" "Example Release"}]
 
         (testing "Creating a release for a series that does exist works"
-          (let [response (PUT (str new-series-path "/releases/release-1")
+          (let [response (PUT release-1-path
                               {:content-type :json
                                :body (json/write-str request-ednld)})
                 body (json/read-str (:body response))]
@@ -171,7 +174,7 @@
                    (get body "dcterms:modified")))))
 
         (testing "Fetching a release that does exist works"
-          (let [response (GET (str new-series-path "/releases/release-1"))
+          (let [response (GET release-1-path)
                 body (json/read-str (:body response))]
             (is (= 200 (:status response)))
             (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
@@ -194,23 +197,21 @@
             (t/is (= nil missing2))))
 
         (testing "A release can be updated, query params take precedence"
-          (let [{body-str-before :body} (GET (str new-series-path "/releases/release-1"))
-                {:keys [body] :as response} (PUT (str new-series-path
-                                                      "/releases/release-1?title=A%20new%20title")
+          (let [{body-str-before :body} (GET release-1-path)
+                {:keys [body] :as response} (PUT (str release-1-path "?title=A%20new%20title")
                                                  {:content-type :json
                                                   :body (json/write-str request-ednld)})
                 body-before (json/read-str body-str-before)
                 body (json/read-str body)]
             (is (= 200 (:status response)))
             (is (= "A new title" (get body "dcterms:title")))
-            (is (= (get body-before "dcterms:issued")
-                   (get body "dcterms:issued")))
+            (is (= (Instant/parse (get body-before "dcterms:issued"))
+                   (Instant/parse (get body "dcterms:issued"))))
             (is (not= (get body "dcterms:modified")
                       (get body-before "dcterms:modified")))
 
             (testing "No update when query params same as in existing doc"
-              (let [response (PUT (str new-series-path
-                                       "/releases/release-1?title=A%20new%20title")
+              (let [response (PUT (str release-1-path "?title=A%20new%20title")
                                   {:content-type :json
                                    :body nil})
                     body' (-> response :body json/read-str)]
