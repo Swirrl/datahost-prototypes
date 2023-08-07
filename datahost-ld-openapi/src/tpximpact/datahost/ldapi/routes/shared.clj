@@ -17,11 +17,11 @@
 
 (def JsonLdSchema
   "Datahost specific JSON-LD documents"
-  (:maybe
+  [:maybe
    (mu/merge
     JsonLdBase 
     [:map
-     ["dh:baseEntity" {:optional true} string?]])))
+     ["dh:baseEntity" {:optional true} string?]])])
 
 (def LdSchemaInputColumn
   [:map 
