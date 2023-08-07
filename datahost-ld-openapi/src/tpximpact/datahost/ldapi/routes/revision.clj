@@ -14,14 +14,15 @@
                        :revision-id int?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json" {:body string?}}}
+                     "application/json+ld" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn get-release-list-route-config [triplestore]
   {:summary "All releases metadata in the given series"
    :handler (partial handlers/get-release-list triplestore)
    :parameters {:path {:series-slug string?}}
-   :responses {200 {:body string?}
+   :responses {200 {:content {"application/json+ld"
+                              {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn get-revision-list-route-config [triplestore]
@@ -29,7 +30,8 @@
    :handler (partial handlers/get-revision-list triplestore)
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
-   :responses {200 {:body string?}
+   :responses {200 {:content {"application/json+ld"
+                              {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn post-revision-route-config [triplestore]
@@ -48,7 +50,8 @@
                                        :optional true} string?]]}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Revision was successfully created"
-                    :body string?
+                    :content {"application/json+ld"
+                              {:body string?}}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"
@@ -65,7 +68,8 @@
                        :revision-id int?}}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Changes were added to a Revision"
-                    :body string?
+                    :content {"application/json+ld"
+                              {:body string?}}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"

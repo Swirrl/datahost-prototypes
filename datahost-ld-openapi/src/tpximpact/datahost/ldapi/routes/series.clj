@@ -7,7 +7,8 @@
 (defn get-series-list-route-config [triplestore]
   {:summary "All series metadata in the database"
    :handler (partial handlers/get-series-list triplestore)
-   :responses {200 {:body string?}
+   :responses {200 {:content {"application/json+ld"
+                              {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn get-series-route-config [triplestore]
@@ -15,7 +16,8 @@
    :description "A dataset series is a named dataset regardless of schema, methodology or compatibility changes"
    :handler (partial handlers/get-dataset-series triplestore)
    :parameters {:path {:series-slug string?}}
-   :responses {200 {:body string?}
+   :responses {200 {:content {"application/json+ld"
+                              {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn put-series-route-config [clock triplestore]
@@ -26,9 +28,11 @@
                 :query schema/ApiQueryParams}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Series already existed and was successfully updated"
-                    :body routes-shared/ResourceSchema}
+                    :content {"application/json+ld"
+                              {:body routes-shared/ResourceSchema}}}
                201 {:description "Series did not exist previously and was successfully created"
-                    :body routes-shared/ResourceSchema}
+                    :content {"application/json+ld"
+                              {:body routes-shared/ResourceSchema}}}
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]
