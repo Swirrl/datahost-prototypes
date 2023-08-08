@@ -30,12 +30,6 @@
     (fn [out-stream]
       (tc/write! tc-dataset out-stream {:file-type :csv}))))
 
-(defn get-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
-  (if-let [series (db/get-series-by-slug triplestore series-slug)]
-    (as-json-ld {:status 200
-                 :body (db/series->response-body series)})
-    not-found-response))
-
 (defn triples->ld-resource
   "Given triples returned from a DB query, transform them into a single resource
    map (e.g. Release or Revision) that's ready for JSON serialization"
@@ -86,6 +80,15 @@
     :update 200
     :noop   200))
 
+(defn get-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
+  (if-let [series (->> (db/get-series-by-slug triplestore series-slug)
+                       (matcha/index-triples)
+                       (triples->ld-resource))]
+    (as-json-ld {:status 200
+                 :body (-> (json-ld/compact series json-ld/simple-context)
+                           (.toString))})
+    not-found-response))
+
 (defn put-dataset-series [clock triplestore {:keys [body-params] :as request}]
   (let [api-params (get-api-params request)
         incoming-jsonld-doc body-params
@@ -110,7 +113,8 @@
 
 (defn put-release [clock triplestore {{:keys [series-slug]} :path-params
                        body-params :body-params :as request}]
-  (if-let [series (db/get-series-by-slug triplestore series-slug)]
+  (if-let [series (some->> (db/get-series-by-slug triplestore series-slug)
+                           (resource/from-statements))]
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
           {:keys [op jsonld-doc]} (db/upsert-release! clock triplestore series api-params incoming-jsonld-doc)]
@@ -123,14 +127,13 @@
   [clock triplestore {{:keys [series-slug]} :path-params
                       incoming-jsonld-doc :body-params
                       :as request}]
-   (if (not (db/get-series-by-slug triplestore series-slug))
-    not-found-response
-
+  (if (db/resource-exists? triplestore (models.shared/dataset-series-uri series-slug))
     (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore
                                                              (get-api-params request)
                                                              incoming-jsonld-doc)]
       (as-json-ld {:status (op->response-code op)
-                   :body jsonld-doc}))))
+                   :body jsonld-doc}))
+    not-found-response))
 
 (defn get-release-schema
     [triplestore {{:keys [series-slug release-slug]} :path-params}]
