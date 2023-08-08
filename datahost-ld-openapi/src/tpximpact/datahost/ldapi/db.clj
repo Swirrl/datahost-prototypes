@@ -26,16 +26,6 @@
                        :foaf (URI. "http://xmlns.com/foaf/0.1/")
                        :dh (URI. "https://publishmydata.com/def/datahost/")})
 
-(defn- get-series-query [series-url]
-  (let [bgps [[series-url 'a :dh/DatasetSeries]
-              [series-url :dcterms/title '?title]
-              [series-url :dh/baseEntity '?baseentity]
-              [series-url :dcterms/modified '?modified]
-              [series-url :dcterms/issued '?issued]]]
-    {:prefixes default-prefixes
-     :construct (conj bgps [series-url :dcterms/description '?description])
-     :where (conj bgps [:optional [[series-url :dcterms/description '?description]]])}))
-
 (defn resource-exists? [triplestore uri]
   (datastore/eager-query triplestore
                          (f/format-query {:ask []
@@ -70,10 +60,6 @@
     (when (seq statements)
       (resource/from-statements statements))))
 
-(defn get-series-by-uri [triplestore series-uri]
-  (let [q (get-series-query series-uri)]
-    (get-resource-by-construct-query triplestore q)))
-
 (defn get-release-by-uri
   "Loads a Release in triple form"
   [triplestore release-uri]
@@ -98,8 +84,17 @@
                            (f/format-query q :pretty? true))))
 
 (defn get-series-by-slug [triplestore series-slug]
-  (let [series-uri (models-shared/dataset-series-uri series-slug)]
-    (get-series-by-uri triplestore series-uri)))
+  (let [series-uri (models-shared/dataset-series-uri series-slug)
+        bgps [[series-uri 'a :dh/DatasetSeries]
+              [series-uri :dcterms/title '?title]
+              [series-uri :dh/baseEntity '?baseentity]
+              [series-uri :dcterms/modified '?modified]
+              [series-uri :dcterms/issued '?issued]]
+        series-query {:prefixes default-prefixes
+                      :construct (conj bgps [series-uri :dcterms/description '?description])
+                      :where (conj bgps [:optional [[series-uri :dcterms/description '?description]]])}]
+    (datastore/eager-query triplestore
+                           (f/format-query series-query :pretty? true))))
 
 (defn get-release [triplestore series-slug release-slug]
   (let [series-uri (models-shared/dataset-series-uri series-slug)
@@ -336,7 +331,7 @@
 
 ;; TODO: move this!
 (defn series->response-body [series]
-  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf"])))
+  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf" "dcat"])))
 
 (defn release->response-body [release]
   (resource/->json-ld release (output-context ["dh" "dcterms" "rdf" "dcat"])))
@@ -379,7 +374,8 @@
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
   [clock triplestore {:keys [series-slug] :as api-params} incoming-jsonld-doc]
   (let [request-series (request->series api-params incoming-jsonld-doc)]
-    (if-let [existing-series (get-series-by-slug triplestore series-slug)]
+    (if-let [existing-series (some->> (get-series-by-slug triplestore series-slug)
+                                      (resource/from-statements))]
       (let [[changed? new-series] (merge-series-updates clock existing-series request-series)]
         (when changed?
           (update-series triplestore new-series))
