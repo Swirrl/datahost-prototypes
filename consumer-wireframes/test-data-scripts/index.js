@@ -55,6 +55,7 @@ createSchemas = async (releases, series) => {
             });
 
             const api = await response.json();
+            console.log(api)
         } catch (e) {
             console.log(e)
             return e;
