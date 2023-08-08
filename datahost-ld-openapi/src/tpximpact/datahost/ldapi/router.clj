@@ -1,30 +1,31 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
-    [buddy.auth.backends.httpbasic :as http-basic]
-    [buddy.auth.middleware :as buddy]
-    [buddy.auth :refer [authenticated?]]
-    [buddy.hashers :as hashers]
-    [integrant.core :as ig]
-    [reitit.dev.pretty :as pretty]
-    [reitit.interceptor.sieppari :as sieppari]
-    [reitit.openapi :as openapi]
-    [reitit.ring :as ring]
-    [reitit.ring.coercion :as coercion]
-    [reitit.ring.middleware.multipart :as multipart]
-    [reitit.ring.middleware.muuntaja :as muuntaja]
-    [reitit.ring.middleware.parameters :as parameters]
-    [reitit.swagger :as swagger]
-    [reitit.swagger-ui :as swagger-ui]
-    [reitit.coercion.malli :as rcm]
-    [muuntaja.core :as m]
-    [muuntaja.format.core :as fc]
-    [malli.util :as mu]
-    [tpximpact.datahost.ldapi.routes.series :as series-routes]
-    [tpximpact.datahost.ldapi.routes.release :as release-routes]
-    [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
-    [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-    [ring.middleware.cors :as cors]
-    [clojure.spec.alpha :as s])
+   [buddy.auth.backends.httpbasic :as http-basic]
+   [buddy.auth.middleware :as buddy]
+   [buddy.auth :refer [authenticated?]]
+   [buddy.hashers :as hashers]
+   [clojure.string :as str]
+   [integrant.core :as ig]
+   [reitit.dev.pretty :as pretty]
+   [reitit.interceptor.sieppari :as sieppari]
+   [reitit.openapi :as openapi]
+   [reitit.ring :as ring]
+   [reitit.ring.coercion :as coercion]
+   [reitit.ring.middleware.multipart :as multipart]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.ring.middleware.parameters :as parameters]
+   [reitit.swagger :as swagger]
+   [reitit.swagger-ui :as swagger-ui]
+   [reitit.coercion.malli :as rcm]
+   [muuntaja.core :as m]
+   [muuntaja.format.core :as fc]
+   [malli.util :as mu]
+   [tpximpact.datahost.ldapi.routes.series :as series-routes]
+   [tpximpact.datahost.ldapi.routes.release :as release-routes]
+   [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
+   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
+   [ring.middleware.cors :as cors]
+   [clojure.spec.alpha :as s])
   (:import (java.io InputStream InputStreamReader OutputStream)))
 
 (defn decode-str [_options]
@@ -88,6 +89,33 @@
                :headers {"Content-Type" "text/plain"}
                :body "Unauthorized"}))
           (handler request))))))
+
+(defn- read-request? [request]
+  (#{:get :head} (:request-method request)))
+
+
+(defn- browser-html-request? [request]
+  (when-let [accept-header (get-in request [:headers "accept"])]
+    (and (str/includes? accept-header "text/html")
+         (not (str/includes? accept-header "application/json"))
+         (not (str/includes? accept-header "application/json+ld")))))
+
+
+(def browser-render-convenience-middleware
+  "This is an affordance that attempts to detect an in-browser GET request. If
+  detected, the application/json+ld content-type from API response will be overridden
+  so that the browser renders the response as plain JSON and does not attempt to download
+  the unrecognized application/json+ld as a file."
+  (fn [handler]
+    (fn [request]
+      (if (and (read-request? request)
+               (browser-html-request? request))
+        (let [response (handler request)]
+          (if (= (get-in response [:headers "content-type"]) "application/json+ld")
+            ;; replace content-type for raw browser request
+            (assoc-in response [:headers "content-type"] "application/json")
+            response))
+        (handler request)))))
 
 (def cors-middleware
   "Defines a CORS middleware for a route"
@@ -181,7 +209,9 @@
 
                         (if auth
                           (basic-auth-middleware auth)
-                          identity)]}}))
+                          identity)
+
+                        browser-render-convenience-middleware]}}))
 
 (defn handler [opts]
   {:pre [(:clock opts) (:triplestore opts) (:change-store opts)]}
