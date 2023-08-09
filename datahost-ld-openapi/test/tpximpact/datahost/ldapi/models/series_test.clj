@@ -9,7 +9,7 @@
     [tpximpact.datahost.time :as time]
     [tpximpact.test-helpers :as th])
   (:import
-    (java.time ZonedDateTime)
+    (java.time ZonedDateTime Instant)
     (java.time.format DateTimeFormatter)
     [java.util UUID]))
 
@@ -165,8 +165,8 @@
               resp-body (json/read-str (:body response))]
           (println response)
           (is (= 200 (:status response)))
-          (is (not= (get resp-body "dcterms:issued")
-                    (get resp-body "dcterms:modified"))))
+          (is (not= (Instant/parse (get resp-body "dcterms:issued"))
+                    (Instant/parse (get resp-body "dcterms:modified")))))
 
         (let [response (GET new-series-path)
               resp-body (json/read-str (:body response))]
@@ -183,6 +183,6 @@
                   body' (json/read-str body')]
               (is (= 200 (:status response)))
               (is (= "A new title" (get body' "dcterms:title")))
-              (is (= (select-keys resp-body ["dcterms:issued" "dcterms:modified"])
-                     (select-keys body' ["dcterms:issued" "dcterms:modified"]))
+              (is (= (update-vals (select-keys resp-body ["dcterms:issued" "dcterms:modified"]) #(Instant/parse %))
+                     (update-vals (select-keys body' ["dcterms:issued" "dcterms:modified"]) #(Instant/parse %)))
                   "The document shouldn't be modified"))))))))
