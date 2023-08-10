@@ -25,7 +25,15 @@
                             {:type :datahost/timestamp
                              :pred (fn timestamp-pred [ts]
                                      (and (instance? ZonedDateTime ts)
-                                          (= (.getZone ^ZonedDateTime ts) utc-tz)))}))}))
+                                          (= (.getZone ^ZonedDateTime ts) utc-tz)))}))
+     
+     ;; swagger-ui complains when namespaced keys are used,
+     ;; so using non-namespaced
+     :title-string (let [regex (str #"^\w[\w\s\D]+$")]
+                     [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
+     ;; description allows newlines
+     :description-string (let [regex #"^\w[\w\s\S\D]+$"]
+                           [:re {:error/message (format "Should match regex: %s" (str regex))} regex])}))
 
 (def registry
   (merge

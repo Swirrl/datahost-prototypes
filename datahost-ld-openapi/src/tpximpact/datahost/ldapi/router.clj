@@ -53,9 +53,13 @@
 
 (def muuntaja-custom-instance
   (m/create
-    (-> (assoc-in
-          m/default-options
-          [:formats "text/csv"] csv-format))))
+   (-> (assoc-in
+        m/default-options
+        [:formats "text/csv"] csv-format)
+       (update :formats (fn [formats]
+                          (let [json-format (get formats "application/json")]
+                            (assoc formats "application/ld+json"
+                                   (assoc json-format :name "application/ld+json"))))))))
 
 (def leave-keys-alone-muuntaja-coercer
   (m/create
@@ -196,8 +200,6 @@
                         muuntaja/format-negotiate-middleware
                         ;; encoding response body
                         muuntaja/format-response-middleware
-                        ;; exception handling
-                        ldapi-errors/exception-middleware
                         ;; decoding request body
                         muuntaja/format-request-middleware
                         ;; coercing response bodies
@@ -206,6 +208,8 @@
                         coercion/coerce-request-middleware
                         ;; multipart
                         multipart/multipart-middleware
+                        ;; exception handling
+                        ldapi-errors/exception-middleware
 
                         (if auth
                           (basic-auth-middleware auth)

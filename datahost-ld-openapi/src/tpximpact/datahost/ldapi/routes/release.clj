@@ -2,6 +2,7 @@
   (:require
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.release :as schema]))
 
@@ -21,7 +22,15 @@
 (defn put-release-route-config [clock triplestore]
   {:summary "Create or update metadata for a release"
    :handler (partial handlers/put-release clock triplestore)
-   :parameters {:body routes-shared/JsonLdSchema
+   :middleware [[middleware/json-only :json-only]
+                [(partial middleware/flag-resource-exists triplestore
+                          :dh/Release ::release) :resource-exists?]
+                [(partial middleware/validate-creation-body+query-params
+                          {:resource-id ::release
+                           :body-explainer (get-in routes-shared/explainers [:put-release :body])
+                           :query-explainer (get-in routes-shared/explainers [:put-release :query])})
+                 :validate-body+query]]
+   :parameters {:body [:any]
                 :path {:series-slug string?
                        :release-slug string?}
                 :query schema/ApiQueryParams}

@@ -3,6 +3,7 @@
     [reitit.ring.malli]
     [reitit.coercion.malli :as rcm]
     [tpximpact.datahost.ldapi.handlers :as handlers]
+    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
     [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
 (defn get-revision-route-config [triplestore change-store]
@@ -38,7 +39,15 @@
   {:summary (str "Create metadata for a revision. The successfully created resource "
                  "path will be returned in the `Location` header")
    :handler (partial handlers/post-revision triplestore)
-   :parameters {:body routes-shared/JsonLdSchema
+   :middleware [[middleware/json-only :json-only]
+                [(partial middleware/flag-resource-exists triplestore
+                          :dh/Revision ::revision) :resource-exists?]
+                [(partial middleware/validate-creation-body+query-params
+                          {:resource-id ::revision
+                           :body-explainer (get-in routes-shared/explainers [:post-revision :body])
+                           :query-explainer (get-in routes-shared/explainers [:post-revision :query])})
+                 :validate-body+query]]
+   :parameters {:body [:any]
                 :path {:series-slug string?
                        :release-slug string?}
                 :query [:map
@@ -62,7 +71,16 @@
 (defn post-revision-changes-route-config [triplestore change-store]
   {:summary "Add changes to a Revision via a CSV file."
    :handler (partial handlers/post-change triplestore change-store)
+   :middleware [[middleware/json-only :json-only]
+                [(partial middleware/flag-resource-exists triplestore
+                          :dh/Revision ::revision) :resource-exists?]
+                [(partial middleware/validate-creation-body+query-params
+                          {:resource-id ::revision
+                           :body-explainer (get-in routes-shared/explainers [:post-revision-change :body])
+                           :query-explainer (get-in routes-shared/explainers [:put-revision-change :query])})
+                 :validate-body+query]]
    :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
+                :body [:any]
                 :path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}

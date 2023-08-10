@@ -163,9 +163,10 @@
         (let [release-slug (str "release-" (UUID/randomUUID))
               release-url (str "/data/" series-slug "/releases/" release-slug)
               release-resp (PUT release-url
-                                {:content-type :json
+                                {:content-type :application/json
                                  :body (json/write-str {"dcterms:title" "Release 34"
-                                                        "dcterms:description" "Description 34"})})
+                                                        "dcterms:description" "Description 34"
+                                                        })})
               schema-req-body {"dcterms:title" "Test schema"
                                "dh:columns"
                                (let [csvw-type (fn [col-name titles datatype]
@@ -196,7 +197,7 @@
                                         "dh:appliesToRelease" (str "https://example.org" release-url)}
 
                 revision-resp (POST revision-post-url
-                                    {:content-type :json
+                                    {:content-type :application/json
                                      :body (json/write-str revision-ednld)})
                 inserted-revision-id (get (json/read-str (:body revision-resp)) "@id")
                 new-revision-location (-> revision-resp :headers (get "Location"))

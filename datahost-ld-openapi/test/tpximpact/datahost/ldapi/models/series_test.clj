@@ -49,7 +49,9 @@
         (t/is (= new-series-doc series-doc)))
 
       (let [series2-slug "new-series-without-description"
-            request (create-put-request series2-slug {"dcterms:title" "Another title"})
+            request (create-put-request series2-slug
+                                        {"dcterms:title" "Another title"
+                                         "dcterms:description" "Foo"})
             {:keys [status]} (handler request)]
         (t/is (= 201 status)
               "Should create series without optional dcterms:description")

@@ -13,8 +13,14 @@
 (defn dataset-series-uri [series-slug]
   (.resolve ld-root series-slug))
 
+(defn dataset-series-uri* [{:keys [series-slug]}]
+  (dataset-series-uri series-slug))
+
 (defn dataset-release-uri [^URI series-uri release-slug]
   (URI. (format "%s/releases/%s" series-uri release-slug)))
+
+(defn dataset-release-uri* [{:keys [series-slug release-slug]}]
+  (URI. (format "%s/releases/%s" (dataset-series-uri series-slug) release-slug)))
 
 (defn dataset-series-key [series-slug]
   (str (.getPath ld-root) series-slug))
@@ -40,6 +46,9 @@
 (defn dataset-revision-uri [^URI dataset-release-uri revision-id]
   (URI. (format "%s/revisions/%s" dataset-release-uri revision-id)))
 
+(defn dataset-revision-uri* [{:keys [series-slug release-slug revision-id]}]
+  (URI. (format "%s/releases/%s/revisions/%s" (dataset-series-uri series-slug) release-slug revision-id)))
+
 (defn revision-key [series-slug release-slug revision-id]
   (str (release-key series-slug release-slug) "/revisions/" revision-id))
 
@@ -51,3 +60,26 @@
 
 (defn change-uri [series-slug release-slug revision-id change-id]
   (.resolve ld-root (change-key series-slug release-slug revision-id change-id)))
+
+(defmulti -resource-uri
+  "Returns URI for the given resource."
+  (fn [resource _] resource))
+
+(defmethod -resource-uri :dh/DatasetSeries [_ params]
+  (dataset-series-uri* params))
+
+(defmethod -resource-uri :dh/Release [_ params]
+  (dataset-release-uri* params))
+
+(defmethod -resource-uri :dh/Revision [_ params]
+  (dataset-revision-uri* params))
+
+(defmethod -resource-uri :dh/Change [_ {:keys [series-slug release-slug revision-id change-id]}]
+  (change-uri series-slug release-slug revision-id change-id))
+
+(defn resource-uri
+  "Returns an uri for resource, where resource in
+  #{:dh/DatasetsSeries :dh/Release :dh/Revision} and params should
+  match the typical path params."
+  [resource params]
+  (-resource-uri resource params))
