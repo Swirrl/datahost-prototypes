@@ -31,18 +31,6 @@
                          (f/format-query {:ask []
                                           :where [[uri '?p '?o]]} :pretty? true)))
 
-(defn- get-release-schema-query [release-uri]
-  {:prefixes default-prefixes
-   :construct [['?schema '?p '?o]]
-   :where [[release-uri :dh/hasSchema '?schema]
-           ['?schema '?p '?o]]})
-
-(defn- get-schema-columns-query [schema-uri]
-  {:prefixes default-prefixes
-   :construct [['?col '?p '?o]]
-   :where [[schema-uri :dh/columns '?col]
-           ['?col '?p '?o]]})
-
 (defn- map-properties [prop-mapping m]
   (reduce-kv (fn [props k v]
                (if-let [prop-uri (get prop-mapping k)]
@@ -54,11 +42,6 @@
   (let [prop-mapping {:title (compact/expand :dcterms/title)
                       :description (compact/expand :dcterms/description)}]
     (map-properties prop-mapping query-params)))
-
-(defn get-resource-by-construct-query [triplestore query]
-  (let [statements (datastore/eager-query triplestore (f/format-query query :pretty? true))]
-    (when (seq statements)
-      (resource/from-statements statements))))
 
 (defn get-release-by-uri
   "Loads a Release in triple form"
@@ -101,15 +84,26 @@
         release-uri (models-shared/dataset-release-uri series-uri release-slug)]
     (get-release-by-uri triplestore release-uri)))
 
-(defn get-release-schema
+(defn get-release-schema-statements
   [triplestore release-uri]
-  (let [q (get-release-schema-query release-uri)]
-    (when-let [schema (get-resource-by-construct-query triplestore q)]
+  (let [q {:prefixes default-prefixes
+           :construct [['?schema '?p '?o]
+                       ['?schema :dh/columns '?col]
+                       ['?col '?col_p '?col_o]]
+           :where [[release-uri :dh/hasSchema '?schema]
+                   ['?schema '?p '?o]
+                   ['?schema :dh/columns '?col]
+                   ['?col '?col_p '?col_o]]}
+        q2 (f/format-query q :pretty? true)]
+    (datastore/eager-query triplestore q2)))
+
+(defn ^:deprecated get-release-schema
+  [triplestore release-uri]
+  (let [schema-statements (get-release-schema-statements triplestore release-uri)]
+    (when-let [schema (when (seq schema-statements)
+                        (resource/from-statements schema-statements))]
       (assert (resource/id schema))
-      (let [columns-query (get-schema-columns-query (resource/id schema))
-            qs (f/format-query columns-query :pretty? true)
-            column-statements (datastore/eager-query triplestore qs)]
-        (resource/add-statements schema column-statements)))))
+      schema)))
 
 (defn get-revision
   ([triplestore revision-uri]

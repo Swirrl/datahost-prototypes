@@ -55,9 +55,7 @@
    :responses {200 {:description "Release schema successfully retrieved"
                     :content {"application/json+ld"
                               {:body string?}}}
-               404 {:body [:map
-                           [:status [:enum "error"]]
-                           [:message :string]]}}})
+               404 {:body [:re "Not found"]}}})
 
 (defn put-release-ld-schema-config
   [clock triplestore]

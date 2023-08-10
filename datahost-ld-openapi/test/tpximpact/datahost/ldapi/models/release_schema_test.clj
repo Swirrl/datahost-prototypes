@@ -47,7 +47,8 @@
         {:keys [GET POST]} (get @th/*system* http-client)
         csvw-type (fn [col-name titles] {"csvw:datatype" "string"
                                          "csvw:name" col-name
-                                         "csvw:titles" titles})]
+                                         "csvw:titles" titles
+                                         "@type" "dh:DimensionColumn"})]
     (testing "Creating a schema"
       (let [schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
             schema-uri (str "https://example.org" schema-path)
