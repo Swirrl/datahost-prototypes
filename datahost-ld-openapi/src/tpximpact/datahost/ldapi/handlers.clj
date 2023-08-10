@@ -15,6 +15,9 @@
    [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
   (:import (java.net URI)))
 
+(defn- box [x]
+  (if (coll? x) x [x]))
+
 (def not-found-response
   {:status 404
    :body "Not found"})
@@ -33,26 +36,45 @@
 (defn triples->ld-resource
   "Given triples returned from a DB query, transform them into a single resource
    map (e.g. Release or Revision) that's ready for JSON serialization"
-  [matcha-db]
-  (-> (matcha/build-1 [(keyword "@id") ?s]
+  ([matcha-db]
+   (-> (matcha/build-1 [(keyword "@id") ?s]
+                       {?p ?o
+                        (keyword "@type") ?t}
+                       [[?s ?p ?o]
+                        (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
+                       matcha-db)
+       (dissoc vocab.rdf/rdf:a)))
+  ([matcha-db subject]
+   (-> (matcha/build-1 [(keyword "@id") ?s]
+                       {?p ?o
+                        (keyword "@type") ?t}
+                       [[?s ?p ?o]
+                        (matcha/optional [[?s vocab.rdf/rdf:a ?t]])
+                        (matcha/values ?s [subject])]
+                       matcha-db)
+       (dissoc vocab.rdf/rdf:a))))
+
+(defn triples->ld-resource-collection
+  "Given triples returned from a DB query, transform them into a collection of
+  resource maps (e.g. seq of Revisions) that are ready for JSON serialization"
+  ([matcha-db]
+   (->> (matcha/build [(keyword "@id") ?s]
                       {?p ?o
                        (keyword "@type") ?t}
                       [[?s ?p ?o]
                        (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
                       matcha-db)
-      (dissoc vocab.rdf/rdf:a)))
-
-(defn triples->ld-resource-collection
-  "Given triples returned from a DB query, transform them into a collection of
-  resource maps (e.g. seq of Revisions) that are ready for JSON serialization"
-  [matcha-db]
-  (->> (matcha/build [(keyword "@id") ?s]
-                     {?p ?o
-                      (keyword "@type") ?t}
-                     [[?s ?p ?o]
-                      (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
-                     matcha-db)
-       (map #(dissoc % vocab.rdf/rdf:a))))
+        (map #(dissoc % vocab.rdf/rdf:a)))
+   )
+  ([matcha-db subject]
+   (->> (matcha/build [(keyword "@id") ?s]
+                      {?p ?o
+                       (keyword "@type") ?t}
+                      [(matcha/values ?s [subject])
+                       [?s ?p ?o]
+                       (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
+                      matcha-db)
+        (map #(dissoc % vocab.rdf/rdf:a)))))
 
 (defn input-stream->dataset [is]
   (tc/dataset is {:file-type :csv}))
@@ -135,15 +157,31 @@
                    :body jsonld-doc}))
     not-found-response))
 
+(defn- get-schema-id [matcha-db]
+  ((grafter.matcha.alpha/select-1 [?schema]
+                                  [[?schema (cmp/expand :dh/columns) ?col]])
+   matcha-db))
+
 (defn get-release-schema
-    [triplestore {{:keys [series-slug release-slug]} :path-params}]
-    (let [release-uri (models.shared/release-uri-from-slugs series-slug release-slug)]
-      (if-let [schema (db/get-release-schema triplestore release-uri)]
+  [triplestore {{:keys [series-slug release-slug]} :path-params}]
+  (let [release-uri (models.shared/release-uri-from-slugs series-slug release-slug)
+        matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
+    (if-let [schema-id (get-schema-id matcha-db)]
+      (let [schema-resource (triples->ld-resource matcha-db schema-id)
+            csvw-number-uri (cmp/expand :csvw/number)
+            columns (->> (box (get schema-resource (cmp/expand :dh/columns)))
+                         (map #(triples->ld-resource matcha-db %))
+                         (sort-by #(get % csvw-number-uri)))
+            schema-ld-with-columns (assoc schema-resource (cmp/expand :dh/columns) columns)]
         (as-json-ld {:status 200
-                     :body (db/schema->response-body schema)})
-        {:status 404
-         :body {:status "error"
-                :message "Not found"}})))
+                     :body (-> (json-ld/compact schema-ld-with-columns
+                                                (merge json-ld/simple-context
+                                                       {"dh:columns" {"@container" "@set"}
+                                                        ;; TODO: add these prefixes to simple-context (but will need tests fixes)
+                                                        :csvw "http://www.w3.org/ns/csvw#"
+                                                        :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"}))
+                               (.toString))}))
+      not-found-response)))
 
 (defn- revision-number
   "Returns a number or throws."
@@ -183,7 +221,7 @@
   {"https://publishmydata.com/def/datahost/collection-contents" coll})
 
 (defn get-series-list [triplestore _request]
-  (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
+  (let [issued-uri (cmp/expand :dcterms/issued)
         series (->> (db/get-all-series triplestore)
                     (matcha/index-triples)
                     (triples->ld-resource-collection)
@@ -208,7 +246,7 @@
                  :body response-body})))
 
 (defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
-  (let [issued-uri (tpximpact.datahost.ldapi.compact/expand :dcterms/issued)
+  (let [issued-uri (cmp/expand :dcterms/issued)
         releases (->> (db/get-releases triplestore series-slug)
                       (matcha/index-triples)
                       (triples->ld-resource-collection)

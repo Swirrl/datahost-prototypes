@@ -6,7 +6,7 @@
 (def UpsertOp 
   "Enum for semantics of the upsert operation.
 
-  Motivation: we may wanto to convey to the client what actaully
+  Motivation: we may want to to convey to the client what actually
   happened (in a form of meaningful HTTP status code, for example)."
   [:enum :noop :create :update])
 

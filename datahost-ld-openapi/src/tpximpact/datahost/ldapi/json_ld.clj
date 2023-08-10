@@ -12,6 +12,7 @@
                      "@base" m.shared/ld-root})
 
 (def simple-collection-context
+  "Use this context when the top level payload will be a collection e.g. Series list"
   (merge simple-context
          {:contents {"@id" "dh:collection-contents",
                      "@container" "@set"}}))
