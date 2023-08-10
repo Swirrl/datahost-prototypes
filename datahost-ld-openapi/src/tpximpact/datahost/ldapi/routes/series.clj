@@ -1,6 +1,7 @@
 (ns tpximpact.datahost.ldapi.routes.series
   (:require
    [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.series :as schema]))
 
@@ -22,8 +23,17 @@
 
 (defn put-series-route-config [clock triplestore]
   {:summary "Create or update metadata on a dataset-series"
+   :middleware [[middleware/json-only :json-only]
+                [(partial middleware/flag-resource-exists triplestore
+                          :dh/DatasetSeries ::series)
+                 :resource-exists?]
+                [(partial middleware/validate-creation-body+query-params
+                          {:resource-id ::series
+                           :body-explainer (get-in routes-shared/explainers [:put-series :body])
+                           :query-explainer (get-in routes-shared/explainers [:put-series :query])})
+                 :validate-body+query]]
    :handler (partial handlers/put-dataset-series clock triplestore)
-   :parameters {:body routes-shared/JsonLdSchema
+   :parameters {:body [:any]            ; validation logic via middleware
                 :path {:series-slug string?}
                 :query schema/ApiQueryParams}
    :openapi {:security [{"basic" []}]}

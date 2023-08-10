@@ -1,6 +1,8 @@
 (ns tpximpact.datahost.ldapi.routes.shared
-  (:require [malli.util :as mu]))
-
+  (:require
+   [malli.core :as m]
+   [malli.util :as mu]
+   [tpximpact.datahost.ldapi.schemas.common :as s.common]))
 
 (def JsonLdBase
   "Common entries in JSON-LD documents.
@@ -23,6 +25,38 @@
     [:map
      ["dh:baseEntity" {:optional true} string?]])])
 
+(def ^:private
+  required-input-fragment
+  (m/schema
+   [:map
+    ["dcterms:title" {:optional false} :title-string]
+    ["dcterms:description" {:optional false} :description-string]]
+   {:registry s.common/registry}))
+
+(def CreateSeriesInput
+  "Input schema for creaing a new series."
+  required-input-fragment)
+
+(def CreateReleaseInput
+  "Input schema for creating a new release."
+  required-input-fragment)
+
+(def CreateRevisionInput
+  "Input schema for creating new revision."
+  (m/schema
+   [:map
+    ["dcterms:title" {:optional false} :title-string]
+    ["dcterms:description" {:optional true} :description-string]]
+   {:registry s.common/registry}))
+
+(def CreateChangeInput
+  "Input schema for new Changes."
+  (m/schema
+   [:map
+    ["dcterms:title" {:optional true} :title-string]
+    ["dcterms:description" {:optional false} :description-string]]
+   {:registry s.common/registry}))
+
 (def LdSchemaInputColumn
   [:map 
    ["csvw:datatype" [:or
@@ -44,3 +78,29 @@
 ;; TODO: create better resource representation
 (def ResourceSchema
   [:string])
+
+(def explainers
+  {:put-series
+   {:body (m/explainer [:maybe CreateSeriesInput])
+    :query (m/explainer
+            (m/schema [:map
+                       ["title" :title-string]
+                       ["description" :description-string]]
+                      {:registry s.common/registry}))}
+
+   :put-release {:body (m/explainer [:maybe CreateReleaseInput])
+                 :query (m/explainer
+                         (m/schema [:map
+                                    ["title" :title-string]
+                                    ["description" :description-string]]
+                                   {:registry s.common/registry}))}
+   :post-revision {:body (m/explainer [:maybe CreateRevisionInput])
+                   :query (m/schema [:map
+                                     ["title" :title-string]
+                                     ["description" {:optional true} :description-string]]
+                                    {:registry s.common/registry})}
+   :post-revision-change {:body (m/explainer [:maybe CreateChangeInput])
+                          :query (m/schema [:map
+                                            ["title" {:optional true} :title-string]
+                                            ["description" :description-string]]
+                                           {:registry s.common/registry})}})

@@ -212,7 +212,7 @@
 
             (testing "No update when query params same as in existing doc"
               (let [response (PUT (str release-1-path "?title=A%20new%20title")
-                                  {:content-type :json
+                                  {:content-type :application/json
                                    :body nil})
                     body' (-> response :body json/read-str)]
                 (is (= 200 (:status response)))
