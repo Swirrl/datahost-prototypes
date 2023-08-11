@@ -68,9 +68,9 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-changes-route-config [triplestore change-store]
+(defn post-revision-changes-route-config [triplestore change-store change-kind]
   {:summary "Add changes to a Revision via a CSV file."
-   :handler (partial handlers/post-change triplestore change-store)
+   :handler (partial handlers/post-change triplestore change-store change-kind)
    :middleware [[middleware/json-only :json-only]
                 [(partial middleware/flag-resource-exists triplestore
                           :dh/Revision ::revision) :resource-exists?]

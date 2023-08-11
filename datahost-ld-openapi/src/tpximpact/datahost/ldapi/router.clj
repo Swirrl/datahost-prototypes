@@ -20,9 +20,9 @@
    [muuntaja.core :as m]
    [muuntaja.format.core :as fc]
    [malli.util :as mu]
-   [tpximpact.datahost.ldapi.routes.series :as series-routes]
-   [tpximpact.datahost.ldapi.routes.release :as release-routes]
-   [tpximpact.datahost.ldapi.routes.revision :as revision-routes]
+   [tpximpact.datahost.ldapi.routes.series :as routes.s]
+   [tpximpact.datahost.ldapi.routes.release :as routes.rel]
+   [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
    [tpximpact.datahost.ldapi.errors :as ldapi-errors]
    [ring.middleware.cors :as cors]
    [clojure.spec.alpha :as s])
@@ -132,47 +132,55 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
+(def ^:private api-github-link
+  (str "Source viewable in GitHub "
+       "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi)."))
+
 (defn router [{:keys [clock triplestore change-store auth]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
             :openapi {:openapi "3.0.0"
                       :info {:title "Prototype OpenData API"
-                             :description (str "Source viewable in GitHub "
-                                               "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).")
-                             :version "0.0.3"}
+                             :description api-github-link
+                             :version "0.1.0"}
                       :components {:securitySchemes {"basic" {:type "http" :scheme "basic"}}}}
             :handler (openapi/create-openapi-handler)}}]
 
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
               :tags ["linked data api"]}
      [""
-      {:get (series-routes/get-series-list-route-config triplestore)}]
+      {:get (routes.s/get-series-list-route-config triplestore)}]
 
      ["/:series-slug"
-      {:get (series-routes/get-series-route-config triplestore)
-       :put (series-routes/put-series-route-config clock triplestore)}]
+      {:get (routes.s/get-series-route-config triplestore)
+       :put (routes.s/put-series-route-config clock triplestore)}]
 
      ["/:series-slug/releases"
-      {:get (revision-routes/get-release-list-route-config triplestore)}]
+      ["" {:get (routes.rev/get-release-list-route-config triplestore)}]
 
-     ["/:series-slug/releases/:release-slug"
-      {:get (release-routes/get-release-route-config triplestore change-store)
-       :put (release-routes/put-release-route-config clock triplestore)}]
+      ["/:release-slug"
+       {:get (routes.rel/get-release-route-config triplestore change-store)
+        :put (routes.rel/put-release-route-config clock triplestore)}]
 
-     ["/:series-slug/releases/:release-slug/schema"
-      {:get (release-routes/get-release-ld-schema-config triplestore)
-       :post (release-routes/put-release-ld-schema-config clock triplestore)}]
+      ["/:release-slug/schema"
+       {:get (routes.rel/get-release-ld-schema-config triplestore)
+        :post (routes.rel/put-release-ld-schema-config clock triplestore)}]
 
-     ["/:series-slug/releases/:release-slug/revisions"
-      {:post (revision-routes/post-revision-route-config triplestore)
-       :get (revision-routes/get-revision-list-route-config triplestore)}]
-     ["/:series-slug/releases/:release-slug/revisions/:revision-id"
-      {:get (revision-routes/get-revision-route-config triplestore change-store)}]
-     ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-      {:post (revision-routes/post-revision-changes-route-config triplestore change-store)}]
-     ["/:series-slug/releases/:release-slug/revisions/:revision-id/changes/:change-id"
-      {:get (revision-routes/get-revision-changes-route-config triplestore change-store)}]]]
+      ["/:release-slug/revisions"
+       ["" {:post (routes.rev/post-revision-route-config triplestore)
+            :get (routes.rev/get-revision-list-route-config triplestore)}]
+
+       ["/:revision-id"
+        {:get (routes.rev/get-revision-route-config triplestore change-store)}]
+
+       ["/:revision-id/changes"
+        ["" {:post (routes.rev/post-revision-changes-route-config triplestore change-store :datahost.change.kind/append)}]
+        ["/:change-id"
+         {:get (routes.rev/get-revision-changes-route-config triplestore change-store)}]]
+
+       ["/:revision-id/delete"
+        {:post (routes.rev/post-revision-changes-route-config triplestore change-store :datahost.change.kind/retract)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data

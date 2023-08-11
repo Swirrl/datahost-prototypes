@@ -510,9 +510,7 @@
         change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)
         append-key (store/insert-append change-store appends-tmp-file)
         change (resource/set-property1 change (compact/expand :dh/appends) append-key)
-
         rev-uri (resource/get-property1 change (compact/expand :dh/appliesToRevision))
-        change-uri (resource/id change)
 
         last-change-num (fn [conn]
                           (-> (doall
