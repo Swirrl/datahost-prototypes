@@ -20,6 +20,10 @@
          :body "not acceptable"}))))
 
 (defn resource-exist?
+  "Checks wether resource exists and short-cirtuits with 404 response if
+  not.
+
+  Relies on [[resource-uri]] to create URI of the resource."
   [triplestore resource handler _id]
   {:pre [(m/validate [:enum :dh/DatasetSeries :dh/Release :dh/Revision] resource)]}
   (fn [{:keys [path-params] :as request}]
@@ -64,7 +68,6 @@
 
         (some? body)
         (let [body-errors (me/humanize (body-explainer body))]
-          (when body-errors (tap> {:body-errors body-errors}))
           (if body-errors
             {:status 400
              :body {:body  body-errors}}
