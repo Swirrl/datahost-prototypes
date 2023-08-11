@@ -68,9 +68,8 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-changes-route-config [triplestore change-store change-kind]
-  {:summary "Add changes to a Revision via a CSV file."
-   :handler (partial handlers/post-change triplestore change-store change-kind)
+(defn changes-route-base [triplestore change-store change-kind]
+  {:handler (partial handlers/post-change triplestore change-store change-kind)
    :middleware [[middleware/json-only :json-only]
                 [(partial middleware/flag-resource-exists triplestore
                           :dh/Revision ::revision) :resource-exists?]
@@ -94,6 +93,14 @@
                     :body [:map
                            [:status [:enum "error"]]
                            [:message string?]]}}})
+
+(defn post-revision-appends-changes-route-config [triplestore change-store]
+  (merge (changes-route-base triplestore change-store :dh/ChangeKindAppend)
+         {:summary "Add appends changes to a Revision via a CSV file."}))
+
+(defn post-revision-deletes-changes-route-config [triplestore change-store]
+  (merge (changes-route-base triplestore change-store :dh/ChangeKindRetract)
+         {:summary "Add deletes changes to a Revision via a CSV file."}))
 
 (defn get-revision-changes-route-config [triplestore change-store]
   {:summary "Retrieve CSV contents for an existing change"
