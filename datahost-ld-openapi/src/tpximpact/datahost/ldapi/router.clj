@@ -179,7 +179,7 @@
         ["/:change-id"
          {:get (routes.rev/get-revision-changes-route-config triplestore change-store)}]]
 
-       ["/:revision-id/delete"
+       ["/:revision-id/deletes"
         {:post (routes.rev/post-revision-changes-route-config triplestore change-store :dh/ChangeKindRetract)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
