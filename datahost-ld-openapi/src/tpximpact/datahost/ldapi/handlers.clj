@@ -286,25 +286,27 @@
 
 (defn post-change [triplestore
                    change-store
+                   change-kind
                    {{:keys [series-slug release-slug revision-id]} :path-params
-                    {{:keys [appends]} :multipart}                 :parameters
-                    body-params                                    :body-params :as request}]
-  (cond
-    (db/resource-exists? triplestore
-                         (models.shared/change-uri series-slug release-slug revision-id 1))
+                    {{:keys [appends]} :multipart} :parameters
+                    body-params :body-params :as request}]
+  (if (db/resource-exists? triplestore
+                           (models.shared/change-uri series-slug release-slug revision-id 1))
     {:status 422
      :body "A change is already associated with the revision."}
-    
-    (db/resource-exists? triplestore
-                         (models.shared/revision-uri series-slug release-slug revision-id))
+
     (let [api-params (get-api-params request)
-          incoming-jsonld-doc body-params
+          jsonld-doc body-params
           release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
           validation-err (when (some? release-schema)
                            (dataset-validation-error! release-schema appends))
           {:keys [jsonld-doc resource-id message]} (when-not validation-err
-                                                     (db/insert-change! triplestore change-store api-params
-                                                                        incoming-jsonld-doc appends))]
+                                                     (db/insert-change! triplestore
+                                                                        change-store
+                                                                        {:api-params api-params
+                                                                         :jsonld-doc jsonld-doc
+                                                                         :appends-file appends
+                                                                         :datahost.change/kind change-kind}))]
       (log/info (format "post-change: validation: found-schema? = %s change-valid? = "
                         (some? release-schema) (nil? validation-err)))
       (cond
@@ -316,11 +318,7 @@
         (as-json-ld {:status 201
                      :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
                                                   series-slug release-slug revision-id resource-id)}
-                     :body jsonld-doc})))
-
-    :else
-    {:status 422
-     :body "Revision for this change does not exist"}))
+                     :body jsonld-doc})))))
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/appends))]

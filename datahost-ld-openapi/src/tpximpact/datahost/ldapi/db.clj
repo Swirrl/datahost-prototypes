@@ -438,7 +438,7 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri))))
 
-(defn- request->change [change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc appends-tmp-file]
+(defn- request->change [change-kind change-number {:keys [series-slug release-slug revision-id] :as api-params} json-doc]
   (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-number)
         series-uri (models-shared/dataset-series-uri series-slug)
         release-uri (models-shared/dataset-release-uri series-uri release-slug)
@@ -448,6 +448,7 @@
         param-properties (params->title-description-properties api-params)]
     (-> doc-resource
         (resource/set-properties param-properties)
+        (resource/set-property1 (compact/expand :dh/changeKind) change-kind)
         (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
 
 (defn- request->schema [{:keys [series-slug release-slug]} json-doc]
@@ -505,20 +506,19 @@
                      (compact/expand :dh/appliesToRevision)
                      revision-uri]])]]})
 
-(defn insert-change! [triplestore change-store api-params incoming-jsonld-doc appends-tmp-file]
+(defn insert-change! [triplestore change-store
+                      {:keys [api-params jsonld-doc appends-file datahost.change/kind]}]
   (let [change-number 1                 ;one append per revision
-        change (request->change change-number api-params incoming-jsonld-doc appends-tmp-file)
-        append-key (store/insert-append change-store appends-tmp-file)
+        change (request->change kind change-number api-params jsonld-doc)
+        append-key (store/insert-append change-store appends-file)
         change (resource/set-property1 change (compact/expand :dh/appends) append-key)
-
         rev-uri (resource/get-property1 change (compact/expand :dh/appliesToRevision))
-        change-uri (resource/id change)
 
         last-change-num (fn [conn]
-                          (-> (doall
-                               (repo/query conn
-                                           (f/format-query
-                                            (select-max-n-query rev-uri (compact/expand :dh/hasChange)))))
+                          (-> (repo/query conn
+                                          (f/format-query
+                                           (select-max-n-query rev-uri (compact/expand :dh/hasChange))))
+                              (doall)
                               first
                               :n))
 

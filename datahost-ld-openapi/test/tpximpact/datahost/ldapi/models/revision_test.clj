@@ -147,6 +147,7 @@
     (let [csv-2019-path "test-inputs/revision/2019.csv"
           csv-2020-path "test-inputs/revision/2020.csv"
           csv-2021-path "test-inputs/revision/2021.csv"
+          csv-2021-deletes-path "test-inputs/revision/2021-deletes.csv"
           [csv-2019-seq csv-2020-seq csv-2021-seq] (for [f [csv-2019-path csv-2020-path csv-2021-path]]
                                                      (line-seq (io/reader (io/resource f))))
           series-title "my lovely series"
@@ -222,7 +223,7 @@
                     release-revisions (get-release-revisions release-doc)]
                 (t/is (= #{(str "https://example.org" release-url "/revisions/1")} release-revisions))))
 
-            (testing "Changes resource created with CSV appends file"
+            (testing "Changes append resource created with CSV appends file"
               ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
               (let [change-ednld {"dcterms:description" "A new change"}
                     multipart-temp-file-part (build-csv-multipart csv-2019-path)
@@ -286,7 +287,7 @@
               (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                   "Created with the resource URI provided in the Location header")
 
-              (testing "Third Changes resource created against 2nd Revision"
+              (testing "Third Changes append resource created against 2nd Revision"
                 (let [change-3-ednld {"dcterms:description" "A new third change"}
                       multipart-temp-file-part (build-csv-multipart csv-2021-path)
                       change-api-response (ld-api-app {:request-method :post
@@ -323,7 +324,25 @@
                       "responds with concatenated changes from all uploaded CSVs")
                   (is (= (first resp-body-seq) (first csv-2019-seq)))
                   (is (str/includes? (last resp-body-seq) ",2021,"))
-                  (is (str/includes? (second resp-body-seq) ",2019,"))))))
+                  (is (str/includes? (second resp-body-seq) ",2019,"))))
+
+              (testing "Changes deletes resource created against 2nd Revision"
+                (let [revision-resp-3 (POST (str release-url "/revisions")
+                                            {:content-type :json
+                                             :body (json/write-str {"dcterms:title" (str "A third revision for release "
+                                                                                         release-slug)})})
+                      new-revision-location-3 (-> revision-resp-3 :headers (get "Location"))
+                      change-4-ednld {"dcterms:description" "A new fourth deletes change"}
+                      multipart-temp-file-part (build-csv-multipart csv-2021-deletes-path)
+                      change-api-response (ld-api-app {:request-method :post
+                                                       :uri (str new-revision-location-3 "/deletes")
+                                                       :multipart-params {:appends multipart-temp-file-part}
+                                                       :content-type "application/json"
+                                                       :body (json/write-str change-4-ednld)})
+                      response-body-doc (json/read-str (:body change-api-response))]
+                  (is (= 201 (:status change-api-response)))
+                  (is (= ":dh/ChangeKindRetract" (get response-body-doc "dh:changeKind")))
+                  (is (str/ends-with? (get response-body-doc "@id") "/revisions/3/changes/1"))))))
           
 
           (testing "Creation of a auto-increment Revision IDs for a release"
@@ -335,7 +354,7 @@
                                                           {:content-type :json
                                                            :body (json/write-str revision-ednld-2)})]]
                                      (get (json/read-str (:body resp)) "@id"))]
-              ;; This Release already has 2 Revisions, so we expect another 10 in the series
-              (is (= new-revision-ids (for [i (range 3 13)]
+              ;; This Release already has 3 Revisions, so we expect another 10 in the series
+              (is (= new-revision-ids (for [i (range 4 14)]
                                         (format "%s/releases/%s/revisions/%d" series-slug release-slug i)))
                   "Expected Revision IDs integers increase in an orderly sequence"))))))))
