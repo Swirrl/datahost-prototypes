@@ -64,7 +64,6 @@
 
         (some? body)
         (let [body-errors (me/humanize (body-explainer body))]
-          (when body-errors (tap> {:body-errors body-errors}))
           (if body-errors
             {:status 400
              :body {:body  body-errors}}
