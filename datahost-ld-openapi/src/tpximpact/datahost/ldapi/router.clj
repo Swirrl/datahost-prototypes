@@ -175,12 +175,12 @@
         {:get (routes.rev/get-revision-route-config triplestore change-store)}]
 
        ["/:revision-id/changes"
-        ["" {:post (routes.rev/post-revision-changes-route-config triplestore change-store :datahost.change.kind/append)}]
+        ["" {:post (routes.rev/post-revision-changes-route-config triplestore change-store :dh/ChangeKindAppend)}]
         ["/:change-id"
          {:get (routes.rev/get-revision-changes-route-config triplestore change-store)}]]
 
        ["/:revision-id/delete"
-        {:post (routes.rev/post-revision-changes-route-config triplestore change-store :datahost.change.kind/retract)}]]]]]
+        {:post (routes.rev/post-revision-changes-route-config triplestore change-store :dh/ChangeKindRetract)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
