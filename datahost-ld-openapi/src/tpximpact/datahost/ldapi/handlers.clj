@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
+   [clojure.data.json :as json]
    [clojure.tools.logging :as log]
    [grafter.vocabularies.rdf :as vocab.rdf]
    [grafter.matcha.alpha :as matcha]
@@ -147,10 +148,11 @@
 
 (defn put-release-schema
   [clock triplestore {{:keys [series-slug]} :path-params
-                      incoming-jsonld-doc :body-params
-                      :as request}]
+                      {{:keys [schema-file]} :multipart} :parameters
+                      body-params :body-params :as request}]
   (if (db/resource-exists? triplestore (models.shared/dataset-series-uri series-slug))
-    (let [{:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore
+    (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)
+          {:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore
                                                              (get-api-params request)
                                                              incoming-jsonld-doc)]
       (as-json-ld {:status (op->response-code op)
