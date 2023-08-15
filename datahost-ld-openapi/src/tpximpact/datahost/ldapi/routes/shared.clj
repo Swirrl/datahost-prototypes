@@ -54,7 +54,8 @@
   (m/schema
    [:map
     ["dcterms:title" {:optional true} :title-string]
-    ["dcterms:description" {:optional false} :description-string]]
+    ["dcterms:description" {:optional false} :description-string]
+    ["dcterms:format" {:optional false :json-schema/example "text/csv"} :string]]
    {:registry s.common/registry}))
 
 (def LdSchemaInputColumn

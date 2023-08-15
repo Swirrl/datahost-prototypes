@@ -185,7 +185,8 @@
   ([triplestore change-uri]
    (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
                                     [change-uri :dcterms/description '?description]
-                                    [change-uri :dh/appends '?appends]
+                                    [change-uri :dcterms/format '?format]
+                                    [change-uri :dh/updates '?appends]
                                     [change-uri :dh/appliesToRevision '?revision]]]
                           {:prefixes default-prefixes
                            :construct bgps
@@ -202,7 +203,7 @@
    :select ['?rev '?appends '?rev_number]
    :where (cond-> [['?rev :dh/appliesToRelease release-uri]
                    ['?rev :dh/hasChange '?change]
-                   ['?change :dh/appends '?appends]
+                   ['?change :dh/updates '?appends]
                    [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]]
             (some? max-rev) (conj [:filter (list '<= '?rev_number max-rev)]))
    :order-by ['(asc ?rev_number)]})
@@ -449,7 +450,8 @@
     (-> doc-resource
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/changeKind) change-kind)
-        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri))))
+        (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri)
+        (resource/set-property1 (compact/expand :dcterms/format) (get json-doc "dcterms:format")))))
 
 (defn- request->schema [{:keys [series-slug release-slug]} json-doc]
   (let [schema-uri (models-shared/release-schema-uri series-slug release-slug)
@@ -511,7 +513,7 @@
   (let [change-number 1                 ;one append per revision
         change (request->change kind change-number api-params jsonld-doc)
         append-key (store/insert-append change-store appends-file)
-        change (resource/set-property1 change (compact/expand :dh/appends) append-key)
+        change (resource/set-property1 change (compact/expand :dh/updates) append-key)
         rev-uri (resource/get-property1 change (compact/expand :dh/appliesToRevision))
 
         last-change-num (fn [conn]

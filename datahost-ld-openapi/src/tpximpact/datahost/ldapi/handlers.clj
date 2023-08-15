@@ -319,7 +319,7 @@
                      :body jsonld-doc})))))
 
 (defn change->csv-stream [change-store change]
-  (let [appends (get change (cmp/expand :dh/appends))]
+  (let [appends (get change (cmp/expand :dh/updates))]
     (when-let [dataset (csv-file-locations->dataset change-store [appends])]
       (write-dataset-to-outputstream dataset))))
 

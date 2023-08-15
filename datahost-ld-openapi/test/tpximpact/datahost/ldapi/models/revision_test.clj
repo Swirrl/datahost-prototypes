@@ -239,10 +239,11 @@
                 (t/is (= #{(str "https://example.org" release-url "/revisions/1")} release-revisions))))
 
             (testing "Changes append resource created with CSV appends file"
-              ;"/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
-              (let [change-ednld {"dcterms:description" "A new change"}
+              ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
+              (let [change-ednld {"dcterms:description" "A new change"
+                                  "dcterms:format" "text/csv"}
                     multipart-temp-file-part (build-csv-multipart csv-2019-path)
-                    change-api-response (ld-api-app {:request-method :post
+                    change-api-response (ld-api-app {:request-method :post 
                                                      :uri (str new-revision-location "/changes")
                                                      :multipart-params {:appends multipart-temp-file-part}
                                                      :content-type "application/json"
@@ -265,7 +266,8 @@
 
             (testing "Ensure we can't add more than 1 change to a revision."
               ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
-              (let [change-ednld {"dcterms:description" "A new second change"}
+              (let [change-ednld {"dcterms:description" "A new second change"
+                                  "dcterms:format" "text/csv"}
                     multipart-temp-file-part (build-csv-multipart csv-2020-path)
                     change-api-response (ld-api-app {:request-method :post
                                                      :uri (str new-revision-location "/changes")
@@ -303,7 +305,8 @@
                   "Created with the resource URI provided in the Location header")
 
               (testing "Third Changes append resource created against 2nd Revision"
-                (let [change-3-ednld {"dcterms:description" "A new third change"}
+                (let [change-3-ednld {"dcterms:description" "A new third change"
+                                      "dcterms:format" "text/csv"}
                       multipart-temp-file-part (build-csv-multipart csv-2021-path)
                       change-api-response (ld-api-app {:request-method :post
                                                        :uri (str new-revision-location-2 "/changes")
@@ -347,7 +350,8 @@
                                              :body (json/write-str {"dcterms:title" (str "A third revision for release "
                                                                                          release-slug)})})
                       new-revision-location-3 (-> revision-resp-3 :headers (get "Location"))
-                      change-4-ednld {"dcterms:description" "A new fourth deletes change"}
+                      change-4-ednld {"dcterms:description" "A new fourth deletes change"
+                                      "dcterms:format" "text/csv"}
                       multipart-temp-file-part (build-csv-multipart csv-2021-deletes-path)
                       change-api-response (ld-api-app {:request-method :post
                                                        :uri (str new-revision-location-3 "/deletes")
