@@ -146,10 +146,9 @@
     {:status 422
      :body "Series for this release does not exist"}))
 
-(defn put-release-schema
+(defn post-release-schema
   [clock triplestore {{:keys [series-slug]} :path-params
-                      {{:keys [schema-file]} :multipart} :parameters
-                      body-params :body-params :as request}]
+                      {{:keys [schema-file]} :multipart} :parameters :as request}]
   (if (db/resource-exists? triplestore (models.shared/dataset-series-uri series-slug))
     (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)
           {:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore

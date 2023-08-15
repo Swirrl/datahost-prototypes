@@ -165,7 +165,7 @@
 
       ["/:release-slug/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore)
-        :post (routes.rel/put-release-ld-schema-config clock triplestore)}]
+        :post (routes.rel/post-release-ld-schema-config clock triplestore)}]
 
       ["/:release-slug/revisions"
        ["" {:post (routes.rev/post-revision-route-config triplestore)
