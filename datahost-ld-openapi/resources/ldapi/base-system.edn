@@ -18,4 +18,10 @@
   :change-store #ig/ref :tpximpact.datahost.ldapi.store.file/store}
 
  :tpximpact.datahost.time/system-clock {}
+
+ :tpximpact.datahost.ldapi.secrets/basic-auth-hash
+ {:gcloud-project "swirrl-ons-datahost"
+  :secret-name "basic-auth-hash"
+  :version "latest"}
+
  }
