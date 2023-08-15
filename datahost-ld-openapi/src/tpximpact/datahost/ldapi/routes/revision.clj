@@ -71,10 +71,11 @@
 (defn changes-route-base [triplestore change-store change-kind]
   {:handler (partial handlers/post-change triplestore change-store change-kind)
    :middleware [[middleware/json-only :json-only]
+                [(partial middleware/resource-exist? triplestore :dh/Revision) :resource-exists?]
                 [(partial middleware/flag-resource-exists triplestore
-                          :dh/Revision ::revision) :resource-exists?]
+                          :dh/Change ::change) :flag-resource-exists]
                 [(partial middleware/validate-creation-body+query-params
-                          {:resource-id ::revision
+                          {:resource-id ::change
                            :body-explainer (get-in routes-shared/explainers [:post-revision-change :body])
                            :query-explainer (get-in routes-shared/explainers [:put-revision-change :query])})
                  :validate-body+query]]
