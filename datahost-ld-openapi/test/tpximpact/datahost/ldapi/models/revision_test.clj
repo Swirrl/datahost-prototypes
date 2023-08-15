@@ -17,7 +17,7 @@
     [tpximpact.datahost.ldapi.strings :as ld-str])
   (:import [java.net URI]
            [java.util UUID]
-           [java.io BufferedReader StringReader]))
+           [java.io BufferedReader File StringReader]))
 
 (defn find-first
   [f coll]
@@ -166,8 +166,8 @@
               release-resp (PUT release-url
                                 {:content-type :application/json
                                  :body (json/write-str {"dcterms:title" "Release 34"
-                                                        "dcterms:description" "Description 34"
-                                                        })})
+                                                        "dcterms:description" "Description 34"})})
+
               schema-req-body {"dcterms:title" "Test schema"
                                "dh:columns"
                                (let [csvw-type (fn [col-name titles datatype]
@@ -177,12 +177,27 @@
                                  ;; we put schema only on 2 columns
                                  [(csvw-type "measure_type" ["Measure type"] :string)
                                   (csvw-type "year" "Year" :integer)])}
-              _ (when-not (m/validate LdSchemaInput schema-req-body)
-                  (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))
-                                  {:schema schema-req-body})))
-              _ (POST (str release-url "/schema")
-                      {:content-type :json
-                       :body (json/write-str schema-req-body)})]
+
+              _validated (when-not (m/validate LdSchemaInput schema-req-body)
+                           (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))
+                                           {:schema schema-req-body})))
+
+              temp-schema-file (File/createTempFile "revision-test-schema-1" ".json")
+
+              _ (with-open [file (io/writer temp-schema-file)]
+                  (binding [*out* file]
+                    (println (json/write-str schema-req-body))))
+
+              json-file-multipart (let [json-file (io/file (.getAbsolutePath temp-schema-file))]
+                                    {:tempfile json-file
+                                     :size (.length json-file)
+                                     :filename (.getName json-file)
+                                     :content-type "application/json"})
+
+              _resp (ld-api-app {:request-method :post
+                                 :uri (str release-url "/schema")
+                                 :multipart-params {:schema-file json-file-multipart}
+                                 :content-type "application/json"})]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
