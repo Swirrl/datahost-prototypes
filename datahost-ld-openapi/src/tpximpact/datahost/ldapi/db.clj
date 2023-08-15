@@ -325,10 +325,10 @@
 
 ;; TODO: move this!
 (defn series->response-body [series]
-  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf" "dcat"])))
+  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf" "dcat" "csvw" "appropriate-csvw"])))
 
 (defn release->response-body [release]
-  (resource/->json-ld release (output-context ["dh" "dcterms" "rdf" "dcat"])))
+  (resource/->json-ld release (output-context ["dh" "dcterms" "rdf" "dcat" "csvw" "appropriate-csvw"])))
 
 (defn revision->response-body [revision]
   (resource/->json-ld revision (output-context ["dh" "dcterms" "rdf"])))

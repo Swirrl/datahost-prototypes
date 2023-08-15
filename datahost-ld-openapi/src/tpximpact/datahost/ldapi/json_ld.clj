@@ -9,6 +9,8 @@
                      :dh "https://publishmydata.com/def/datahost/"
                      :dcat "http://www.w3.org/ns/dcat#"
                      :dcterms "http://purl.org/dc/terms/"
+                     :csvw "http://www.w3.org/ns/csvw#"
+                     :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"
                      "@base" m.shared/ld-root})
 
 (def simple-collection-context

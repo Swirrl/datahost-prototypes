@@ -177,10 +177,7 @@
         (as-json-ld {:status 200
                      :body (-> (json-ld/compact schema-ld-with-columns
                                                 (merge json-ld/simple-context
-                                                       {"dh:columns" {"@container" "@set"}
-                                                        ;; TODO: add these prefixes to simple-context (but will need tests fixes)
-                                                        :csvw "http://www.w3.org/ns/csvw#"
-                                                        :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"}))
+                                                       {"dh:columns" {"@container" "@set"}}))
                                (.toString))}))
       not-found-response)))
 

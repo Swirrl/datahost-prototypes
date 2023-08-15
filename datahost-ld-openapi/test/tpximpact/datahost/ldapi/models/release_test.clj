@@ -153,6 +153,8 @@
                            "dcterms:description" "Description"}
             normalised-ednld {"@context"
                               {"@base" "https://example.org/data/"
+                               "appropriate-csvw" "https://publishmydata.com/def/appropriate-csvw/",
+                               "csvw" "http://www.w3.org/ns/csvw#"
                                "dcat" "http://www.w3.org/ns/dcat#"
                                "dcterms" "http://purl.org/dc/terms/"
                                "dh" "https://publishmydata.com/def/datahost/"
