@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.routes.release
   (:require
+   [reitit.ring.malli]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
@@ -57,11 +58,11 @@
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn put-release-ld-schema-config
+(defn post-release-ld-schema-config
   [clock triplestore]
   {:summary "Create schema for a release"
-   :handler (partial handlers/put-release-schema clock triplestore)
-   :parameters {:body routes-shared/LdSchemaInput
+   :handler (partial handlers/post-release-schema clock triplestore)
+   :parameters {:multipart [:map [:schema-file reitit.ring.malli/temp-file-part]]
                 :path {:series-slug :string
                        :release-slug :string}}
    :openapi {:security [{"basic" []}]}
