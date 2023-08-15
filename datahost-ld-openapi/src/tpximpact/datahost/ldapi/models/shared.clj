@@ -10,6 +10,23 @@
 
 ;;; ---- KEY CTORS
 
+(defn dataset-series-key [series-slug]
+  (str (.getPath ld-root) series-slug))
+
+(defn release-key [series-slug release-slug]
+  (str (dataset-series-key series-slug) "/releases/" release-slug))
+
+(defn release-schema-key
+  ([{:keys [series-slug release-slug]}]
+   (release-schema-key series-slug release-slug))
+  ([series-slug release-slug]
+   (str (release-key series-slug release-slug) "/schema" )))
+
+(defn revision-key [series-slug release-slug revision-id]
+  (str (release-key series-slug release-slug) "/revisions/" revision-id))
+
+;;; --- URI CTORS
+
 (defn dataset-series-uri [series-slug]
   (.resolve ld-root series-slug))
 
@@ -22,23 +39,11 @@
 (defn dataset-release-uri* [{:keys [series-slug release-slug]}]
   (URI. (format "%s/releases/%s" (dataset-series-uri series-slug) release-slug)))
 
-(defn dataset-series-key [series-slug]
-  (str (.getPath ld-root) series-slug))
-
 (defn new-dataset-file-uri [filename]
   (.resolve ld-root (str "files/" (UUID/randomUUID) "/" filename)))
 
-(defn release-key [series-slug release-slug]
-  (str (dataset-series-key series-slug) "/releases/" release-slug))
-
 (defn release-uri-from-slugs [series-slug release-slug]
   (.resolve ld-root (release-key series-slug release-slug)))
-
-(defn release-schema-key
-  ([{:keys [series-slug release-slug]}]
-   (release-schema-key series-slug release-slug))
-  ([series-slug release-slug]
-   (str (release-key series-slug release-slug) "/schema" )))
 
 (defn release-schema-uri [series-slug release-slug]
   (.resolve ld-root (release-schema-key series-slug release-slug)))
@@ -49,9 +54,6 @@
 (defn dataset-revision-uri* [{:keys [series-slug release-slug revision-id]}]
   (URI. (format "%s/releases/%s/revisions/%s" (dataset-series-uri series-slug) release-slug revision-id)))
 
-(defn revision-key [series-slug release-slug revision-id]
-  (str (release-key series-slug release-slug) "/revisions/" revision-id))
-
 (defn change-key [series-slug release-slug revision-id change-id]
   (str (revision-key series-slug release-slug revision-id) "/changes/" change-id))
 
@@ -59,6 +61,7 @@
   (.resolve ld-root (revision-key series-slug release-slug revision-id)))
 
 (defn change-uri [series-slug release-slug revision-id change-id]
+  (assert change-id)
   (.resolve ld-root (change-key series-slug release-slug revision-id change-id)))
 
 (defmulti -resource-uri
