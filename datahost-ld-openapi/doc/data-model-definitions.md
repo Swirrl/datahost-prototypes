@@ -28,6 +28,10 @@ Revisions are like ‘versions’ of the dataset (from a users point of view): s
 
 While revisions specify only the data updates relative to _previous_ revision, the user should be able to fetch the full dataset snapshot (at this particular revision). This snapshot is a dataset accumulated by replaying all revisions in order.
 
+### Change
+
+Each [revision](#revision) has a change attached (at the moment only one change per revision is supported). The change specifies a set of records to append, retract, or correct in the [dataset](##dataset) resulting from previous revisions. Change can have only one data file attached.
+
 ### Dataset
 
 Dataset is the accumulation of all changes added with successive [revisions](#revision), up to a particular revision. To avoid ambiguities, we can specify: dataset of series "S", release "A" at revision "N".

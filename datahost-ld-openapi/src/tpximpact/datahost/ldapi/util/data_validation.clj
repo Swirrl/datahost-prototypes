@@ -188,6 +188,9 @@
 (defmethod -as-dataset URL [v opts]
   (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^URL v)))
 
+(defmethod -as-dataset java.nio.file.Path [^java.nio.file.Path v opts]
+  (tc/set-dataset-name (slurpable->dataset (.toFile v)) (.getFileName v)))
+
 (def AsDatasetOpts
   [:map
    [:file-type {:optional true} [:enum :csv]]
