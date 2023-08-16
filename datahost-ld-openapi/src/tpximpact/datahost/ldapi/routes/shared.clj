@@ -18,14 +18,6 @@
     [:or :string [:tuple :string [:map {:closed false}
                                   ["@base" string?]]]]]])
 
-(def JsonLdSchema
-  "Datahost specific JSON-LD documents"
-  [:maybe
-   (mu/merge
-    JsonLdBase 
-    [:map
-     ["dh:baseEntity" {:optional true} string?]])])
-
 (def ^:private
   required-input-fragment
   (m/schema
