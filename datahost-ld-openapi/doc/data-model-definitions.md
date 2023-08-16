@@ -30,7 +30,7 @@ While revisions specify only the data updates relative to _previous_ revision, t
 
 ### Change
 
-Each [revision](#revision) has a change attached (at the moment only one change per revision is supported). The change specifies a set of records to append, retract, or correct in the [dataset](##dataset) resulting from previous revisions. Change can has only one data file attached.
+Each [revision](#revision) has a change attached (at the moment only one change per revision is supported). The change specifies a set of records to append, retract, or correct in the [dataset](##dataset) resulting from previous revisions. Change can have only one data file attached.
 
 ### Dataset
 
