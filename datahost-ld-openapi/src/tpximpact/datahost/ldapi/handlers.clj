@@ -150,12 +150,11 @@
   [clock triplestore {{:keys [series-slug]} :path-params
                       {{:keys [schema-file]} :multipart} :parameters :as request}]
   (if (db/resource-exists? triplestore (models.shared/dataset-series-uri series-slug))
-    (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)
-          {:keys [op jsonld-doc]} (db/upsert-release-schema! clock triplestore
-                                                             (get-api-params request)
-                                                             incoming-jsonld-doc)]
-      (as-json-ld {:status (op->response-code op)
-                   :body jsonld-doc}))
+    (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)]
+      (data-validation/validate-ld-release-schema-input incoming-jsonld-doc)
+      (as-> (db/upsert-release-schema! clock triplestore (get-api-params request) incoming-jsonld-doc) insert-result
+            (as-json-ld {:status (op->response-code (:op insert-result))
+                         :body (:jsonld-doc insert-result)})))
     not-found-response))
 
 (defn- get-schema-id [matcha-db]

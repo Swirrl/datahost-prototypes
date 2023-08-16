@@ -7,7 +7,8 @@
    [clojure.tools.logging :as log]
    [tablecloth.api :as tc]
    [tech.v3.dataset :as ds]
-   [tpximpact.datahost.ldapi.resource :as resource])
+   [tpximpact.datahost.ldapi.resource :as resource]
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared])
   (:import (clojure.lang ExceptionInfo)
            (java.io ByteArrayInputStream File)
            [java.net URL]
@@ -23,6 +24,8 @@
 (def ^:private make-row-schema-options-valid? (m/validator MakeRowSchemaOptions))
 
 (def ^:private validate-dataset-options-valid? (m/validator ValidateOptions))
+
+(def ^:private validate-ld-release-schema-input-valid? (m/validator routes-shared/LdSchemaInput))
 
 (defn column-key
   [k]
@@ -178,7 +181,7 @@
   [v {:keys [file-type encoding]}]
   (-> v
       slurp
-      (.getBytes ^String encoding)
+      (.getBytes ^String (or encoding "UTF-8"))
       (ByteArrayInputStream.)
       (tc/dataset {:file-type file-type})))
 
@@ -189,7 +192,8 @@
   (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^URL v)))
 
 (defmethod -as-dataset java.nio.file.Path [^java.nio.file.Path v opts]
-  (tc/set-dataset-name (slurpable->dataset (.toFile v)) (.getFileName v)))
+  (tc/set-dataset-name (slurpable->dataset (.toFile v) opts)
+                       (.getFileName v)))
 
 (def AsDatasetOpts
   [:map
@@ -209,3 +213,7 @@
   [v opts]
   {:pre [(as-dataset-opts-valid? opts)]}
   (-as-dataset v (merge {:file-type :csv :encoding "UTF-8"} opts)))
+
+(defn validate-ld-release-schema-input [ld-schema]
+  (when-not (validate-ld-release-schema-input-valid? ld-schema)
+    (throw (ex-info "Invalid Release schema input" {:ld-schema ld-schema}))))

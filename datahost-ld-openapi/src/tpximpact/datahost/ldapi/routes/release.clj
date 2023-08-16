@@ -62,6 +62,7 @@
   [clock triplestore]
   {:summary "Create schema for a release"
    :handler (partial handlers/post-release-schema clock triplestore)
+   ;; NOTE: file schema JSON content string is validated within the handler itself
    :parameters {:multipart [:map [:schema-file reitit.ring.malli/temp-file-part]]
                 :path {:series-slug :string
                        :release-slug :string}}

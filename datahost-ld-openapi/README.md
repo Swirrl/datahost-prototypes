@@ -10,7 +10,7 @@ If the tests pass images are built and tagged with the following tags:
 
 - The name of the branch (branch name tags will be mutated to track passing CI builds from the branch)
 - The full commit sha of the passing build
-- The names of any commit tags (or a unique abreviated commit sha if there isn't one)
+- The names of any commit tags (or a unique abbreviated commit sha if there isn't one)
 
 This means that the latest `main` version can be found at:
 
