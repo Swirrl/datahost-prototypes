@@ -20,7 +20,7 @@
          :body "not acceptable"}))))
 
 (defn resource-exist?
-  "Checks wether resource exists and short-cirtuits with 404 response if
+  "Checks whether resource exists and short-circuits with 404 response if
   not.
 
   Relies on [[resource-uri]] to create URI of the resource."
@@ -48,9 +48,9 @@
   and validates the parameters accordingly based on that.
 
   Explainers will be used to return the error message in the
-  respons (see [[malli.core/explainer]]).
+  response (see [[malli.core/explainer]]).
   
-  Motivation: on creation we usually require diffrent set of
+  Motivation: on creation we usually require different set of
   parameters to be in the request, while updates can supply only a
   subset (e.g. only the title).
 

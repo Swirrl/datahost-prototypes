@@ -1,5 +1,5 @@
 (ns tpximpact.datahost.ldapi.test-util.http-client
-  "Conveniencve http-client relying on `clj-http.client` library."
+  "Convenience http-client relying on `clj-http.client` library."
   (:require [clj-http.client :as http]))
 
 (defn- http-request
