@@ -181,7 +181,7 @@
   [v {:keys [file-type encoding]}]
   (-> v
       slurp
-      (.getBytes ^String encoding)
+      (.getBytes ^String (or encoding "UTF-8"))
       (ByteArrayInputStream.)
       (tc/dataset {:file-type file-type})))
 
@@ -192,7 +192,8 @@
   (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^URL v)))
 
 (defmethod -as-dataset java.nio.file.Path [^java.nio.file.Path v opts]
-  (tc/set-dataset-name (slurpable->dataset (.toFile v)) (.getFileName v)))
+  (tc/set-dataset-name (slurpable->dataset (.toFile v) opts)
+                       (.getFileName v)))
 
 (def AsDatasetOpts
   [:map
