@@ -14,8 +14,9 @@
    ["dcterms:description" {:optional true} string?]
    ["@type" {:optional true} string?]
    ["@id" {:optional true} string?]
-   ;; ["@context" [:or :string [:tuple :string [:map ["@base" string?]]]]]
-   ])
+   ["@context" {:optional true}
+    [:or :string [:tuple :string [:map {:closed false}
+                                  ["@base" string?]]]]]])
 
 (def JsonLdSchema
   "Datahost specific JSON-LD documents"
@@ -34,7 +35,7 @@
    {:registry s.common/registry}))
 
 (def CreateSeriesInput
-  "Input schema for creaing a new series."
+  "Input schema for creating a new series."
   required-input-fragment)
 
 (def CreateReleaseInput
@@ -60,14 +61,12 @@
 
 (def LdSchemaInputColumn
   [:map 
-   ["csvw:datatype" [:or
-                     [:enum :integer :string :double]
-                     ;; [:map]
-                     ]]
+   ["csvw:datatype" [:or :string :keyword]]
    ["csvw:name" :string]
    ["csvw:titles" [:or
                    :string
-                   [:sequential :string]]]])
+                   [:sequential :string]]]
+   ["@type" {:optional true} string?]])
 
 (def LdSchemaInput
   "Schema for new schema documents"
