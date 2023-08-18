@@ -13,8 +13,7 @@
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
-   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
-   [tpximpact.datahost.ldapi.util.data-compilation :as data-compilation])
+   [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
   (:import (java.net URI)))
 
 (defn- box [x]
@@ -102,7 +101,7 @@
     :noop   200))
 
 (defn get-dataset-series [triplestore {{:keys [series-slug]} :path-params}]
-  (if-let [series (->> (db/get-series-by-slug triplestore series-slug)
+  (if-let [series (->> (db/get-dataset-series triplestore (models.shared/dataset-series-uri series-slug))
                        (matcha/index-triples)
                        (triples->ld-resource))]
     (as-json-ld {:status 200
@@ -112,14 +111,17 @@
 
 (defn put-dataset-series [clock triplestore {:keys [body-params] :as request}]
   (let [api-params (get-api-params request)
+        series-uri (models.shared/dataset-series-uri (:series-slug api-params))
         incoming-jsonld-doc body-params
-        {:keys [op jsonld-doc]} (db/upsert-series! clock triplestore api-params incoming-jsonld-doc)]
+        {:keys [op jsonld-doc]} (db/upsert-series! clock triplestore series-uri
+                                                   api-params incoming-jsonld-doc models.shared/ld-root)]
     (as-json-ld {:status (op->response-code op)
                  :body jsonld-doc})))
 
-(defn get-release [triplestore change-store {{:keys [series-slug release-slug]} :path-params
-                                             {:strs [accept]} :headers}]
-  (if-let [release (->> (db/get-release triplestore series-slug release-slug)
+(defn get-release [triplestore change-store
+                   {path-params :path-params {:strs [accept]} :headers}]
+  (if-let [release (->> (models.shared/dataset-release-uri* path-params)
+                        (db/get-release-by-uri triplestore)
                         (matcha/index-triples)
                         (triples->ld-resource))]
     (if (= accept "text/csv")
@@ -132,25 +134,33 @@
                              (.toString))}))
     not-found-response))
 
-(defn put-release [clock triplestore {{:keys [series-slug]} :path-params
-                       body-params :body-params :as request}]
-  (if-let [series (some->> (db/get-series-by-slug triplestore series-slug)
-                           (resource/from-statements))]
+(defn put-release [clock triplestore {path-params :path-params
+                                      body-params :body-params :as request}]
+  (if (db/resource-exists? triplestore (models.shared/dataset-series-uri* path-params))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
-          {:keys [op jsonld-doc]} (db/upsert-release! clock triplestore series api-params incoming-jsonld-doc)]
+          {:keys [op jsonld-doc]} (db/upsert-release! clock triplestore
+                                                      (models.shared/dataset-series-uri* path-params)
+                                                      (models.shared/dataset-release-uri* path-params)
+                                                      api-params
+                                                      incoming-jsonld-doc
+                                                      models.shared/ld-root)]
       (as-json-ld {:status (op->response-code op)
                    :body jsonld-doc}))
     {:status 422
      :body "Series for this release does not exist"}))
 
 (defn post-release-schema
-  [clock triplestore {{:keys [series-slug]} :path-params
+  [clock triplestore {path-params :path-params
                       {{:keys [schema-file]} :multipart} :parameters :as request}]
-  (if (db/resource-exists? triplestore (models.shared/dataset-series-uri series-slug))
-    (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)]
+  (if (db/resource-exists? triplestore (models.shared/dataset-series-uri* path-params))
+    (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)
+          api-params (get-api-params request)
+          release-uri (models.shared/dataset-release-uri* api-params)
+          schema-uri (models.shared/release-schema-uri api-params)]
       (data-validation/validate-ld-release-schema-input incoming-jsonld-doc)
-      (as-> (db/upsert-release-schema! clock triplestore (get-api-params request) incoming-jsonld-doc) insert-result
+      (as-> (db/upsert-release-schema! clock triplestore incoming-jsonld-doc
+                                       models.shared/ld-root schema-uri release-uri) insert-result
             (as-json-ld {:status (op->response-code (:op insert-result))
                          :body (:jsonld-doc insert-result)})))
     not-found-response))
@@ -198,7 +208,8 @@
 (defn get-revision
   [triplestore change-store {{:keys [series-slug release-slug revision-id]} :path-params
                              {:strs [accept]} :headers :as _request}]
-  (if-let [revision-ld (->> (db/get-revision triplestore series-slug release-slug revision-id)
+  (if-let [revision-ld (->> (models.shared/revision-uri series-slug release-slug revision-id)
+                            (db/get-revision triplestore)
                             matcha/index-triples
                             triples->ld-resource)]
     (if (= accept "text/csv")
@@ -229,7 +240,8 @@
                  :body response-body})))
 
 (defn get-revision-list [triplestore {{:keys [series-slug release-slug]} :path-params}]
-  (let [revisions (->> (db/get-revisions triplestore series-slug release-slug)
+  (let [revisions (->> (models.shared/release-uri-from-slugs series-slug release-slug)
+                       (db/get-revisions triplestore)
                        (matcha/index-triples)
                        (triples->ld-resource-collection)
                        (sort-by (comp str (keyword "@id")))
@@ -242,7 +254,7 @@
 
 (defn get-release-list [triplestore {{:keys [series-slug]} :path-params}]
   (let [issued-uri (cmp/expand :dcterms/issued)
-        releases (->> (db/get-releases triplestore series-slug)
+        releases (->> (db/get-releases triplestore (models.shared/dataset-series-uri series-slug))
                       (matcha/index-triples)
                       (triples->ld-resource-collection)
                       (sort-by #(get % issued-uri))
@@ -255,10 +267,14 @@
 
 (defn post-revision [triplestore {{:keys [series-slug release-slug]} :path-params
                                   body-params :body-params :as request}]
-  (let [release-uri (-> (models.shared/dataset-series-uri series-slug)
-                        (models.shared/dataset-release-uri release-slug))]
+  (let [api-params (get-api-params request)
+        release-uri (models.shared/dataset-release-uri (models.shared/dataset-series-uri series-slug) release-slug)]
     (if (db/resource-exists? triplestore release-uri)
-      (let [{:keys [jsonld-doc resource-id]} (db/insert-revision! triplestore (get-api-params request) body-params)]
+      (let [next-revision-id (db/fetch-next-child-resource-number triplestore release-uri :dh/hasRevision)
+            revision-uri (models.shared/revision-uri series-slug release-slug next-revision-id)
+            {:keys [jsonld-doc resource-id]} (db/insert-revision! triplestore api-params
+                                                                  body-params models.shared/ld-root
+                                                                  release-uri revision-uri next-revision-id)]
         (as-json-ld {:status 201
                      :headers {"Location" (format "/data/%s/releases/%s/revisions/%s"
                                                   series-slug release-slug resource-id)}
@@ -285,7 +301,7 @@
                    {{:keys [series-slug release-slug revision-id]} :path-params
                     {{:keys [appends]} :multipart} :parameters ;TODO: change 'appends' to ??
                     jsonld-doc :body-params :as request}]
-  (let [change-uri ^java.net.URI (models.shared/change-uri series-slug release-slug revision-id 1)]
+  (let [change-uri ^URI (models.shared/change-uri series-slug release-slug revision-id 1)]
     (if (db/resource-exists? triplestore change-uri)
       {:status 422
        :body "A change is already associated with the revision."}
@@ -295,13 +311,17 @@
             release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
             validation-err (when (some? release-schema)
                              (dataset-validation-error! release-schema appends))
+            ; one change append per revision
+            change-number 1
             {:keys [jsonld-doc resource-id message]} (when-not validation-err
                                                        (db/insert-change! triplestore
-                                                                          change-store
                                                                           {:api-params api-params
                                                                            :jsonld-doc jsonld-doc
                                                                            :insert-request insert-req
-                                                                           :datahost.change/kind change-kind}))]
+                                                                           :datahost.change/kind change-kind
+                                                                           :ld-root models.shared/ld-root
+                                                                           :revision-uri (models.shared/dataset-revision-uri* api-params)
+                                                                           :change-uri (models.shared/change-uri series-slug release-slug revision-id change-number)}))]
         (log/info (format "post-change: '%s' validation: found-schema? = %s change-valid? = %s"
                           (.getPath change-uri) (some? release-schema) (nil? validation-err)))
         (cond
@@ -326,7 +346,8 @@
 
 (defn get-change [triplestore change-store {{:keys [series-slug release-slug revision-id change-id]} :path-params
                         {:strs [accept]} :headers :as _request}]
-  (if-let [change (->> (db/get-change triplestore series-slug release-slug revision-id change-id)
+  (if-let [change (->> (models.shared/change-uri series-slug release-slug revision-id change-id)
+                       (db/get-change triplestore)
                        matcha/index-triples
                        triples->ld-resource)]
     (if (= accept "text/csv")

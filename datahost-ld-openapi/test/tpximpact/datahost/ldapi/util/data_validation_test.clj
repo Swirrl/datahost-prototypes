@@ -25,11 +25,11 @@
         slugs {:series-slug "s1" :release-slug "r1" :schema-slug "schema1"}
 
         schema-json (-> (io/resource "test-inputs/schemas/simple.json")
-                       (slurp)
-                       (json/read-str {:keywordize? false}))
+                        (slurp)
+                        (json/read-str {:keywordize? false}))
         ld-schema (m/decode
                    LdSchemaInput
-                   schema-json 
+                   schema-json
                    (mt/transformer
                     mt/json-transformer
                     mt/string-transformer))]
@@ -37,7 +37,9 @@
     (testing "Decoding malli schema from JSON-LD"
       (is ld-schema))
 
-    (db/upsert-release-schema! clock repo slugs ld-schema)
+    (db/upsert-release-schema! clock repo ld-schema models.shared/ld-root
+                               (models.shared/release-schema-uri slugs)
+                               (models.shared/dataset-release-uri* slugs))
     
     (let [schema (db/get-release-schema repo (models.shared/release-uri-from-slugs "s1" "r1"))]
       (testing "Creating malli row schemas from JSON-LD schema"

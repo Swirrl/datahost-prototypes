@@ -1,7 +1,6 @@
 (ns tpximpact.datahost.ldapi.models.shared
   (:import
-    [java.net URI]
-    (java.util UUID)))
+    [java.net URI]))
 
 (def ld-root
   "For the prototype this item will come from config or be derived from
@@ -39,17 +38,11 @@
 (defn dataset-release-uri* [{:keys [series-slug release-slug]}]
   (URI. (format "%s/releases/%s" (dataset-series-uri series-slug) release-slug)))
 
-(defn new-dataset-file-uri [filename]
-  (.resolve ld-root (str "files/" (UUID/randomUUID) "/" filename)))
-
 (defn release-uri-from-slugs [series-slug release-slug]
   (.resolve ld-root (release-key series-slug release-slug)))
 
-(defn release-schema-uri [series-slug release-slug]
+(defn release-schema-uri [{:keys [series-slug release-slug]}]
   (.resolve ld-root (release-schema-key series-slug release-slug)))
-
-(defn dataset-revision-uri [^URI dataset-release-uri revision-id]
-  (URI. (format "%s/revisions/%s" dataset-release-uri revision-id)))
 
 (defn dataset-revision-uri* [{:keys [series-slug release-slug revision-id]}]
   (URI. (format "%s/releases/%s/revisions/%s" (dataset-series-uri series-slug) release-slug revision-id)))
