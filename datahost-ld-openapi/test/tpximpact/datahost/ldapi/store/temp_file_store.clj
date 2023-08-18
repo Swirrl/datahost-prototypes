@@ -8,10 +8,14 @@
 
 (defrecord TempFileStore [file-store]
   store/ChangeStore
-  (insert-append [_this file]
-    (store/insert-append file-store file))
-  (get-append [_this append-key]
-    (store/get-append file-store append-key))
+  (-insert-data [_this file]
+    (store/insert-data file-store file))
+  (-insert-data-with-request [_this request]
+    (store/-insert-data-with-request file-store request))
+  (-get-data [_this data-key]
+    (store/get-data file-store data-key))
+  (-data-key [_this data]
+    (store/data-key file-store data))
 
   AutoCloseable
   (close [_]

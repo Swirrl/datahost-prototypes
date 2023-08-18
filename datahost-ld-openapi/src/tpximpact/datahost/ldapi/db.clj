@@ -186,7 +186,7 @@
    (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
                                     [change-uri :dcterms/description '?description]
                                     [change-uri :dcterms/format '?format]
-                                    [change-uri :dh/updates '?appends]
+                                    [change-uri :dh/updates '?updates]
                                     [change-uri :dh/appliesToRevision '?revision]]]
                           {:prefixes default-prefixes
                            :construct bgps
@@ -197,27 +197,29 @@
    (let [change-uri (models-shared/change-uri series-slug release-slug revision-id change-id)]
      (get-change triplestore change-uri))))
 
-(defn- get-appends-query
+(defn- get-changes-info-query
   [release-uri max-rev]
-  {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh]))
-   :select ['?rev '?appends '?rev_number]
+  {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh :dcterms]))
+   :select ['?rev '?updates '?rev_number '?kind '?format]
    :where (cond-> [['?rev :dh/appliesToRelease release-uri]
                    ['?rev :dh/hasChange '?change]
-                   ['?change :dh/updates '?appends]
+                   ['?change :dh/updates '?updates]
+                   ['?change :dh/changeKind '?kind]
+                   ['?change :dcterms/format '?format]
                    [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]]
             (some? max-rev) (conj [:filter (list '<= '?rev_number max-rev)]))
    :order-by ['(asc ?rev_number)]})
 
-(defn get-appends
+(defn get-changes-info
   "Returns records for all appends, optionally up to `?max-rev` (int)
   revision (inclusive).
 
   The returned seq will contain maps of shape
-       {:rev_num Number :rev URI :appends FILE-KEY}"
-  ([triplestore release-uri] (get-appends triplestore release-uri nil))
+       {:rev_num Number :rev URI :appends FILE-KEY :kind change-kind}"
+  ([triplestore release-uri] (get-changes-info triplestore release-uri nil))
   ([triplestore release-uri ?max-rev]
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
-   (datastore/eager-query triplestore (f/format-query (get-appends-query release-uri ?max-rev)))))
+   (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev)))))
 
 (defn- input-context []
   (assoc (update-vals @compact/default-context str)
@@ -509,13 +511,11 @@
                      revision-uri]])]]})
 
 (defn insert-change! [triplestore change-store
-                      {:keys [api-params jsonld-doc appends-file datahost.change/kind]}]
+                      {:keys [api-params jsonld-doc insert-request datahost.change/kind]}]
   (let [change-number 1                 ;one append per revision
         change (request->change kind change-number api-params jsonld-doc)
-        append-key (store/insert-append change-store appends-file)
-        change (resource/set-property1 change (compact/expand :dh/updates) append-key)
+        change (resource/set-property1 change (compact/expand :dh/updates) (:key insert-request))
         rev-uri (resource/get-property1 change (compact/expand :dh/appliesToRevision))
-
         last-change-num (fn [conn]
                           (-> (repo/query conn
                                           (f/format-query
@@ -523,7 +523,6 @@
                               (doall)
                               first
                               :n))
-
         {:keys [before after]}
         (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
           (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
