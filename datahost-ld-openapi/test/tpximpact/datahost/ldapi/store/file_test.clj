@@ -35,7 +35,7 @@
 (defn- add-to-store [store files m contents]
   (let [f (new-temp-file files "filestore-test")]
     (spit f contents)
-    (let [key (store/insert-append store {:tempfile f :filename (.getName f)})]
+    (let [key (store/insert-data store {:tempfile f :filename (.getName f)})]
       (assoc m key contents))))
 
 (def file-contents-gen gen/string)
@@ -49,7 +49,7 @@
                                 (add-to-store store fs acc contents))
                               {}
                               file-contents)
-                fetched (into {} (map (fn [k] [k (slurp (store/get-append store k))]) (keys added)))]
+                fetched (into {} (map (fn [k] [k (slurp (store/get-data store k))]) (keys added)))]
             (= added fetched)))))))
 
 (defspec added-data-can-be-fetched-by-key

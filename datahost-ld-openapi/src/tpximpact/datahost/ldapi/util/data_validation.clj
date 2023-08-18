@@ -195,6 +195,9 @@
   (tc/set-dataset-name (slurpable->dataset (.toFile v) opts)
                        (.getFileName v)))
 
+(defmethod -as-dataset java.io.BufferedInputStream [^java.io.BufferedInputStream v opts]
+  (slurpable->dataset v opts))
+
 (def AsDatasetOpts
   [:map
    [:file-type {:optional true} [:enum :csv]]

@@ -27,8 +27,8 @@
    {:description "Description of a change to a revision."}
    [:datahost.change.data/ref {:description "Reference/key to the data (e.g. CSV file)."}
     [:fn (comp dataset-input-type-valid? type)]]
-   [:datahost.change.data/format {:description "Format of the input data, e.g. :csv"
-                                  :json-schema/example "csv"}
+   [:datahost.change.data/format {:description "Format of the input data, e.g. 'text/csv'"
+                                  :json-schema/example "text/csv"}
     ;; 'native' means we're passing native Clojure data structures.
     [:string {:description "Mime type of the referenced data. Values as in 'dcterms:format'"}]]
    [:datahost.change/kind [:enum

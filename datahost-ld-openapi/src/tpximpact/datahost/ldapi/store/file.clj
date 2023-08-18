@@ -12,7 +12,7 @@
 (defn- consume-input-stream
   "Reads an input stream to the end"
   [^InputStream is]
-  (let [buf (byte-array 2048)]
+  (let [buf (byte-array 4096)]
     (loop []
       (let [bytes-read (.read is buf)]
         (when-not (= -1 bytes-read)
@@ -39,23 +39,29 @@
 
 (defrecord FileChangeStore [root-dir]
   store/ChangeStore
-  (insert-append [_this {:keys [tempfile]}]
-    (let [file-digest (file->digest tempfile "SHA-1")
+  (-insert-data-with-request [this request]
+    (let [file-digest (:key request)
           location (file-location root-dir file-digest)]
       (when-not (.exists location)
         (.mkdirs (.getParentFile location))
         ;; copy input file into temp location within store then rename to
         ;; final destination
         (let [store-temp (File/createTempFile "filestore" nil root-dir)]
-          (io/copy tempfile store-temp)
+          (io/copy (:data request) store-temp)
           (.renameTo store-temp location)))
       file-digest))
+  
+  (-insert-data [this {:keys [tempfile]}]
+    (store/-insert-data-with-request this (store/make-insert-request! this tempfile)))
 
-  (get-append [_this append-key]
+  (-get-data [_this append-key]
     (let [location (file-location root-dir (.toString append-key))]
       (if (.exists location)
         (io/input-stream location)
-        (throw (ex-info "Append not found for key" {:key append-key}))))))
+        (throw (ex-info "Append not found for key" {:key append-key})))))
+
+  (-data-key [_this data]
+    (file->digest data "SHA-256")))
 
 (defn get-root-dir
   "Returns the root directory of a file store"

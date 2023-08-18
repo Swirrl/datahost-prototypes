@@ -13,7 +13,8 @@
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.models.shared :as models.shared]
-   [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
+   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
+   [tpximpact.datahost.ldapi.util.data-compilation :as data-compilation])
   (:import (java.net URI)))
 
 (defn- box [x]
@@ -65,8 +66,7 @@
                       [[?s ?p ?o]
                        (matcha/optional [[?s vocab.rdf/rdf:a ?t]])]
                       matcha-db)
-        (map #(dissoc % vocab.rdf/rdf:a)))
-   )
+        (map #(dissoc % vocab.rdf/rdf:a))))
   ([matcha-db subject]
    (->> (matcha/build [(keyword "@id") ?s]
                       {?p ?o
@@ -77,20 +77,18 @@
                       matcha-db)
         (map #(dissoc % vocab.rdf/rdf:a)))))
 
-(defn input-stream->dataset [is]
-  (tc/dataset is {:file-type :csv}))
-
 (defn csv-file-locations->dataset [change-store append-keys]
   (if (sequential? append-keys)
     (some->> (remove nil? append-keys)
-             (map #(input-stream->dataset (store/get-append change-store %)))
+             (map #(data-validation/as-dataset (store/get-data change-store %)
+                                               {:file-type :csv}))
              (apply tc/concat))
-    (some->> (store/get-append change-store append-keys)
-             (input-stream->dataset))))
+    (some->> (store/get-data change-store append-keys)
+             (data-validation/as-dataset {:file-type :csv}))))
 
 (defn release->csv-stream [triplestore change-store release]
-  (let [appends-file-keys (->> (db/get-appends triplestore (resource/id release) nil)
-                               (map :appends))]
+  (let [appends-file-keys (->> (db/get-changes-info triplestore (resource/id release) nil)
+                               (map :updates))]
     (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
       (write-dataset-to-outputstream merged-datasets))))
 
@@ -193,8 +191,8 @@
 (defn revision->csv-stream [triplestore change-store revision]
   (let [rev-id (resource/id revision)
         release-id (get revision (cmp/expand :dh/appliesToRelease))
-        appends (db/get-appends triplestore release-id (revision-number rev-id))]
-    (when-let [merged-datasets (csv-file-locations->dataset change-store (map :appends appends))]
+        appends (db/get-changes-info triplestore release-id (revision-number rev-id))]
+    (when-let [merged-datasets (csv-file-locations->dataset change-store (map :updates appends))]
       (write-dataset-to-outputstream merged-datasets))))
 
 (defn get-revision
@@ -285,37 +283,41 @@
                    change-store
                    change-kind
                    {{:keys [series-slug release-slug revision-id]} :path-params
-                    {{:keys [appends]} :multipart} :parameters
-                    body-params :body-params :as request}]
-  (if (db/resource-exists? triplestore
-                           (models.shared/change-uri series-slug release-slug revision-id 1))
-    {:status 422
-     :body "A change is already associated with the revision."}
+                    {{:keys [appends]} :multipart} :parameters ;TODO: change 'appends' to ??
+                    jsonld-doc :body-params :as request}]
+  (let [change-uri ^java.net.URI (models.shared/change-uri series-slug release-slug revision-id 1)]
+    (if (db/resource-exists? triplestore change-uri)
+      {:status 422
+       :body "A change is already associated with the revision."}
 
-    (let [api-params (get-api-params request)
-          jsonld-doc body-params
-          release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
-          validation-err (when (some? release-schema)
-                           (dataset-validation-error! release-schema appends))
-          {:keys [jsonld-doc resource-id message]} (when-not validation-err
-                                                     (db/insert-change! triplestore
-                                                                        change-store
-                                                                        {:api-params api-params
-                                                                         :jsonld-doc jsonld-doc
-                                                                         :appends-file appends
-                                                                         :datahost.change/kind change-kind}))]
-      (log/info (format "post-change: validation: found-schema? = %s change-valid? = "
-                        (some? release-schema) (nil? validation-err)))
-      (cond
-        (some? validation-err) validation-err
+      (let [api-params (get-api-params request)
+            insert-req (store/make-insert-request! change-store (:tempfile appends))
+            release-schema (db/get-release-schema triplestore (models.shared/release-uri-from-slugs series-slug release-slug))
+            validation-err (when (some? release-schema)
+                             (dataset-validation-error! release-schema appends))
+            {:keys [jsonld-doc resource-id message]} (when-not validation-err
+                                                       (db/insert-change! triplestore
+                                                                          change-store
+                                                                          {:api-params api-params
+                                                                           :jsonld-doc jsonld-doc
+                                                                           :insert-request insert-req
+                                                                           :datahost.change/kind change-kind}))]
+        (log/info (format "post-change: '%s' validation: found-schema? = %s change-valid? = %s"
+                          (.getPath change-uri) (some? release-schema) (nil? validation-err)))
+        (cond
+          (some? validation-err) validation-err
 
-        (some? message) {:status 422 :body message}
+          (some? message) {:status 422 :body message}
 
-        :else-success
-        (as-json-ld {:status 201
-                     :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
-                                                  series-slug release-slug revision-id resource-id)}
-                     :body jsonld-doc})))))
+          :else-success
+          (do
+            (store/request-data-insert change-store insert-req)
+            (log/debug (format "post-change: %s stored-change '%s'" (.getPath change-uri) (:key insert-req)))
+
+            (as-json-ld {:status 201
+                         :headers {"Location" (format "/data/%s/releases/%s/revisions/%s/changes/%s"
+                                                      series-slug release-slug revision-id resource-id)}
+                         :body jsonld-doc})))))))
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/updates))]
