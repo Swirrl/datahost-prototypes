@@ -50,10 +50,14 @@ resource "google_service_account" "ldapi_service_account" {
   display_name = "Service account to run the ldapi server"
 }
 
-# service account needs to be able to read images from the swirrl-devops-infrastructure project
 resource "google_project_iam_member" "ldapi_service_account_permissions" {
   project = "swirrl-devops-infrastructure-1"
-  role = "roles/artifactregistry.reader"
+  for_each = toset([
+    # service account needs to be able to read images from the swirrl-devops-infrastructure project
+    "roles/artifactregistry.reader",
+    "roles/secretmanager.secretAccessor",
+  ])
+  role = each.key
   member = "serviceAccount:${google_service_account.ldapi_service_account.email}"
 }
 
