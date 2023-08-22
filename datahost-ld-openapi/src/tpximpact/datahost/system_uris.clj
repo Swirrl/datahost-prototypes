@@ -41,7 +41,7 @@
   (change-uri [this series-slug release-slug revision-id change-id]))
 
 (defn make-system-uris
-  "Returns a ..."
+  "Returns an object that builds URIs based upon the configured RDF base URI"
   [base-uri]
 
   (reify AppUri
