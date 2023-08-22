@@ -1,14 +1,16 @@
 (ns tpximpact.datahost.ldapi.models.release-test
   (:require
-    [clojure.data :as c.data]
-    [clojure.data.json :as json]
-    [clojure.test :refer [deftest is testing] :as t]
-    [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.datahost.ldapi.router :as router]
-    [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore])
-  (:import (java.time Instant)
+   [clojure.data :as c.data]
+   [clojure.data.json :as json]
+   [clojure.test :refer [deftest is testing] :as t]
+   [grafter-2.rdf4j.repository :as repo]
+   [tpximpact.datahost.ldapi.router :as router]
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.time :as time]
+   [tpximpact.test-helpers :as th]
+   [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore])
+  (:import (java.net URI)
+           (java.time Instant)
            [java.util UUID]))
 
 (defn- put-series [put-fn]
@@ -41,7 +43,8 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-07-03T11:16:16Z")
           clock (time/manual-clock t)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           series-slug (create-series handler)
 
           request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
@@ -63,7 +66,9 @@
           t1 (time/parse "2023-07-03T14:35:55Z")
           t2 (time/parse "2023-07-03T16:02:34Z")
           clock (time/manual-clock t1)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
           series-slug (create-series handler)
           create-request (create-put-request series-slug "test-release" {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
@@ -90,7 +95,9 @@
           t1 (time/parse "2023-07-04T08:54:11Z")
           t2 (time/parse "2023-07-04T10:33:24Z")
           clock (time/manual-clock t1)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
           series-slug (create-series handler)
 

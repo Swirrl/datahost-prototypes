@@ -1,21 +1,22 @@
 (ns tpximpact.datahost.ldapi.json-ld
   (:require [jsonista.core :as jsonista]
-            [tpximpact.datahost.ldapi.models.shared :as m.shared])
+            [tpximpact.datahost.system-uris :as su])
   (:import (com.apicatalog.jsonld JsonLd)
            (com.apicatalog.jsonld.document JsonDocument)
            (java.io StringReader)))
 
-(def simple-context {:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-                     :dh "https://publishmydata.com/def/datahost/"
-                     :dcat "http://www.w3.org/ns/dcat#"
-                     :dcterms "http://purl.org/dc/terms/"
-                     :csvw "http://www.w3.org/ns/csvw#"
-                     :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"
-                     "@base" m.shared/ld-root})
+(defn simple-context [system-uris]
+  {:rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   :dh "https://publishmydata.com/def/datahost/"
+   :dcat "http://www.w3.org/ns/dcat#"
+   :dcterms "http://purl.org/dc/terms/"
+   :csvw "http://www.w3.org/ns/csvw#"
+   :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"
+   "@base" (su/rdf-base-uri system-uris)})
 
-(def simple-collection-context
+(defn simple-collection-context [system-uris]
   "Use this context when the top level payload will be a collection e.g. Series list"
-  (merge simple-context
+  (merge (simple-context system-uris)
          {:contents {"@id" "dh:collection-contents",
                      "@container" "@set"}}))
 

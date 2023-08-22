@@ -1,13 +1,14 @@
 (ns tpximpact.datahost.ldapi.db
   (:require
-    [clojure.data.json :as json]
-    [com.yetanalytics.flint :as f]
-    [grafter-2.rdf.protocols :as pr]
-    [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.datahost.ldapi.compact :as compact]
-    [tpximpact.datahost.ldapi.native-datastore :as datastore]
-    [tpximpact.datahost.time :as time]
-    [tpximpact.datahost.ldapi.resource :as resource])
+   [clojure.data.json :as json]
+   [com.yetanalytics.flint :as f]
+   [grafter-2.rdf.protocols :as pr]
+   [grafter-2.rdf4j.repository :as repo]
+   [tpximpact.datahost.ldapi.compact :as compact]
+   [tpximpact.datahost.ldapi.native-datastore :as datastore]
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.time :as time]
+   [tpximpact.datahost.ldapi.resource :as resource])
   (:import (java.net URI)
            (org.eclipse.rdf4j.common.transaction IsolationLevels)
            (org.eclipse.rdf4j.repository RepositoryConnection)))
@@ -217,14 +218,18 @@
     "@type" (str resource-type)
     "@context" (input-context ld-root)))
 
-(defn- request->series [series-uri api-params json-doc ld-root]
-  (let [series-doc (annotate-json-resource json-doc series-uri (compact/expand :dh/DatasetSeries) ld-root)
+(defn- request->series [system-uris api-params json-doc]
+  (let [series-uri (su/dataset-series-uri system-uris (:series-slug api-params))
+        ld-root (su/rdf-base-uri system-uris)
+        series-doc (annotate-json-resource json-doc series-uri (compact/expand :dh/DatasetSeries) ld-root)
         doc-resource (resource/from-json-ld-doc series-doc)
         param-properties (params->title-description-properties api-params)]
     (resource/set-properties doc-resource param-properties)))
 
-(defn- request->release [series-uri release-uri api-params json-doc ld-root]
-  (let [release-doc (annotate-json-resource json-doc release-uri (compact/expand :dh/Release) ld-root)
+(defn- request->release [system-uris api-params json-doc]
+  (let [series-uri (su/dataset-series-uri* system-uris api-params)
+        release-uri (su/dataset-release-uri* system-uris api-params)
+        release-doc (annotate-json-resource json-doc release-uri (compact/expand :dh/Release) (su/rdf-base-uri system-uris))
         doc-resource (resource/from-json-ld-doc release-doc)
         param-properties (params->title-description-properties api-params)
         base-release (resource/set-properties doc-resource param-properties)]
@@ -349,8 +354,10 @@
 (defn upsert-series!
   "Returns a map {:op ... :jsonld-doc ...}, where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
-  [clock triplestore series-uri api-params incoming-jsonld-doc ld-root]
-  (let [request-series (request->series series-uri api-params incoming-jsonld-doc ld-root)]
+  [clock triplestore system-uris api-params incoming-jsonld-doc]
+  (let [series-uri (su/dataset-series-uri system-uris (:series-slug api-params))
+        ld-root (su/rdf-base-uri system-uris)
+        request-series (request->series system-uris api-params incoming-jsonld-doc)]
     (if-let [existing-series (some->> (get-dataset-series triplestore series-uri)
                                       (resource/from-statements))]
       (let [[changed? new-series] (merge-series-updates clock existing-series request-series)]
@@ -364,8 +371,9 @@
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
-  [clock triplestore series-uri release-uri api-params incoming-jsonld-doc ld-root]
-  (let [request-release (request->release series-uri release-uri api-params incoming-jsonld-doc ld-root)]
+  [clock triplestore system-uris api-params incoming-jsonld-doc]
+  (let [ld-root (su/rdf-base-uri system-uris)
+        request-release (request->release system-uris api-params incoming-jsonld-doc)]
     (if-let [existing-release (some->> (get-release-by-uri triplestore (resource/id request-release))
                                        (resource/from-statements))]
       (let [[changed? new-release] (merge-release-updates clock existing-release request-release)]
@@ -509,8 +517,11 @@
     new-schema))
 
 (defn upsert-release-schema!
-  [clock triplestore incoming-jsonld-doc ld-root schema-uri release-uri]
-  (let [request-schema (request->schema incoming-jsonld-doc ld-root schema-uri release-uri)]
+  [clock triplestore system-uris incoming-jsonld-doc slugs]
+  (let [schema-uri (su/release-schema-uri system-uris slugs)
+        release-uri (su/dataset-release-uri* system-uris slugs)
+        ld-root (su/rdf-base-uri system-uris)
+        request-schema (request->schema incoming-jsonld-doc ld-root schema-uri release-uri)]
     (if-let [existing-schema (get-release-schema triplestore release-uri)]
       {:op :noop
        :jsonld-doc (schema->response-body existing-schema ld-root)}

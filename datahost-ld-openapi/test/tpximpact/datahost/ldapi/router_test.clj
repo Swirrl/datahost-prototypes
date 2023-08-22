@@ -1,19 +1,23 @@
 (ns tpximpact.datahost.ldapi.router-test
   (:require
-    [clojure.java.io :as io]
-    [clojure.test :as t]
-    [grafter-2.rdf4j.repository :as repo]
-    [reitit.ring :as ring]
-    [tpximpact.datahost.ldapi.store.file :as fstore]
-    [tpximpact.datahost.time :as time]
-    [tpximpact.datahost.ldapi.router :as sut]))
+   [clojure.java.io :as io]
+   [clojure.test :as t]
+   [grafter-2.rdf4j.repository :as repo]
+   [reitit.ring :as ring]
+   [tpximpact.datahost.ldapi.store.file :as fstore]
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.time :as time]
+   [tpximpact.datahost.ldapi.router :as sut])
+  (:import (java.net URI)))
 
 (defn- get-test-router
   ([] (get-test-router time/system-clock))
   ([clock]
    (let [triplestore (repo/sail-repo)
+         rdf-base-uri (URI. "https://example.org/data/")
+         system-uris (su/make-system-uris rdf-base-uri)
          change-store (fstore/->FileChangeStore (io/file "/Users/lee/data/filestore-tmp"))]
-     (sut/router {:clock clock :triplestore triplestore :change-store change-store}))))
+     (sut/router {:clock clock :triplestore triplestore :change-store change-store :system-uris system-uris}))))
 
 (t/deftest cors-preflight-request-test
   (let [router (get-test-router)

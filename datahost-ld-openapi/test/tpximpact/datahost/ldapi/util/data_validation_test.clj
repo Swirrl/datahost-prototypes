@@ -8,10 +8,11 @@
    [malli.error :as me]
    [malli.transform :as mt]
    [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.models.shared :as models.shared]
    [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
    [tpximpact.datahost.ldapi.util.data-validation :as util.data-validation]
-   [tpximpact.datahost.time :as time]))
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.time :as time])
+  (:import (java.net URI)))
 
 (defn- explain
   "Returns nil on success, a value on validation error."
@@ -22,6 +23,8 @@
   (let [repo (repo/sail-repo)
         t (time/parse "2023-07-20T11:00:00Z")
         clock (time/manual-clock t)
+        system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+
         slugs {:series-slug "s1" :release-slug "r1" :schema-slug "schema1"}
 
         schema-json (-> (io/resource "test-inputs/schemas/simple.json")
@@ -37,11 +40,9 @@
     (testing "Decoding malli schema from JSON-LD"
       (is ld-schema))
 
-    (db/upsert-release-schema! clock repo ld-schema models.shared/ld-root
-                               (models.shared/release-schema-uri slugs)
-                               (models.shared/dataset-release-uri* slugs))
+    (db/upsert-release-schema! clock repo system-uris ld-schema slugs)
     
-    (let [schema (db/get-release-schema repo (models.shared/release-uri-from-slugs "s1" "r1"))]
+    (let [schema (db/get-release-schema repo (su/dataset-release-uri* system-uris {:series-slug "s1" :release-slug "r1"}))]
       (testing "Creating malli row schemas from JSON-LD schema"
         (is (= ["Year" "Unit of Measure"]
                (-> (util.data-validation/make-row-schema schema ["Year" "Unit of Measure"])

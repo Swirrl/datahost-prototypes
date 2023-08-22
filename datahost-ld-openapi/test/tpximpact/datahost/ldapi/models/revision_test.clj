@@ -8,6 +8,7 @@
     [grafter-2.rdf4j.repository :as repo]
     [malli.core :as m]
     [malli.error :as me]
+    [tpximpact.datahost.system-uris :as su]
     [tpximpact.datahost.ldapi.resource :as resource]
     [tpximpact.datahost.ldapi.router :as router]
     [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
@@ -59,7 +60,9 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-07-03T11:16:16Z")
           clock (time/manual-clock t)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           series-slug (create-series handler)
           [release-slug release-doc] (create-release handler series-slug)
           release-uri (resource-id release-doc)
