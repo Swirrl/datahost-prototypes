@@ -51,9 +51,15 @@ resource "google_service_account" "ldapi_service_account" {
 }
 
 # service account needs to be able to read images from the swirrl-devops-infrastructure project
-resource "google_project_iam_member" "ldapi_service_account_permissions" {
+resource "google_project_iam_member" "ldapi_service_account_permissions_acr" {
   project = "swirrl-devops-infrastructure-1"
   role = "roles/artifactregistry.reader"
+  member = "serviceAccount:${google_service_account.ldapi_service_account.email}"
+}
+
+resource "google_project_iam_member" "ldapi_service_account_permissions_secrets" {
+  project = "swirrl-ons-datahost"
+  role = "roles/secretmanager.secretAccessor"
   member = "serviceAccount:${google_service_account.ldapi_service_account.email}"
 }
 
