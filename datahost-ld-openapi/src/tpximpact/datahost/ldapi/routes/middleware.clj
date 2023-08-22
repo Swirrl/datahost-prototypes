@@ -3,9 +3,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.ldapi.models.shared
-    :as models.shared
-    :refer [resource-uri]]))
+   [tpximpact.datahost.system-uris :refer [resource-uri]]))
 
 (defn json-only
   "Middleware that requires the request to pass 'Content-Type: application/json'.
@@ -24,10 +22,10 @@
   not.
 
   Relies on [[resource-uri]] to create URI of the resource."
-  [triplestore resource handler _id]
+  [triplestore system-uris resource handler _id]
   {:pre [(m/validate [:enum :dh/DatasetSeries :dh/Release :dh/Revision] resource)]}
   (fn [{:keys [path-params] :as request}]
-    (if (not (db/resource-exists? triplestore (resource-uri resource path-params)))
+    (if (not (db/resource-exists? triplestore (resource-uri resource system-uris path-params)))
       {:status 404 :body "not found"}
       (handler request))))
 
@@ -36,11 +34,11 @@
   the given resource exists.
 
   - resource: [:enum :dh/DatasetSeries :dh/Release :dh/Revision :dh/Change]"
-  [triplestore resource resource-id handler _id]
+  [triplestore system-uris resource resource-id handler _id]
   {:pre [(m/validate [:enum :dh/DatasetSeries :dh/Release :dh/Revision :dh/Change] resource)]}
   (fn [{:keys [path-params] :as request}]
     (handler (cond-> request
-               (db/resource-exists? triplestore (resource-uri resource path-params))
+               (db/resource-exists? triplestore (resource-uri resource system-uris path-params))
                (assoc resource-id true)))))
 
 (defn validate-creation-body+query-params

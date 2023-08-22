@@ -1,17 +1,19 @@
 (ns tpximpact.datahost.ldapi.models.series-test
   (:require
-    [clojure.data :as c.data]
-    [clojure.data.json :as json]
-    [clojure.test :refer [deftest is testing] :as t]
-    [grafter-2.rdf4j.repository :as repo]
-    [tpximpact.datahost.ldapi.router :as router]
-    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
-    [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th])
+   [clojure.data :as c.data]
+   [clojure.data.json :as json]
+   [clojure.test :refer [deftest is testing] :as t]
+   [grafter-2.rdf4j.repository :as repo]
+   [tpximpact.datahost.ldapi.router :as router]
+   [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.time :as time]
+   [tpximpact.test-helpers :as th])
   (:import
-    (java.time ZonedDateTime Instant)
-    (java.time.format DateTimeFormatter)
-    [java.util UUID]))
+   (java.net URI)
+   (java.time ZonedDateTime Instant)
+   (java.time.format DateTimeFormatter)
+   [java.util UUID]))
 
 (defn format-date-time
   [dt]
@@ -28,7 +30,8 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-06-29T10:11:07Z")
           clock (time/manual-clock t)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           request (create-put-request "new-series" {"dcterms:title" "A title"
                                                     "dcterms:description" "Description"})
           {:keys [status body]} (handler request)
@@ -68,7 +71,8 @@
           t1 (time/parse "2023-06-30T11:36:18Z")
           t2 (time/parse "2023-06-30T14:25:33Z")
           clock (time/manual-clock t1)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           create-request (create-put-request "new-series" {"dcterms:title" "Initial Title"
                                                            "dcterms:description" "Initial Description"})
           _initial-response (handler create-request)
@@ -90,7 +94,9 @@
           t1 (time/parse "2023-06-30T13:37:00Z")
           t2 (time/parse "2023-06-30T15:08:03Z")
           clock (time/manual-clock t1)
-          handler (router/handler {:clock clock :triplestore repo :change-store temp-store})
+          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
+
+          handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
           properties {"dcterms:title" "Title" "dcterms:description" "Description"}
           create-request (create-put-request "new-series" properties)

@@ -24,8 +24,7 @@
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
    [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-   [ring.middleware.cors :as cors]
-   [clojure.spec.alpha :as s])
+   [ring.middleware.cors :as cors])
   (:import (java.io InputStream InputStreamReader OutputStream)))
 
 (defn decode-str [_options]
@@ -136,7 +135,7 @@
   (str "Source viewable in GitHub "
        "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi)."))
 
-(defn router [{:keys [clock triplestore change-store auth]}]
+(defn router [{:keys [clock triplestore change-store auth system-uris]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
@@ -150,37 +149,37 @@
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
               :tags ["linked data api"]}
      [""
-      {:get (routes.s/get-series-list-route-config triplestore)}]
+      {:get (routes.s/get-series-list-route-config triplestore system-uris)}]
 
      ["/:series-slug"
-      {:get (routes.s/get-series-route-config triplestore)
-       :put (routes.s/put-series-route-config clock triplestore)}]
+      {:get (routes.s/get-series-route-config triplestore system-uris)
+       :put (routes.s/put-series-route-config clock triplestore system-uris)}]
 
      ["/:series-slug/releases"
-      ["" {:get (routes.rev/get-release-list-route-config triplestore)}]
+      ["" {:get (routes.rev/get-release-list-route-config triplestore system-uris)}]
 
       ["/:release-slug"
-       {:get (routes.rel/get-release-route-config triplestore change-store)
-        :put (routes.rel/put-release-route-config clock triplestore)}]
+       {:get (routes.rel/get-release-route-config triplestore change-store system-uris)
+        :put (routes.rel/put-release-route-config clock triplestore system-uris)}]
 
       ["/:release-slug/schema"
-       {:get (routes.rel/get-release-ld-schema-config triplestore)
-        :post (routes.rel/post-release-ld-schema-config clock triplestore)}]
+       {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)
+        :post (routes.rel/post-release-ld-schema-config clock triplestore system-uris)}]
 
       ["/:release-slug/revisions"
-       ["" {:post (routes.rev/post-revision-route-config triplestore)
-            :get (routes.rev/get-revision-list-route-config triplestore)}]
+       ["" {:post (routes.rev/post-revision-route-config triplestore system-uris)
+            :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
 
        ["/:revision-id"
-        {:get (routes.rev/get-revision-route-config triplestore change-store)}]
+        {:get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/changes"
-        ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store)}]
+        ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]
         ["/:change-id"
-         {:get (routes.rev/get-revision-changes-route-config triplestore change-store)}]]
+         {:get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]]
 
        ["/:revision-id/deletes"
-        {:post (routes.rev/post-revision-deletes-changes-route-config triplestore change-store)}]]]]]
+        {:post (routes.rev/post-revision-deletes-changes-route-config triplestore change-store system-uris)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -240,9 +239,9 @@
     (ring/create-default-handler))
    {:executor sieppari/executor}))
 
-(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
-  (s/keys :req-un [::clock ::triplestore ::change-store]
-          :opt-un [::auth]))
+;(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
+;  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::rdf-base-uri]
+;          :opt-un [::auth]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler [_ opts]
   (handler opts))

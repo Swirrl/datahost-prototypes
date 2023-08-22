@@ -9,9 +9,9 @@
 
 (def internal-server-error-desc "Internal server error")
 
-(defn get-release-route-config [triplestore change-store]
+(defn get-release-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata for an existing release"
-   :handler (partial handlers/get-release triplestore change-store)
+   :handler (partial handlers/get-release triplestore change-store system-uris)
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
@@ -20,11 +20,11 @@
                      "application/json+ld" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn put-release-route-config [clock triplestore]
+(defn put-release-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata for a release"
-   :handler (partial handlers/put-release clock triplestore)
+   :handler (partial handlers/put-release clock triplestore system-uris)
    :middleware [[middleware/json-only :json-only]
-                [(partial middleware/flag-resource-exists triplestore
+                [(partial middleware/flag-resource-exists triplestore system-uris
                           :dh/Release ::release) :resource-exists?]
                 [(partial middleware/validate-creation-body+query-params
                           {:resource-id ::release
@@ -48,9 +48,9 @@
                            [:message string?]]}}})
 
 (defn get-release-ld-schema-config
-  [triplestore]
+  [triplestore system-uris]
   {:summary "Retrieve release schema"
-   :handler (partial handlers/get-release-schema triplestore)
+   :handler (partial handlers/get-release-schema triplestore system-uris)
    :parameters {:path {:series-slug :string
                        :release-slug :string}}
    :responses {200 {:description "Release schema successfully retrieved"
@@ -59,9 +59,9 @@
                404 {:body [:re "Not found"]}}})
 
 (defn post-release-ld-schema-config
-  [clock triplestore]
+  [clock triplestore system-uris]
   {:summary "Create schema for a release"
-   :handler (partial handlers/post-release-schema clock triplestore)
+   :handler (partial handlers/post-release-schema clock triplestore system-uris)
    ;; NOTE: file schema JSON content string is validated within the handler itself
    :parameters {:multipart [:map [:schema-file reitit.ring.malli/temp-file-part]]
                 :path {:series-slug :string

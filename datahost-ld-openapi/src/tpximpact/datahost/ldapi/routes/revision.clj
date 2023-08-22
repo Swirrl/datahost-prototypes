@@ -6,10 +6,10 @@
     [tpximpact.datahost.ldapi.routes.middleware :as middleware]
     [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
-(defn get-revision-route-config [triplestore change-store]
+(defn get-revision-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-revision triplestore change-store)
+   :handler (partial handlers/get-revision triplestore change-store system-uris)
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
@@ -18,29 +18,29 @@
                      "application/json+ld" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn get-release-list-route-config [triplestore]
+(defn get-release-list-route-config [triplestore system-uris]
   {:summary "All releases metadata in the given series"
-   :handler (partial handlers/get-release-list triplestore)
+   :handler (partial handlers/get-release-list triplestore system-uris)
    :parameters {:path {:series-slug string?}}
    :responses {200 {:content {"application/json+ld"
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn get-revision-list-route-config [triplestore]
+(defn get-revision-list-route-config [triplestore system-uris]
   {:summary "All revisions metadata in the given release"
-   :handler (partial handlers/get-revision-list triplestore)
+   :handler (partial handlers/get-revision-list triplestore system-uris)
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
    :responses {200 {:content {"application/json+ld"
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
-(defn post-revision-route-config [triplestore]
+(defn post-revision-route-config [triplestore system-uris]
   {:summary (str "Create metadata for a revision. The successfully created resource "
                  "path will be returned in the `Location` header")
-   :handler (partial handlers/post-revision triplestore)
+   :handler (partial handlers/post-revision triplestore system-uris)
    :middleware [[middleware/json-only :json-only]
-                [(partial middleware/flag-resource-exists triplestore
+                [(partial middleware/flag-resource-exists triplestore system-uris
                           :dh/Revision ::revision) :resource-exists?]
                 [(partial middleware/validate-creation-body+query-params
                           {:resource-id ::revision
@@ -68,10 +68,10 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn changes-route-base [triplestore change-store change-kind]
-  {:handler (partial handlers/post-change triplestore change-store change-kind)
+(defn changes-route-base [triplestore change-store system-uris change-kind]
+  {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
    :middleware [[middleware/json-only :json-only]
-                [(partial middleware/resource-exist? triplestore :dh/Revision) :resource-exists?]]
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]]
    :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
                 :body routes-shared/CreateChangeInput
                 :path {:series-slug string?
@@ -88,18 +88,18 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-appends-changes-route-config [triplestore change-store]
-  (merge (changes-route-base triplestore change-store :dh/ChangeKindAppend)
+(defn post-revision-appends-changes-route-config [triplestore change-store system-uris]
+  (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindAppend)
          {:summary "Add appends changes to a Revision via a CSV file."}))
 
-(defn post-revision-deletes-changes-route-config [triplestore change-store]
-  (merge (changes-route-base triplestore change-store :dh/ChangeKindRetract)
+(defn post-revision-deletes-changes-route-config [triplestore change-store system-uris]
+  (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
          {:summary "Add deletes changes to a Revision via a CSV file."}))
 
-(defn get-revision-changes-route-config [triplestore change-store]
+(defn get-revision-changes-route-config [triplestore change-store system-uris]
   {:summary "Retrieve CSV contents for an existing change"
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-change triplestore change-store)
+   :handler (partial handlers/get-change triplestore change-store system-uris)
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?
