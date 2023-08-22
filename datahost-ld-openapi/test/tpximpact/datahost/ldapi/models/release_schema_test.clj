@@ -29,10 +29,10 @@
 (t/use-fixtures :each th/with-system-fixture)
 
 (defn schema-doc
-  [tag]
+  [tag rdf-base-uri]
   {"@type" "dh:TableSchema"
    "appropriate-csvw:modeling-of-dialect" "UTF-8,RFC4180"
-   "dh:appliesToRelease" (format "https://example.org/data/my-series-%s/releases/release-%s" tag tag)
+   "dh:appliesToRelease" (format "%smy-series-%s/releases/release-%s" rdf-base-uri tag tag)
    "dcterms:title" "Fun schema"
    "dh:columns" [{"@type" "dh:DimensionColumn"
                   "csvw:datatype" "string"
@@ -56,31 +56,34 @@
         {{:keys [GET]} :tpximpact.datahost.ldapi.test/http-client
          ld-api-app :tpximpact.datahost.ldapi.router/handler} @th/*system*
 
+        rdf-base-uri (th/sys->rdf-base-uri @th/*system*)
+
         csvw-type (fn [col-name titles] {"csvw:datatype" "string"
                                          "csvw:name" col-name
                                          "csvw:titles" titles
                                          "@type" "dh:DimensionColumn"})]
     (testing "Creating a schema from file upload"
-      (let [schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
-            schema-uri (str "https://example.org" schema-path)
+      (let [schema-fragment (format "my-series-%s/releases/release-%s/schema" n n)
+            schema-resource-path (str "/data/" schema-fragment)
+            schema-uri (str rdf-base-uri schema-fragment)
             temp-schema-file (File/createTempFile "my-schema-1" ".json")
 
             _ (with-open [file (io/writer temp-schema-file)]
                 (binding [*out* file]
                   (println (json/write-str
                             {"@context" ["https://publishmydata.com/def/datahost/context"
-                                         {"@base" (format "https://example.org/data/my-series-%s/" n)}]
+                                         {"@base" (str rdf-base-uri "my-series-" n "/")}]
                              "dcterms:title" "Fun schema"
                              "dh:columns" [(csvw-type "foo_bar" ["Foo Bar"])
                                            (csvw-type "height" ["Height"])]}))))
 
             json-file-multipart (build-json-multipart (.getAbsolutePath temp-schema-file))
             response (ld-api-app {:request-method :post
-                         :uri schema-path
+                         :uri schema-resource-path
                          :multipart-params {:schema-file json-file-multipart}
                          :content-type "application/json"})
             resp-body (json/read-str (:body response))
-            expected-doc (schema-doc n)
+            expected-doc (schema-doc n rdf-base-uri)
             [missing _extra _matching] (diff expected-doc resp-body)]
         (is (= 201 (:status response)))
         (is (= nil missing))

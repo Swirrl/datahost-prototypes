@@ -112,7 +112,7 @@
       (t/is (= initial-doc updated-doc)))))
 
 (deftest round-tripping-series-test
-  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as _sys}
+  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as sys}
     (testing "A series that does not exist returns 'not found'"
       (try
         (GET "/data/does-not-exist")
@@ -122,14 +122,15 @@
             (is (= 404 status))
             (is (= "Not found" body))))))
 
-    (let [new-series-id (str "new-series-" (UUID/randomUUID))
+    (let [rdf-base-uri (th/sys->rdf-base-uri sys)
+          new-series-id (str "new-series-" (UUID/randomUUID))
           new-series-path (str "/data/" new-series-id)
           request-ednld {"dcterms:title" "A title"
                          "dcterms:description" "foobar"}
           normalised-ednld {"@type" "dh:DatasetSeries"
                             "dcterms:description" "foobar"
                             "@id" new-series-id
-                            "dh:baseEntity" (str "https://example.org" new-series-path)
+                            "dh:baseEntity" (str rdf-base-uri new-series-id)
                             "dcterms:title" "A title"}]
 
       (testing "A series can be created"

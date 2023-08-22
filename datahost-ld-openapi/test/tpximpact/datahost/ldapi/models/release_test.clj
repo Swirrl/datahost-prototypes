@@ -13,14 +13,7 @@
            (java.time Instant)
            [java.util UUID]))
 
-(defn- put-series [put-fn]
-  (let [jsonld {"@context"
-                ["https://publishmydata.com/def/datahost/context"
-                 {"@base" "https://example.org/data/"}]
-                "dcterms:title" "A title" "dcterms:description" "Description"}]
-    (put-fn "/data/new-series"
-            {:content-type :json
-             :body (json/write-str jsonld)})))
+(def system-uris (su/make-system-uris (URI. "https://example.org/data/")))
 
 (defn- create-series [handler]
   (let [request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
@@ -43,10 +36,8 @@
     (let [repo (repo/sail-repo)
           t (time/parse "2023-07-03T11:16:16Z")
           clock (time/manual-clock t)
-          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           series-slug (create-series handler)
-
           request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
           release-request (create-put-request series-slug "test-release" request-json)
           {:keys [body status]} (handler release-request)
@@ -66,12 +57,12 @@
           t1 (time/parse "2023-07-03T14:35:55Z")
           t2 (time/parse "2023-07-03T16:02:34Z")
           clock (time/manual-clock t1)
-
-          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
           series-slug (create-series handler)
-          create-request (create-put-request series-slug "test-release" {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
+          create-request (create-put-request series-slug
+                                             "test-release"
+                                             {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
           _create-response (handler create-request)
 
           _ (time/set-now clock t2)
@@ -95,7 +86,6 @@
           t1 (time/parse "2023-07-04T08:54:11Z")
           t2 (time/parse "2023-07-04T10:33:24Z")
           clock (time/manual-clock t1)
-          system-uris (su/make-system-uris (URI. "https://example.org/data/"))
 
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
@@ -117,7 +107,8 @@
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
                                 :as sys}
 
-    (let [new-series-slug (str "new-series-" (UUID/randomUUID))
+    (let [rdf-base-uri (th/sys->rdf-base-uri sys)
+          new-series-slug (str "new-series-" (UUID/randomUUID))
           new-series-path (str "/data/" new-series-slug)
           release-1-id (str "release-" (UUID/randomUUID))
           release-1-path (str new-series-path "/releases/" release-1-id)]
@@ -159,7 +150,7 @@
       (let [request-ednld {"dcterms:title" "Example Release"
                            "dcterms:description" "Description"}
             normalised-ednld {"@context"
-                              {"@base" "https://example.org/data/"
+                              {"@base" (.toString rdf-base-uri)
                                "appropriate-csvw" "https://publishmydata.com/def/appropriate-csvw/",
                                "csvw" "http://www.w3.org/ns/csvw#"
                                "dcat" "http://www.w3.org/ns/dcat#"
@@ -168,7 +159,7 @@
                                "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
                               "@id" (str new-series-slug "/releases/" release-1-id)
                               "@type" "dh:Release"
-                              "dcat:inSeries" (str "https://example.org" new-series-path)
+                              "dcat:inSeries" (str rdf-base-uri new-series-slug)
                               "dcterms:description" "Description"
                               "dcterms:title" "Example Release"}]
 

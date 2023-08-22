@@ -1,6 +1,7 @@
 (ns tpximpact.test-helpers
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
+            [tpximpact.datahost.system-uris :as su]
             [tpximpact.db-cleaner :as dc]
             [tpximpact.datahost.sys :as sys]
             [tpximpact.datahost.ldapi.test-util.http-client :as http-client]))
@@ -65,3 +66,6 @@
                   :on-halt [ig/halt!]}
                  ~system-binding
                  ~@body))
+
+(defn sys->rdf-base-uri [sys]
+  (-> sys :tpximpact.datahost.system-uris/uris (su/rdf-base-uri)))

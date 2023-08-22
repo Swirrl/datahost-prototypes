@@ -147,7 +147,8 @@
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client
                                 ld-api-app :tpximpact.datahost.ldapi.router/handler
                                 :as sys}
-    (let [csv-2019-path "test-inputs/revision/2019.csv"
+    (let [rdf-base-uri (th/sys->rdf-base-uri sys)
+          csv-2019-path "test-inputs/revision/2019.csv"
           csv-2020-path "test-inputs/revision/2020.csv"
           csv-2021-path "test-inputs/revision/2021.csv"
           csv-2021-deletes-path "test-inputs/revision/2021-deletes.csv"
@@ -213,7 +214,7 @@
                 normalised-revision-ld {"dcterms:title" revision-title
                                         "dcterms:description" revision-description
                                         "@type" "dh:Revision"
-                                        "dh:appliesToRelease" (str "https://example.org" release-url)}
+                                        "dh:appliesToRelease" (str rdf-base-uri series-slug "/releases/" release-slug)}
 
                 revision-resp (POST revision-post-url
                                     {:content-type :application/json
@@ -239,7 +240,7 @@
               (let [release-resp (GET release-url)
                     release-doc (json/read-str (:body release-resp))
                     release-revisions (get-release-revisions release-doc)]
-                (t/is (= #{(str "https://example.org" release-url "/revisions/1")} release-revisions))))
+                (t/is (= #{(str rdf-base-uri series-slug "/releases/" release-slug "/revisions/1")} release-revisions))))
 
             (testing "Changes append resource created with CSV appends file"
               ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
