@@ -21,6 +21,9 @@
 
 (derive ::drafter-base-uri ::const)
 
+;; The application base path or mount point
+(derive ::base-path ::const)
+
 (defmethod ig/pre-init-spec ::default-catalog-id [_]
   string?)
 

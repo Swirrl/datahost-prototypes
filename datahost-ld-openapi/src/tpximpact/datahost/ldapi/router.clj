@@ -4,6 +4,7 @@
    [buddy.auth.middleware :as buddy]
    [buddy.auth :refer [authenticated?]]
    [buddy.hashers :as hashers]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [integrant.core :as ig]
    [reitit.dev.pretty :as pretty]
@@ -20,6 +21,7 @@
    [muuntaja.core :as m]
    [muuntaja.format.core :as fc]
    [malli.util :as mu]
+   [ring.util.request :as r.u.request]
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
@@ -120,6 +122,16 @@
             response))
         (handler request)))))
 
+(defn wrap-context-middleware [base-path]
+  (when-not (str/blank? base-path)
+    (println (str "\nApp `base-path` will be set to: `" base-path "`\n")))
+  (fn wrap-context [handler]
+    (fn [request]
+      (if (str/blank? base-path)
+        (handler request)
+        (handler
+         (r.u.request/set-context request base-path))))))
+
 (def cors-middleware
   "Defines a CORS middleware for a route"
   {:name ::cors
@@ -135,7 +147,7 @@
   (str "Source viewable in GitHub "
        "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi)."))
 
-(defn router [{:keys [clock triplestore change-store auth system-uris]}]
+(defn router [{:keys [clock triplestore change-store auth system-uris base-path]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
@@ -222,7 +234,9 @@
                           (basic-auth-middleware auth)
                           identity)
 
-                        browser-render-convenience-middleware]}}))
+                        browser-render-convenience-middleware
+
+                        (wrap-context-middleware base-path)]}}))
 
 (defn handler [opts]
   {:pre [(:clock opts) (:triplestore opts) (:change-store opts)]}
@@ -239,9 +253,9 @@
     (ring/create-default-handler))
    {:executor sieppari/executor}))
 
-;(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
-;  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::rdf-base-uri]
-;          :opt-un [::auth]))
+(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
+  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::base-path]
+          :opt-un [::auth]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler [_ opts]
   (handler opts))
