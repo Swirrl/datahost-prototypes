@@ -4,6 +4,7 @@
    [buddy.auth.middleware :as buddy]
    [buddy.auth :refer [authenticated?]]
    [buddy.hashers :as hashers]
+   [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [integrant.core :as ig]
    [reitit.dev.pretty :as pretty]
@@ -252,9 +253,9 @@
     (ring/create-default-handler))
    {:executor sieppari/executor}))
 
-;(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
-;  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::rdf-base-uri]
-;          :opt-un [::auth]))
+(defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
+  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::base-path]
+          :opt-un [::auth]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler [_ opts]
   (handler opts))
