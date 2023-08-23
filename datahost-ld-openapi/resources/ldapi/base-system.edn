@@ -4,6 +4,11 @@
 
  :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "https://example.org/data/"}
 
+ ;; Associate a context and path-info with the ring request.
+ ;; The request URI must be a subpath of the supplied context.
+ ;; NOT to be confused with the RDF Base URI (although it may match)
+ :tpximpact.datahost.ldapi/base-path ""
+
  :tpximpact.datahost.ldapi.jetty/runnable-service
  {:host "localhost"
   :port #ig/ref :tpximpact.datahost.ldapi.jetty/http-port
@@ -18,8 +23,8 @@
  {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
   :clock #ig/ref :tpximpact.datahost.time/system-clock
   :change-store #ig/ref :tpximpact.datahost.ldapi.store.file/store
-  :system-uris #ig/ref :tpximpact.datahost.system-uris/uris}
+  :system-uris #ig/ref :tpximpact.datahost.system-uris/uris
+  :base-path #ig/ref :tpximpact.datahost.ldapi/base-path}
 
  :tpximpact.datahost.time/system-clock {}
-
  }

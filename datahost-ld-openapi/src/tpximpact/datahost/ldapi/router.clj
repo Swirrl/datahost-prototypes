@@ -20,6 +20,7 @@
    [muuntaja.core :as m]
    [muuntaja.format.core :as fc]
    [malli.util :as mu]
+   [ring.util.request :as r.u.request]
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
@@ -120,6 +121,16 @@
             response))
         (handler request)))))
 
+(defn wrap-context-middleware [base-path]
+  (when-not (str/blank? base-path)
+    (println (str "\nApp `base-path` will be set to: `" base-path "`\n")))
+  (fn wrap-context [handler]
+    (fn [request]
+      (if (str/blank? base-path)
+        (handler request)
+        (handler
+         (r.u.request/set-context request base-path))))))
+
 (def cors-middleware
   "Defines a CORS middleware for a route"
   {:name ::cors
@@ -135,7 +146,7 @@
   (str "Source viewable in GitHub "
        "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi)."))
 
-(defn router [{:keys [clock triplestore change-store auth system-uris]}]
+(defn router [{:keys [clock triplestore change-store auth system-uris base-path]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
@@ -222,7 +233,9 @@
                           (basic-auth-middleware auth)
                           identity)
 
-                        browser-render-convenience-middleware]}}))
+                        browser-render-convenience-middleware
+
+                        (wrap-context-middleware base-path)]}}))
 
 (defn handler [opts]
   {:pre [(:clock opts) (:triplestore opts) (:change-store opts)]}
