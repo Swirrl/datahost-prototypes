@@ -3,24 +3,28 @@
 
   At the moment the only supported input/output type is CSV files."
   (:require
+   [clojure.tools.logging :as log]
    [malli.core :as m]
    [malli.error :as me]
    [tablecloth.api :as tc]
+   [tpximpact.datahost.ldapi.store :as store]
    [tpximpact.datahost.ldapi.util.data-validation
     :refer [-as-dataset as-dataset]]))
 
-(def registry
-  (merge
-   (m/class-schemas)
-   (m/comparator-schemas)
-   (m/base-schemas)
-   (m/type-schemas)
-   {:datahost.types/uri #(instance? java.net.URI %)
-    :datahost.types/file #(instance? java.io.File %)
-    :datahost.types/path #(instance? java.nio.file.Path %)
-    :datahost.types/seq-of-maps #(= :datahost.types/seq-of-maps (type %))}))
+(defmethod -as-dataset tech.v3.dataset.impl.dataset.Dataset [v _opts]
+  v)
 
-(def dataset-input-type-valid? (m/validator [:qualified-keyword]))
+;;; use content hash (a store key) to get the data
+
+(defmethod -as-dataset String [v {:keys [store] :as opts}]
+  (assert (= 64 (count v)))
+  (assert store)
+  (with-open [is (store/get-data store v)]
+   (as-dataset is opts)))
+
+(def dataset-input-type-valid? (m/validator [:or
+                                             [:qualified-keyword]
+                                             [:fn #(instance? java.lang.Class %)]]))
 
 (def ChangeInfo
   [:map
@@ -32,22 +36,27 @@
     ;; 'native' means we're passing native Clojure data structures.
     [:string {:description "Mime type of the referenced data. Values as in 'dcterms:format'"}]]
    [:datahost.change/kind [:enum
-                           :datahost.change.kind/append
-                           :datahost.change.kind/retract]]])
+                           :dh/ChangeKindAppend
+                           :dh/ChangeKindRetract]]])
 
 (def CompileDatasetOptions
   (m/schema
    [:map
-    [:changes [:sequential ChangeInfo]]]))
+    [:changes [:sequential ChangeInfo]]
+    [:store {:optional true} [:fn some?]]]))
 
 (def ^:private compile-dataset-opts-valid? (m/validator CompileDatasetOptions))
 
 (defn- compile-reducer
-  [ds change]
-  (let [{:datahost.change/keys [kind input-format]} change]
+  [opts ds change]
+  (let [{:datahost.change/keys [kind input-format]} change
+        dataset (as-dataset (:datahost.change.data/ref change) opts)]
+    (log/trace "reducer:"
+               {:new {:dataset (tc/dataset-name dataset) :row-count (tc/row-count dataset) :kind kind}
+                :old {:dataset (tc/dataset-name ds) :row-count (tc/row-count ds)}})
     (case (:datahost.change/kind change)
-      :datahost.change.kind/append (tc/union ds (as-dataset (:datahost.change.data/ref change) {}))
-      :datahost.change.kind/retract (tc/difference ds (as-dataset (:datahost.change.data/ref change) {})))))
+      :dh/ChangeKindAppend (tc/concat ds dataset)
+      :dh/ChangeKindRetract (tc/difference ds dataset))))
 
 (defn compile-dataset
   "Returns a dataset.
@@ -60,10 +69,11 @@
                                                               (me/humanize))})))
   (let [{:keys [changes]} opts
         change (when-let [change (first changes)]
-                 (when (not= :datahost.change.kind/append (:datahost.change/kind change))
+                 (when (not= :dh/ChangeKindAppend (:datahost.change/kind change))
                    (throw (ex-info "First change kind should be an 'append'"
-                                   {:kind (:datahost.change/kind (first change))})))
-                 change)]
-    (reduce compile-reducer
-            (as-dataset (:datahost.change.data/ref change) {})
+                                   {:kinds (map :datahost.change/kind changes)})))
+                 change)
+        ds-opts opts]
+    (reduce (partial compile-reducer ds-opts)
+            (as-dataset (:datahost.change.data/ref change) ds-opts)
             (next changes))))

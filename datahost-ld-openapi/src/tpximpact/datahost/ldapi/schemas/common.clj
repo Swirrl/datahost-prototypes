@@ -42,3 +42,7 @@
    (m/base-schemas)
    (m/type-schemas)
    custom-registry-keys))
+
+(def EntityType [:enum :dh/DatasetSeries :dh/Release :dh/Revision :dh/Change])
+
+(def ChangeKind [:enum :dh/ChangeKindAppend :dh/ChangeKindRetract])

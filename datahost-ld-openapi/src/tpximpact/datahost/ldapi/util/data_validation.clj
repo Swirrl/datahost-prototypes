@@ -198,10 +198,14 @@
 (defmethod -as-dataset java.io.BufferedInputStream [^java.io.BufferedInputStream v opts]
   (slurpable->dataset v opts))
 
+(defmethod -as-dataset :datahost.types/seq-of-maps [v _opts]
+  (tc/dataset v))
+
 (def AsDatasetOpts
   [:map
    [:file-type {:optional true} [:enum :csv]]
-   [:encoding {:optional true} [:enum "UTF-8"]]])
+   [:encoding {:optional true} [:enum "UTF-8"]]
+   [:store {:optional true} [:fn some?]]])
 
 (def ^:private as-dataset-opts-valid? (m/validator AsDatasetOpts))
 

@@ -51,5 +51,7 @@
   (-data-key store data))
 
 (defn make-insert-request!
+  "Creates an insert request. This can be a potentially be an expensive
+  operation. Data can be a File, InputStream, etc."
   [store data]
   (->InsertRequest data (data-key store data)))

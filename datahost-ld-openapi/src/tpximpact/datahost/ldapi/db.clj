@@ -1,6 +1,7 @@
 (ns tpximpact.datahost.ldapi.db
   (:require
    [clojure.data.json :as json]
+   [clojure.tools.logging :as log]
    [com.yetanalytics.flint :as f]
    [grafter-2.rdf.protocols :as pr]
    [grafter-2.rdf4j.repository :as repo]
@@ -99,19 +100,21 @@
       schema)))
 
 (defn get-revision
-  [triplestore revision-uri]
-  (let [q (let [bgps [[revision-uri 'a :dh/Revision]
-                      [revision-uri :dcterms/title '?title]
-                      [revision-uri :dh/appliesToRelease '?release]]]
-            {:prefixes default-prefixes
-             :construct (conj bgps
-                              [revision-uri :dh/hasChange '?change]
-                              [revision-uri :dcterms/description '?description])
-             :where (conj bgps
-                          [:optional [[revision-uri :dh/hasChange '?change]]]
-                          [:optional [[revision-uri :dcterms/description '?description]]])})]
-    (datastore/eager-query triplestore
-                           (f/format-query q :pretty? true))))
+  ([triplestore revision-uri]
+   (let [q (let [bgps [[revision-uri 'a :dh/Revision]
+                       [revision-uri :dcterms/title '?title]
+                       [revision-uri :dh/appliesToRelease '?release]]]
+             {:prefixes default-prefixes
+              :construct (conj bgps
+                               [revision-uri :dh/hasChange '?change]
+                               [revision-uri :dcterms/description '?description]
+                               [revision-uri :dh/revisionSnapshotCSV '?snapshot])
+              :where (conj bgps
+                           [:optional [[revision-uri :dh/hasChange '?change]]]
+                           [:optional [[revision-uri :dcterms/description '?description]]]
+                           [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]])})]
+     (datastore/eager-query triplestore
+                            (f/format-query q :pretty? true)))))
 
 (defn get-all-series
   "Returns all Series in triple from"
@@ -168,17 +171,18 @@
 
 (defn get-change
   "Returns a single Revision Change in triple form"
-  [triplestore change-uri]
-  (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
-                                   [change-uri :dcterms/description '?description]
-                                   [change-uri :dcterms/format '?format]
-                                   [change-uri :dh/updates '?updates]
-                                   [change-uri :dh/appliesToRevision '?revision]]]
-                         {:prefixes default-prefixes
-                          :construct bgps
-                          :where bgps})
-                       :pretty? true)
-       (datastore/eager-query triplestore)))
+  ([triplestore change-uri]
+   (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
+                                    [change-uri :dcterms/description '?description]
+                                    [change-uri :dcterms/format '?format]
+                                    [change-uri :dh/updates '?updates]
+                                    [change-uri :dh/appliesToRevision '?revision]]
+                              snapshot-csv-tri [change-uri :dh/revisionSnapshotCSV '?snapshot]]
+                          {:prefixes default-prefixes
+                           :construct (conj bgps snapshot-csv-tri)
+                           :where (conj bgps [:optional [snapshot-csv-tri]])})
+                        :pretty? true)
+        (datastore/eager-query triplestore))))
 
 (defn- get-changes-info-query
   [release-uri max-rev]
@@ -392,11 +396,41 @@
            [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
 (defn- select-max-n-query [parent-uri child-pred]
+  (assert parent-uri)
   {:prefixes (select-keys default-prefixes [:dh :xsd])
    :select ['?n]
    :where [[:where {:select '[[(max (:xsd/integer (replace (str ?child) "^.*/([^/]*)$" "$1"))) ?highest]]
                     :where [[parent-uri child-pred '?child]]}]
            [:bind ['(coalesce ?highest 0) '?n]]]})
+
+(defn- select-max-n
+  "Returns a number or nil."
+  [connection parent-uri child-pred]
+  (-> connection
+      (repo/query (f/format-query (select-max-n-query parent-uri child-pred)))
+      (doall)
+      first
+      :n))
+
+(defn get-release-snapshot-info
+  "Given a release (as path-params) attempts to fetch the latest
+  revision-id and the key of the dataset snapshot (as
+  in :dh/revisionSnapshotCSV).
+  
+  Returns a map of {:data-key ... :revision-id ...} or nil"
+  [triplestore system-uris path-params]
+  (let [release-uri (su/dataset-release-uri* system-uris  path-params)
+        rev-id (with-open [conn (repo/->connection triplestore)]
+                 (select-max-n conn release-uri (compact/expand :dh/hasRevision)))
+        revision (when (pos? rev-id)
+                   (get-revision triplestore
+                                 (su/dataset-revision-uri* system-uris
+                                                           (assoc path-params :revision-id rev-id))))
+        pred (compact/expand :dh/revisionSnapshotCSV)
+        pred-fn (fn [q] (= pred (:p q)))
+        data-key (:o (first (filter pred-fn revision)))]
+    (when revision
+      {:n rev-id :data-key data-key})))
 
 (defn fetch-next-child-resource-number [triplestore parent-uri child-pred]
   (let [q (select-auto-increment-query parent-uri child-pred)
@@ -452,6 +486,24 @@
                 (compact/expand :dh/hasChange)
                 (resource/id change))])
 
+(defn- dataset-snapshot-statements
+  [uri snapshot-key]
+  [(pr/->Triple uri (compact/expand :dh/revisionSnapshotCSV) snapshot-key)])
+
+(defn tag-with-snapshot
+  "Updates the entity under uri with dataset snapshot information.
+
+  Assumes m contains keys:
+
+  - :dh/revisionSnapshotCSV"
+  [triplestore ^URI uri m]
+  (let [key (:dh/revisionSnapshotCSV m)
+        statements (dataset-snapshot-statements uri key)]
+    (assert key)
+    (log/debug "tag-revision-with-snapshot:" (.getPath uri) (format "key='%s'" key))
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/add conn statements))))
+
 (defn insert-revision! [triplestore api-params incoming-jsonld-doc ld-root release-uri revision-uri revision-number]
   (let [revision (request->revision release-uri revision-uri api-params incoming-jsonld-doc ld-root)]
     (with-open [conn (repo/->connection triplestore)]
@@ -477,18 +529,17 @@
                      (compact/expand :dh/appliesToRevision)
                      revision-uri]])]]})
 
-(defn insert-change! [triplestore
-                      {:keys [api-params jsonld-doc insert-request datahost.change/kind ld-root revision-uri change-uri]}]
-  (let [change (request->change kind api-params jsonld-doc ld-root revision-uri change-uri)
-        change (resource/set-property1 change (compact/expand :dh/updates) (:key insert-request))
-        rev-uri (resource/get-property1 change (compact/expand :dh/appliesToRevision))
-        last-change-num (fn [conn]
-                          (-> (repo/query conn
-                                          (f/format-query
-                                           (select-max-n-query rev-uri (compact/expand :dh/hasChange))))
-                              (doall)
-                              first
-                              :n))
+(defn insert-change!
+  "Returns {:resource-id NUMBER :jsonld-doc DOC} on success,
+  {:message STRING} when an insert could not be performed."
+  [triplestore
+   _system-uris
+   {:keys [api-params jsonld-doc ld-root store-key datahost.change/kind change-uri]
+    {rev-uri :dh/Revision } :datahost.request/uris}]
+  {:pre [(some? kind) (some? store-key) (some? change-uri) (some? rev-uri)]}
+  (let [change (request->change kind api-params jsonld-doc ld-root rev-uri change-uri)
+        change (resource/set-property1 change (compact/expand :dh/updates) store-key)
+        last-change-num (fn [conn] (select-max-n conn rev-uri (compact/expand :dh/hasChange)))
         {:keys [before after]}
         (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
           (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
@@ -503,6 +554,53 @@
       {:resource-id 1
        :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
       {:message "Change already exists."})))
+
+(defn- previous-change-coords
+  "Given revision and change id, tries to find the preceeding change's
+  revision and change ids. If not possible, indicates an extra DB
+  lookup is needed.
+
+  Returns a [:new :new] | [rev-id change-id] | [rev-id :find]."
+  [revision-id change-id]
+  {:pre [(pos? revision-id) (pos? change-id)]}
+  (cond
+    (and (= revision-id 1) (= 1 change-id)) [:new :new]
+
+    (< 1 change-id) [revision-id (dec change-id)]
+
+    ;; we need to find the last change-id in previous revision
+    :else [(dec revision-id) :find]))
+
+(defn get-previous-change
+  "Returns the previouis change (as Quads), nil when no previous change existsts."
+  [triplestore system-uris  {:keys [revision-id change-id] :as params}]
+  (let [revision-uri ^URI (su/dataset-revision-uri* system-uris params)
+        [prev-rev-id c] (previous-change-coords revision-id change-id)]
+    (log/debug (format "get-previous-change: '%s'" (.getPath revision-uri)) [prev-rev-id c])
+    (cond
+      (= :new c)                        ; the given revision+change is the first
+      nil
+
+      (int? c)                          ; we got a definitive answer
+      (get-change triplestore
+                  (su/change-uri* system-uris (assoc params :revision-id prev-rev-id :change-id c)))
+      
+      (= :find c)                       ; we need to find change-id
+      (let [prev-rev-uri (su/dataset-revision-uri* system-uris (assoc params :revision-id prev-rev-id))
+            prev-change-id (with-open [conn (repo/->connection triplestore)]
+                             (select-max-n conn prev-rev-uri (compact/expand :dh/hasChange)))]
+        (log/debug "get-previous-change: find prev change id: " prev-change-id)
+        (when (= 0N prev-change-id)
+          (throw (ex-info (format "No previous change-id could be found for revision %s"
+                                  (.getPath revision-uri))
+                          {:params params :revision-uri revision-uri})))
+        (get-change triplestore
+                    (su/change-uri* system-uris
+                                            (assoc params
+                                                   :revision-id prev-rev-id
+                                                   :change-id prev-change-id) )))
+      
+      :else (throw (ex-info "Error: illegal state" {:params params})))))
 
 (defn- release-schema-statements [schema]
   [(pr/->Triple (resource/get-property1 schema (compact/expand :dh/appliesToRelease))
