@@ -23,7 +23,9 @@
    (as-dataset is opts)))
 
 (def dataset-input-type-valid? (m/validator [:or
+                                             ;; specify :type in metadata
                                              [:qualified-keyword]
+                                             ;; or we can accept an object of some class
                                              [:fn #(instance? java.lang.Class %)]]))
 
 (def ChangeInfo

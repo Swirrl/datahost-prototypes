@@ -74,7 +74,7 @@
   (-get-data [_this data-key]
     (let [location (file-location root-dir (.toString data-key))]
       (if (.exists location)
-        (io/input-stream location)      ;TODO: verify the strem is closed in all call sites
+        (io/input-stream location)
         (throw (ex-info "Data not found for key" {:key data-key})))))
 
   (-data-key [_this data]

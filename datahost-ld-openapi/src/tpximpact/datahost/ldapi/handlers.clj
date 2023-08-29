@@ -45,8 +45,8 @@
 
 (defn csv-file-locations->dataset [change-store append-keys]
   (let [as-dataset (fn [k]
-                     (with-open [is (store/get-data change-store k)]
-                       (data-validation/as-dataset is {:file-type :csv})))]
+                     (with-open [in (store/get-data change-store k)]
+                       (data-validation/as-dataset in {:file-type :csv})))]
    (if (sequential? append-keys)
      (some->> (remove nil? append-keys)
               (map as-dataset)
@@ -304,9 +304,11 @@
 
       :else
       (do
+        ;; store the change
         (store/request-data-insert change-store insert-req)
         (log/debug (format "post-change: '%s' stored-change: '%s'" (.getPath change-uri) (:key insert-req)))
 
+        ;; generate and store the dataset snapshot
         (let [{:keys [new-snapshot-key]} (internal/post-change--generate-csv-snapshot
                                           {:triplestore triplestore
                                            :change-store change-store
