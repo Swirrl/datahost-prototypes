@@ -100,21 +100,21 @@
       schema)))
 
 (defn get-revision
-  ([triplestore revision-uri]
-   (let [q (let [bgps [[revision-uri 'a :dh/Revision]
-                       [revision-uri :dcterms/title '?title]
-                       [revision-uri :dh/appliesToRelease '?release]]]
-             {:prefixes default-prefixes
-              :construct (conj bgps
-                               [revision-uri :dh/hasChange '?change]
-                               [revision-uri :dcterms/description '?description]
-                               [revision-uri :dh/revisionSnapshotCSV '?snapshot])
-              :where (conj bgps
-                           [:optional [[revision-uri :dh/hasChange '?change]]]
-                           [:optional [[revision-uri :dcterms/description '?description]]]
-                           [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]])})]
-     (datastore/eager-query triplestore
-                            (f/format-query q :pretty? true)))))
+  [triplestore revision-uri]
+  (let [q (let [bgps [[revision-uri 'a :dh/Revision]
+                      [revision-uri :dcterms/title '?title]
+                      [revision-uri :dh/appliesToRelease '?release]]]
+            {:prefixes default-prefixes
+             :construct (conj bgps
+                              [revision-uri :dh/hasChange '?change]
+                              [revision-uri :dcterms/description '?description]
+                              [revision-uri :dh/revisionSnapshotCSV '?snapshot])
+             :where (conj bgps
+                          [:optional [[revision-uri :dh/hasChange '?change]]]
+                          [:optional [[revision-uri :dcterms/description '?description]]]
+                          [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]])})]
+    (datastore/eager-query triplestore
+                           (f/format-query q :pretty? true))))
 
 (defn get-all-series
   "Returns all Series in triple from"
@@ -171,18 +171,18 @@
 
 (defn get-change
   "Returns a single Revision Change in triple form"
-  ([triplestore change-uri]
-   (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
-                                    [change-uri :dcterms/description '?description]
-                                    [change-uri :dcterms/format '?format]
-                                    [change-uri :dh/updates '?updates]
-                                    [change-uri :dh/appliesToRevision '?revision]]
-                              snapshot-csv-tri [change-uri :dh/revisionSnapshotCSV '?snapshot]]
-                          {:prefixes default-prefixes
-                           :construct (conj bgps snapshot-csv-tri)
-                           :where (conj bgps [:optional [snapshot-csv-tri]])})
-                        :pretty? true)
-        (datastore/eager-query triplestore))))
+  [triplestore change-uri]
+  (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
+                                   [change-uri :dcterms/description '?description]
+                                   [change-uri :dcterms/format '?format]
+                                   [change-uri :dh/updates '?updates]
+                                   [change-uri :dh/appliesToRevision '?revision]]
+                             snapshot-csv-tri [change-uri :dh/revisionSnapshotCSV '?snapshot]]
+                         {:prefixes default-prefixes
+                          :construct (conj bgps snapshot-csv-tri)
+                          :where (conj bgps [:optional [snapshot-csv-tri]])})
+                       :pretty? true)
+       (datastore/eager-query triplestore)))
 
 (defn- get-changes-info-query
   [release-uri max-rev]
