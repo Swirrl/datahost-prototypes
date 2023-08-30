@@ -114,13 +114,9 @@
 (deftest round-tripping-series-test
   (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client :as sys}
     (testing "A series that does not exist returns 'not found'"
-      (try
-        (GET "/data/does-not-exist")
-
-        (catch Throwable ex
-          (let [{:keys [status body]} (ex-data ex)]
-            (is (= 404 status))
-            (is (= "Not found" body))))))
+      (let [{:keys [status body]} (GET "/data/does-not-exist")]
+        (is (= 404 status))
+        (is (= "Not found" body))))
 
     (let [rdf-base-uri (th/sys->rdf-base-uri sys)
           new-series-id (str "new-series-" (UUID/randomUUID))

@@ -3,9 +3,11 @@
   (:require [clj-http.client :as http]))
 
 (defn- http-request
-  [method-fn base-url path & args]
+  [method-fn base-url path & [request & args]]
   (assert (not (.endsWith base-url "/")))
-  (apply method-fn (str base-url path) args))
+  (apply method-fn
+         (str base-url path)
+         (assoc request :throw-exceptions false) args))
 
 (defn make-client
   "Returns a map `{:keys [GET PUT POST DELETE HEAD]}` where each value
