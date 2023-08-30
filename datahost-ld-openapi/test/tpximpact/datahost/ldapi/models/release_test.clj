@@ -113,34 +113,23 @@
           release-1-id (str "release-" (UUID/randomUUID))
           release-1-path (str new-series-path "/releases/" release-1-id)]
       (testing "Fetching a release for a series that does not exist returns 'not found'"
-        (try
-
-          (GET release-1-path)
-
-          (catch Throwable ex
-            (let [{:keys [status body]} (ex-data ex)]
-              (is (= 404 status))
-              (is (= "Not found" body))))))
+        (let [{:keys [status body]} (GET release-1-path)]
+          (is (= 404 status))
+          (is (= "Not found" body))))
 
       (testing "Fetching a release that does not exist returns 'not found'"
-        (try
-          (GET release-1-path)
-
-          (catch Throwable ex
-            (let [{:keys [status body]} (ex-data ex)]
-              (is (= 404 status))
-              (is (= "Not found" body))))))
+        (let [{:keys [status body]} (GET release-1-path)]
+          (is (= 404 status))
+          (is (= "Not found" body))))
 
       (testing "Creating a release for a series that is not found fails gracefully"
-        (try
-          (PUT (str "/data/this-series-does-not-exist/releases/release-xyz")
-               {:content-type :json
-                :body (json/write-str {"dcterms:title" "Example Release"
-                                       "dcterms:description" "Description"})})
-            (catch Throwable ex
-              (let [{:keys [status body]} (ex-data ex)]
-                (is (= 422 status))
-                (is (= "Series for this release does not exist" body))))))
+        (let [{:keys [status body]}
+              (PUT (str "/data/this-series-does-not-exist/releases/release-xyz")
+                   {:content-type :json
+                    :body (json/write-str {"dcterms:title" "Example Release"
+                                           "dcterms:description" "Description"})})]
+          (is (= 422 status))
+          (is (= "Series for this release does not exist" body))))
 
       (PUT new-series-path
            {:content-type :json
