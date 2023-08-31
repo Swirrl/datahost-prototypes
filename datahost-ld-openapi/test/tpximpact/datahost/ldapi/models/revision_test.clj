@@ -247,14 +247,14 @@
               (let [change-ednld {"dcterms:description" "A new change"
                                   "dcterms:format" "text/csv"}
                     multipart-temp-file-part (build-csv-multipart csv-2019-path)
-                    change-api-response (ld-api-app {:request-method :post 
+                    change-api-response (ld-api-app {:request-method :post
                                                      :uri (str new-revision-location "/changes")
                                                      :multipart-params {:appends multipart-temp-file-part}
                                                      :content-type "application/json"
                                                      :body (json/write-str change-ednld)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-                
+
                 (is (= 201 (:status change-api-response)))
                 (is (= (str new-revision-location "/changes/1")
                        new-change-resource-location)
@@ -366,7 +366,7 @@
                   (is (= 201 (:status change-api-response)))
                   (is (= ":dh/ChangeKindRetract" (get response-body-doc "dh:changeKind")))
                   (is (str/ends-with? (get response-body-doc "@id") "/revisions/3/changes/1"))))))
-          
+
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)
@@ -381,3 +381,56 @@
               (is (= new-revision-ids (for [i (range 4 14)]
                                         (format "%s/releases/%s/revisions/%d" series-slug release-slug i)))
                   "Expected Revision IDs integers increase in an orderly sequence"))))))))
+
+(deftest csvm-revision-test
+  (th/with-system-and-clean-up
+      {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client :as sys}
+
+    (let [new-series-slug (str "new-series-" (UUID/randomUUID))
+          new-series-path (str "/data/" new-series-slug)
+          release-1-id (str "release-" (UUID/randomUUID))
+          release-1-path (str new-series-path "/releases/" release-1-id)
+          revision-post-url (str release-1-path "/revisions")
+          _
+          (PUT new-series-path
+               {:content-type :json
+                :body (json/write-str {"dcterms:title" "A title"
+                                       "dcterms:description" "Description"})})
+          _
+          (PUT release-1-path
+               {:content-type :json
+                :body (json/write-str {"dcterms:title" "Example Release"
+                                       "dcterms:description" "Description"})})
+          revision-response
+          (POST revision-post-url
+                {:content-type :application/json
+                 :body (json/write-str
+                        {"dcterms:title" (str "A revision for release " release-1-id)
+                         "dcterms:description" "Revision description"})})
+
+          revision-1-path (-> revision-response :headers (get "Location"))
+          revision-1-csvm-path (str revision-1-path "-metadata.json")]
+
+      (testing "Fetching csvw metadata for a revision that does not exist returns 'not found'"
+
+        (let [{:keys [status body]} (GET (str revision-post-url "/does-not-exist"))]
+          (is (= 404 status))
+          (is (= "Not found" body))))
+
+      (testing "Fetching a release csv that does exist works"
+        (let [response (GET revision-1-path {:headers {"accept" "text/csv"}})]
+          (is (= 200 (:status response)))
+          ;; (is (not (empty? (:body response))))
+          ;; TODO: what is the csv release meant to be? `""` empty string
+          ;; seems off when the json returns something not-nil
+          (is (= (str "<http://localhost:3400" revision-1-csvm-path ">; "
+                      "rel=\"describedBy\"; "
+                      "type=\"application/csvm+json\""),
+                 (get-in response [:headers "link"])))))
+
+      (testing "Fetching csvm for release that does exist works"
+        (let [response (GET revision-1-csvm-path)
+              body (json/read-str (:body response))]
+          (is (= 200 (:status response)))
+          (is (= {"@context" ["http://www.w3.org/ns/csvw" {"@language" "en"}]}
+                 body)))))))

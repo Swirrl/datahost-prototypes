@@ -47,3 +47,11 @@
         {:keys [status headers] :as _response} (handler request)]
     (t/is (= 201 status))
     (t/is (= origin (get headers "Access-Control-Allow-Origin")))))
+
+(t/deftest csvm-well-known-request-test
+  (let [router (get-test-router)
+        handler (ring/ring-handler router)
+        request {:request-method :get :uri "/.well-known/csvm"}
+        {:keys [status body]} (handler request)]
+    (t/is (= 200 status))
+    (t/is (= "{+url}-metadata.json\nmetadata.json" body))))

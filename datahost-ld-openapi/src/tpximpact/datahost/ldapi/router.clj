@@ -157,6 +157,12 @@
                              :version "0.1.0"}
                       :components {:securitySchemes {"basic" {:type "http" :scheme "basic"}}}}
             :handler (openapi/create-openapi-handler)}}]
+    ["/.well-known"
+     ["/csvm" {:no-doc true
+               :get {:handler (constantly
+                               {:status 200
+                                :headers {"content-type" "text/plain"}
+                                :body "{+url}-metadata.json\nmetadata.json"})}}]]
 
     ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
               :tags ["linked data api"]}

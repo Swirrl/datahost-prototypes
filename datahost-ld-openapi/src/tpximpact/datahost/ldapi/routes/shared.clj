@@ -1,8 +1,12 @@
 (ns tpximpact.datahost.ldapi.routes.shared
   (:require
+   [clojure.string :as string]
    [malli.core :as m]
    [malli.util :as mu]
-   [tpximpact.datahost.ldapi.schemas.common :as s.common]))
+   [tpximpact.datahost.ldapi.schemas.common :as s.common]
+   [ring.util.request :as request]
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.ldapi.db :as db]))
 
 (def JsonLdBase
   "Common entries in JSON-LD documents.
@@ -52,7 +56,7 @@
    {:registry s.common/registry}))
 
 (def LdSchemaInputColumn
-  [:map 
+  [:map
    ["csvw:datatype" [:or :string :keyword]]
    ["csvw:name" :string]
    ["csvw:titles" [:or
@@ -96,3 +100,38 @@
                                             ["title" {:optional true} :title-string]
                                             ["description" :description-string]]
                                            {:registry s.common/registry})}})
+
+(defn base-url [request]
+  (request/request-url (select-keys request [:scheme :headers :uri])))
+
+(defn set-csvm-header [response request]
+  (let [csvm-url (-> request (update :uri str "-metadata.json") base-url)]
+    (update response :headers assoc "link" (str "<" csvm-url ">; "
+                                                "rel=\"describedBy\"; "
+                                                "type=\"application/csvm+json\""))))
+
+(defn csv-metadata-json-handler [request]
+  {:status 200
+   :headers {"content-type" "application/csvm+json"}
+   :body "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"})
+
+(def metadata-re-pattern #"-metadata.json$")
+
+(defn strip-metadata-uris [path-params]
+  (->> path-params
+       (map (fn [[k v]] [k (string/replace v metadata-re-pattern "")]))
+       (into {})))
+
+(defn csvm-request? [{:keys [request-method uri] :as request}]
+  (and (= request-method :get) (re-find metadata-re-pattern uri)))
+
+(defn csvm-request
+  [{:keys [triplestore system-uris]
+    {:keys [request-method uri path-params] :as request} :request :as _context}]
+  (let [path-params (strip-metadata-uris path-params)
+        uri (su/dataset-release-uri* system-uris path-params)]
+    ;; TODO: this should pull the resource metadata, not just check the
+    ;; resource exists
+    (if (db/resource-exists? triplestore uri)
+      (csv-metadata-json-handler request)
+      {:status 404 :body "Not found"})))

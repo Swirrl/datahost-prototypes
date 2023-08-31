@@ -12,6 +12,7 @@
    [tpximpact.datahost.ldapi.store :as store]
    [tpximpact.datahost.ldapi.json-ld :as json-ld]
    [tpximpact.datahost.ldapi.resource :as resource]
+   [tpximpact.datahost.ldapi.routes.shared :as shared]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
   (:import (java.net URI)))
@@ -81,6 +82,7 @@
     (some->> (remove nil? append-keys)
              (map #(data-validation/as-dataset (store/get-data change-store %)
                                                {:file-type :csv}))
+             (seq)
              (apply tc/concat))
     (some->> (store/get-data change-store append-keys)
              (data-validation/as-dataset {:file-type :csv}))))
@@ -117,20 +119,25 @@
                  :body jsonld-doc})))
 
 (defn get-release [triplestore change-store system-uris
-                   {path-params :path-params {:strs [accept]} :headers}]
-  (if-let [release (->> (su/dataset-release-uri* system-uris path-params)
-                        (db/get-release-by-uri triplestore)
-                        (matcha/index-triples)
-                        (triples->ld-resource))]
-    (if (= accept "text/csv")
-      {:status 200
-       :headers {"content-type" "text/csv"
-                 "content-disposition" "attachment ; filename=release.csv"}
-       :body (or (release->csv-stream triplestore change-store release) "")}
-      (as-json-ld {:status 200
-                   :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
-                             (.toString))}))
-    not-found-response))
+                   {path-params :path-params {:strs [accept]} :headers :as request}]
+  (if (shared/csvm-request? request)
+    (shared/csvm-request {:triplestore triplestore
+                          :system-uris system-uris
+                          :request request})
+    (if-let [release (->> (su/dataset-release-uri* system-uris path-params)
+                          (db/get-release-by-uri triplestore)
+                          (matcha/index-triples)
+                          (triples->ld-resource))]
+      (if (= accept "text/csv")
+        (-> {:status 200
+             :headers {"content-type" "text/csv"
+                       "content-disposition" "attachment; filename=release.csv"}
+             :body (or (release->csv-stream triplestore change-store release) "")}
+            (shared/set-csvm-header request))
+        (as-json-ld {:status 200
+                     :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
+                               (.toString))}))
+      not-found-response)))
 
 (defn put-release [clock triplestore system-uris {path-params :path-params
                                                   body-params :body-params :as request}]
@@ -196,22 +203,28 @@
       (write-dataset-to-outputstream merged-datasets))))
 
 (defn get-revision
-  [triplestore change-store system-uris {{:keys [series-slug release-slug revision-id]} :path-params
-                                         {:strs [accept]} :headers :as _request}]
-  (if-let [revision-ld (->> (su/revision-uri system-uris series-slug release-slug revision-id)
-                            (db/get-revision triplestore)
-                            matcha/index-triples
-                            triples->ld-resource)]
-    (if (= accept "text/csv")
-      {:status 200
-       :headers {"content-type" "text/csv"
-                 "content-disposition" "attachment ; filename=revision.csv"}
-       :body (or (revision->csv-stream triplestore change-store revision-ld) "")}
+  [triplestore change-store system-uris
+   {{:keys [series-slug release-slug revision-id]} :path-params
+    {:strs [accept]} :headers :as request}]
+  (if (shared/csvm-request? request)
+    (shared/csvm-request {:triplestore triplestore
+                          :system-uris system-uris
+                          :request request})
+    (if-let [revision-ld (->> (su/revision-uri system-uris series-slug release-slug revision-id)
+                              (db/get-revision triplestore)
+                              matcha/index-triples
+                              triples->ld-resource)]
+      (if (= accept "text/csv")
+        (-> {:status 200
+             :headers {"content-type" "text/csv"
+                       "content-disposition" "attachment ; filename=revision.csv"}
+             :body (or (revision->csv-stream triplestore change-store revision-ld) "")}
+            (shared/set-csvm-header request))
 
-      (as-json-ld {:status 200
-                   :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))
-                             (.toString))}))
-    not-found-response))
+        (as-json-ld {:status 200
+                     :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))
+                               (.toString))}))
+      not-found-response)))
 
 (defn- wrap-ld-collection-contents [coll]
   {"https://publishmydata.com/def/datahost/collection-contents" coll})
