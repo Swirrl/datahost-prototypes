@@ -138,7 +138,8 @@
 
 (defn- build-csv-multipart [csv-path]
   (let [appends-file (io/file (io/resource csv-path))]
-    {:tempfile appends-file
+    {:name "appends"
+     :content appends-file
      :size (.length appends-file)
      :filename (.getName appends-file)
      :content-type "text/csv;"}))
@@ -273,9 +274,10 @@
                                   "dcterms:format" "text/csv"}
                     multipart-temp-file-part (build-csv-multipart csv-2020-path)
                     change-api-response (POST (str new-revision-location "/changes")
-                                              {:multipart {:appends multipart-temp-file-part}
-                                               :content-type "application/json"
-                                               :body (json/write-str change-ednld)})
+                                              {:multipart [multipart-temp-file-part]
+                                               ;; :content-type "application/json"
+                                               ;; :body (json/write-str change-ednld)
+                                               })
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
                 (is (= 422 (:status change-api-response)))
                 (is (nil? new-change-resource-location))))
