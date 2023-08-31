@@ -158,7 +158,8 @@
                       :components {:securitySchemes {"basic" {:type "http" :scheme "basic"}}}}
             :handler (openapi/create-openapi-handler)}}]
     ["/.well-known"
-     ["/csvm" {:get {:handler (constantly
+     ["/csvm" {:no-doc true
+               :get {:handler (constantly
                                {:status 200
                                 :headers {"content-type" "text/plain"}
                                 :body "{+url}-metadata.json\nmetadata.json"})}}]]
