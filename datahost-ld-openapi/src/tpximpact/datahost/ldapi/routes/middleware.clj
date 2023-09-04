@@ -4,6 +4,7 @@
    [malli.error :as me]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
+   [tpximpact.datahost.ldapi.routes.shared :as shared]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]))
 
 (def not-found-response
@@ -126,3 +127,12 @@
              :body {:query-params query-errors}}
             (handler request)))))))
 
+
+(defn csvm-request-response
+  [triplestore system-uris handler _id]
+  (fn [request]
+    (if (shared/csvm-request? request)
+      (shared/csvm-request {:triplestore triplestore
+                            :system-uris system-uris
+                            :request request})
+      (handler request))))

@@ -86,29 +86,31 @@
     (as-json-ld {:status (op->response-code op)
                  :body jsonld-doc})))
 
-(defn get-release [triplestore change-store system-uris
-                   {path-params :path-params {:strs [accept]} :headers :as request}]
-  (if (shared/csvm-request? request)
-    (shared/csvm-request {:triplestore triplestore
-                          :system-uris system-uris
-                          :request request})
-    (if-let [release (->> (su/dataset-release-uri* system-uris path-params)
-                          (db/get-release-by-uri triplestore)
-                          (matcha/index-triples)
-                          (triples->ld-resource))]
-      (if (= accept "text/csv")
-        (-> {:status 200
-             :headers {"content-type" "text/csv"
-                       "content-disposition" "attachment ; filename=release.csv"}
-             :body (let [{:keys [data-key]} (db/get-release-snapshot-info triplestore system-uris path-params)]
+(defn get-release
+  [triplestore change-store system-uris
+   {path-params :path-params
+    {:strs [accept]} :headers 
+    {release-uri :dh/Release} :datahost.request/uris
+    :as request}]
+  (if-let [release (->> (su/dataset-release-uri* system-uris path-params)
+                        (db/get-release-by-uri triplestore)
+                        (matcha/index-triples)
+                        (triples->ld-resource))]
+    (if (= accept "text/csv")
+      (-> {:status 200
+           :headers {"content-type" "text/csv"
+                     "content-disposition" "attachment ; filename=release.csv"}
+           :body (if (empty? (db/get-changes-info triplestore release-uri Integer/MAX_VALUE))
+                   ""
+                   (let [{:keys [data-key]} (db/get-release-snapshot-info triplestore system-uris path-params)]
                      (when-not data-key (throw (ex-info "No CSV snapshot for release found."
                                                         {:path-params path-params})))
-                     (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store data-key)))}
-            (shared/set-csvm-header request))
-        (as-json-ld {:status 200
-                     :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
-                               (.toString))}))
-      not-found-response)))
+                     (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store data-key))))}
+          (shared/set-csvm-header request))
+      (as-json-ld {:status 200
+                   :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
+                             (.toString))}))
+    not-found-response))
 
 
 (defn put-release [clock triplestore system-uris {path-params :path-params
@@ -175,26 +177,30 @@
       (write-dataset-to-outputstream merged-datasets))))
 
 (defn get-revision
-  [_triplestore change-store system-uris {{revision :dh/Revision} :datahost.request/entities
-                                          {:strs [accept]} :headers :as request}]
-  (if (shared/csvm-request? request)
-    (shared/csvm-request {:triplestore triplestore
-                          :system-uris system-uris
-                          :request request})
-    (let [revision-ld (->> revision matcha/index-triples triples->ld-resource)]
-      (if (= accept "text/csv")
-        (-> {:status 200
-             :headers {"content-type" "text/csv"
-                       "content-disposition" "attachment ; filename=revision.csv"}
-             :body (let [key (get revision-ld (cmp/expand :dh/revisionSnapshotCSV))]
+  [triplestore
+   change-store
+   system-uris
+   {{revision :dh/Revision} :datahost.request/entities
+    {release-uri :dh/Release} :datahost.request/uris
+    {:strs [accept]} :headers
+    :as request}]
+  
+  (let [revision-ld (->> revision matcha/index-triples triples->ld-resource)]
+    (if (= accept "text/csv")
+      (-> {:status 200
+           :headers {"content-type" "text/csv"
+                     "content-disposition" "attachment ; filename=revision.csv"}
+           :body (if (empty? (db/get-changes-info triplestore release-uri (revision-number (resource/id revision-ld))))
+                   ""
+                   (let [key (get revision-ld (cmp/expand :dh/revisionSnapshotCSV))]
                      (when (nil? key)
                        (throw (ex-info "No snapshot reference for revision" {:revision revision})))
-                     (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key)))}
-            (shared/set-csvm-header request))
+                     (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key))))}
+          (shared/set-csvm-header request))
 
-        (as-json-ld {:status 200
-                     :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))
-                               (.toString))})))))
+      (as-json-ld {:status 200
+                   :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))
+                             (.toString))}))))
 
 (defn- wrap-ld-collection-contents [coll]
   {"https://publishmydata.com/def/datahost/collection-contents" coll})

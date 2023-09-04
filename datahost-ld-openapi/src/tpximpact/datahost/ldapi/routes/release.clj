@@ -12,6 +12,8 @@
 (defn get-release-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata for an existing release"
    :handler (partial handlers/get-release triplestore change-store system-uris)
+   :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
+                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path {:series-slug string?
                        :release-slug string?}}

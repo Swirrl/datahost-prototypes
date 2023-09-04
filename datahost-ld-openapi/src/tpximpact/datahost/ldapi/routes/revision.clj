@@ -10,8 +10,10 @@
   {:summary "Retrieve metadata or CSV contents for an existing revision"
    :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-revision triplestore change-store system-uris)
-   :middleware [[(partial middleware/entity-or-not-found triplestore system-uris :dh/Revision)
-                 :entity-or-not-found]]
+   :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
+                [(partial middleware/entity-or-not-found triplestore system-uris :dh/Revision)
+                 :entity-or-not-found]
+                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}

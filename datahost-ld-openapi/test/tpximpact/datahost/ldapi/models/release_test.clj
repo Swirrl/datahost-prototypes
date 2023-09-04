@@ -236,15 +236,14 @@
                                    "dcterms:description" "Description"})})
 
       (testing "Fetching a release csv that does exist works"
-        (let [response (GET release-1-path {:headers {"accept" "text/csv"}})]
+        (let [response (GET release-1-path {:headers {"accept" "text/csv"}})
+              [_ _ path :as v] (re-find #"<http:\/\/(.+):\d+(\S+)>; rel=\"describedBy\"; type=\"application\/csvm\+json\""
+                                        (get-in response [:headers "link"]))]
           (is (= 200 (:status response)))
           ;; (is (not (empty? (:body response))))
           ;; TODO: what is the csv release meant to be? `""` empty string
           ;; seems off when the json returns something not-nil
-          (is (= (str "<http://localhost:3400" release-1-csvm-path ">; "
-                      "rel=\"describedBy\"; "
-                      "type=\"application/csvm+json\""),
-                 (get-in response [:headers "link"])))))
+          (is (= release-1-csvm-path path))))
 
       (testing "Fetching csvm for release that does exist works"
         (let [response (GET release-1-csvm-path)

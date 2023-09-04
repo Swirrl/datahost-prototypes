@@ -198,11 +198,11 @@
    :order-by ['(asc ?rev_number)]})
 
 (defn get-changes-info
-  "Returns records for all appends, optionally up to `?max-rev` (int)
+  "Returns records for all changess, optionally up to `?max-rev` (int)
   revision (inclusive).
 
   The returned seq will contain maps of shape
-       {:rev_num Number :rev URI :appends FILE-KEY :kind change-kind}"
+       {:rev_num Number :rev URI :updates FILE-KEY :kind change-kind}"
   ([triplestore release-uri] (get-changes-info triplestore release-uri nil))
   ([triplestore release-uri ?max-rev]
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
