@@ -421,7 +421,6 @@
         (let [response (GET revision-1-path {:headers {"accept" "text/csv"}})
               [_ _ path :as v] (re-find #"<http:\/\/(.+):\d+(\S+)>; rel=\"describedBy\"; type=\"application\/csvm\+json\""
                                         (get-in response [:headers "link"]))]
-          (tap> {:v v})
           (is (= 200 (:status response)))
           ;; (is (not (empty? (:body response))))
           ;; TODO: what is the csv release meant to be? `""` empty string
@@ -430,7 +429,6 @@
 
       (testing "Fetching csvm for revision that does exist works"
         (let [response (GET revision-1-csvm-path)
-              _ (tap> (:body response)) 
               body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (= {"@context" ["http://www.w3.org/ns/csvw" {"@language" "en"}]}
