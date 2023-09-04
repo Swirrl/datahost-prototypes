@@ -4,9 +4,9 @@
 
  :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "https://example.org/data/"}
 
- ;; Associate a context and path-info with the ring request.
- ;; The request URI must be a subpath of the supplied context.
- ;; NOT to be confused with the RDF Base URI (although it may match)
+ ;; Associate a context and path-info with the ring request. The request URI must
+ ;; be a subpath of the supplied context. NOT to be confused with the RDF Base URI
+ ;; (although it may need to work closely with that for dereffing)
  :tpximpact.datahost.ldapi/base-path ""
 
  :tpximpact.datahost.ldapi.jetty/runnable-service

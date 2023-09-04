@@ -135,6 +135,10 @@
         (handler
          (r.u.request/set-context request base-path))))))
 
+(defn wrap-request-base-uri [handler]
+  (fn [request]
+    (handler (update request :uri #(str/replace-first % (:context request "") "")))))
+
 (def cors-middleware
   "Defines a CORS middleware for a route"
   {:name ::cors
@@ -230,6 +234,7 @@
                         parameters/parameters-middleware
                         ;; content-negotiation
                         muuntaja/format-negotiate-middleware
+
                         ;; encoding response body
                         muuntaja/format-response-middleware
                         ;; decoding request body
@@ -245,9 +250,7 @@
                           (basic-auth-middleware auth)
                           identity)
 
-                        browser-render-convenience-middleware
-
-                        (wrap-context-middleware base-path)]}}))
+                        browser-render-convenience-middleware]}}))
 
 (defn handler [opts]
   {:pre [(:clock opts) (:triplestore opts) (:change-store opts)]}
@@ -262,7 +265,11 @@
                :urls.primaryName "openapi"
                :operationsSorter "alpha"}})
     (ring/create-default-handler))
-   {:executor sieppari/executor}))
+   (cond-> {:executor sieppari/executor}
+
+           (not (str/blank? (:base-path opts)))
+           (assoc :middleware [(wrap-context-middleware (:base-path opts))
+                               wrap-request-base-uri]))))
 
 (defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
   (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::base-path]
