@@ -4,7 +4,9 @@
             [tpximpact.datahost.system-uris :as su]
             [tpximpact.db-cleaner :as dc]
             [tpximpact.datahost.sys :as sys]
-            [tpximpact.datahost.ldapi.test-util.http-client :as http-client]))
+            [tpximpact.datahost.ldapi.test-util.http-client :as http-client]
+            [clojure.data.json :as json]
+            [clojure.java.io :as io]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.test/http-client [_ config]
   (http-client/make-client config))
@@ -69,3 +71,23 @@
 
 (defn sys->rdf-base-uri [sys]
   (-> sys :tpximpact.datahost.system-uris/uris (su/rdf-base-uri)))
+
+(defn multipart [name content content-type]
+  (cond-> {:name name
+           :content content
+           :mime-type content-type
+           :encoding "UTF-8"}
+    (string? content)
+    (assoc :size (.length content))
+    (instance? java.io.File content)
+    (assoc :filename (.getName content)
+           :size (.length content))
+    (instance? java.io.InputStream content)
+    (assoc :size (.size content))))
+
+(defn build-csv-multipart [csv-path]
+  (let [appends-file (io/file (io/resource csv-path))]
+    (multipart "appends" appends-file "text/csv")))
+
+(defn jsonld-multipart [name jsonld]
+  (multipart name (.getBytes (json/write-str jsonld) "UTF-8") "application/json"))

@@ -1,33 +1,34 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
+   [buddy.auth :refer [authenticated?]]
    [buddy.auth.backends.httpbasic :as http-basic]
    [buddy.auth.middleware :as buddy]
-   [buddy.auth :refer [authenticated?]]
    [buddy.hashers :as hashers]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [integrant.core :as ig]
+   [malli.util :as mu]
+   [muuntaja.core :as m]
+   [muuntaja.format.core :as fc]
+   [reitit.coercion.malli :as rcm]
    [reitit.dev.pretty :as pretty]
    [reitit.interceptor.sieppari :as sieppari]
    [reitit.openapi :as openapi]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as coercion]
-   [reitit.ring.middleware.multipart :as multipart]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]
    [reitit.swagger :as swagger]
    [reitit.swagger-ui :as swagger-ui]
-   [reitit.coercion.malli :as rcm]
-   [muuntaja.core :as m]
-   [muuntaja.format.core :as fc]
-   [malli.util :as mu]
+   [ring.middleware.cors :as cors]
    [ring.util.request :as r.u.request]
-   [tpximpact.datahost.ldapi.routes.series :as routes.s]
+   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
-   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-   [ring.middleware.cors :as cors])
-  (:import (java.io InputStream InputStreamReader OutputStream)))
+   [tpximpact.datahost.ldapi.routes.series :as routes.s])
+  (:import
+   (java.io InputStream InputStreamReader OutputStream)))
 
 (defn decode-str [_options]
   (reify
@@ -215,7 +216,10 @@
                        ;; malli options
                        :options nil})
            :muuntaja muuntaja-custom-instance
-           :middleware [cors-middleware
+           :middleware [;; exception handling
+                        ldapi-errors/exception-middleware
+
+                        cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
@@ -232,9 +236,7 @@
                         ;; coercing request parameters
                         coercion/coerce-request-middleware
                         ;; multipart
-                        multipart/multipart-middleware
-                        ;; exception handling
-                        ldapi-errors/exception-middleware
+                        middleware/multipart-middleware
 
                         (if auth
                           (basic-auth-middleware auth)

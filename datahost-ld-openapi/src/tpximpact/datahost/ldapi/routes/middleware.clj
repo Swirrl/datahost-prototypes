@@ -1,7 +1,11 @@
 (ns tpximpact.datahost.ldapi.routes.middleware
   (:require
+   [clojure.data.json :as json]
    [malli.core :as m]
    [malli.error :as me]
+   [reitit.coercion]
+   [reitit.ring.middleware.multipart :as multipart]
+   [ring.middleware.multipart-params :as multipart-params]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
@@ -127,6 +131,56 @@
              :body {:query-params query-errors}}
             (handler request)))))))
 
+(defn- parse-multipart-params [request]
+  (let [params (->> (:multipart-params request)
+                    (map (fn [[k {:keys [content-type tempfile] :as p}]]
+                           [(keyword k)
+                            (if (= content-type "application/json")
+                                (some-> tempfile slurp json/read-str)
+                                p)]))
+                    (into {}))]
+    (assoc request :multipart-params params)))
+
+(defn- compile-multipart-middleware [options]
+  (fn [{:keys [parameters coercion]} opts]
+    (if-let [multipart (:multipart parameters)]
+      (let [parameter-coercion {:multipart (reitit.coercion/->ParameterCoercion
+                                            :multipart-params :string false true)}
+            opts (assoc opts :reitit.coercion/parameter-coercion parameter-coercion)
+            coercers (if multipart (reitit.coercion/request-coercers coercion parameters opts))]
+        {:data {:swagger {:consumes ^:replace #{"multipart/form-data"}}}
+         :wrap (fn [handler]
+                 (fn
+                   ([request]
+                    (-> request
+                        (multipart-params/multipart-params-request options)
+                        (parse-multipart-params)
+                        (#'multipart/coerced-request coercers)
+                        (handler)))
+                   ([request respond raise]
+                    (-> request
+                        (multipart-params/multipart-params-request options)
+                        (parse-multipart-params)
+                        (#'multipart/coerced-request coercers)
+                        (handler respond raise)))))}))))
+
+(defn create-multipart-middleware
+  "Creates a Middleware to handle the multipart params, based on
+  ring.middleware.multipart-params, taking same options. Mounts only
+  if endpoint has `[:parameters :multipart]` defined. Publishes coerced
+  parameters into `[:parameters :multipart]` under request."
+  ([]
+   (create-multipart-middleware nil))
+  ([options]
+   {:name ::multipart
+    :compile (compile-multipart-middleware options)}))
+
+(def multipart-middleware
+  "Middleware to handle the multipart params, based on
+  ring.middleware.multipart-params, taking same options. Mounts only
+  if endpoint has `[:parameters :multipart]` defined. Publishes coerced
+  parameters into `[:parameters :multipart]` under request."
+  (create-multipart-middleware))
 
 (defn csvm-request-response
   [triplestore system-uris handler _id]

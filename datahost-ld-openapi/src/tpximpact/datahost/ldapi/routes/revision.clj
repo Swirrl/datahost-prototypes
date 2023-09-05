@@ -1,10 +1,11 @@
 (ns tpximpact.datahost.ldapi.routes.revision
   (:require
-    [reitit.ring.malli]
-    [reitit.coercion.malli :as rcm]
-    [tpximpact.datahost.ldapi.handlers :as handlers]
-    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
-    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
+   [reitit.ring.malli]
+   [reitit.coercion.malli :as rcm]
+   [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware]
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
+   [clojure.data.json :as json]))
 
 (defn get-revision-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
@@ -81,8 +82,9 @@
                           triplestore system-uris
                           {:resource :dh/Change :missing-params {:change-id 1}} )
                  :resource-already-created?]]
-   :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
-                :body routes-shared/CreateChangeInput
+   :parameters {:multipart [:map
+                            [:jsonld-doc routes-shared/CreateChangeInput]
+                            [:appends reitit.ring.malli/temp-file-part]]
                 :path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
