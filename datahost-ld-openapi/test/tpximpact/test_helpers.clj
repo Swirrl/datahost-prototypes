@@ -90,4 +90,4 @@
     (multipart "appends" appends-file "text/csv")))
 
 (defn jsonld-multipart [name jsonld]
-  (multipart name (.getBytes (json/write-str jsonld) "UTF-8") "application/json"))
+  (multipart name (.getBytes (json/write-str jsonld) "UTF-8") "application/ld+json"))

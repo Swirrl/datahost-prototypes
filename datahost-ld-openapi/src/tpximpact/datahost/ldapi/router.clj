@@ -26,7 +26,9 @@
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
-   [tpximpact.datahost.ldapi.routes.series :as routes.s])
+   [tpximpact.datahost.ldapi.routes.series :as routes.s]
+   [clojure.data.json :as json]
+   [clojure.java.io :as io])
   (:import
    (java.io InputStream InputStreamReader OutputStream)))
 
@@ -215,6 +217,7 @@
                        :default-values true
                        ;; malli options
                        :options nil})
+           :multipart-opts {:formats {"application/json" (comp json/read io/reader)}}
            :muuntaja muuntaja-custom-instance
            :middleware [;; exception handling
                         ldapi-errors/exception-middleware
