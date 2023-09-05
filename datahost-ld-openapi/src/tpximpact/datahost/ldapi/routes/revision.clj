@@ -1,10 +1,11 @@
 (ns tpximpact.datahost.ldapi.routes.revision
   (:require
-    [reitit.ring.malli]
-    [reitit.coercion.malli :as rcm]
-    [tpximpact.datahost.ldapi.handlers :as handlers]
-    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
-    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
+   [reitit.ring.malli]
+   [reitit.coercion.malli :as rcm]
+   [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware]
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
+   [clojure.data.json :as json]))
 
 (defn get-revision-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
@@ -19,14 +20,14 @@
                        :revision-id int?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json+ld" {:body string?}}}
+                     "application/ld+json" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn get-release-list-route-config [triplestore system-uris]
   {:summary "All releases metadata in the given series"
    :handler (partial handlers/get-release-list triplestore system-uris)
    :parameters {:path {:series-slug string?}}
-   :responses {200 {:content {"application/json+ld"
+   :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
@@ -35,7 +36,7 @@
    :handler (partial handlers/get-revision-list triplestore system-uris)
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
-   :responses {200 {:content {"application/json+ld"
+   :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
@@ -63,7 +64,7 @@
                                        :optional true} string?]]}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Revision was successfully created"
-                    :content {"application/json+ld"
+                    :content {"application/ld+json"
                               {:body string?}}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
@@ -74,21 +75,21 @@
 
 (defn changes-route-base [triplestore change-store system-uris change-kind]
   {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
-   :middleware [[middleware/json-only :json-only]
-                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
                 [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]
                 [(partial middleware/resource-already-created?
                           triplestore system-uris
                           {:resource :dh/Change :missing-params {:change-id 1}} )
                  :resource-already-created?]]
-   :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
-                :body routes-shared/CreateChangeInput
+   :parameters {:multipart [:map
+                            [:jsonld-doc routes-shared/CreateChangeInput]
+                            [:appends reitit.ring.malli/temp-file-part]]
                 :path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Changes were added to a Revision"
-                    :content {"application/json+ld"
+                    :content {"application/ld+json"
                               {:body string?}}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}

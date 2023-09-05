@@ -85,7 +85,7 @@ example:datasets
 #
 # DELETE's will look the same as POSTS just with the HTTP verb replaced
 
-# GET /data/life-expectancy/releases/2023 Accept: application/json+ld
+# GET /data/life-expectancy/releases/2023 Accept: application/ld+json
 #
 # {"@id": "/data/life-expectancy/releases/1",
 #  "@type": "datahost:Release"

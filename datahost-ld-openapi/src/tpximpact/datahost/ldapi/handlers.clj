@@ -27,7 +27,7 @@
    :body "Not found"})
 
 (defn- as-json-ld [response]
-  (assoc-in response [:headers "content-type"] "application/json+ld"))
+  (assoc-in response [:headers "content-type"] "application/ld+json"))
 
 (defn get-api-params [{:keys [path-params query-params]}]
   (-> query-params (update-keys keyword) (merge path-params)))
@@ -89,7 +89,7 @@
 (defn get-release
   [triplestore change-store system-uris
    {path-params :path-params
-    {:strs [accept]} :headers 
+    {:strs [accept]} :headers
     {release-uri :dh/Release} :datahost.request/uris
     :as request}]
   (if-let [release (->> (su/dataset-release-uri* system-uris path-params)
@@ -128,9 +128,8 @@
   [clock triplestore system-uris {path-params :path-params
                                   {{:keys [schema-file]} :multipart} :parameters :as request}]
   (if (db/resource-exists? triplestore (su/dataset-series-uri* system-uris path-params))
-    (let [incoming-jsonld-doc (some-> schema-file :tempfile slurp json/read-str)
+    (let [incoming-jsonld-doc schema-file
           api-params (get-api-params request)]
-      (data-validation/validate-ld-release-schema-input incoming-jsonld-doc)
       (as-> (db/upsert-release-schema! clock triplestore system-uris incoming-jsonld-doc api-params) insert-result
             (as-json-ld {:status (op->response-code (:op insert-result))
                          :body (:jsonld-doc insert-result)})))
@@ -184,7 +183,7 @@
     {release-uri :dh/Release} :datahost.request/uris
     {:strs [accept]} :headers
     :as request}]
-  
+
   (let [revision-ld (->> revision matcha/index-triples triples->ld-resource)]
     (if (= accept "text/csv")
       (-> {:status 200
@@ -278,8 +277,7 @@
    system-uris
    change-kind
    {path-params :path-params
-    {{:keys [appends]} :multipart} :parameters ;TODO: change 'appends' to ??
-    input-jsonld-doc :body-params
+    {{:keys [jsonld-doc appends]} :multipart} :parameters ;TODO: change 'appends' to ??
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
   (let [change-id 1
@@ -290,16 +288,16 @@
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         ;; insert relevant triples
         insert-req (store/make-insert-request! change-store (:tempfile appends))
-        {:keys [jsonld-doc resource-id message]} (when-not validation-err
-                                                   (db/insert-change! triplestore
-                                                                      system-uris
-                                                                      {:api-params (get-api-params request)
-                                                                       :ld-root (su/rdf-base-uri system-uris)
-                                                                       :jsonld-doc input-jsonld-doc
-                                                                       :store-key (:key insert-req)
-                                                                       :change-uri change-uri
-                                                                       :datahost.change/kind change-kind
-                                                                       :datahost.request/uris request-uris}))]
+        {:keys [inserted-jsonld-doc resource-id message]} (when-not validation-err
+                                                            (db/insert-change! triplestore
+                                                                               system-uris
+                                                                               {:api-params (get-api-params request)
+                                                                                :ld-root (su/rdf-base-uri system-uris)
+                                                                                :jsonld-doc jsonld-doc
+                                                                                :store-key (:key insert-req)
+                                                                                :change-uri change-uri
+                                                                                :datahost.change/kind change-kind
+                                                                                :datahost.request/uris request-uris}))]
     (assert (= resource-id change-id))
     (log/info (format "post-change: '%s' validation: found-schema? = %s, change-valid? = %s, insert-ok? = %s"
                       (.getPath change-uri) (some? release-schema) (nil? validation-err) (nil? message)))
@@ -323,14 +321,14 @@
                                            :change-kind change-kind
                                            :change-id change-id
                                            :dataset change-ds
-                                           "dcterms:format" (get input-jsonld-doc "dcterms:format")})]
+                                           "dcterms:format" (get jsonld-doc "dcterms:format")})]
           (log/debug (format "post-change: '%s' stored snapshot" (.getPath change-uri))
                      {:new-snapshot-key new-snapshot-key})
           (db/tag-with-snapshot triplestore change-uri {:dh/revisionSnapshotCSV new-snapshot-key}))
 
         (as-json-ld {:status 201
                      :headers {"Location" (.getPath change-uri)}
-                     :body jsonld-doc})))))
+                     :body inserted-jsonld-doc})))))
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/updates))]

@@ -136,16 +136,8 @@
           (t/is (= nil missing1))
           (t/is (= nil missing2)))))))
 
-(defn- build-csv-multipart [csv-path]
-  (let [appends-file (io/file (io/resource csv-path))]
-    {:tempfile appends-file
-     :size (.length appends-file)
-     :filename (.getName appends-file)
-     :content-type "text/csv;"}))
-
 (deftest round-tripping-revision-test
   (th/with-system-and-clean-up {{:keys [GET POST PUT]} :tpximpact.datahost.ldapi.test/http-client
-                                ld-api-app :tpximpact.datahost.ldapi.router/handler
                                 :as sys}
     (let [rdf-base-uri (th/sys->rdf-base-uri sys)
           csv-2019-path "test-inputs/revision/2019.csv"
@@ -186,22 +178,8 @@
                            (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))
                                            {:schema schema-req-body})))
 
-              temp-schema-file (File/createTempFile "revision-test-schema-1" ".json")
-
-              _ (with-open [file (io/writer temp-schema-file)]
-                  (binding [*out* file]
-                    (println (json/write-str schema-req-body))))
-
-              json-file-multipart (let [json-file (io/file (.getAbsolutePath temp-schema-file))]
-                                    {:tempfile json-file
-                                     :size (.length json-file)
-                                     :filename (.getName json-file)
-                                     :content-type "application/json"})
-
-              _resp (ld-api-app {:request-method :post
-                                 :uri (str release-url "/schema")
-                                 :multipart-params {:schema-file json-file-multipart}
-                                 :content-type "application/json"})]
+              _resp (POST (str release-url "/schema")
+                          {:multipart [(th/jsonld-multipart "schema-file" schema-req-body)]})]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
@@ -246,12 +224,10 @@
               ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
               (let [change-ednld {"dcterms:description" "A new change"
                                   "dcterms:format" "text/csv"}
-                    multipart-temp-file-part (build-csv-multipart csv-2019-path)
-                    change-api-response (ld-api-app {:request-method :post
-                                                     :uri (str new-revision-location "/changes")
-                                                     :multipart-params {:appends multipart-temp-file-part}
-                                                     :content-type "application/json"
-                                                     :body (json/write-str change-ednld)})
+                    multipart-temp-file-part (th/build-csv-multipart csv-2019-path)
+                    change-api-response (POST (str new-revision-location "/changes")
+                                              {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
+                                                           multipart-temp-file-part]})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
                 (is (= 201 (:status change-api-response)))
@@ -271,12 +247,10 @@
               ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
               (let [change-ednld {"dcterms:description" "A new second change"
                                   "dcterms:format" "text/csv"}
-                    multipart-temp-file-part (build-csv-multipart csv-2020-path)
-                    change-api-response (ld-api-app {:request-method :post
-                                                     :uri (str new-revision-location "/changes")
-                                                     :multipart-params {:appends multipart-temp-file-part}
-                                                     :content-type "application/json"
-                                                     :body (json/write-str change-ednld)})
+                    multipart-temp-file-part (th/build-csv-multipart csv-2020-path)
+                    change-api-response (POST (str new-revision-location "/changes")
+                                              {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
+                                                           multipart-temp-file-part]})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
                 (is (= 422 (:status change-api-response)))
                 (is (nil? new-change-resource-location))))
@@ -310,12 +284,10 @@
               (testing "Third Changes append resource created against 2nd Revision"
                 (let [change-3-ednld {"dcterms:description" "A new third change"
                                       "dcterms:format" "text/csv"}
-                      multipart-temp-file-part (build-csv-multipart csv-2021-path)
-                      change-api-response (ld-api-app {:request-method :post
-                                                       :uri (str new-revision-location-2 "/changes")
-                                                       :multipart-params {:appends multipart-temp-file-part}
-                                                       :content-type "application/json"
-                                                       :body (json/write-str change-3-ednld)})]
+                      multipart-temp-file-part (th/build-csv-multipart csv-2021-path)
+                      change-api-response (POST (str new-revision-location-2 "/changes")
+                                                {:multipart [(th/jsonld-multipart "jsonld-doc" change-3-ednld)
+                                                             multipart-temp-file-part]})]
                   (is (= 201 (:status change-api-response)))
                   (is (str/ends-with? (get (json/read-str (:body change-api-response)) "@id")
                                       "/changes/1"))))
@@ -356,12 +328,10 @@
                       new-revision-location-3 (-> revision-resp-3 :headers (get "Location"))
                       change-4-ednld {"dcterms:description" "A new fourth deletes change"
                                       "dcterms:format" "text/csv"}
-                      multipart-temp-file-part (build-csv-multipart csv-2021-deletes-path)
-                      change-api-response (ld-api-app {:request-method :post
-                                                       :uri (str new-revision-location-3 "/deletes")
-                                                       :multipart-params {:appends multipart-temp-file-part}
-                                                       :content-type "application/json"
-                                                       :body (json/write-str change-4-ednld)})
+                      multipart-temp-file-part (th/build-csv-multipart csv-2021-deletes-path)
+                      change-api-response (POST (str new-revision-location-3 "/deletes")
+                                                {:multipart [(th/jsonld-multipart "jsonld-doc" change-4-ednld)
+                                                             multipart-temp-file-part]})
                       response-body-doc (json/read-str (:body change-api-response))]
                   (is (= 201 (:status change-api-response)))
                   (is (= ":dh/ChangeKindRetract" (get response-body-doc "dh:changeKind")))

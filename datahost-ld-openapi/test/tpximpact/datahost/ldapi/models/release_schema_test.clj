@@ -102,7 +102,7 @@
 (t/deftest one-column-schema-test
   (let [n (format "%03d" (rand-int 1000))
         _ (setup-release n)
-        {{:keys [GET]} :tpximpact.datahost.ldapi.test/http-client
+        {{:keys [GET POST]} :tpximpact.datahost.ldapi.test/http-client
          ld-api-app :tpximpact.datahost.ldapi.router/handler} @th/*system*
         schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
         schema {"dcterms:title" "Fun schema"
@@ -111,17 +111,8 @@
                                "csvw:name" "test"
                                "csvw:titles" "Test"}]}
 
-        temp-schema-file (File/createTempFile "my-schema-2" ".json")
-
-        _ (with-open [file (io/writer temp-schema-file)]
-            (binding [*out* file]
-              (println (json/write-str schema))))
-
-        json-file-multipart (build-json-multipart (.getAbsolutePath temp-schema-file))
-        _response (ld-api-app {:request-method :post
-                              :uri schema-path
-                              :multipart-params {:schema-file json-file-multipart}
-                              :content-type "application/json"})
+        _response (POST schema-path
+                        {:multipart [(th/jsonld-multipart "schema-file" schema)]})
 
         fetch-response (GET (format "/data/my-series-%s/releases/release-%s/schema" n n))
         fetched-doc (json/read-str (:body fetch-response))

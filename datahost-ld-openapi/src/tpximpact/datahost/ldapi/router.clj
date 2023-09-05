@@ -1,33 +1,36 @@
 (ns tpximpact.datahost.ldapi.router
   (:require
+   [buddy.auth :refer [authenticated?]]
    [buddy.auth.backends.httpbasic :as http-basic]
    [buddy.auth.middleware :as buddy]
-   [buddy.auth :refer [authenticated?]]
    [buddy.hashers :as hashers]
    [clojure.spec.alpha :as s]
    [clojure.string :as str]
    [integrant.core :as ig]
+   [malli.util :as mu]
+   [muuntaja.core :as m]
+   [muuntaja.format.core :as fc]
+   [reitit.coercion.malli :as rcm]
    [reitit.dev.pretty :as pretty]
    [reitit.interceptor.sieppari :as sieppari]
    [reitit.openapi :as openapi]
    [reitit.ring :as ring]
    [reitit.ring.coercion :as coercion]
-   [reitit.ring.middleware.multipart :as multipart]
    [reitit.ring.middleware.muuntaja :as muuntaja]
    [reitit.ring.middleware.parameters :as parameters]
    [reitit.swagger :as swagger]
    [reitit.swagger-ui :as swagger-ui]
-   [reitit.coercion.malli :as rcm]
-   [muuntaja.core :as m]
-   [muuntaja.format.core :as fc]
-   [malli.util :as mu]
+   [ring.middleware.cors :as cors]
    [ring.util.request :as r.u.request]
-   [tpximpact.datahost.ldapi.routes.series :as routes.s]
+   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
-   [tpximpact.datahost.ldapi.errors :as ldapi-errors]
-   [ring.middleware.cors :as cors])
-  (:import (java.io InputStream InputStreamReader OutputStream)))
+   [tpximpact.datahost.ldapi.routes.series :as routes.s]
+   [clojure.data.json :as json]
+   [clojure.java.io :as io])
+  (:import
+   (java.io InputStream InputStreamReader OutputStream)))
 
 (defn decode-str [_options]
   (reify
@@ -103,20 +106,20 @@
   (when-let [accept-header (get-in request [:headers "accept"])]
     (and (str/includes? accept-header "text/html")
          (not (str/includes? accept-header "application/json"))
-         (not (str/includes? accept-header "application/json+ld")))))
+         (not (str/includes? accept-header "application/ld+json")))))
 
 
 (def browser-render-convenience-middleware
   "This is an affordance that attempts to detect an in-browser GET request. If
-  detected, the application/json+ld content-type from API response will be overridden
+  detected, the application/ld+json content-type from API response will be overridden
   so that the browser renders the response as plain JSON and does not attempt to download
-  the unrecognized application/json+ld as a file."
+  the unrecognized application/ld+json as a file."
   (fn [handler]
     (fn [request]
       (if (and (read-request? request)
                (browser-html-request? request))
         (let [response (handler request)]
-          (if (= (get-in response [:headers "content-type"]) "application/json+ld")
+          (if (= (get-in response [:headers "content-type"]) "application/ld+json")
             ;; replace content-type for raw browser request
             (assoc-in response [:headers "content-type"] "application/json")
             response))
@@ -214,8 +217,12 @@
                        :default-values true
                        ;; malli options
                        :options nil})
+           :multipart-opts {:formats {"application/json" (comp json/read io/reader)}}
            :muuntaja muuntaja-custom-instance
-           :middleware [cors-middleware
+           :middleware [;; exception handling
+                        ldapi-errors/exception-middleware
+
+                        cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
@@ -232,9 +239,7 @@
                         ;; coercing request parameters
                         coercion/coerce-request-middleware
                         ;; multipart
-                        multipart/multipart-middleware
-                        ;; exception handling
-                        ldapi-errors/exception-middleware
+                        middleware/multipart-middleware
 
                         (if auth
                           (basic-auth-middleware auth)

@@ -1,7 +1,11 @@
 (ns tpximpact.datahost.ldapi.routes.middleware
   (:require
+   [clojure.data.json :as json]
    [malli.core :as m]
    [malli.error :as me]
+   [reitit.coercion :as coercion]
+   [reitit.ring.middleware.multipart :as multipart]
+   [ring.middleware.multipart-params :as multipart-params]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
@@ -21,7 +25,7 @@
               (= "application/ld+json" content-type))
         (handler request)
         {:status 406
-         :body "not acceptable"}))))
+         :body "Not acceptable. Only Content-Type: application/json is accepted"}))))
 
 (defn entity-uris-from-path
   [system-uris entities handler _id]
@@ -127,6 +131,52 @@
              :body {:query-params query-errors}}
             (handler request)))))))
 
+(defn- match-content-type [content-type formats]
+  (or (get formats content-type)
+      (let [[_ ns type] (re-find #"([^/]+)/(?:[^\+]+\+)?([^\+].*)" content-type)]
+        (get formats (str ns \/ type)))))
+
+(defn- parse-multipart-params [request {:keys [formats] :as options}]
+  (letfn [(parse-part [[k {:keys [content-type tempfile] :as p}]]
+            [(keyword k)
+             (if-let  [parse-fn (match-content-type content-type formats)]
+               (parse-fn tempfile)
+               p)])]
+    (update request :multipart-params #(->> % (map parse-part) (into {})))))
+
+(defn- coerced-request [request coercers]
+  (if-let [coerced (if coercers (coercion/coerce-request coercers request))]
+    (update request :parameters merge coerced)
+    request))
+
+(defn- compile-multipart-middleware [options]
+  (fn [{:keys [parameters coercion multipart-opts]} opts]
+    (if-let [multipart (:multipart parameters)]
+      (let [parameter-coercion {:multipart (coercion/->ParameterCoercion
+                                            :multipart-params :string false true)}
+            opts (assoc opts ::coercion/parameter-coercion parameter-coercion)
+            coercers (if multipart (coercion/request-coercers coercion parameters opts))]
+        {:data {:swagger {:consumes ^:replace #{"multipart/form-data"}}}
+         :wrap (fn [handler]
+                 (fn
+                   ([request]
+                    (-> request
+                        (multipart-params/multipart-params-request options)
+                        (parse-multipart-params multipart-opts)
+                        (coerced-request coercers)
+                        (handler)))
+                   ([request respond raise]
+                    (-> request
+                        (multipart-params/multipart-params-request options)
+                        (parse-multipart-params multipart-opts)
+                        (coerced-request coercers)
+                        (handler respond raise)))))}))))
+
+(def multipart-middleware
+  "Modified reitit.ring.middleware.multipart/multipart-middleware that parses
+  multipart \"parts\" according to their content-type/configuration."
+  {:name ::multipart
+   :compile (compile-multipart-middleware nil)})
 
 (defn csvm-request-response
   [triplestore system-uris handler _id]
