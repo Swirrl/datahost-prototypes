@@ -25,7 +25,7 @@
               (= "application/ld+json" content-type))
         (handler request)
         {:status 406
-         :body "not acceptable"}))))
+         :body "Not acceptable. Only Content-Type: application/json is accepted"}))))
 
 (defn entity-uris-from-path
   [system-uris entities handler _id]

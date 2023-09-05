@@ -552,7 +552,7 @@
               {:before before :after after})))]
     (if (and (= 0N before) (= 1N after))
       {:resource-id 1
-       :jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
+       :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
       {:message "Change already exists."})))
 
 (defn- previous-change-coords

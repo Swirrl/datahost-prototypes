@@ -75,8 +75,7 @@
 
 (defn changes-route-base [triplestore change-store system-uris change-kind]
   {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
-   :middleware [[middleware/json-only :json-only]
-                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
                 [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]
                 [(partial middleware/resource-already-created?
                           triplestore system-uris

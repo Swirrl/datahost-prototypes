@@ -288,16 +288,16 @@
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         ;; insert relevant triples
         insert-req (store/make-insert-request! change-store (:tempfile appends))
-        {:keys [jsonld-doc resource-id message]} (when-not validation-err
-                                                   (db/insert-change! triplestore
-                                                                      system-uris
-                                                                      {:api-params (get-api-params request)
-                                                                       :ld-root (su/rdf-base-uri system-uris)
-                                                                       :jsonld-doc jsonld-doc
-                                                                       :store-key (:key insert-req)
-                                                                       :change-uri change-uri
-                                                                       :datahost.change/kind change-kind
-                                                                       :datahost.request/uris request-uris}))]
+        {:keys [inserted-jsonld-doc resource-id message]} (when-not validation-err
+                                                            (db/insert-change! triplestore
+                                                                               system-uris
+                                                                               {:api-params (get-api-params request)
+                                                                                :ld-root (su/rdf-base-uri system-uris)
+                                                                                :jsonld-doc jsonld-doc
+                                                                                :store-key (:key insert-req)
+                                                                                :change-uri change-uri
+                                                                                :datahost.change/kind change-kind
+                                                                                :datahost.request/uris request-uris}))]
     (assert (= resource-id change-id))
     (log/info (format "post-change: '%s' validation: found-schema? = %s, change-valid? = %s, insert-ok? = %s"
                       (.getPath change-uri) (some? release-schema) (nil? validation-err) (nil? message)))
@@ -328,7 +328,7 @@
 
         (as-json-ld {:status 201
                      :headers {"Location" (.getPath change-uri)}
-                     :body jsonld-doc})))))
+                     :body inserted-jsonld-doc})))))
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/updates))]
