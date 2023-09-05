@@ -20,14 +20,14 @@
                        :revision-id int?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/json+ld" {:body string?}}}
+                     "application/ld+json" {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
 (defn get-release-list-route-config [triplestore system-uris]
   {:summary "All releases metadata in the given series"
    :handler (partial handlers/get-release-list triplestore system-uris)
    :parameters {:path {:series-slug string?}}
-   :responses {200 {:content {"application/json+ld"
+   :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
@@ -36,7 +36,7 @@
    :handler (partial handlers/get-revision-list triplestore system-uris)
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
-   :responses {200 {:content {"application/json+ld"
+   :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
                404 {:body [:re "Not found"]}}})
 
@@ -64,7 +64,7 @@
                                        :optional true} string?]]}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Revision was successfully created"
-                    :content {"application/json+ld"
+                    :content {"application/ld+json"
                               {:body string?}}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
@@ -90,7 +90,7 @@
                        :revision-id int?}}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Changes were added to a Revision"
-                    :content {"application/json+ld"
+                    :content {"application/ld+json"
                               {:body string?}}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}

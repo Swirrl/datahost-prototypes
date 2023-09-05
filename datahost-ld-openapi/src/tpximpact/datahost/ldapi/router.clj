@@ -106,20 +106,20 @@
   (when-let [accept-header (get-in request [:headers "accept"])]
     (and (str/includes? accept-header "text/html")
          (not (str/includes? accept-header "application/json"))
-         (not (str/includes? accept-header "application/json+ld")))))
+         (not (str/includes? accept-header "application/ld+json")))))
 
 
 (def browser-render-convenience-middleware
   "This is an affordance that attempts to detect an in-browser GET request. If
-  detected, the application/json+ld content-type from API response will be overridden
+  detected, the application/ld+json content-type from API response will be overridden
   so that the browser renders the response as plain JSON and does not attempt to download
-  the unrecognized application/json+ld as a file."
+  the unrecognized application/ld+json as a file."
   (fn [handler]
     (fn [request]
       (if (and (read-request? request)
                (browser-html-request? request))
         (let [response (handler request)]
-          (if (= (get-in response [:headers "content-type"]) "application/json+ld")
+          (if (= (get-in response [:headers "content-type"]) "application/ld+json")
             ;; replace content-type for raw browser request
             (assoc-in response [:headers "content-type"] "application/json")
             response))

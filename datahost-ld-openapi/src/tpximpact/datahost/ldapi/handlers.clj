@@ -27,7 +27,7 @@
    :body "Not found"})
 
 (defn- as-json-ld [response]
-  (assoc-in response [:headers "content-type"] "application/json+ld"))
+  (assoc-in response [:headers "content-type"] "application/ld+json"))
 
 (defn get-api-params [{:keys [path-params query-params]}]
   (-> query-params (update-keys keyword) (merge path-params)))
