@@ -125,7 +125,10 @@
             response))
         (handler request)))))
 
-(defn wrap-context-middleware [base-path]
+(defn wrap-context-middleware
+  "Associate a :context and :path-info with the request. The request URI must be
+  a sub-path of the supplied context."
+  [base-path]
   (when-not (str/blank? base-path)
     (println (str "\nApp `base-path` will be set to: `" base-path "`\n")))
   (fn wrap-context [handler]
@@ -134,6 +137,14 @@
         (handler request)
         (handler
          (r.u.request/set-context request base-path))))))
+
+(defn wrap-request-base-uri
+  "Reitit does not directly acknowledge or act on the Ring request :context key, so
+  we must manually intercept request URIs here and remove the :context value (base path)
+  from the :uri so reitit routes are matched"
+  [handler]
+  (fn [request]
+    (handler (update request :uri #(str/replace-first % (:context request "") "")))))
 
 (def cors-middleware
   "Defines a CORS middleware for a route"
@@ -230,6 +241,7 @@
                         parameters/parameters-middleware
                         ;; content-negotiation
                         muuntaja/format-negotiate-middleware
+
                         ;; encoding response body
                         muuntaja/format-response-middleware
                         ;; decoding request body
@@ -245,9 +257,7 @@
                           (basic-auth-middleware auth)
                           identity)
 
-                        browser-render-convenience-middleware
-
-                        (wrap-context-middleware base-path)]}}))
+                        browser-render-convenience-middleware]}}))
 
 (defn handler [opts]
   {:pre [(:clock opts) (:triplestore opts) (:change-store opts)]}
@@ -262,7 +272,12 @@
                :urls.primaryName "openapi"
                :operationsSorter "alpha"}})
     (ring/create-default-handler))
-   {:executor sieppari/executor}))
+   (cond-> {:executor sieppari/executor}
+
+           ;; This middleware is inserted here because it needs to run _before_ route matching
+           (not (str/blank? (:base-path opts)))
+           (assoc :middleware [(wrap-context-middleware (:base-path opts))
+                               wrap-request-base-uri]))))
 
 (defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
   (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::base-path]

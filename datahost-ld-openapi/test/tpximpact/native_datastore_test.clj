@@ -6,7 +6,7 @@
 
 (deftest native-datastore-test
   (testing "Base data is loaded on startup"
-    (th/with-system sys
+    (th/with-system sys nil
       (let [repo (:tpximpact.datahost.ldapi.native-datastore/repo sys)
             qry {:prefixes {:dcat "<http://www.w3.org/ns/dcat#>"
                             :rdfs "<http://www.w3.org/2000/01/rdf-schema#>"}

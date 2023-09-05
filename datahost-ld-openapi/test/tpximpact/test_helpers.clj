@@ -46,8 +46,8 @@
   (test-fn)
   (stop-system))
 
-(defmacro with-system* [{:keys [on-halt on-init] :as _opts} system-binding & body]
-  `(let [sys# (start-system)
+(defmacro with-system* [{:keys [on-halt on-init] :as _opts} system-binding system-loader & body]
+  `(let [sys# (or ~system-loader (start-system))
          ~system-binding sys#]
      (try
        (doseq [f!# ~on-init]
@@ -67,6 +67,7 @@
   `(with-system* {:on-init [dc/clean-db]
                   :on-halt [ig/halt!]}
                  ~system-binding
+                 nil
                  ~@body))
 
 (defn sys->rdf-base-uri [sys]
