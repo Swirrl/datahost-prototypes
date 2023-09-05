@@ -125,7 +125,10 @@
             response))
         (handler request)))))
 
-(defn wrap-context-middleware [base-path]
+(defn wrap-context-middleware
+  "Associate a :context and :path-info with the request. The request URI must be
+  a sub-path of the supplied context."
+  [base-path]
   (when-not (str/blank? base-path)
     (println (str "\nApp `base-path` will be set to: `" base-path "`\n")))
   (fn wrap-context [handler]
@@ -135,7 +138,11 @@
         (handler
          (r.u.request/set-context request base-path))))))
 
-(defn wrap-request-base-uri [handler]
+(defn wrap-request-base-uri
+  "Reitit does not directly acknowledge or act on the Ring request :context key, so
+  we must manually intercept request URIs here and remove the :context value (base path)
+  from the :uri so reitit routes are matched"
+  [handler]
   (fn [request]
     (handler (update request :uri #(str/replace-first % (:context request "") "")))))
 
@@ -267,6 +274,7 @@
     (ring/create-default-handler))
    (cond-> {:executor sieppari/executor}
 
+           ;; This middleware is inserted here because it needs to run _before_ route matching
            (not (str/blank? (:base-path opts)))
            (assoc :middleware [(wrap-context-middleware (:base-path opts))
                                wrap-request-base-uri]))))
