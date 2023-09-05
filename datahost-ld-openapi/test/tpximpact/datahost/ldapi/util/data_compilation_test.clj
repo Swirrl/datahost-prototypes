@@ -15,9 +15,9 @@
                    {:datahost.change.data/ref (with-meta (mapv item r) {:type :datahost.types/seq-of-maps})
                     :datahost.change.data/format "native"
                     :datahost.change/kind kind})]
-    {1 (ds-input (range 4) :datahost.change.kind/append)
-     2 (ds-input (range 4 10) :datahost.change.kind/append)
-     3 (ds-input (range 8 10) :datahost.change.kind/retract)}))
+    {1 (ds-input (range 4) :dh/ChangeKindAppend)
+     2 (ds-input (range 4 10) :dh/ChangeKindAppend)
+     3 (ds-input (range 8 10) :dh/ChangeKindRetract)}))
 
 (defn data-record-count [k]
   (count (:datahost.change.data/ref (get data k))))

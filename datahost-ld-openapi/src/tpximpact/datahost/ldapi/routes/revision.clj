@@ -10,6 +10,10 @@
   {:summary "Retrieve metadata or CSV contents for an existing revision"
    :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-revision triplestore change-store system-uris)
+   :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
+                [(partial middleware/entity-or-not-found triplestore system-uris :dh/Revision)
+                 :entity-or-not-found]
+                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
@@ -71,7 +75,12 @@
 (defn changes-route-base [triplestore change-store system-uris change-kind]
   {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
    :middleware [[middleware/json-only :json-only]
-                [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]]
+                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]
+                [(partial middleware/resource-already-created?
+                          triplestore system-uris
+                          {:resource :dh/Change :missing-params {:change-id 1}} )
+                 :resource-already-created?]]
    :parameters {:multipart [:map [:appends reitit.ring.malli/temp-file-part]]
                 :body routes-shared/CreateChangeInput
                 :path {:series-slug string?

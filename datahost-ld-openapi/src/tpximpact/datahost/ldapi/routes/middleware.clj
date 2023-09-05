@@ -3,7 +3,13 @@
    [malli.core :as m]
    [malli.error :as me]
    [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.system-uris :refer [resource-uri]]))
+   [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
+   [tpximpact.datahost.ldapi.routes.shared :as shared]
+   [tpximpact.datahost.ldapi.schemas.common :as s.common]))
+
+(def not-found-response
+  {:status 404
+   :body "Not found"})
 
 (defn json-only
   "Middleware that requires the request to pass 'Content-Type: application/json'.
@@ -17,6 +23,33 @@
         {:status 406
          :body "not acceptable"}))))
 
+(defn entity-uris-from-path
+  [system-uris entities handler _id]
+  {:pre [(m/validate [:set s.common/EntityType] entities)]}
+  (fn entity-uris [request]
+    (let [uris (reduce (fn [r entity]
+                         (assoc! r entity (su/resource-uri entity system-uris (:path-params request))))
+                       (transient {})
+                       entities)]
+     (handler (assoc request :datahost.request/uris (persistent! uris))))))
+
+(defn entity-or-not-found
+  "If found, puts the entity under [:datahost.request/entities entity-kw],
+  short-circuits with 404 response otherwise."
+  [triplestore system-uris entity-kw handler _id]
+  {:pre [(m/validate s.common/EntityType entity-kw)]}
+  (fn inner [{:keys [path-params]:as request}]
+    (let [{:keys [series-slug release-slug revision-id change-id]} path-params
+          uri (resource-uri entity-kw system-uris path-params)
+          entity (case entity-kw
+                   :dh/DatasetSeries (db/get-dataset-series triplestore uri)
+                   :dh/Release (db/get-release-by-uri triplestore uri)
+                   :dh/Revision (db/get-revision triplestore uri)
+                   :dh/Change (db/get-change triplestore uri))]
+      (if entity
+        (handler (assoc-in request [:datahost.request/entities entity-kw] entity))
+        not-found-response))))
+
 (defn resource-exist?
   "Checks whether resource exists and short-circuits with 404 response if
   not.
@@ -29,13 +62,29 @@
       {:status 404 :body "not found"}
       (handler request))))
 
+(defn resource-already-created?
+  "Checks whether resource already exists and short-circuits with 422
+  response if it does.
+
+  Options:
+
+  - :resource - :dh/DataSeries etc
+  - :missing-params - map of params possibly missing from path
+  params (e.g. when the request generates an ID)"
+  [triplestore system-uris {:keys [resource missing-params]} handler _id]
+  {:pre [(m/validate s.common/EntityType resource)]}
+  (fn created? [{:keys [path-params] :as request}]
+    (if (db/resource-exists? triplestore (resource-uri resource system-uris (merge path-params missing-params)))
+      {:status 422 :body "Resource already exists"}
+      (handler request))))
+
 (defn flag-resource-exists
   "Adds a boolean flag to the request under resource-id, when
   the given resource exists.
 
   - resource: [:enum :dh/DatasetSeries :dh/Release :dh/Revision :dh/Change]"
   [triplestore system-uris resource resource-id handler _id]
-  {:pre [(m/validate [:enum :dh/DatasetSeries :dh/Release :dh/Revision :dh/Change] resource)]}
+  {:pre [(m/validate s.common/EntityType resource)]}
   (fn [{:keys [path-params] :as request}]
     (handler (cond-> request
                (db/resource-exists? triplestore (resource-uri resource system-uris path-params))
@@ -78,3 +127,12 @@
              :body {:query-params query-errors}}
             (handler request)))))))
 
+
+(defn csvm-request-response
+  [triplestore system-uris handler _id]
+  (fn [request]
+    (if (shared/csvm-request? request)
+      (shared/csvm-request {:triplestore triplestore
+                            :system-uris system-uris
+                            :request request})
+      (handler request))))

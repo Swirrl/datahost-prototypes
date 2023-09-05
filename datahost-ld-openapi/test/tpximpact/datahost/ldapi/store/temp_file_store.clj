@@ -1,10 +1,9 @@
 (ns tpximpact.datahost.ldapi.store.temp-file-store
-  (:require [clojure.test :as t]
-            [integrant.core :as ig]
+  (:require [integrant.core :as ig]
             [tpximpact.datahost.ldapi.files :as files]
             [tpximpact.datahost.ldapi.store :as store]
             [tpximpact.datahost.ldapi.store.file :as fstore])
-  (:import [java.lang AutoCloseable]))
+  (:import (java.lang AutoCloseable)))
 
 (defrecord TempFileStore [file-store]
   store/ChangeStore

@@ -1,4 +1,14 @@
 (ns tpximpact.datahost.system-uris
+  "Contains few families of functions for creating resource
+  keys (strings) or URIs. Also a generic `resource-uri` fn
+  (and associated multimethod `-resource-uri` that accepts can
+  construct an URI from a map of path params.
+  
+  
+  - 'dataset-[series|release|revision]-uri' - ctors taking individual
+  ids as arguments
+  - 'dataset-[series|release|revision]-uri*'- ctors taking a map
+  as argument"
   (:require [integrant.core :as ig])
   (:import (java.net URI)))
 
@@ -38,7 +48,9 @@
 
   (dataset-revision-uri* [this api-params])
 
-  (change-uri [this series-slug release-slug revision-id change-id]))
+  (change-uri [this series-slug release-slug revision-id change-id])
+
+  (change-uri* [this api-params]))
 
 (defn make-system-uris
   "Returns an object that builds URIs based upon the configured RDF base URI"
@@ -69,6 +81,10 @@
       (URI. (format "%s/releases/%s/revisions/%s" (dataset-series-uri this series-slug) release-slug revision-id)))
 
     (change-uri [_ series-slug release-slug revision-id change-id]
+      (assert change-id)
+      (.resolve base-uri (change-key base-uri series-slug release-slug revision-id change-id)))
+
+    (change-uri* [_this {:keys [series-slug release-slug revision-id change-id]}]
       (assert change-id)
       (.resolve base-uri (change-key base-uri series-slug release-slug revision-id change-id)))))
 

@@ -254,7 +254,6 @@
                                                      :body (json/write-str change-ednld)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
-
                 (is (= 201 (:status change-api-response)))
                 (is (= (str new-revision-location "/changes/1")
                        new-change-resource-location)
@@ -282,7 +281,7 @@
                 (is (= 422 (:status change-api-response)))
                 (is (nil? new-change-resource-location))))
 
-            (testing "Fetching Revision as CSV with multiple CSV append changes"
+            (testing "Fetching Revision as CSV after 'appending' a single CSV"
               (let [response (GET new-revision-location {:headers {"accept" "text/csv"}})
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
@@ -291,7 +290,6 @@
                        (count resp-body-seq))
                     "responds with concatenated changes from both CSVs")
                 (is (= (first resp-body-seq) (first csv-2020-seq)))
-                ;;(is (= (second resp-body-seq) (second csv-2020-seq)))
                 (is (str/includes? (last resp-body-seq) ",2019,")))))
 
           (testing "Creation of a second revision for a release"
@@ -305,6 +303,7 @@
                   new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
 
               (is (= 201 (:status revision-resp-2)))
+              (is (re-find #".*\/revisions\/2" inserted-revision-id-2))
               (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                   "Created with the resource URI provided in the Location header")
 
@@ -322,6 +321,7 @@
                                       "/changes/1"))))
 
               (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
+                
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
                       valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
@@ -417,20 +417,21 @@
           (is (= 404 status))
           (is (= "Not found" body))))
 
-      (testing "Fetching a release csv that does exist works"
-        (let [response (GET revision-1-path {:headers {"accept" "text/csv"}})]
+      (testing "Fetching a revision csv that does exist works"
+        (let [response (GET revision-1-path {:headers {"accept" "text/csv"}})
+              [_ _ path :as v] (re-find #"<http:\/\/(.+):\d+(\S+)>; rel=\"describedBy\"; type=\"application\/csvm\+json\""
+                                        (get-in response [:headers "link"]))]
           (is (= 200 (:status response)))
           ;; (is (not (empty? (:body response))))
           ;; TODO: what is the csv release meant to be? `""` empty string
           ;; seems off when the json returns something not-nil
-          (is (= (str "<http://localhost:3400" revision-1-csvm-path ">; "
-                      "rel=\"describedBy\"; "
-                      "type=\"application/csvm+json\""),
-                 (get-in response [:headers "link"])))))
+          (is (= revision-1-csvm-path path))))
 
-      (testing "Fetching csvm for release that does exist works"
+      (testing "Fetching csvm for revision that does exist works"
         (let [response (GET revision-1-csvm-path)
               body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (= {"@context" ["http://www.w3.org/ns/csvw" {"@language" "en"}]}
                  body)))))))
+
+
