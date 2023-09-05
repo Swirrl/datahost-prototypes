@@ -63,7 +63,7 @@
       (handler request))))
 
 (defn resource-already-created?
-  "Checks wether resource already exists and short-circuits with 422
+  "Checks whether resource already exists and short-circuits with 422
   response if it does.
 
   Options:

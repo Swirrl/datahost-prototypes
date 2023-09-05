@@ -68,7 +68,7 @@
         insert-request (store/make-insert-request! change-store is)]
 
     (store/request-data-insert change-store insert-request)
-    (log/debug "post-change--generate-csv-shapshot:" path-params
+    (log/debug "post-change--generate-csv-snapshot:" path-params
                {:snapshot-rows (tc/row-count ds)
                 :bytes-written (.size os)
                 :snapshot-key (:key insert-request)})

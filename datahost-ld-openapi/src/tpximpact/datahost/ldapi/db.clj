@@ -198,7 +198,7 @@
    :order-by ['(asc ?rev_number)]})
 
 (defn get-changes-info
-  "Returns records for all changess, optionally up to `?max-rev` (int)
+  "Returns records for all changes, optionally up to `?max-rev` (int)
   revision (inclusive).
 
   The returned seq will contain maps of shape
@@ -556,7 +556,7 @@
       {:message "Change already exists."})))
 
 (defn- previous-change-coords
-  "Given revision and change id, tries to find the preceeding change's
+  "Given revision and change id, tries to find the preceding change's
   revision and change ids. If not possible, indicates an extra DB
   lookup is needed.
 
@@ -572,7 +572,7 @@
     :else [(dec revision-id) :find]))
 
 (defn get-previous-change
-  "Returns the previouis change (as Quads), nil when no previous change existsts."
+  "Returns the previous change (as Quads), nil when no previous change exists."
   [triplestore system-uris  {:keys [revision-id change-id] :as params}]
   (let [revision-uri ^URI (su/dataset-revision-uri* system-uris params)
         [prev-rev-id c] (previous-change-coords revision-id change-id)]

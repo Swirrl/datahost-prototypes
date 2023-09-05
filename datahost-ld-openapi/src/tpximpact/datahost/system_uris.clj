@@ -84,7 +84,7 @@
       (assert change-id)
       (.resolve base-uri (change-key base-uri series-slug release-slug revision-id change-id)))
 
-    (change-uri* [this {:keys [series-slug release-slug revision-id change-id]}]
+    (change-uri* [_this {:keys [series-slug release-slug revision-id change-id]}]
       (assert change-id)
       (.resolve base-uri (change-key base-uri series-slug release-slug revision-id change-id)))))
 
