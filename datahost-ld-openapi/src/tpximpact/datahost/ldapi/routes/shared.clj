@@ -91,15 +91,17 @@
                                     ["description" :description-string]]
                                    {:registry s.common/registry}))}
    :post-revision {:body (m/explainer [:maybe CreateRevisionInput])
-                   :query (m/schema [:map
-                                     ["title" :title-string]
-                                     ["description" {:optional true} :description-string]]
-                                    {:registry s.common/registry})}
+                   :query (m/explainer
+                           (m/schema [:map
+                                      ["title" :title-string]
+                                      ["description" {:optional true} :description-string]]
+                                     {:registry s.common/registry}))}
    :post-revision-change {:body (m/explainer [:maybe CreateChangeInput])
-                          :query (m/schema [:map
-                                            ["title" {:optional true} :title-string]
-                                            ["description" :description-string]]
-                                           {:registry s.common/registry})}})
+                          :query (m/explainer
+                                  (m/schema [:map
+                                             ["title" {:optional true} :title-string]
+                                             ["description" :description-string]]
+                                            {:registry s.common/registry}))}})
 
 (defn base-url [request]
   (request/request-url (select-keys request [:scheme :headers :uri])))

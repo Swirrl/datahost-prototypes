@@ -350,7 +350,13 @@
               ;; This Release already has 3 Revisions, so we expect another 10 in the series
               (is (= new-revision-ids (for [i (range 4 14)]
                                         (format "%s/releases/%s/revisions/%d" series-slug release-slug i)))
-                  "Expected Revision IDs integers increase in an orderly sequence"))))))))
+                  "Expected Revision IDs integers increase in an orderly sequence")))
+
+          (testing "Create revision with query params only"
+            (let [{status :status body :body} (POST (str release-url "/revisions")
+                                                    {:content-type :json
+                                                     :query-params {:title "final revision"}})]
+              (is (= 201 status)))))))))
 
 (deftest csvm-revision-test
   (th/with-system-and-clean-up
