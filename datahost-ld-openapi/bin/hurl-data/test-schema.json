@@ -5,7 +5,7 @@
 	"dcterms:title": "Fun schema",
 	"dh:columns": [
 		{
-			"@type": "dh:DimensionColumn",
+			"@type": "dh:MeasureColumn",
 			"csvw:datatype": "string",
 			"csvw:name": "name",
             "csvw:titles": "name"
