@@ -2,6 +2,7 @@
  :tpximpact.datahost.ldapi/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
  :tpximpact.datahost.ldapi.jetty/http-port 3000
 
+ ;; Base URI should end in a trailing slash
  :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "https://example.org/data/"}
 
  ;; Associate a context and path-info with the ring request. The request URI must
