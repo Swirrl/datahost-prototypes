@@ -166,13 +166,14 @@
 
               schema-req-body {"dcterms:title" "Test schema"
                                "dh:columns"
-                               (let [csvw-type (fn [col-name titles datatype]
-                                                 {"csvw:datatype" datatype
+                               (let [csvw-type (fn [typ col-name titles datatype]
+                                                 {"@type" typ
+                                                  "csvw:datatype" datatype
                                                   "csvw:name" col-name
                                                   "csvw:titles" titles})]
                                  ;; we put schema only on 2 columns
-                                 [(csvw-type "measure_type" ["Measure type"] :string)
-                                  (csvw-type "year" "Year" :integer)])}
+                                 [(csvw-type "dh:MeasureColumn" "measure_type" ["Measure type"] :string)
+                                  (csvw-type "dh:DimensionColumn" "year" "Year" :integer)])}
 
               _validated (when-not (m/validate LdSchemaInput schema-req-body)
                            (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))

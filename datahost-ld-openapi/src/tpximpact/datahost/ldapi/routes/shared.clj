@@ -57,19 +57,27 @@
 
 (def LdSchemaInputColumn
   [:map
+   ["@type" [:enum "dh:DimensionColumn" "dh:AttributeColumn" "dh:MeasureColumn"]]
    ["csvw:datatype" [:or :string :keyword]]
    ["csvw:name" :string]
    ["csvw:titles" [:or
                    :string
-                   [:sequential :string]]]
-   ["@type" {:optional true} string?]])
+                   [:sequential :string]]]])
 
 (def LdSchemaInput
   "Schema for new schema documents"
-  (mu/merge
-   JsonLdBase
-   [:map {:closed false}
-    ["dh:columns" [:repeat {:min 1} LdSchemaInputColumn]]]))
+  (let [err-msg "Schema should have exactly 1 'dh:MeasureColumn', 1+ 'dh:DimensionColumn, 0+ 'dh:AttributeColumn'' "]
+    (mu/merge
+     JsonLdBase
+     [:and
+      [:map {:closed false}
+       ["dh:columns" [:repeat {:min 1} LdSchemaInputColumn]]]
+      [:fn {:error/message err-msg}
+       (fn release-schema-check [v]
+         (let [freqs (frequencies (map #(get % "@type") (get v "dh:columns")))]
+           (and (= 1  (get freqs "dh:MeasureColumn" 0))
+                (<= 1 (get freqs "dh:DimensionColumn" 0))
+                (<= 0 (get freqs "dh:AttributeColumn" 0)))))]])))
 
 ;; TODO: create better resource representation
 (def ResourceSchema
