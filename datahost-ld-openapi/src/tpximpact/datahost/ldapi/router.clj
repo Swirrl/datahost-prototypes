@@ -230,10 +230,7 @@
                        :options nil})
            :multipart-opts {:formats {"application/json" (comp json/read io/reader)}}
            :muuntaja muuntaja-custom-instance
-           :middleware [;; exception handling
-                        ldapi-errors/exception-middleware
-
-                        cors-middleware
+           :middleware [cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
@@ -244,6 +241,8 @@
 
                         ;; encoding response body
                         muuntaja/format-response-middleware
+                        ;; exception handling
+                        ldapi-errors/exception-middleware
                         ;; decoding request body
                         muuntaja/format-request-middleware
                         ;; coercing response bodies

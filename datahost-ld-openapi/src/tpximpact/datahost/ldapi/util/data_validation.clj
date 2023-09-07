@@ -49,7 +49,7 @@
   "
   [csvw-col-schema]
   (let [datatype (first (get csvw-col-schema (column-key :datatype)))
-        schema (get {"integer" :int "string" :string "double" :double} datatype datatype)]
+        schema (get {"int" :int "integer" :int "string" :string "double" :double} datatype datatype)]
     (if-not (get csvw-col-schema (column-key :required))
       [:maybe schema]
       schema)))

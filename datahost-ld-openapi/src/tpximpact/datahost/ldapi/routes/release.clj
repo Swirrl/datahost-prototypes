@@ -20,7 +20,7 @@
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn put-release-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata for a release"
@@ -58,7 +58,7 @@
    :responses {200 {:description "Release schema successfully retrieved"
                     :content {"application/ld+json"
                               {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn post-release-ld-schema-config
   [clock triplestore system-uris]

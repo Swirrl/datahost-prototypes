@@ -6,14 +6,12 @@
    [reitit.coercion :as coercion]
    [reitit.ring.middleware.multipart :as multipart]
    [ring.middleware.multipart-params :as multipart-params]
+   [ring.util.http-status :as status]
    [tpximpact.datahost.ldapi.db :as db]
+   [tpximpact.datahost.ldapi.errors :as errors]
    [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]))
-
-(def not-found-response
-  {:status 404
-   :body "Not found"})
 
 (defn json-only
   "Middleware that requires the request to pass 'Content-Type: application/json'.
@@ -24,8 +22,8 @@
       (if (or (= "application/json" content-type)
               (= "application/ld+json" content-type))
         (handler request)
-        {:status 406
-         :body "Not acceptable. Only Content-Type: application/json is accepted"}))))
+        {:status status/not-acceptable
+         :body {:message "Not acceptable. Only Content-Type: application/json is accepted"}}))))
 
 (defn entity-uris-from-path
   [system-uris entities handler _id]
@@ -52,7 +50,7 @@
                    :dh/Change (db/get-change triplestore uri))]
       (if entity
         (handler (assoc-in request [:datahost.request/entities entity-kw] entity))
-        not-found-response))))
+        (errors/not-found-response request)))))
 
 (defn resource-exist?
   "Checks whether resource exists and short-circuits with 404 response if

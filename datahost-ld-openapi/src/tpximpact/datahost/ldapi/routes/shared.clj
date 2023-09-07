@@ -8,6 +8,12 @@
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.ldapi.db :as db]))
 
+(def NotFoundErrorBody
+  "Default body for 404 errors, for 'application/[ld+]json and others."
+  [:or
+   [:re "Not found"]
+   [:map ["message" [:re "Not found"]]]])
+
 (def JsonLdBase
   "Common entries in JSON-LD documents.
 
