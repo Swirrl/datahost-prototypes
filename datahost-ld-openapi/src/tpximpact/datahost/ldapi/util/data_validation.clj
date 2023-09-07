@@ -108,7 +108,7 @@
 (defn row-schema->column-names
   "Returns a seq of column names supported by the row schema."
   [row-schema]
-  (map (comp :dataset.column/name m/properties) 
+  (map (comp :dataset.column/name m/properties)
        (m/children row-schema)))
 
 (defn- validate-found-columns
@@ -140,7 +140,7 @@
   properties (see [[make-row-schema]], [[malli.core/properties]]).
 
   Options:
-  
+
   - :fail-fast? (boolean) - terminate validation on first failure."
   [dataset schema {:keys [fail-fast?] :as options}]
   (when-not (validate-dataset-options-valid? options)
@@ -195,7 +195,7 @@
   (tc/set-dataset-name (slurpable->dataset (.toFile v) opts)
                        (.getFileName v)))
 
-(defmethod -as-dataset java.io.BufferedInputStream [^java.io.BufferedInputStream v opts]
+(defmethod -as-dataset java.io.InputStream [^java.io.InputStream v opts]
   (slurpable->dataset v opts))
 
 (defmethod -as-dataset :datahost.types/seq-of-maps [v _opts]
@@ -215,7 +215,7 @@
   The value can be:
   - `java.io.File`
   - `java.net.URL` (e.g. a resource)
-  
+
   See also: [[tc/dataset]]"
   [v opts]
   {:pre [(as-dataset-opts-valid? opts)]}

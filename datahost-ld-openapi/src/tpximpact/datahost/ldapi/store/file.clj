@@ -67,7 +67,7 @@
           (.renameTo store-temp location)
           (log/debug  "-insert-data-with-request" {:type (type data) :key digest})))
       digest))
-  
+
   (-insert-data [this {:keys [tempfile]}]
     (store/-insert-data-with-request this (store/make-insert-request! this tempfile)))
 

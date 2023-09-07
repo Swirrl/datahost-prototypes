@@ -1,17 +1,19 @@
 (ns tpximpact.datahost.ldapi.routes.middleware
   (:require
-   [clojure.data.json :as json]
    [malli.core :as m]
    [malli.error :as me]
    [reitit.coercion :as coercion]
-   [reitit.ring.middleware.multipart :as multipart]
+   [reitit.impl :as impl]
+   [reitit.spec :as rs]
    [ring.middleware.multipart-params :as multipart-params]
    [ring.util.http-status :as status]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.errors :as errors]
    [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
-   [tpximpact.datahost.ldapi.schemas.common :as s.common]))
+   [tpximpact.datahost.ldapi.schemas.common :as s.common]
+   [tpximpact.datahost.system-uris :as su :refer [resource-uri]]
+   [clojure.java.io :as io]))
 
 (defn json-only
   "Middleware that requires the request to pass 'Content-Type: application/json'.
@@ -98,7 +100,7 @@
 
   Explainers will be used to return the error message in the
   response (see [[malli.core/explainer]]).
-  
+
   Motivation: on creation we usually require different set of
   parameters to be in the request, while updates can supply only a
   subset (e.g. only the title).
@@ -130,9 +132,11 @@
             (handler request)))))))
 
 (defn- match-content-type [content-type formats]
-  (or (get formats content-type)
-      (let [[_ ns type] (re-find #"([^/]+)/(?:[^\+]+\+)?([^\+].*)" content-type)]
-        (get formats (str ns \/ type)))))
+  (and content-type
+       (seq content-type)
+       (or (get formats content-type)
+           (let [[_ ns type] (re-find #"([^/]+)/(?:[^\+]+\+)?([^\+].*)" content-type)]
+             (get formats (str ns \/ type))))))
 
 (defn- parse-multipart-params [request {:keys [formats] :as options}]
   (letfn [(parse-part [[k {:keys [content-type tempfile] :as p}]]
@@ -184,3 +188,34 @@
                             :system-uris system-uris
                             :request request})
       (handler request))))
+
+(def configurable-coerce-request-middleware
+  "Reimplementation of reitit.ring.coercion/coerce-request-middleware, that
+  allows coercion configuration on a per-route basis.
+
+  Middleware for pluggable request coercion.
+  Expects a :coercion of type `reitit.coercion/Coercion`
+  and :parameters from route data, otherwise does not mount."
+  {:name ::coerce-request
+   :spec ::rs/parameters
+   :compile (fn [{:keys [coercion parameters ::coercion/parameter-coercion]} opts]
+              (let [opts (cond-> opts
+                           parameter-coercion
+                           (update ::coercion/parameter-coercion merge parameter-coercion))]
+                (cond
+                  ;; no coercion, skip
+                  (not coercion) nil
+                  ;; just coercion, don't mount
+                  (not parameters) {}
+                  ;; mount
+                  :else
+                  (if-let [coercers (coercion/request-coercers coercion parameters opts)]
+                    (fn [handler]
+                      (fn
+                        ([request]
+                         (let [coerced (coercion/coerce-request coercers request)]
+                           (handler (impl/fast-assoc request :parameters coerced))))
+                        ([request respond raise]
+                         (let [coerced (coercion/coerce-request coercers request)]
+                           (handler (impl/fast-assoc request :parameters coerced) respond raise)))))
+                    {}))))})

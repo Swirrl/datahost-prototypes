@@ -17,8 +17,12 @@
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
    [tpximpact.datahost.ldapi.util.triples
-    :refer [triples->ld-resource triples->ld-resource-collection]])
-  (:import (java.net URI)))
+    :refer [triples->ld-resource triples->ld-resource-collection]]
+   [clojure.java.io :as io]
+   [tpximpact.datahost.ldapi.routes.middleware :as middleware])
+  (:import
+   (java.net URI)
+   (java.io ByteArrayInputStream ByteArrayOutputStream)))
 
 (defn- box [x]
   (if (coll? x) x [x]))
@@ -123,7 +127,8 @@
 
 (defn post-release-schema
   [clock triplestore system-uris {path-params :path-params
-                                  {{:keys [schema-file]} :multipart} :parameters :as request}]
+                                  {schema-file :body} :parameters :as request}]
+  {:pre [schema-file]}
   (if (db/resource-exists? triplestore (su/dataset-series-uri* system-uris path-params))
     (let [incoming-jsonld-doc schema-file
           api-params (get-api-params request)]
@@ -261,12 +266,17 @@
   "Returns a map {:dataset DATASET (optional-key :error-response) ...},
   containing :error-response entry when validation failed."
   [release-schema appends]
-  (let [dataset (data-validation/as-dataset (:tempfile appends) {})
+  (let [dataset (data-validation/as-dataset appends {})
         schema (data-validation/make-row-schema release-schema)
         {:keys [explanation]} (data-validation/validate-dataset dataset schema
                                                                 {:fail-fast? true})]
     (cond-> {:dataset dataset}
       (some? explanation) (assoc :error-response {:status 400 :body explanation}))))
+
+(defn ->byte-array-input-stream [input-stream]
+  (with-open [intermediate (java.io.ByteArrayOutputStream.)]
+    (io/copy input-stream intermediate)
+    (java.io.ByteArrayInputStream. (.toByteArray intermediate))))
 
 (defn post-change
   [triplestore
@@ -274,17 +284,24 @@
    system-uris
    change-kind
    {path-params :path-params
-    {{:keys [jsonld-doc appends]} :multipart} :parameters ;TODO: change 'appends' to ??
+    jsonld-doc :query-params
+    appends :body
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
   (let [change-id 1
         change-uri ^URI (su/change-uri* system-uris (assoc path-params :change-id change-id))
         ;; validate incoming data
         release-schema (db/get-release-schema triplestore release-uri)
+        ;; If there's no release-schema, then no validation happens, and db/insert
+        ;; is a NOOP. This fails further down in the `let` body in
+        ;; #'internal/post-change--generate-csv-snapshot
+        ;; We don't need to proceed further if there's no release-schema!
+        _ (assert release-schema (str "No release schema found for: " release-uri))
+        appends (->byte-array-input-stream appends)
         {validation-err :error-response
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         ;; insert relevant triples
-        insert-req (store/make-insert-request! change-store (:tempfile appends))
+        insert-req (store/make-insert-request! change-store appends)
         {:keys [inserted-jsonld-doc resource-id message]} (when-not validation-err
                                                             (db/insert-change! triplestore
                                                                                system-uris

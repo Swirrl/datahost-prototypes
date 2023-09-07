@@ -65,7 +65,7 @@
   {:summary "Create schema for a release"
    :handler (partial handlers/post-release-schema clock triplestore system-uris)
    ;; NOTE: file schema JSON content string is validated within the handler itself
-   :parameters {:multipart [:map [:schema-file routes-shared/LdSchemaInput]]
+   :parameters {:body routes-shared/LdSchemaInput
                 :path {:series-slug :string
                        :release-slug :string}}
    :openapi {:security [{"basic" []}]}

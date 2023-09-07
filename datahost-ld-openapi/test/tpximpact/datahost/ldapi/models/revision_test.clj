@@ -187,7 +187,7 @@
                                            {:schema schema-req-body})))
 
               _resp (POST (str release-url "/schema")
-                          {:multipart [(th/jsonld-multipart "schema-file" schema-req-body)]})]
+                          (th/jsonld-body-request schema-req-body))]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
@@ -232,10 +232,10 @@
               ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/appends"
               (let [change-ednld {"dcterms:description" "A new change"
                                   "dcterms:format" "text/csv"}
-                    multipart-temp-file-part (th/build-csv-multipart csv-2019-path)
-                    change-api-response (POST (str new-revision-location "/appends")
-                                              {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
-                                                           multipart-temp-file-part]})
+                    change-api-response (POST (str new-revision-location "/changes")
+                                              {:query-params change-ednld
+                                               :headers {"content-type" "text/csv"}
+                                               :body (th/file-upload csv-2019-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
                 (is (= 201 (:status change-api-response)))
@@ -252,13 +252,13 @@
                         "responds CSV contents")))))
 
             (testing "Ensure we can't add more than 1 change to a revision."
-              ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
+                                        ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
               (let [change-ednld {"dcterms:description" "A new second change"
                                   "dcterms:format" "text/csv"}
-                    multipart-temp-file-part (th/build-csv-multipart csv-2020-path)
-                    change-api-response (POST (str new-revision-location "/appends")
-                                              {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
-                                                           multipart-temp-file-part]})
+                    change-api-response (POST (str new-revision-location "/changes")
+                                              {:query-params change-ednld
+                                               :headers {"content-type" "text/csv"}
+                                               :body (th/file-upload csv-2020-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
                 (is (= 422 (:status change-api-response)))
                 (is (nil? new-change-resource-location))))
@@ -292,16 +292,15 @@
               (testing "Third Changes append resource created against 2nd Revision"
                 (let [change-3-ednld {"dcterms:description" "A new third change"
                                       "dcterms:format" "text/csv"}
-                      multipart-temp-file-part (th/build-csv-multipart csv-2021-path)
-                      change-api-response (POST (str new-revision-location-2 "/appends")
-                                                {:multipart [(th/jsonld-multipart "jsonld-doc" change-3-ednld)
-                                                             multipart-temp-file-part]})
-                      body (:body change-api-response)]
+                      change-api-response (POST (str new-revision-location-2 "/changes")
+                                                {:query-params change-3-ednld
+                                                 :headers {"content-type" "text/csv"}
+                                                 :body (th/file-upload csv-2021-path)})]
                   (is (= 201 (:status change-api-response)))
                   (is (id-matches? (:body change-api-response) "/changes/1"))))
 
               (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
-                
+
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
                       valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
@@ -336,10 +335,10 @@
                       new-revision-location-3 (-> revision-resp-3 :headers (get "Location"))
                       change-4-ednld {"dcterms:description" "A new fourth deletes change"
                                       "dcterms:format" "text/csv"}
-                      multipart-temp-file-part (th/build-csv-multipart csv-2021-deletes-path)
-                      change-api-response (POST (str new-revision-location-3 "/retractions")
-                                                {:multipart [(th/jsonld-multipart "jsonld-doc" change-4-ednld)
-                                                             multipart-temp-file-part]})
+                      change-api-response (POST (str new-revision-location-3 "/deletes")
+                                                {:query-params change-4-ednld
+                                                 :headers {"content-type" "text/csv"}
+                                                 :body (th/file-upload csv-2021-deletes-path)})
                       response-body-doc (json/read-str (:body change-api-response))]
                   (is (= 201 (:status change-api-response)))
                   (is (= ":dh/ChangeKindRetract" (get response-body-doc "dh:changeKind")))
@@ -417,5 +416,3 @@
           (is (= 200 (:status response)))
           (is (= {"@context" ["http://www.w3.org/ns/csvw" {"@language" "en"}]}
                  body)))))))
-
-

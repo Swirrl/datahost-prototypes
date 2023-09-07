@@ -27,6 +27,7 @@
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
+   [muuntaja.format.json :as json-format]
    [clojure.data.json :as json]
    [clojure.java.io :as io])
   (:import
@@ -55,21 +56,24 @@
      :decoder [decode-str]
      :encoder [encode-str]}))
 
-(def muuntaja-custom-instance
-  (m/create
-   (-> (assoc-in
-        m/default-options
-        [:formats "text/csv"] csv-format)
-       (update :formats (fn [formats]
-                          (let [json-format (get formats "application/json")]
-                            (assoc formats "application/ld+json"
-                                   (assoc json-format :name "application/ld+json"))))))))
+(defn jsonld-options [options]
+  (assoc-in options
+            [:formats "application/ld+json"]
+            (-> json-format/format
+                (assoc :name "application/ld+json"
+                       :decoder-opts {:decode-key-fn identity}
+                       :encoder-opts {:encode-key-fn identity}))))
+
+(defn leave-json-keys-alone [options]
+  (-> options
+      (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
+      (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity})))
 
 (def leave-keys-alone-muuntaja-coercer
-  (m/create
-   (-> m/default-options
-       (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
-       (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
+  (-> m/default-options
+      jsonld-options
+      leave-json-keys-alone
+      m/create))
 
 (defn authenticate-user [users authdata]
   (let [username (:username authdata)
@@ -178,8 +182,7 @@
                                 :headers {"content-type" "text/plain"}
                                 :body "{+url}-metadata.json\nmetadata.json"})}}]]
 
-    ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
-              :tags ["linked data api"]}
+    ["/data" {:tags ["linked data api"]}
      [""
       {:get (routes.s/get-series-list-route-config triplestore system-uris)}]
 
@@ -231,7 +234,7 @@
                        ;; malli options
                        :options nil})
            :multipart-opts {:formats {"application/json" (comp json/read io/reader)}}
-           :muuntaja muuntaja-custom-instance
+           :muuntaja leave-keys-alone-muuntaja-coercer
            :middleware [cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
@@ -250,7 +253,8 @@
                         ;; coercing response bodies
                         coercion/coerce-response-middleware
                         ;; coercing request parameters
-                        coercion/coerce-request-middleware
+                        ;; coercion/coerce-request-middleware
+                        middleware/configurable-coerce-request-middleware
                         ;; multipart
                         middleware/multipart-middleware
 
