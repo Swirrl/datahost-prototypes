@@ -38,50 +38,38 @@
                   "csvw:datatype" "string"
                   "csvw:name" "foo_bar"
                   "csvw:titles" "Foo Bar"}
-                 {"@type" "dh:DimensionColumn"
+                 {"@type" "dh:MeasureColumn"
                   "csvw:datatype" "string"
                   "csvw:name" "height"
                   "csvw:titles" "Height"}]})
 
-(defn- build-json-multipart [json-path]
-  (let [json-file (io/file json-path)]
-    {:tempfile json-file
-     :size (.length json-file)
-     :filename (.getName json-file)
-     :content-type "application/json"}))
-
 (deftest round-tripping-release-schema-from-file-test
   (let [n (format "%03d" (rand-int 100))
         _ (setup-release n)
-        {{:keys [GET]} :tpximpact.datahost.ldapi.test/http-client
+        {{:keys [GET POST]} :tpximpact.datahost.ldapi.test/http-client
          ld-api-app :tpximpact.datahost.ldapi.router/handler} @th/*system*
 
         rdf-base-uri (th/sys->rdf-base-uri @th/*system*)
 
-        csvw-type (fn [col-name titles] {"csvw:datatype" "string"
-                                         "csvw:name" col-name
-                                         "csvw:titles" titles
-                                         "@type" "dh:DimensionColumn"})]
+        csvw-col (fn [typ col-name titles]
+                   {"csvw:datatype" "string"
+                    "csvw:name" col-name
+                    "csvw:titles" titles
+                    "@type" typ})]
     (testing "Creating a schema from file upload"
       (let [schema-fragment (format "my-series-%s/releases/release-%s/schema" n n)
             schema-resource-path (str "/data/" schema-fragment)
             schema-uri (str rdf-base-uri schema-fragment)
             temp-schema-file (File/createTempFile "my-schema-1" ".json")
 
-            _ (with-open [file (io/writer temp-schema-file)]
-                (binding [*out* file]
-                  (println (json/write-str
-                            {"@context" ["https://publishmydata.com/def/datahost/context"
-                                         {"@base" (str rdf-base-uri "my-series-" n "/")}]
-                             "dcterms:title" "Fun schema"
-                             "dh:columns" [(csvw-type "foo_bar" ["Foo Bar"])
-                                           (csvw-type "height" ["Height"])]}))))
+            rel-schema {"@context" ["https://publishmydata.com/def/datahost/context"
+                                    {"@base" (str rdf-base-uri "my-series-" n "/")}]
+                        "dcterms:title" "Fun schema"
+                        "dh:columns" [(csvw-col "dh:DimensionColumn" "foo_bar" ["Foo Bar"])
+                                      (csvw-col "dh:MeasureColumn" "height" ["Height"])]}
 
-            json-file-multipart (build-json-multipart (.getAbsolutePath temp-schema-file))
-            response (ld-api-app {:request-method :post
-                         :uri schema-resource-path
-                         :multipart-params {:schema-file json-file-multipart}
-                         :content-type "application/json"})
+            response (POST schema-resource-path
+                           {:multipart [(th/jsonld-multipart "schema-file" rel-schema)]})
             resp-body (json/read-str (:body response))
             expected-doc (schema-doc n rdf-base-uri)
             [missing _extra _matching] (diff expected-doc resp-body)]
@@ -99,7 +87,7 @@
                 [missing _extra _matching] (diff expected-doc body)]
             (is (= nil missing))))))))
 
-(t/deftest one-column-schema-test
+(t/deftest minimal-column-count-schema-test
   (let [n (format "%03d" (rand-int 1000))
         _ (setup-release n)
         {{:keys [GET POST]} :tpximpact.datahost.ldapi.test/http-client
@@ -107,9 +95,14 @@
         schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
         schema {"dcterms:title" "Fun schema"
                 "dcterms:description" "Description"
-                "dh:columns" [{"csvw:datatype" "string"
-                               "csvw:name" "test"
-                               "csvw:titles" "Test"}]}
+                "dh:columns" [{"@type" "dh:MeasureColumn"
+                               "csvw:datatype" "string"
+                               "csvw:name" "measure"
+                               "csvw:titles" "Measure"}
+                              {"@type" "dh:DimensionColumn"
+                               "csvw:datatype" "string"
+                               "csvw:name" "dim"
+                               "csvw:titles" "Dimension"}]}
 
         _response (POST schema-path
                         {:multipart [(th/jsonld-multipart "schema-file" schema)]})

@@ -464,7 +464,6 @@
         schema-doc (update schema-doc "dh:columns" (fn [cols]
                                                      (map-indexed (fn mapper [index col]
                                                                     (assoc col "@id" (str schema-uri "/columns/" (inc index))
-                                                                           "@type" "dh:DimensionColumn"
                                                                            "csvw:number" (inc index)))
                                                                   cols)))
         schema-resource (resource/from-json-ld-doc schema-doc)]
