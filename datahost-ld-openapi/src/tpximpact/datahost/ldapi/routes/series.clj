@@ -10,7 +10,7 @@
    :handler (partial handlers/get-series-list triplestore system-uris)
    :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn get-series-route-config [triplestore system-uris]
   {:summary "Retrieve metadata for an existing dataset-series"
@@ -19,7 +19,7 @@
    :parameters {:path {:series-slug string?}}
    :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn put-series-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata on a dataset-series"

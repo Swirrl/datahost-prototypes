@@ -21,7 +21,7 @@
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn get-release-list-route-config [triplestore system-uris]
   {:summary "All releases metadata in the given series"
@@ -29,7 +29,7 @@
    :parameters {:path {:series-slug string?}}
    :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn get-revision-list-route-config [triplestore system-uris]
   {:summary "All revisions metadata in the given release"
@@ -38,7 +38,7 @@
                        :release-slug string?}}
    :responses {200 {:content {"application/ld+json"
                               {:body string?}}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn post-revision-route-config [triplestore system-uris]
   {:summary (str "Create metadata for a revision. The successfully created resource "
@@ -116,4 +116,4 @@
                        :change-id int?}}
    :responses {200 {:content
                     {"text/csv" any?}}
-               404 {:body [:re "Not found"]}}})
+               404 {:body routes-shared/NotFoundErrorBody}}})

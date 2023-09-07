@@ -8,6 +8,7 @@
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.ldapi.compact :as cmp]
    [tpximpact.datahost.ldapi.db :as db]
+   [tpximpact.datahost.ldapi.errors :as errors]
    [tpximpact.datahost.ldapi.store :as store]
    [tpximpact.datahost.ldapi.json-ld :as json-ld]
    [tpximpact.datahost.ldapi.handlers.internal :as internal]
@@ -21,10 +22,6 @@
 
 (defn- box [x]
   (if (coll? x) x [x]))
-
-(def not-found-response
-  {:status 404
-   :body "Not found"})
 
 (defn- as-json-ld [response]
   (assoc-in response [:headers "content-type"] "application/ld+json"))
@@ -70,14 +67,14 @@
     :update 200
     :noop   200))
 
-(defn get-dataset-series [triplestore system-uris {{:keys [series-slug]} :path-params}]
+(defn get-dataset-series [triplestore system-uris {{:keys [series-slug]} :path-params :as request}]
   (if-let [series (->> (db/get-dataset-series triplestore (su/dataset-series-uri system-uris series-slug))
                        (matcha/index-triples)
                        (triples->ld-resource))]
     (as-json-ld {:status 200
                  :body (-> (json-ld/compact series (json-ld/simple-context system-uris))
                            (.toString))})
-    not-found-response))
+    (errors/not-found-response request)))
 
 (defn put-dataset-series [clock triplestore system-uris {:keys [body-params] :as request}]
   (let [api-params (get-api-params request)
@@ -110,7 +107,7 @@
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
                              (.toString))}))
-    not-found-response))
+    (errors/not-found-response request)))
 
 
 (defn put-release [clock triplestore system-uris {path-params :path-params
@@ -133,7 +130,7 @@
       (as-> (db/upsert-release-schema! clock triplestore system-uris incoming-jsonld-doc api-params) insert-result
             (as-json-ld {:status (op->response-code (:op insert-result))
                          :body (:jsonld-doc insert-result)})))
-    not-found-response))
+    (errors/not-found-response request)))
 
 (defn- get-schema-id [matcha-db]
   ((grafter.matcha.alpha/select-1 [?schema]
@@ -141,7 +138,7 @@
    matcha-db))
 
 (defn get-release-schema
-  [triplestore system-uris {path-params :path-params}]
+  [triplestore system-uris {path-params :path-params :as request}]
   (let [release-uri (su/dataset-release-uri* system-uris path-params)
         matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
     (if-let [schema-id (get-schema-id matcha-db)]
@@ -156,7 +153,7 @@
                                                 (merge (json-ld/simple-context system-uris)
                                                        {"dh:columns" {"@container" "@set"}}))
                                (.toString))}))
-      not-found-response)))
+      (errors/not-found-response request))))
 
 (defn- revision-number
   "Returns a number or throws."
@@ -336,7 +333,7 @@
       (write-dataset-to-outputstream dataset))))
 
 (defn get-change [triplestore change-store system-uris {{:keys [series-slug release-slug revision-id change-id]} :path-params
-                        {:strs [accept]} :headers :as _request}]
+                        {:strs [accept]} :headers :as request}]
   (if-let [change (->> (su/change-uri system-uris series-slug release-slug revision-id change-id)
                        (db/get-change triplestore)
                        matcha/index-triples
@@ -350,4 +347,4 @@
       {:status 406
        :headers {}
        :body "Only text/csv format is available at this time."})
-    not-found-response))
+    (errors/not-found-response request)))

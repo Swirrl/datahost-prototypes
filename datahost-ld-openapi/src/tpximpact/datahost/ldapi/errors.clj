@@ -1,7 +1,15 @@
 (ns tpximpact.datahost.ldapi.errors
   (:require
     [ring.util.http-status :as status]
+    [ring.util.response :as response]
     [reitit.ring.middleware.exception :as exception]))
+
+(defn not-found-response [request]
+  {:status 404
+   :body (if (some->> (response/get-header request "accept")
+                      (re-find #".*application\/(json|ld\+json).*"))
+           {"message" "Not found"}
+           "Not found")})
 
 ;; type hierarchy
 (derive ::error ::exception)
