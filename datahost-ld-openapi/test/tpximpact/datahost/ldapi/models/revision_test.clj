@@ -24,6 +24,13 @@
   [f coll]
   (first (filter f coll)))
 
+(defn id-matches? [body s]
+  (assert body)
+  (let [body' (if (string? body)
+                (json/read-str body)
+                body)]
+   (str/ends-with? (get body' "@id") s)))
+
 (defn- create-series [handler]
   (let [series-slug (str "new-series-" (UUID/randomUUID))
         request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
@@ -222,11 +229,11 @@
                 (t/is (= #{(str rdf-base-uri series-slug "/releases/" release-slug "/revisions/1")} release-revisions))))
 
             (testing "Changes append resource created with CSV appends file"
-              ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/changes"
+              ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/appends"
               (let [change-ednld {"dcterms:description" "A new change"
                                   "dcterms:format" "text/csv"}
                     multipart-temp-file-part (th/build-csv-multipart csv-2019-path)
-                    change-api-response (POST (str new-revision-location "/changes")
+                    change-api-response (POST (str new-revision-location "/appends")
                                               {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
                                                            multipart-temp-file-part]})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
@@ -245,11 +252,11 @@
                         "responds CSV contents")))))
 
             (testing "Ensure we can't add more than 1 change to a revision."
-              ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
+              ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
               (let [change-ednld {"dcterms:description" "A new second change"
                                   "dcterms:format" "text/csv"}
                     multipart-temp-file-part (th/build-csv-multipart csv-2020-path)
-                    change-api-response (POST (str new-revision-location "/changes")
+                    change-api-response (POST (str new-revision-location "/appends")
                                               {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
                                                            multipart-temp-file-part]})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
@@ -286,12 +293,12 @@
                 (let [change-3-ednld {"dcterms:description" "A new third change"
                                       "dcterms:format" "text/csv"}
                       multipart-temp-file-part (th/build-csv-multipart csv-2021-path)
-                      change-api-response (POST (str new-revision-location-2 "/changes")
+                      change-api-response (POST (str new-revision-location-2 "/appends")
                                                 {:multipart [(th/jsonld-multipart "jsonld-doc" change-3-ednld)
-                                                             multipart-temp-file-part]})]
+                                                             multipart-temp-file-part]})
+                      body (:body change-api-response)]
                   (is (= 201 (:status change-api-response)))
-                  (is (str/ends-with? (get (json/read-str (:body change-api-response)) "@id")
-                                      "/changes/1"))))
+                  (is (id-matches? (:body change-api-response) "/changes/1"))))
 
               (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
                 
@@ -330,13 +337,13 @@
                       change-4-ednld {"dcterms:description" "A new fourth deletes change"
                                       "dcterms:format" "text/csv"}
                       multipart-temp-file-part (th/build-csv-multipart csv-2021-deletes-path)
-                      change-api-response (POST (str new-revision-location-3 "/deletes")
+                      change-api-response (POST (str new-revision-location-3 "/retractions")
                                                 {:multipart [(th/jsonld-multipart "jsonld-doc" change-4-ednld)
                                                              multipart-temp-file-part]})
                       response-body-doc (json/read-str (:body change-api-response))]
                   (is (= 201 (:status change-api-response)))
                   (is (= ":dh/ChangeKindRetract" (get response-body-doc "dh:changeKind")))
-                  (is (str/ends-with? (get response-body-doc "@id") "/revisions/3/changes/1"))))))
+                  (is (id-matches? response-body-doc "/revisions/3/changes/1"))))))
 
 
           (testing "Creation of a auto-increment Revision IDs for a release"

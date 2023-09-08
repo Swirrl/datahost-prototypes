@@ -206,11 +206,13 @@
         {:get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/changes"
-        ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]
         ["/:change-id"
          {:get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]]
 
-       ["/:revision-id/deletes"
+       ["/:revision-id/appends"
+        ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]]
+
+       ["/:revision-id/retractions"
         {:post (routes.rev/post-revision-deletes-changes-route-config triplestore change-store system-uris)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
