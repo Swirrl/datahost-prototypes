@@ -25,6 +25,7 @@
    [ring.util.request :as r.u.request]
    [tpximpact.datahost.ldapi.errors :as ldapi-errors]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
+   [tpximpact.datahost.ldapi.routes.middleware.multipart-params :as multipart]
    [tpximpact.datahost.ldapi.routes.release :as routes.rel]
    [tpximpact.datahost.ldapi.routes.revision :as routes.rev]
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
@@ -254,7 +255,7 @@
                         ;; coercing request parameters
                         coercion/coerce-request-middleware
                         ;; multipart
-                        middleware/multipart-middleware
+                        multipart/multipart-middleware
 
                         (if auth
                           (basic-auth-middleware auth)

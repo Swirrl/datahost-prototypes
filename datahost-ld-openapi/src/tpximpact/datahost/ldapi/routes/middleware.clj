@@ -98,7 +98,7 @@
 
   Explainers will be used to return the error message in the
   response (see [[malli.core/explainer]]).
-  
+
   Motivation: on creation we usually require different set of
   parameters to be in the request, while updates can supply only a
   subset (e.g. only the title).
@@ -128,53 +128,6 @@
             {:status 400
              :body {:query-params query-errors}}
             (handler request)))))))
-
-(defn- match-content-type [content-type formats]
-  (or (get formats content-type)
-      (let [[_ ns type] (re-find #"([^/]+)/(?:[^\+]+\+)?([^\+].*)" content-type)]
-        (get formats (str ns \/ type)))))
-
-(defn- parse-multipart-params [request {:keys [formats] :as options}]
-  (letfn [(parse-part [[k {:keys [content-type tempfile] :as p}]]
-            [(keyword k)
-             (if-let  [parse-fn (match-content-type content-type formats)]
-               (parse-fn tempfile)
-               p)])]
-    (update request :multipart-params #(->> % (map parse-part) (into {})))))
-
-(defn- coerced-request [request coercers]
-  (if-let [coerced (if coercers (coercion/coerce-request coercers request))]
-    (update request :parameters merge coerced)
-    request))
-
-(defn- compile-multipart-middleware [options]
-  (fn [{:keys [parameters coercion multipart-opts]} opts]
-    (if-let [multipart (:multipart parameters)]
-      (let [parameter-coercion {:multipart (coercion/->ParameterCoercion
-                                            :multipart-params :string false true)}
-            opts (assoc opts ::coercion/parameter-coercion parameter-coercion)
-            coercers (if multipart (coercion/request-coercers coercion parameters opts))]
-        {:data {:swagger {:consumes ^:replace #{"multipart/form-data"}}}
-         :wrap (fn [handler]
-                 (fn
-                   ([request]
-                    (-> request
-                        (multipart-params/multipart-params-request options)
-                        (parse-multipart-params multipart-opts)
-                        (coerced-request coercers)
-                        (handler)))
-                   ([request respond raise]
-                    (-> request
-                        (multipart-params/multipart-params-request options)
-                        (parse-multipart-params multipart-opts)
-                        (coerced-request coercers)
-                        (handler respond raise)))))}))))
-
-(def multipart-middleware
-  "Modified reitit.ring.middleware.multipart/multipart-middleware that parses
-  multipart \"parts\" according to their content-type/configuration."
-  {:name ::multipart
-   :compile (compile-multipart-middleware nil)})
 
 (defn csvm-request-response
   [triplestore system-uris handler _id]
