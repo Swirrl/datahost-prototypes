@@ -10,10 +10,6 @@
       "schema": "release_1-1.json",
       "revisions": [{
         "file": "data/2019.csv"
-      }, {
-        "file": "data/2020.csv"
-      }, {
-        "file": "data/2021.csv"
       }]
     }, {
       "title": "Release 1-2",

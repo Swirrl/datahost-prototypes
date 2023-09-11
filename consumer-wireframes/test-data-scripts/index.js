@@ -1,9 +1,13 @@
 const fetch = require('node-fetch');
+const base64 = require('base-64');
 const data = require('./data/series.json');
 const FormData = require('form-data');
 const fs = require('fs');
+const user = require('./data/user.json');
+const login = user.username
+const password = user.password
 
-const openAPI = "http://localhost:3000";
+const openAPI = "http://127.0.0.1:3000";
 // const openAPI = "https://ldapi-prototype.gss-data.org.uk"
 
 createSeries = async (series) => {
@@ -12,7 +16,11 @@ createSeries = async (series) => {
 
     let url = `${openAPI}/data/${series}?title=${title}&description=${description}`
     const response = await fetch(url, {
-        method: 'PUT'
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+        },
     });
     const api = await response.json();
 
@@ -26,12 +34,15 @@ createRelease = async (series) => {
     for (j = 0; j < releases.length; j++) {
         let title = releases[j].title
         let id = releases[j].id
-        let url = `${openAPI}/data/${series}/releases/${id}?title=${title}`
+        let url = `${openAPI}/data/${series}/releases/${id}?title=${title}&description=test`
         const response = await fetch(url, {
-            method: 'PUT'
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+            },
         });
         const api = await response.json();
-
         url = `${openAPI}/data/${api["@id"]}`
         console.log(`Created: ${url}`)
 
@@ -42,20 +53,21 @@ createRelease = async (series) => {
 createSchemas = async (releases, series) => {
     if (releases[j].schema != null) {
         let schemaFile = `./data/${releases[j].schema}`
-        let schema = require(schemaFile);
         let id = releases[j].id
-        let url = `${openAPI}/data/${series}/releases/${id}/schemas/schema`
+        let url = `${openAPI}/data/${series}/releases/${id}/schema`
+        const formData = new FormData();
+        formData.append('schema-file', fs.createReadStream(schemaFile));
+        const settings = {
+            method: 'POST',
+            body: formData,
+            headers: {
+                "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+            },
+        };
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(schema)
-            });
-
-            const api = await response.json();
-            console.log(api)
+            const fetchResponse = await fetch(url, settings);
+            const data = await fetchResponse.json();
+            console.log(`Added data to: ${url}`)
         } catch (e) {
             console.log(e)
             return e;
@@ -66,19 +78,10 @@ createSchemas = async (releases, series) => {
 
 createRevision = async (series) => {
     let releases = data[i].releases
-    body = `
-        {"@context": [
-          "https://publishmydata.com/def/datahost/context",
-          {
-            "@base": "https://example.org/data/${series}/"
-          }
-        ],
-        "dcterms:title": "Revision"}`
-
+    body = `{"dcterms:title":"Revision","dcterms:description":"Test"}`
     for (j = 0; j < releases.length; j++) {
         let id = releases[j].id
         let url = `${openAPI}/data/${series}/releases/${id}/revisions`
-
         if (releases[j].revisions != null) {
             for (k = 0; k < releases[j].revisions.length; k++) {
                 let file = releases[j].revisions[k].file
@@ -90,12 +93,16 @@ createRevision = async (series) => {
 }
 
 postRevision = async (url, file) => {
-    url = url + "?title=Revision"
+    url = url + "?title=Revision&description=Test"
     const response = await fetch(url, {
         method: 'POST',
-        body: JSON.stringify(body)
+        body: body,
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+        },
     });
-    const api = await response.json();
+    const api = await response.json()
     let revision = api["@id"]
     console.log(`Created: ${openAPI}/data/${revision}`)
 
@@ -104,14 +111,25 @@ postRevision = async (url, file) => {
 
 uploadData = async (revision, file) => {
     const formData = new FormData();
+    const obj = {
+        'dcterms:title': "Test",
+        'dcterms:description': "Test desc",
+        'dcterms:format': "text/csv"
+      };
     formData.append('appends', fs.createReadStream(file));
+    formData.append("jsonld-doc", JSON.stringify(obj));
     const settings = {
         method: 'POST',
-        body: formData
+        body: formData,
+        headers: {
+            'Content-Type': 'application/json-ld',
+            "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+        },
     };
     try {
-        url = `${openAPI}/data/${revision}/changes?description=appends`
+        url = `${openAPI}/data/${revision}/changes`
         const fetchResponse = await fetch(url, settings);
+        console.log(fetchResponse)
         const data = await fetchResponse.json();
         console.log(`Added data to: ${url}`)
     } catch (e) {
