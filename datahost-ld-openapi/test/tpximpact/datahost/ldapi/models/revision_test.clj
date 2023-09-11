@@ -301,7 +301,7 @@
                   (is (id-matches? (:body change-api-response) "/changes/1"))))
 
               (testing "Fetching Release as CSV with multiple Revision and CSV append changes"
-                
+
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
                       valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
@@ -417,5 +417,3 @@
           (is (= 200 (:status response)))
           (is (= {"@context" ["http://www.w3.org/ns/csvw" {"@language" "en"}]}
                  body)))))))
-
-

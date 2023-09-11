@@ -234,8 +234,8 @@
                        :default-values true
                        ;; malli options
                        :options nil})
-           :middleware [cors-middleware
            :muuntaja leave-keys-alone-muuntaja-coercer
+           :middleware [cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature

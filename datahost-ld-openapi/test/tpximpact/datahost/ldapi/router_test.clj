@@ -44,9 +44,9 @@
                  :query-string "title=test"
                  :headers {"content-type" "application/ld+json"
                            "origin" origin}
-                 :body {"@context" {"dcterms" "http://wat"}
-                        "dcterms:title" "Test"
-                        "dcterms:description" "Test series"}}
+                 :body (json/write-str {"@context" {"dcterms" "http://wat"}
+                                        "dcterms:title" "Test"
+                                        "dcterms:description" "Test series"})}
         {:keys [status headers] :as _response} (handler request)]
     (t/is (= 201 status))
     (t/is (= origin (get headers "Access-Control-Allow-Origin")))))
