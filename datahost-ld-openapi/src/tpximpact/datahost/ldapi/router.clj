@@ -10,6 +10,7 @@
    [malli.util :as mu]
    [muuntaja.core :as m]
    [muuntaja.format.core :as fc]
+   [muuntaja.format.json :as json-format]
    [reitit.coercion.malli :as rcm]
    [reitit.dev.pretty :as pretty]
    [reitit.interceptor.sieppari :as sieppari]
@@ -55,21 +56,24 @@
      :decoder [decode-str]
      :encoder [encode-str]}))
 
-(def muuntaja-custom-instance
-  (m/create
-   (-> (assoc-in
-        m/default-options
-        [:formats "text/csv"] csv-format)
-       (update :formats (fn [formats]
-                          (let [json-format (get formats "application/json")]
-                            (assoc formats "application/ld+json"
-                                   (assoc json-format :name "application/ld+json"))))))))
+(defn jsonld-options [options]
+  (assoc-in options
+            [:formats "application/ld+json"]
+            (-> json-format/format
+                (assoc :name "application/ld+json"
+                       :decoder-opts {:decode-key-fn identity}
+                       :encoder-opts {:encode-key-fn identity}))))
+
+(defn leave-json-keys-alone [options]
+  (-> options
+      (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
+      (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity})))
 
 (def leave-keys-alone-muuntaja-coercer
-  (m/create
-   (-> m/default-options
-       (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
-       (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity}))))
+  (-> m/default-options
+      jsonld-options
+      leave-json-keys-alone
+      m/create))
 
 (defn authenticate-user [users authdata]
   (let [username (:username authdata)
@@ -178,8 +182,7 @@
                                 :headers {"content-type" "text/plain"}
                                 :body "{+url}-metadata.json\nmetadata.json"})}}]]
 
-    ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
-              :tags ["linked data api"]}
+    ["/data" {:tags ["linked data api"]}
      [""
       {:get (routes.s/get-series-list-route-config triplestore system-uris)}]
 
@@ -230,9 +233,8 @@
                        :default-values true
                        ;; malli options
                        :options nil})
-           :multipart-opts {:formats {"application/json" (comp json/read io/reader)}}
-           :muuntaja muuntaja-custom-instance
            :middleware [cors-middleware
+           :muuntaja leave-keys-alone-muuntaja-coercer
                         ;; swagger & openapi
                         swagger/swagger-feature
                         openapi/openapi-feature
