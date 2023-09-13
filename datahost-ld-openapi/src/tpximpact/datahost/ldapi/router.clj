@@ -69,6 +69,11 @@
       (assoc-in [:formats "application/json" :decoder-opts] {:decode-key-fn identity})
       (assoc-in [:formats "application/json" :encoder-opts] {:encode-key-fn identity})))
 
+(def default-muuntaja-coercer
+  (-> m/default-options
+      jsonld-options
+      m/create))
+
 (def leave-keys-alone-muuntaja-coercer
   (-> m/default-options
       jsonld-options
@@ -182,7 +187,14 @@
                                 :headers {"content-type" "text/plain"}
                                 :body "{+url}-metadata.json\nmetadata.json"})}}]]
 
-    ["/data" {:tags ["linked data api"]}
+    ["/data" {:muuntaja leave-keys-alone-muuntaja-coercer
+              ;; Routes below /data should have json keys left alone, not
+              ;; coerced.
+              ;; Routes above, E.G., swagger routes should have their keys
+              ;; coerced, especially on the way out as the response. Otherwise
+              ;; keywords will remain ":keyword" and swagger.json will be
+              ;; invalid
+              :tags ["linked data api"]}
      [""
       {:get (routes.s/get-series-list-route-config triplestore system-uris)}]
 
@@ -233,8 +245,9 @@
                        :default-values true
                        ;; malli options
                        :options nil})
+
            :multipart-opts {:formats {"application/json" (comp json/read io/reader)}}
-           :muuntaja leave-keys-alone-muuntaja-coercer
+           :muuntaja default-muuntaja-coercer
            :middleware [cors-middleware
                         ;; swagger & openapi
                         swagger/swagger-feature
