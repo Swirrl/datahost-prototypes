@@ -67,15 +67,17 @@
   (some->> (.getContentType item) parsing/find-content-type-charset))
 
 (defn- parse-file-item [^FileItemStream item store]
-  (let [field? (.isFormField item)]
+  (let [field? (.isFormField item)
+        content-type (.getContentType item)]
     {:field? field?
      :name   (.getFieldName item)
      :value  (if field?
-               {:bytes    (IOUtils/toByteArray (.openStream item))
-                :content-type (.getContentType item)
-                :encoding (parse-content-type-charset item)}
+               (cond-> {:bytes    (IOUtils/toByteArray (.openStream item))
+                        :encoding (parse-content-type-charset item)}
+                 content-type
+                 (assoc :content-type content-type))
                (store {:filename     (.getName item)
-                       :content-type (.getContentType item)
+                       :content-type content-type
                        :stream       (.openStream item)}))}))
 
 (defn- find-param [params name]
@@ -88,14 +90,17 @@
 (defn- decode-field
   [{:keys [bytes encoding] :as field} forced-encoding fallback-encoding]
   (let [encoding (str (or forced-encoding encoding fallback-encoding))]
-    (assoc field
-           :content (String. ^bytes bytes encoding)
-           :encoding encoding)))
+    (-> field
+        (dissoc :bytes)
+        (assoc :body (String. ^bytes bytes encoding)
+               :encoding encoding))))
 
 (defn- build-param-map [encoding fallback-encoding params]
   (let [enc (or encoding (parse-html5-charset params))]
     (reduce (fn [m {:keys [name value field?]}]
-              (assoc-conj m name (if field?
+              (assoc-conj m
+                          (keyword name)
+                          (if field?
                                    (decode-field value enc fallback-encoding)
                                    value)))
             {}
@@ -135,20 +140,13 @@
                  {:multipart-params params}
                  {:params params}))))
 
-(defn- match-content-type [content-type formats]
-  (and content-type
-       (seq content-type)
-       (or (get formats content-type)
-           (let [[_ ns type] (re-find #"([^/]+)/(?:[^\+]+\+)?([^\+].*)" content-type)]
-             (get formats (str ns \/ type))))))
-
 (defn- decode-multipart-params [request muuntaja]
-  (letfn [(decode-part [[k {:keys [content-type content tempfile encoding] :as p}]]
-            (let [content-type-subtype (parse-content-type-subtype content-type)]
-              [(keyword k)
-               (if-let  [decode (m/decoder muuntaja content-type-subtype)]
-                 (decode (or content tempfile) encoding)
-                 p)]))]
+  (letfn [(decode-part [[k {:keys [content-type body tempfile encoding] :as p}]]
+            [k (if-let  [decode (some->> content-type
+                                         (parse-content-type-subtype)
+                                         (m/decoder muuntaja))]
+                 (decode (or body tempfile) encoding)
+                 p)])]
     (update request :multipart-params #(->> % (map decode-part) (into {})))))
 
 (defn- coerced-request [request coercers]
