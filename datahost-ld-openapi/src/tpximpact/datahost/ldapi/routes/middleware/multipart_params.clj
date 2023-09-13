@@ -101,8 +101,8 @@
               (assoc-conj m
                           (keyword name)
                           (if field?
-                                   (decode-field value enc fallback-encoding)
-                                   value)))
+                            (decode-field value enc fallback-encoding)
+                            value)))
             {}
             params)))
 
@@ -140,14 +140,21 @@
                  {:multipart-params params}
                  {:params params}))))
 
-(defn- decode-multipart-params [request muuntaja]
-  (letfn [(decode-part [[k {:keys [content-type body tempfile encoding] :as p}]]
-            [k (if-let  [decode (some->> content-type
-                                         (parse-content-type-subtype)
-                                         (m/decoder muuntaja))]
-                 (decode (or body tempfile) encoding)
-                 p)])]
-    (update request :multipart-params #(->> % (map decode-part) (into {})))))
+(defn- decode-multipart-params
+  [request muuntaja {:keys [encoding fallback-encoding]}]
+  (let [fallback-encoding (or encoding
+                              fallback-encoding
+                              (req/character-encoding request)
+                              "UTF-8")]
+    (letfn [(decode-part [[k {:keys [content-type body tempfile encoding] :as p}]]
+              [k (if-let  [decode (some->> content-type
+                                           (parse-content-type-subtype)
+                                           (m/decoder muuntaja))]
+                   (let [encoding (or encoding fallback-encoding)
+                         content (or body (some-> tempfile slurp))]
+                     (decode content encoding))
+                   p)])]
+      (update request :multipart-params #(->> % (map decode-part) (into {}))))))
 
 (defn- coerced-request [request coercers]
   (if-let [coerced (if coercers (coercion/coerce-request coercers request))]
@@ -167,13 +174,13 @@
                    ([request]
                     (-> request
                         (multipart-params-request options)
-                        (decode-multipart-params muuntaja)
+                        (decode-multipart-params muuntaja options)
                         (coerced-request coercers)
                         (handler)))
                    ([request respond raise]
                     (-> request
                         (multipart-params-request options)
-                        (decode-multipart-params muuntaja)
+                        (decode-multipart-params muuntaja options)
                         (coerced-request coercers)
                         (handler respond raise)))))}))))
 

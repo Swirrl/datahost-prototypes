@@ -11,8 +11,8 @@
 (defn wrap-multipart-params
   ([handler]
    (wrap-multipart-params handler {}))
-  ([handler options]
-   (let [reitit {:parameters {:multipart {}}
+  ([handler {:keys [parameters] :as options}]
+   (let [reitit {:parameters (or parameters {:multipart {}})
                  :coercion (rcm/create)
                  :muuntaja leave-keys-alone-muuntaja-coercer}
          reitit-middleware (@#'mp/compile-multipart-middleware options)
@@ -225,3 +225,18 @@
     (let [response ((wrap-multipart-params handler {:max-file-count 2})
                     {:headers headers, :body (string-input-stream form-body)})]
       (is (= 200 (:status response))))))
+
+(deftest blob-json-parsing
+  (let [form-body (str "--XXXX\r\n"
+                       "Content-Disposition: form-data;"
+                       "name=\"json\"; filename=\"blob\"\r\n"
+                       "Content-Type: application/json;\r\n\r\n"
+                       "{}\r\n"
+                       "--XXXX--")
+        request {:headers {"content-type"
+                           (str "multipart/form-data; boundary=XXXX")}
+                 :body (string-input-stream form-body "UTF-8")}
+        handler (wrap-multipart-params identity {:parameters {:multipart {:json [:any]}}})
+        request* (handler request)]
+    (is (= (get-in request* [:multipart-params :json]) {}))
+    (is (= (get-in request* [:parameters :multipart :json]) {}))))
