@@ -87,7 +87,11 @@
                 :path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}}
-   :openapi {:security [{"basic" []}]}
+   :openapi {:security [{"basic" []}]
+             :requestBody
+             {:content {"multipart/form-data"
+                        {:encoding
+                         {:jsonld-doc {:contentType "application/ld+json"}}}}}}
    :responses {201 {:description "Changes were added to a Revision"
                     :content {"application/ld+json"
                               {:body string?}}
