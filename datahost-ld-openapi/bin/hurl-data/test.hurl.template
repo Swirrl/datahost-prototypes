@@ -38,7 +38,7 @@ HTTP 201
 [Captures]
 revision_url: header "Location"
 
-POST http://localhost:3000{{revision_url}}/changes
+POST http://localhost:3000{{revision_url}}/appends
 [MultipartFormData]
 appends: file,bin/hurl-data/change1.csv; text/csv
 jsonld-doc: file,bin/hurl-data/change1.meta.json; application/json
