@@ -22,8 +22,16 @@
 (defn- create-put-request [series-slug body]
   {:uri (str "/data/" series-slug)
    :request-method :put
-   :headers {"content-type" "application/json"}
+   :headers {"accept" "application/ld+json"
+             "content-type" "application/json"}
    :body (json/write-str body)})
+
+(t/deftest get-data-root-test
+  (th/with-system-and-clean-up {{:keys [GET]} :tpximpact.datahost.ldapi.test/http-client :as sys}
+    (let [{:keys [headers body] :as response}
+          (GET "/data" {:headers {"accept" "application/ld+json"}})]
+      (is (= "application/ld+json" (get headers "content-type")))
+      (is (string? (:body response))))))
 
 (t/deftest put-series-create-test
   (with-open [temp-store (tfstore/create-temp-file-store)]
@@ -60,6 +68,7 @@
               "Should create series without optional dcterms:description")
 
         (let [request {:uri (str "/data/" series2-slug)
+                       :headers {"accept" "application/ld+json"}
                        :request-method :get}
               {:keys [status]} (handler request)]
           (t/is (= 200 status)
@@ -132,6 +141,7 @@
       (testing "A series can be created"
         (let [response (PUT new-series-path
                             {:content-type :json
+                             :headers {"Accept" "application/ld+json"}
                              :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 201 (:status response)))
@@ -140,7 +150,8 @@
                  (get resp-body "dcterms:modified")))))
 
       (testing "A series can be retrieved via the API"
-        (let [response (GET new-series-path)
+        (let [response (GET new-series-path
+                            {:headers {"Accept" "application/ld+json"}})
               resp-body (json/read-str (:body response))]
           (is (= 200 (:status response)))
           (is (= normalised-ednld (dissoc resp-body "@context" "dcterms:issued" "dcterms:modified")))))

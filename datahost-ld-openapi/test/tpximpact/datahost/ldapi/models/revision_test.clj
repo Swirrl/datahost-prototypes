@@ -36,7 +36,8 @@
         request-json {"dcterms:title" "A title" "dcterms:description" "Description"}
         request {:uri (str "/data/" series-slug)
                  :request-method :put
-                 :headers {"content-type" "application/json"}
+                 :headers {"accept" "application/ld+json"
+                           "content-type" "application/json"}
                  :body (json/write-str request-json)}
         _response (handler request)]
     series-slug))
@@ -46,7 +47,8 @@
         request-json {"dcterms:title" "Test release" "dcterms:description" "Description"}
         request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
                  :request-method :put
-                 :headers {"content-type" "application/json"}
+                 :headers {"accept" "application/ld+json"
+                           "content-type" "application/json"}
                  :body (json/write-str request-json)}
         response (handler request)
         release-doc (json/read-str (:body response))]
@@ -75,7 +77,8 @@
           release-uri (resource-id release-doc)
           request1 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
                     :request-method :post
-                    :headers {"content-type" "application/json"}
+                    :headers {"accept" "application/ld+json"
+                              "content-type" "application/json"}
                     :body (json/write-str {"dcterms:title" "Test revision" "dcterms:description" "Description"})}
           {:keys [status body] :as _response} (handler request1)
           revision-doc (json/read-str body)]
@@ -91,7 +94,7 @@
         ;; NOTE: this test is essential for ensuring that single item collections
         ;; are serialized within an array wrapper and not as a hash-map
         (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                                     :headers {"accept" "application/json"}
+                                     :headers {"accept" "application/ld+json"}
                                      :request-method :get}
               {:keys [body status]} (handler all-revisions-request)
               release-doc (json/read-str body)
@@ -106,7 +109,8 @@
 
       (let [request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
                       :request-method :post
-                      :headers {"content-type" "application/json"}
+                      :headers {"accept" "application/ld+json"
+                                "content-type" "application/json"}
                       :body (json/write-str {"dcterms:title" "A second test revision"
                                              "dcterms:description" "Description"})}
             {:keys [status body] :as _response2} (handler request2)
@@ -117,7 +121,7 @@
               "subsequent revision has next auto-increment revision ID assigned"))
 
       (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
-                             :headers {"accept" "application/json"}
+                             :headers {"accept" "application/ld+json"}
                              :request-method :get}
             {:keys [body]} (handler release-request)
             release-doc (json/read-str body)
@@ -128,7 +132,7 @@
 
       (testing "Multiple revisions can be can be retrieved via the list API"
         (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
-                                     :headers {"accept" "application/json"}
+                                     :headers {"accept" "application/ld+json"}
                                      :request-method :get}
               {:keys [body status]} (handler all-revisions-request)
               release-doc (json/read-str body)
@@ -159,6 +163,7 @@
       ;; SERIES
       (PUT (str "/data/" series-slug)
            {:content-type :json
+            :headers {"accept" "application/ld+json"}
             :body (json/write-str {"dcterms:title" series-title
                                    "dcterms:description" "Description"})})
 
@@ -168,6 +173,7 @@
               release-url (str "/data/" series-slug "/releases/" release-slug)
               release-resp (PUT release-url
                                 {:content-type :application/json
+                                 :headers {"accept" "application/ld+json"}
                                  :body (json/write-str {"dcterms:title" "Release 34"
                                                         "dcterms:description" "Description 34"})})
 
@@ -216,14 +222,15 @@
                 "Created with the resource URI provided in the Location header")
 
             (testing "Fetching an existing Revision as default application/json format works"
-              (let [response (GET new-revision-location)
+              (let [response (GET new-revision-location
+                                  {:headers {"accept" "application/ld+json"}})
                     revision-doc (json/read-str (:body response))]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (select-keys revision-doc (keys normalised-revision-ld)))
                     "responds with JSON")))
 
             (testing "Associated Release gets the Revision inverse triple"
-              (let [release-resp (GET release-url)
+              (let [release-resp (GET release-url {:headers {"accept" "application/ld+json"}})
                     release-doc (json/read-str (:body release-resp))
                     release-revisions (get-release-revisions release-doc)]
                 (t/is (= #{(str rdf-base-uri series-slug "/releases/" release-slug "/revisions/1")} release-revisions))))

@@ -97,5 +97,6 @@
   (multipart name (.getBytes (json/write-str jsonld) "UTF-8") "application/ld+json"))
 
 (defn jsonld-body-request [jsonld]
-  {:headers {"content-type" "application/ld+json"}
+  {:headers {;; "accept" "application/ld+json"
+             "content-type" "application/ld+json"}
    :body (.getBytes (json/write-str jsonld) "UTF-8")})
