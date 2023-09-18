@@ -233,13 +233,14 @@
               (let [release-resp (GET release-url {:headers {"accept" "application/ld+json"}})
                     release-doc (json/read-str (:body release-resp))
                     release-revisions (get-release-revisions release-doc)]
-                (t/is (= #{(str rdf-base-uri series-slug "/releases/" release-slug "/revisions/1")} release-revisions))))
+                (t/is (= #{(str rdf-base-uri series-slug "/releases/" release-slug "/revisions/1")}
+                         release-revisions))))
 
             (testing "Changes append resource created with CSV appends file"
               ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/appends"
               (let [change-ednld {"dcterms:description" "A new change"
                                   "dcterms:format" "text/csv"}
-                    change-api-response (POST (str new-revision-location "/changes")
+                    change-api-response (POST (str new-revision-location "/appends")
                                               {:query-params change-ednld
                                                :headers {"content-type" "text/csv"}
                                                :body (th/file-upload csv-2019-path)})
@@ -262,7 +263,7 @@
                                         ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
               (let [change-ednld {"dcterms:description" "A new second change"
                                   "dcterms:format" "text/csv"}
-                    change-api-response (POST (str new-revision-location "/changes")
+                    change-api-response (POST (str new-revision-location "/appends")
                                               {:query-params change-ednld
                                                :headers {"content-type" "text/csv"}
                                                :body (th/file-upload csv-2020-path)})
@@ -299,7 +300,7 @@
               (testing "Third Changes append resource created against 2nd Revision"
                 (let [change-3-ednld {"dcterms:description" "A new third change"
                                       "dcterms:format" "text/csv"}
-                      change-api-response (POST (str new-revision-location-2 "/changes")
+                      change-api-response (POST (str new-revision-location-2 "/appends")
                                                 {:query-params change-3-ednld
                                                  :headers {"content-type" "text/csv"}
                                                  :body (th/file-upload csv-2021-path)})]
@@ -342,7 +343,7 @@
                       new-revision-location-3 (-> revision-resp-3 :headers (get "Location"))
                       change-4-ednld {"dcterms:description" "A new fourth deletes change"
                                       "dcterms:format" "text/csv"}
-                      change-api-response (POST (str new-revision-location-3 "/deletes")
+                      change-api-response (POST (str new-revision-location-3 "/retractions")
                                                 {:query-params change-4-ednld
                                                  :headers {"content-type" "text/csv"}
                                                  :body (th/file-upload csv-2021-deletes-path)})
