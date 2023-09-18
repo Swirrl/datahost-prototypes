@@ -260,7 +260,7 @@
                         "responds CSV contents")))))
 
             (testing "Ensure we can't add more than 1 change to a revision."
-                                        ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/changes
+              ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
               (let [change-ednld {"dcterms:description" "A new second change"
                                   "dcterms:format" "text/csv"}
                     change-api-response (POST (str new-revision-location "/appends")

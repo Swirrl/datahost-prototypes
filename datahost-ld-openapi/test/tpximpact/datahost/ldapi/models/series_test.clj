@@ -141,7 +141,7 @@
       (testing "A series can be created"
         (let [response (PUT new-series-path
                             {:content-type :json
-                             :headers {"Accept" "application/ld+json"}
+                             :headers {"accept" "application/ld+json"}
                              :body (json/write-str request-ednld)})
               resp-body (json/read-str (:body response))]
           (is (= 201 (:status response)))
