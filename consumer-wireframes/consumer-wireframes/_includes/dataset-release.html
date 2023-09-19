@@ -1,0 +1,150 @@
+---
+layout: basic
+---
+
+<main role="main" id="content" tabindex="-1">
+    <div class="container pt-3 ">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/datasets">Datasets</a></li>
+                <li class="breadcrumb-item"><a href="/datasets/dataset-series">Population aged 16 to 64 years level 3 or
+                        above qualifications</a></li>
+                <li class="breadcrumb-item active" aria-current="page">2010 onwards</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="jumbotron pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="font-weight-bold h3 pr-5">Population aged 16 to 64 years level 3 or above qualifications
+                    </h1>
+                    <h1 class="font-weight-bold pr-5">
+                        2010 onwards</h1>
+                    <p class="lead"><strong>Last update:</strong> 19 November 2022 | <strong> Next update:</strong> 22
+                        November 2023</p>
+                    <p>Percentage of the population aged 16 - 64 with National Vocational Qualification (NVQ) level 3+
+                        qualifications, Great Britain (Northern Ireland national figure included).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="pt-4">Latest data</h2>
+
+
+                <h3 class="h4 pt-3"><a class="btn btn-primary" href="/downloads/data.csv">Download dataset (CSV,
+                        300Kb)</a> <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a></h3>
+                <h3 class="h5 pt-3">
+                    <a class="" data-bs-toggle="collapse" href="#1986-2010explain" role="button" aria-expanded="false"
+                        aria-controls="collapseExample">
+                        What has changed in this revision
+                    </a>
+                </h3>
+                <div class="collapse" id="1986-2010explain">
+                    <div class="card card-body">
+                        <strong>The latest version of this data contains additional data for the new year of 2021. In
+                            addition
+                            some minor corrections to to rounding issues for some historic data in 2011 have been fixed.
+                            One duplicate piece of data was also deleted</strong><br>
+                        <h5>Download changes since last revision:</h5>
+                        <p><a href="#">Appends.csv</a> (100 rows)</p>
+                        <p><a href="#">Corrections.csv</a> (20 rows)</p>
+                        <p><a href="#">Deletions.csv</a> (1 row)</p>
+                    </div>
+                </div>
+                <h3 class="h6 pt-3">
+                    <a class="" data-bs-toggle="collapse" href="#citation" role="button" aria-expanded="false"
+                        aria-controls="collapseExample">
+                        Citation information for this revision
+                    </a>
+                </h3>
+                <div class="collapse" id="citation">
+                    <div class="card card-body">
+                        <p>Population aged 16 to 64 years level 3 or above qualifications: 2010 onwards: Revision 5, 2023, electronic dataset, Office for National Statistics, https://doi.org/10.1000/182.</p>
+                    </div>
+                </div>
+
+                <hr>
+                <h3 class="h5"><a href="./revisions">View all revisions</a></h3>
+
+                <h2 class="pt-5">Table schema</a>
+                </h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Datatype</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Measure type</td>
+                            <td>String</td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>Statistical Geography</td>
+                            <td>String</td>
+                            <td>Includes geographies for countries, regions and local authorities.
+                                <br><br>
+                                Has defined universal codelist. <a href="#">View Reference area codelist</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Year</td>
+                            <td>String</td>
+                            <td>Calender year<br><br>
+                                Has defined universal codelist. <a href="#">View Reference period codelist</a> </td>
+                        </tr>
+                        <tr>
+                            <td>Aged 16 to 64 years level 3 or above qualifications</td>
+                            <td>String</td>
+                            <td>Value</td>
+                        </tr>
+                        <tr>
+                            <td>Unit of Measure</td>
+                            <td>String</td>
+                            <td>All values are percentages</td>
+                        </tr>
+                        <tr>
+                            <td>Upper Confidence Interval</td>
+                            <td>String</td>
+                            <td>Provided at 95% confidence level</td>
+                        </tr>
+                        <tr>
+                            <td>Lower Confidence Interval</td>
+                            <td>String</td>
+                            <td>Provided at 95% confidence level</td>
+                        </tr>
+                        <tr>
+                            <td>Observation Status</td>
+                            <td>String</td>
+                            <td>Provides details of any missing or suppressed values</td>
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-lg-4 pt-4 pb-5">
+                {% include "api-helper.html" 
+                type: "REST"
+                method: "GET"
+                example: "{example}"
+                details: "Get more detail on this release, the data schema and set up a request to receive the latest revision."
+                %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 pt-5">
+
+            </div>
+        </div>
+    </div>
+</main>

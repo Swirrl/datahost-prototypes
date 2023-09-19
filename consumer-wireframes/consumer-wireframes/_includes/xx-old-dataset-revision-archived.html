@@ -1,0 +1,65 @@
+---
+layout: basic
+---
+
+<main role="main" id="content" tabindex="-1">
+    <div class="container pt-3 ">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/datasets">Datasets</a></li>
+                <li class="breadcrumb-item"><a href="/datasets/dataset-series">Population aged 16 to 64 years level 3 or
+                        above qualifications</a></li>
+                <li class="breadcrumb-item"><a href="/datasets/dataset-series/dataset-release">2010 onwards</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Revision 4</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="jumbotron pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="font-weight-bold h3 pr-5">Population aged 16 to 64 years level 3 or above qualifications: 2010 onwards</h1>
+                    <h1 class="font-weight-bold pr-5">
+                            Revision 4</h1>
+                    <p class="lead"><strong>Last update:</strong> 19 November 2021 | <strong> Next update:</strong> 19 November 2022</p>
+                    <p>Percentage of the population aged 16 - 64 with National Vocational Qualification (NVQ) level 3+
+                        qualifications, Great Britain (Northern Ireland national figure included).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="pt-4">Data</h2>
+                <div class="alert alert-warning" role="alert"> <svg xmlns="http://www.w3.org/2000/svg" width="24"
+                        height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"
+                        viewBox="0 0 16 16" role="img" aria-label="Warning:">
+                        <path
+                            d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                    </svg>
+                    This is not the latest revision <a href="../" class="alert-link">View latest</a>
+                </div>
+                <h3 class="h4 pt-3"><a class="btn btn-primary" href="/downloads/data.csv">Download dataset (CSV,
+                        300Kb)</a> <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a></h3>
+                <h3 class="h5 pt-3">
+                    What has changed in this revision
+                </h3>
+                The latest version of this data contains additional data for the new year of 2020.
+                <h3 class="h5 pt-3">Download changes made in this revision:</h3>
+                <p><a href="#">Appends.csv</a> (100 rows)</p>
+                <hr>
+                <h3 class="h5 pb-5"><a href="../revisions">View all revisions for this release</a></h4>
+            </div>
+            <div class="col-lg-4 pt-5 pb-5">
+                {% include "api-helper.html" 
+                type: "REST"
+                method: "GET"
+                example: "{example}"
+                details: "Query this specific revision and what changed in this update."
+                %}
+            </div>
+        </div>
+    </div>
+</main>
