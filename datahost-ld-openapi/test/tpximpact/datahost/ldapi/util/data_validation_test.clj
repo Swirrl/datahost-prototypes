@@ -44,8 +44,10 @@
     
     (let [schema (db/get-release-schema repo (su/dataset-release-uri* system-uris {:series-slug "s1" :release-slug "r1"}))]
       (testing "Creating malli row schemas from JSON-LD schema"
-        (is (= ["Year" "Unit of Measure"]
-               (-> (util.data-validation/make-row-schema schema ["Year" "Unit of Measure"])
+        (is (= ["Year" "Aged 16 to 64 years level 3 or above qualifications"]
+               (-> (util.data-validation/make-row-schema schema
+                                                         ["Year"
+                                                          "Aged 16 to 64 years level 3 or above qualifications"])
                    (util.data-validation/row-schema->column-names)))))
 
       (testing "Validating data"

@@ -7,8 +7,10 @@
    [clojure.tools.logging :as log]
    [tablecloth.api :as tc]
    [tech.v3.dataset :as ds]
+   [tpximpact.datahost.uris :as uris]
    [tpximpact.datahost.ldapi.resource :as resource]
-   [tpximpact.datahost.ldapi.routes.shared :as routes-shared])
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
+   [tpximpact.datahost.ldapi.schemas.common :as s.common])
   (:import (clojure.lang ExceptionInfo)
            (java.io ByteArrayInputStream File)
            [java.net URL]
@@ -32,7 +34,8 @@
   (case k
     :datatype (URI. "http://www.w3.org/ns/csvw#datatype")
     :titles (URI. "http://www.w3.org/ns/csvw#titles")
-    :required (URI. "http://www.w3.org/ns/csvw#required")))
+    :required (URI. "http://www.w3.org/ns/csvw#required")
+    :type (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")))
 
 (defn- extract-column-datatype
   "Returns a malli schema for column's value.
@@ -63,7 +66,7 @@
     (and (set? title) (= 1 (count title)))
     (first title)
 
-    :default (throw (ex-info (format "Unsupported column name value: %s" title)
+    :default (throw (ex-info (format "Unsupported column name value: '%s'" title)
                              {:title title
                               :columns json-cols}))))
 
@@ -75,6 +78,31 @@
         column-keys (get-in subjects-map [id col-key])]
     (map subjects-map column-keys)))
 
+(def DatasetRow
+  "Dataset row schema should be a malli tuple where each child schema
+  has required properties set.
+
+  Example schema for dataset with two columns:
+
+  ```
+    [:tuple [:maybe {:dataset.column/name \"Foo\"
+                     :dataset.column/type <URI>} :string]
+            [:int {:dataset.column/name \"My Measure\"
+                   :dataset.column/type <URI>}]]
+  ```"
+  (let [props-schema [:map
+                      [:dataset.column/name :string]
+                      [:dataset.column/type (into [:enum ] (vals uris/column-types))]]
+        validate-seq (m/validator (m/schema [:sequential props-schema]
+                                            {:registry s.common/registry}))]
+    [:and
+     [:fn {:error/message "Not a malli schema."} m/schema?]
+     [:fn {:error/message "Properties of children schemas are invalid"}
+      (fn props-pred [s]
+        (validate-seq (map m/properties (m/children s))))]]))
+
+(def row-schema-valid? (m/validator DatasetRow))
+
 (defn make-row-schema
   "Make a malli schema for a tuple of row values specified by
   column-names. If column names were not specified, uses all columns
@@ -85,7 +113,7 @@
    (make-row-schema json-ld-schema column-names {}))
   ([json-ld-schema column-names options]
    {:pre [(make-row-schema-options-valid? options)]
-    :post [(every? some? (next %))]}
+    :post [(row-schema-valid? %)]}
    (let [titles-key (column-key :titles)
          json-cols (schema-columns json-ld-schema)
          ;; NOTE: titles passed as a JS Array -> #{["foo" "bar"]} ?
@@ -97,13 +125,23 @@
          m (reduce-kv (fn reducer [r k v]
                         ;; we know there's only item per index key,
                         ;; so we can safely unpack the value
-                        (let [col-name (get k titles-key)
-                              schema (extract-column-datatype (first v))]
+                        (let [ld-val (first v)
+                              col-name (get k titles-key)
+                              schema (extract-column-datatype ld-val)]
                           (assoc r col-name
-                                 (mu/update-properties schema assoc :dataset.column/name col-name))))
+                                 (mu/update-properties schema assoc
+                                                       :dataset.column/name col-name
+                                                       :dataset.column/type (first (get ld-val (column-key :type)))))))
                       {}
-                      indexed)]
-     (into [:tuple] (map #(get m %) (or column-names (keys m)))))))
+                      indexed)
+         components (map #(get m %) (or column-names (keys m)))]
+     (when-not (every? some? components)
+       (throw (ex-info "Could not find desired column names in passed in schema."
+                       {:column-names column-names
+                        :keys (keys m)
+                        :extracted-components components
+                        :schema-cols json-cols})))
+     (m/schema (into [:tuple] components)))))
 
 (defn row-schema->column-names
   "Returns a seq of column names supported by the row schema."
