@@ -62,7 +62,8 @@
                    (->change-info change-ds change-kind change-ds-fmt)]
                   [(->change-info change-ds change-kind change-ds-fmt)])
         os ^ByteArrayOutputStream (ByteArrayOutputStream.)
-        ds (data-compilation/compile-dataset {:changes changes :store change-store})
+        ds (data-compilation/compile-dataset {:changes changes :store change-store
+                                              :row-schema (:row-schema change-info)})
         _ (tc/write! ds os {:file-type :csv})
         is ^ByteArrayInputStream (ByteArrayInputStream. (.toByteArray os))
         insert-request (store/make-insert-request! change-store is)]

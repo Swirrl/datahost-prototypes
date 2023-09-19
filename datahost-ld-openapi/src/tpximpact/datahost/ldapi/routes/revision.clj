@@ -103,6 +103,10 @@
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
          {:summary "Add deletes changes to a Revision via a CSV file."}))
 
+(defn post-revision-corrections-changes-route-config [triplestore change-store system-uris]
+  (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindCorrect)
+         {:summary "Add corrections to a Revision via a CSV file."}))
+
 (defn get-revision-changes-route-config [triplestore change-store system-uris]
   {:summary "Retrieve CSV contents for an existing change"
    :coercion (rcm/create {:transformers {}, :validate false})

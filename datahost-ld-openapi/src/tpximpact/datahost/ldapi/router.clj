@@ -228,7 +228,10 @@
         ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]]
 
        ["/:revision-id/retractions"
-        {:post (routes.rev/post-revision-deletes-changes-route-config triplestore change-store system-uris)}]]]]]
+        {:post (routes.rev/post-revision-deletes-changes-route-config triplestore change-store system-uris)}]
+       ["/:revision-id/corrections"
+        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]
+       ]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data

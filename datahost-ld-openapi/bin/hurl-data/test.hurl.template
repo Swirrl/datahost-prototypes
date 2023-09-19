@@ -36,9 +36,9 @@ Content-Type: application/json
 
 HTTP 201
 [Captures]
-revision_url: header "Location"
+revision1_url: header "Location"
 
-POST http://localhost:3000{{revision_url}}/appends
+POST http://localhost:3000{{revision1_url}}/appends
 [MultipartFormData]
 appends: file,bin/hurl-data/change1.csv; text/csv
 jsonld-doc: file,bin/hurl-data/change1.meta.json; application/json
@@ -47,7 +47,57 @@ HTTP 201
 
 GET http://localhost:3000/data/test-011/releases/release-1
 Accept: text/csv
-[Options]
-very-verbose: true
 
 HTTP 200
+
+POST http://localhost:3000/data/test-011/releases/release-1/revisions
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "Rev 2",
+	"dcterms:description": "A test revision 2 (with retraction)"
+}
+
+HTTP 201
+[Captures]
+revision2_url: header "Location"
+
+POST http://localhost:3000{{revision2_url}}/retractions
+[MultipartFormData]
+appends: file,bin/hurl-data/change2.csv; text/csv
+jsonld-doc: file,bin/hurl-data/change2.meta.json; application/json
+
+HTTP 201
+
+GET http://localhost:3000/data/test-011/releases/release-1
+Accept: text/csv
+
+HTTP 200
+
+POST http://localhost:3000/data/test-011/releases/release-1/revisions
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "Rev 3",
+	"dcterms:description": "A test revision 3 (with corrections)"
+}
+
+HTTP 201
+[Captures]
+revision3_url: header "Location"
+
+POST http://localhost:3000{{revision3_url}}/corrections
+#[Options]
+#very-verbose: true
+[MultipartFormData]
+appends: file,bin/hurl-data/change3.csv; text/csv
+jsonld-doc: file,bin/hurl-data/change3.meta.json; application/json
+
+HTTP 201
+
+GET http://localhost:3000/data/test-011/releases/release-1
+Accept: text/csv
+
+HTTP 200
+[Asserts]
+body matches /max,44/

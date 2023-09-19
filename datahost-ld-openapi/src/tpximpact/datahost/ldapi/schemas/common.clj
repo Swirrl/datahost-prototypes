@@ -33,7 +33,10 @@
                      [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
      ;; description allows newlines
      :description-string (let [regex #"^\w[\w\s\S\D]+$"]
-                           [:re {:error/message (format "Should match regex: %s" (str regex))} regex])}))
+                           [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
+     :datahost/uri (m/-simple-schema
+                    {:type :uri
+                     :pred #(instance? URI %)})}))
 
 (def registry
   (merge
@@ -45,4 +48,4 @@
 
 (def EntityType [:enum :dh/DatasetSeries :dh/Release :dh/Revision :dh/Change])
 
-(def ChangeKind [:enum :dh/ChangeKindAppend :dh/ChangeKindRetract])
+(def ChangeKind [:enum :dh/ChangeKindAppend :dh/ChangeKindRetract :dh/ChangeKindCorrect])

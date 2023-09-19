@@ -263,14 +263,14 @@
        :body "Release for this revision does not exist"})))
 
 (defn- validate-incoming-change-data
-  "Returns a map {:dataset DATASET (optional-key :error-response) ...},
+  "Returns a map {:dataset DATASET (optional-key :error-response) ..., row-shema MALLI-SCHEMA},
   containing :error-response entry when validation failed."
   [release-schema appends]
   (let [dataset (data-validation/as-dataset appends {})
-        schema (data-validation/make-row-schema release-schema)
-        {:keys [explanation]} (data-validation/validate-dataset dataset schema
+        row-schema (data-validation/make-row-schema release-schema)
+        {:keys [explanation]} (data-validation/validate-dataset dataset row-schema
                                                                 {:fail-fast? true})]
-    (cond-> {:dataset dataset}
+    (cond-> {:dataset dataset :row-schema row-schema}
       (some? explanation) (assoc :error-response {:status 400 :body explanation}))))
 
 (defn ->byte-array-input-stream [input-stream]
@@ -299,6 +299,7 @@
         _ (assert release-schema (str "No release schema found for: " release-uri))
         appends (->byte-array-input-stream appends)
         {validation-err :error-response
+         row-schema :row-schema
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         ;; insert relevant triples
         insert-req (store/make-insert-request! change-store appends)
@@ -335,6 +336,7 @@
                                            :change-kind change-kind
                                            :change-id change-id
                                            :dataset change-ds
+                                           :row-schema row-schema
                                            "dcterms:format" (get jsonld-doc "dcterms:format")})]
           (log/debug (format "post-change: '%s' stored snapshot" (.getPath change-uri))
                      {:new-snapshot-key new-snapshot-key})

@@ -5,13 +5,13 @@
 	"dcterms:title": "Fun schema",
 	"dh:columns": [
 		{
-			"@type": "dh:MeasureColumn",
+			"@type": "dh:DimensionColumn",
 			"csvw:datatype": "string",
 			"csvw:name": "name",
             "csvw:titles": "name"
         },
         {
-			"@type": "dh:DimensionColumn",
+			"@type": "dh:MeasureColumn",
 			"csvw:datatype": "int",
 			"csvw:name": "age",
             "csvw:titles": "age"
