@@ -223,7 +223,7 @@
   "Coerce given value (e.g. CSV string or CSV java.io.File ) to a dataset"
   (fn [v _opts] (type v)))
 
-(defn- slurpable->dataset
+(defn slurpable->dataset
   "If `slurp` can handle, so does this fn. Returns a dataset."
   [v {:keys [file-type encoding]}]
   (-> v
