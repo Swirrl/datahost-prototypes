@@ -29,7 +29,8 @@
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
    [muuntaja.format.json :as json-format]
    [clojure.data.json :as json]
-   [clojure.java.io :as io])
+   [clojure.java.io :as io]
+   [tpximpact.datahost.ldapi.delta-handler :as delta-handler])
   (:import
    (java.io InputStream InputStreamReader OutputStream)))
 
@@ -303,6 +304,7 @@ specifications for each route.")
                              {:name "Publisher API"
                               :description "Operations for data publishers"}]}
             :handler (openapi/create-openapi-handler)}}]
+
     ["/.well-known"
      ["/csvm" {:no-doc true
                :get {:handler (constantly
@@ -358,7 +360,10 @@ specifications for each route.")
         {:post (routes.rev/post-revision-retractions-changes-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]]]]]
+        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]]]]
+
+    ["/delta"
+     {:post (delta-handler/delta-tool-route-config)}]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
