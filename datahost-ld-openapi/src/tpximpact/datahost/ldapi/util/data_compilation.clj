@@ -31,18 +31,6 @@
   (with-open [is (store/get-data store v)]
    (as-dataset is opts)))
 
-(defn make-hasher [column-names]
-  (fn hasher* [record]
-    (let [^StringBuilder sb (StringBuilder.)]
-      (.append sb "|")
-      (loop [columns column-names]
-        (if-not (seq columns)
-          (MurmurHash3/hash32 (.toString sb))
-          (do
-            (.append sb (get record (first columns)))
-            (.append sb "|")
-            (recur (next columns))))))))
-
 (defn make-columnwise-hasher []
   (fn hasher* [& columns]
     (let [^StringBuilder sb (StringBuilder.)]
@@ -87,7 +75,7 @@
                   ;;(mu/subschemas row-schema)
                   (m/children row-schema))))
 
-(defn compile--extract-measure-column-name
+(defn- compile--extract-measure-column-name
   [row-schema]
   {:post [some?]}
   (first (sort (sequence tuple-schema-measure-names-xform
