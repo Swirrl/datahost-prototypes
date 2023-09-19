@@ -1,6 +1,5 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
-   [clojure.data.json :as json]
    [clojure.tools.logging :as log]
    [grafter.matcha.alpha :as matcha]
    [ring.util.io :as ring-io]
@@ -18,11 +17,10 @@
    [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
    [tpximpact.datahost.ldapi.util.triples
     :refer [triples->ld-resource triples->ld-resource-collection]]
-   [clojure.java.io :as io]
-   [tpximpact.datahost.ldapi.routes.middleware :as middleware])
+   [clojure.java.io :as io])
   (:import
    (java.net URI)
-   (java.io ByteArrayInputStream ByteArrayOutputStream)))
+   (java.io ByteArrayInputStream ByteArrayOutputStream InputStream OutputStream)))
 
 (defn- box [x]
   (if (coll? x) x [x]))
@@ -40,8 +38,8 @@
 
 (defn- change-store-to-ring-io-writer
   "Use as argument to `ring-io/piped-input-stream`."
-  [change-store data-key ^java.io.OutputStream out-stream]
-  (with-open [in ^java.io.InputStream (store/get-data change-store data-key)]
+  [change-store data-key ^OutputStream out-stream]
+  (with-open [in ^InputStream (store/get-data change-store data-key)]
     (.transferTo in out-stream)))
 
 (defn csv-file-locations->dataset [change-store append-keys]
@@ -55,12 +53,6 @@
               (apply tc/concat))
      (some->> (store/get-data change-store append-keys)
               (as-dataset)))))
-
-(defn release->csv-stream [triplestore change-store release]
-  (let [appends-file-keys (->> (db/get-changes-info triplestore (resource/id release) nil)
-                               (map :updates))]
-    (when-let [merged-datasets (csv-file-locations->dataset change-store appends-file-keys)]
-      (write-dataset-to-outputstream merged-datasets))))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
@@ -170,13 +162,6 @@
         (throw (ex-info (format "Could not extract revision number from given id: %s" rev-id)
                         {:revision-id rev-id} ex))))))
 
-(defn revision->csv-stream [triplestore change-store revision]
-  (let [rev-id (resource/id revision)
-        release-id (get revision (cmp/expand :dh/appliesToRelease))
-        appends (db/get-changes-info triplestore release-id (revision-number rev-id))]
-    (when-let [merged-datasets (csv-file-locations->dataset change-store (map :updates appends))]
-      (write-dataset-to-outputstream merged-datasets))))
-
 (defn get-revision
   [triplestore
    change-store
@@ -263,7 +248,7 @@
        :body "Release for this revision does not exist"})))
 
 (defn- validate-incoming-change-data
-  "Returns a map {:dataset DATASET (optional-key :error-response) ..., row-shema MALLI-SCHEMA},
+  "Returns a map {:dataset DATASET (optional-key :error-response) ..., row-schema MALLI-SCHEMA},
   containing :error-response entry when validation failed."
   [release-schema appends]
   (let [dataset (data-validation/as-dataset appends {})
@@ -274,9 +259,9 @@
       (some? explanation) (assoc :error-response {:status 400 :body explanation}))))
 
 (defn ->byte-array-input-stream [input-stream]
-  (with-open [intermediate (java.io.ByteArrayOutputStream.)]
+  (with-open [intermediate (ByteArrayOutputStream.)]
     (io/copy input-stream intermediate)
-    (java.io.ByteArrayInputStream. (.toByteArray intermediate))))
+    (ByteArrayInputStream. (.toByteArray intermediate))))
 
 (defn post-change
   [triplestore

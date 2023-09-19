@@ -74,7 +74,7 @@
   - change-kind: one of :dh/ChangeKindAppend etc
   - file-path - path to the CSV
   - title - string
-  - url-suffix: strin of the form \"/revisions/3/changes/1"
+  - url-suffix: string of the form \"/revisions/3/changes/1"
   [http-client release-url change-kind revision-title file-path url-suffix]
   (let [{:keys [POST]} http-client
         revision-resp (POST (str release-url "/revisions")
