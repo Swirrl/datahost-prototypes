@@ -1,6 +1,7 @@
 (ns tpximpact.datahost.ldapi.routes.revision
   (:require
    [reitit.ring.malli]
+   [reitit.coercion :as rc]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
@@ -20,15 +21,14 @@
                        :revision-id int?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/ld+json" {:body string?}}}
+                     "application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn get-release-list-route-config [triplestore system-uris]
   {:summary "All releases metadata in the given series"
    :handler (partial handlers/get-release-list triplestore system-uris)
    :parameters {:path {:series-slug string?}}
-   :responses {200 {:content {"application/ld+json"
-                              {:body string?}}}
+   :responses {200 {:content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn get-revision-list-route-config [triplestore system-uris]
@@ -36,8 +36,7 @@
    :handler (partial handlers/get-revision-list triplestore system-uris)
    :parameters {:path {:series-slug string?
                        :release-slug string?}}
-   :responses {200 {:content {"application/ld+json"
-                              {:body string?}}}
+   :responses {200 {:content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn post-revision-route-config [triplestore system-uris]
@@ -64,8 +63,7 @@
                                        :optional true} string?]]}
    :openapi {:security [{"basic" []}]}
    :responses {201 {:description "Revision was successfully created"
-                    :content {"application/ld+json"
-                              {:body string?}}
+                    :content {"application/ld+json" string?}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"
@@ -81,16 +79,15 @@
                           triplestore system-uris
                           {:resource :dh/Change :missing-params {:change-id 1}} )
                  :resource-already-created?]]
-   :parameters {:multipart [:map
-                            [:jsonld-doc routes-shared/CreateChangeInput]
-                            [:appends reitit.ring.malli/temp-file-part]]
-                :path {:series-slug string?
+   :parameters {:path {:series-slug string?
                        :release-slug string?
-                       :revision-id int?}}
-   :openapi {:security [{"basic" []}]}
+                       :revision-id int?}
+                :query routes-shared/CreateChangeInput}
+   :openapi {:security [{"basic" []}]
+             :requestBody {:content {"text/csv" {:schema {:type "sting" :format "binary"}}}}}
+   ::rc/parameter-coercion {:query (rc/->ParameterCoercion :query-params :string false true)}
    :responses {201 {:description "Changes were added to a Revision"
-                    :content {"application/ld+json"
-                              {:body string?}}
+                    :content {"application/ld+json" string?}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"

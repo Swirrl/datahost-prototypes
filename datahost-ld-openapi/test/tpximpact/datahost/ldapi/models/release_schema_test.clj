@@ -60,16 +60,12 @@
       (let [schema-fragment (format "my-series-%s/releases/release-%s/schema" n n)
             schema-resource-path (str "/data/" schema-fragment)
             schema-uri (str rdf-base-uri schema-fragment)
-            temp-schema-file (File/createTempFile "my-schema-1" ".json")
-
             rel-schema {"@context" ["https://publishmydata.com/def/datahost/context"
                                     {"@base" (str rdf-base-uri "my-series-" n "/")}]
                         "dcterms:title" "Fun schema"
                         "dh:columns" [(csvw-col "dh:DimensionColumn" "foo_bar" ["Foo Bar"])
                                       (csvw-col "dh:MeasureColumn" "height" ["Height"])]}
-
-            response (POST schema-resource-path
-                           {:multipart [(th/jsonld-multipart "schema-file" rel-schema)]})
+            response (POST schema-resource-path (th/jsonld-body-request rel-schema))
             resp-body (json/read-str (:body response))
             expected-doc (schema-doc n rdf-base-uri)
             [missing _extra _matching] (diff expected-doc resp-body)]
@@ -104,8 +100,7 @@
                                "csvw:name" "dim"
                                "csvw:titles" "Dimension"}]}
 
-        _response (POST schema-path
-                        {:multipart [(th/jsonld-multipart "schema-file" schema)]})
+        _response (POST schema-path (th/jsonld-body-request schema))
 
         fetch-response (GET (format "/data/my-series-%s/releases/release-%s/schema" n n))
         fetched-doc (json/read-str (:body fetch-response))

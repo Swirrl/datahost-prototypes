@@ -19,7 +19,7 @@
                        :release-slug string?}}
    :responses {200 {:content
                     {"text/csv" any?
-                     "application/ld+json" {:body string?}}}
+                     "application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn put-release-route-config [clock triplestore system-uris]
@@ -39,11 +39,9 @@
                 :query schema/ApiQueryParams}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Release already existed and was successfully updated"
-                    :content {"application/ld+json"
-                              {:body string?}}}
+                    :content {"application/ld+json" string?}}
                201 {:description "Release did not exist previously and was successfully created"
-                    :content {"application/ld+json"
-                              {:body string?}}}
+                    :content {"application/ld+json" string?}}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]
@@ -56,8 +54,7 @@
    :parameters {:path {:series-slug :string
                        :release-slug :string}}
    :responses {200 {:description "Release schema successfully retrieved"
-                    :content {"application/ld+json"
-                              {:body string?}}}
+                    :content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn post-release-ld-schema-config
@@ -65,16 +62,14 @@
   {:summary "Create schema for a release"
    :handler (partial handlers/post-release-schema clock triplestore system-uris)
    ;; NOTE: file schema JSON content string is validated within the handler itself
-   :parameters {:multipart [:map [:schema-file routes-shared/LdSchemaInput]]
+   :parameters {:body routes-shared/LdSchemaInput
                 :path {:series-slug :string
                        :release-slug :string}}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Schema already exists."
-                    :content {"application/ld+json"
-                              {:body string?}}}
+                    :content {"application/ld+json" string?}}
                201 {:description "Schema successfully created"
-                    :content {"application/ld+json"
-                              {:body string?}}}
+                    :content {"application/ld+json" string?}}
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]

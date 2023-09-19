@@ -90,5 +90,12 @@
   (let [appends-file (io/file (io/resource csv-path))]
     (multipart "appends" appends-file "text/csv")))
 
+(defn file-upload [resource-path]
+  (io/file (io/resource resource-path)))
+
 (defn jsonld-multipart [name jsonld]
   (multipart name (.getBytes (json/write-str jsonld) "UTF-8") "application/ld+json"))
+
+(defn jsonld-body-request [jsonld]
+  {:headers {"content-type" "application/ld+json"}
+   :body (.getBytes (json/write-str jsonld) "UTF-8")})

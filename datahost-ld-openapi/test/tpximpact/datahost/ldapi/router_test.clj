@@ -39,14 +39,14 @@
   (let [router (get-test-router)
         handler (ring/ring-handler router)
         origin "http://localhost:3000"
-        request {:request-method :put
-                 :uri "/data/new-series"
-                 :query-string "title=test"
-                 :headers {"content-type" "application/ld+json"
-                           "origin" origin}
-                 :body {"@context" {"dcterms" "http://wat"}
-                        "dcterms:title" "Test"
-                        "dcterms:description" "Test series"}}
+        request (-> (th/jsonld-body-request
+                     {"@context" {"dcterms" "http://wat"}
+                      "dcterms:title" "Test"
+                      "dcterms:description" "Test series"})
+                    (assoc :request-method :put
+                           :uri "/data/new-series"
+                           :query-string "title=test")
+                    (assoc-in [:headers "origin"] origin))
         {:keys [status headers] :as _response} (handler request)]
     (t/is (= 201 status))
     (t/is (= origin (get headers "Access-Control-Allow-Origin")))))
