@@ -78,7 +78,7 @@
   [http-client release-url change-kind revision-title file-path url-suffix]
   (let [{:keys [POST]} http-client
         revision-resp (POST (str release-url "/revisions")
-                            {:content-type :json
+                            {:content-type :application/json
                              :body (json/write-str {"dcterms:title" revision-title})})
         new-revision-location (-> revision-resp :headers (get "Location"))
         [revision-id change-id] (re-find #"\/data\/.*\/revisions\/(\d+)\/changes\/(\d+)"
@@ -87,14 +87,15 @@
         _ (assert change-id)
         change-ednld {"dcterms:description" (str revision-title " -- changes")
                       "dcterms:format" "text/csv"}
-        multipart-temp-file-part (th/build-csv-multipart file-path)
+
         change-api-response (POST (str new-revision-location
-                                       (case  change-kind
+                                       (case change-kind
                                          :dh/ChangeKindAppend "/appends"
                                          :dh/ChangeKindRetract "/retractions"
                                          :dh/ChangeKindCorrect "/corrections"))
-                                  {:multipart [(th/jsonld-multipart "jsonld-doc" change-ednld)
-                                               multipart-temp-file-part]})
+                                  {:query-params change-ednld
+                                   :headers {"content-type" "text/csv"}
+                                   :body (th/file-upload file-path)})
         response-body-doc (json/read-str (:body change-api-response))]
     (is (= 201 (:status change-api-response)))
     (is (= (str change-kind) (get response-body-doc "dh:changeKind")))
