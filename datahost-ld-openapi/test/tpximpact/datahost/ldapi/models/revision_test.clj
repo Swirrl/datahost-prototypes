@@ -1,27 +1,26 @@
 (ns tpximpact.datahost.ldapi.models.revision-test
   (:require
-    [clojure.data :as c.data]
-    [clojure.data.json :as json]
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.test :refer [deftest is testing] :as t]
-    [clojure.tools.logging :as log]
-    [grafter-2.rdf4j.repository :as repo]
-    [malli.core :as m]
-    [malli.error :as me]
-    [tablecloth.api :as tc]
-    [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
-    [tpximpact.datahost.system-uris :as su]
-    [tpximpact.datahost.ldapi.resource :as resource]
-    [tpximpact.datahost.ldapi.router :as router]
-    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
-    [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
-    [tpximpact.datahost.time :as time]
-    [tpximpact.test-helpers :as th]
-    [tpximpact.datahost.ldapi.strings :as ld-str])
-  (:import [java.net URI]
-           [java.util UUID]
-           [java.io BufferedReader File StringReader]))
+   [clojure.data :as c.data]
+   [clojure.data.json :as json]
+   [clojure.java.io :as io]
+   [clojure.string :as str]
+   [clojure.test :refer [deftest is testing] :as t]
+   [grafter-2.rdf4j.repository :as repo]
+   [malli.core :as m]
+   [malli.error :as me]
+   [tablecloth.api :as tc]
+   [tpximpact.datahost.ldapi.resource :as resource]
+   [tpximpact.datahost.ldapi.router :as router]
+   [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
+   [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore]
+   [tpximpact.datahost.ldapi.strings :as ld-str]
+   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
+   [tpximpact.datahost.system-uris :as su]
+   [tpximpact.datahost.time :as time]
+   [tpximpact.test-helpers :as th])
+  (:import (java.io BufferedReader StringReader)
+           (java.net URI)
+           (java.util UUID)))
 
 (defn find-first
   [f coll]

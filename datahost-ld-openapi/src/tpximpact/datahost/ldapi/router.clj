@@ -170,7 +170,7 @@
   (str "Source viewable in GitHub "
        "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi)."))
 
-(defn router [{:keys [clock triplestore change-store auth system-uris base-path]}]
+(defn router [{:keys [clock triplestore change-store auth system-uris]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
