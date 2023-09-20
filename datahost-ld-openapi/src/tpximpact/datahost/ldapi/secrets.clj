@@ -1,8 +1,8 @@
 (ns tpximpact.datahost.ldapi.secrets
   (:require [clojure.spec.alpha :as s]
             [integrant.core :as ig])
-  (:import [com.google.cloud.secretmanager.v1
-            ProjectName SecretName SecretVersionName SecretManagerServiceClient]))
+  (:import (com.google.cloud.secretmanager.v1
+            SecretManagerServiceClient SecretVersionName)))
 
 (s/def ::gcloud-project string?)
 (s/def ::secret-name string?)

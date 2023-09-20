@@ -1,17 +1,15 @@
 (ns tpximpact.datahost.ldapi.util.data-compilation-test
   (:require
-   [clojure.test :as t :refer [deftest testing is]]
+   [clojure.test :refer [deftest is testing]]
    [malli.core :as m]
    [tablecloth.api :as tc]
-   [tpximpact.datahost.uris :as uris]
-   [tpximpact.datahost.ldapi.db :as db]
-   [tpximpact.datahost.system-uris :as system-uris]
-   [tpximpact.datahost.ldapi.routes.shared :refer [LdSchemaInput]]
    [tpximpact.datahost.ldapi.util.data-compilation :as dc]
    [tpximpact.datahost.ldapi.util.data-validation
     :refer [-as-dataset]
-    :as data-validation])
-  (:import [java.net URI]))
+    :as data-validation]
+   [tpximpact.datahost.system-uris :as system-uris]
+   [tpximpact.datahost.uris :as uris])
+  (:import (java.net URI)))
 
 (defmethod -as-dataset :datahost.types/seq-of-maps [v _opts]
     (tc/dataset v))

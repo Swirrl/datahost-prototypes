@@ -28,10 +28,10 @@
 
 (t/deftest get-data-root-test
   (th/with-system-and-clean-up {{:keys [GET]} :tpximpact.datahost.ldapi.test/http-client :as sys}
-    (let [{:keys [headers body] :as response}
+    (let [{:keys [headers body] :as _response}
           (GET "/data" {:headers {"accept" "application/ld+json"}})]
       (is (= "application/ld+json" (get headers "content-type")))
-      (is (string? (:body response))))))
+      (is (string? body)))))
 
 (t/deftest put-series-create-test
   (with-open [temp-store (tfstore/create-temp-file-store)]

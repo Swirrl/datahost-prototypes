@@ -1,10 +1,10 @@
 (ns dev
   (:refer-clojure :exclude [test])
   (:require
-    [clojure.repl :refer :all]
-    [clojure.tools.namespace.repl :refer [refresh] :as tns]
-    [integrant.repl :refer [clear halt go init prep reset]]
-    [tpximpact.datahost.sys :as sys]))
+   [clojure.repl :refer :all]
+   [clojure.tools.namespace.repl :as tns]
+   [integrant.repl :refer [go]]
+   [tpximpact.datahost.sys :as sys]))
 
 ;; temp disable this line if working on the dev namespace, obviously.
 (tns/disable-reload! (find-ns 'dev))

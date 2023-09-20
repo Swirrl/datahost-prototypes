@@ -1,11 +1,9 @@
 (ns tpximpact.datahost.ldapi.models.release-schema-test
   (:require
-   [clojure.data.json :as json]
    [clojure.data :refer [diff]]
-   [clojure.java.io :as io]
-   [clojure.test :refer [deftest testing is] :as t]
-   [tpximpact.test-helpers :as th])
-  (:import (java.io File)))
+   [clojure.data.json :as json]
+   [clojure.test :refer [deftest is testing] :as t]
+   [tpximpact.test-helpers :as th]))
 
 (def http-client :tpximpact.datahost.ldapi.test/http-client)
 

@@ -9,11 +9,10 @@
    [ring.util.http-status :as status]
    [tpximpact.datahost.ldapi.db :as db]
    [tpximpact.datahost.ldapi.errors :as errors]
-   [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]
-   [tpximpact.datahost.system-uris :as su :refer [resource-uri]]
-   [clojure.java.io :as io]))
+   [tpximpact.datahost.system-uris :refer [resource-uri] :as su]
+   [tpximpact.datahost.system-uris :as su :refer [resource-uri]]))
 
 (defn json-only
   "Middleware that requires the request to pass 'Content-Type: application/json'.

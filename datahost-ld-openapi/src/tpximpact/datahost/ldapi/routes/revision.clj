@@ -5,8 +5,7 @@
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
-   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
-   [clojure.data.json :as json]))
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
 (defn get-revision-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
