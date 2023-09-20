@@ -65,9 +65,9 @@
    ["@type" [:enum "dh:DimensionColumn" "dh:AttributeColumn" "dh:MeasureColumn"]]
    ["csvw:datatype" [:or :string :keyword]]
    ["csvw:name" :string]
-   ["csvw:titles" [:or
-                   :string
-                   [:sequential :string]]]])
+   ["csvw:titles" {:optional true} [:or
+                                    :string
+                                    [:sequential :string]]]])
 
 (def LdSchemaInput
   "Schema for new schema documents"

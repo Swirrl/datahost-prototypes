@@ -102,7 +102,7 @@
   ([json-ld-schema column-names options]
    {:pre [(make-row-schema-options-valid? options)]
     :post [(row-schema-valid? %)]}
-   (let [name-key (column-key :titles)
+   (let [name-key (column-key :name)
          json-cols (schema-columns json-ld-schema)
          unpack-name (fn [schema] (update schema name-key first))
          indexed (set/index (into #{} (map unpack-name) json-cols) [name-key])
