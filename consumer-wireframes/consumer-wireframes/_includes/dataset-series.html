@@ -79,6 +79,7 @@ layout: basic
 <script>
     let url = window.location.href
     uri = domain + url.split('?')[1]
+    document.getElementById('apiLink').href = uri
 
     const settings = {
         method: 'GET',
@@ -105,7 +106,7 @@ layout: basic
         document.getElementById('modified').innerHTML = data["dcterms:modified"]
         document.getElementById('description').innerHTML = data["dcterms:description"]
         document.getElementById('descriptionMetadata').innerHTML = data["dcterms:description"]
-        document.getElementById('apiLink').href = uri
+        
     }
 
     fetch(`${uri}/releases`, settings)
