@@ -33,6 +33,7 @@
   [k]
   (case k
     :datatype (URI. "http://www.w3.org/ns/csvw#datatype")
+    :name (URI. "http://www.w3.org/ns/csvw#name")
     :titles (URI. "http://www.w3.org/ns/csvw#titles")
     :required (URI. "http://www.w3.org/ns/csvw#required")
     :type (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")))
@@ -56,19 +57,6 @@
     (if-not (get csvw-col-schema (column-key :required))
       [:maybe schema]
       schema)))
-
-(defn- unpack-column-title
-  "Extracts column title from the schema."
-  [json-cols title]
-  (cond
-    ;;(string? title) title
-
-    (and (set? title) (= 1 (count title)))
-    (first title)
-
-    :default (throw (ex-info (format "Unsupported column name value: '%s'" title)
-                             {:title title
-                              :columns json-cols}))))
 
 (defn- schema-columns
   [json-ld-schema]
@@ -114,19 +102,18 @@
   ([json-ld-schema column-names options]
    {:pre [(make-row-schema-options-valid? options)]
     :post [(row-schema-valid? %)]}
-   (let [titles-key (column-key :titles)
+   (let [name-key (column-key :titles)
          json-cols (schema-columns json-ld-schema)
-         ;; NOTE: titles passed as a JS Array -> #{["foo" "bar"]} ?
-         ;; we throw if the array has more than one element.
-         fix-title (fn [schema] (update schema titles-key (partial unpack-column-title json-cols)))
-         indexed (set/index (into #{} (map fix-title) json-cols) [titles-key])
+         unpack-name (fn [schema] (update schema name-key first))
+         indexed (set/index (into #{} (map unpack-name) json-cols) [name-key])
          _ (assert (= (count json-cols) (count indexed))
-                   "column names in schema should be distinct")
+                   (format "column names in schema should be distinct: schema=%s, indexed=%s"
+                           (count json-cols) (count indexed)))
          m (reduce-kv (fn reducer [r k v]
                         ;; we know there's only item per index key,
                         ;; so we can safely unpack the value
                         (let [ld-val (first v)
-                              col-name (get k titles-key)
+                              col-name (get k name-key)
                               schema (extract-column-datatype ld-val)]
                           (assoc r col-name
                                  (mu/update-properties schema assoc

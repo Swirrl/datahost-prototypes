@@ -52,13 +52,12 @@
     ["dcterms:description" {:optional true} :description-string]]
    {:registry s.common/registry}))
 
-(def CreateChangeInput
-  "Input schema for new Changes."
+(def CreateChangeInputQueryParams
   (m/schema
    [:map
-    ["dcterms:title" {:optional true} :title-string]
-    ["dcterms:description" {:optional false} :description-string]
-    ["dcterms:format" {:optional false :json-schema/example "text/csv"} :string]]
+    ["title" {:optional true} :title-string]
+    ["description" {:optional false} :description-string]
+    ["format" {:optional false :json-schema/example "text/csv"} :string]]
    {:registry s.common/registry}))
 
 (def LdSchemaInputColumn
@@ -109,13 +108,7 @@
                            (m/schema [:map
                                       ["title" :title-string]
                                       ["description" {:optional true} :description-string]]
-                                     {:registry s.common/registry}))}
-   :post-revision-change {:body (m/explainer [:maybe CreateChangeInput])
-                          :query (m/explainer
-                                  (m/schema [:map
-                                             ["title" {:optional true} :title-string]
-                                             ["description" :description-string]]
-                                            {:registry s.common/registry}))}})
+                                     {:registry s.common/registry}))}})
 
 (defn base-url [request]
   (request/request-url (select-keys request [:scheme :headers :uri])))

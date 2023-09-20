@@ -85,8 +85,8 @@
                                          "/data/whatever/revisions/3/changes/1")
         _ (assert revision-id)
         _ (assert change-id)
-        change-ednld {"dcterms:description" (str revision-title " -- changes")
-                      "dcterms:format" "text/csv"}
+        change-ednld {"description" (str revision-title " -- changes")
+                      "format" "text/csv"}
 
         change-api-response (POST (str new-revision-location
                                        (case change-kind
@@ -227,21 +227,23 @@
                                                   "csvw:name" col-name
                                                   "csvw:titles" titles})]
                                  ;; we put schema only on 2 columns
-                                 [(csvw-type "dh:DimensionColumn" "measure_type"
+                                 [(csvw-type "dh:DimensionColumn" "Measure type"
                                              ["Measure type"] :string)
-                                  (csvw-type "dh:DimensionColumn" "statistical_geography"
+                                  (csvw-type "dh:DimensionColumn" "Statistical Geography"
                                             "Statistical Geography" :string)
-                                  (csvw-type "dh:DimensionColumn" "year"
+                                  (csvw-type "dh:DimensionColumn" "Year"
                                              "Year" :integer)
-                                  (csvw-type "dh:MeasureColumn" "qualifications"
-                                            "Aged 16 to 64 years level 3 or above qualifications" :double)
-                                  (csvw-type "dh:DimensionColumn" "unit_of_measure"
+                                  (csvw-type "dh:MeasureColumn"
+                                             "Aged 16 to 64 years level 3 or above qualifications"
+                                             "Aged 16 to 64 years level 3 or above qualifications"
+                                             :double)
+                                  (csvw-type "dh:DimensionColumn" "Unit of Measure"
                                             "Unit of Measure" :string)
-                                  (csvw-type "dh:DimensionColumn" "upper_confidence_int"
+                                  (csvw-type "dh:DimensionColumn" "Upper Confidence Interval"
                                             "Upper Confidence Interval" :double)
-                                  (csvw-type "dh:DimensionColumn" "lower_confidence_int"
+                                  (csvw-type "dh:DimensionColumn" "Lower Confidence Interval"
                                             "Lower Confidence Interval" :double)
-                                  (csvw-type "dh:AttributeColumn" "observation_status"
+                                  (csvw-type "dh:AttributeColumn" "Observation Status"
                                             "Observation Status" :string)])}
 
               _validated (when-not (m/validate LdSchemaInput schema-req-body)
@@ -294,10 +296,10 @@
 
             (testing "Changes append resource created with CSV appends file"
               ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/appends"
-              (let [change-ednld {"dcterms:description" "A new change"
-                                  "dcterms:format" "text/csv"}
+              (let [query-params {"description" "A new change"
+                                  "format" "text/csv"}
                     change-api-response (POST (str new-revision-location "/appends")
-                                              {:query-params change-ednld
+                                              {:query-params query-params
                                                :headers {"content-type" "text/csv"}
                                                :body (th/file-upload csv-2019-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
@@ -317,10 +319,10 @@
 
             (testing "Ensure we can't add more than 1 change to a revision."
               ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
-              (let [change-ednld {"dcterms:description" "A new second change"
-                                  "dcterms:format" "text/csv"}
+              (let [query-params {"description" "A new second change"
+                                  "format" "text/csv"}
                     change-api-response (POST (str new-revision-location "/appends")
-                                              {:query-params change-ednld
+                                              {:query-params query-params
                                                :headers {"content-type" "text/csv"}
                                                :body (th/file-upload csv-2020-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
@@ -353,10 +355,10 @@
                 "Created with the resource URI provided in the Location header")
 
               (testing "Third Changes append resource created against 2nd Revision"
-                (let [change-3-ednld {"dcterms:description" "A new third change"
-                                      "dcterms:format" "text/csv"}
+                (let [query-params {"description" "A new third change"
+                                      "format" "text/csv"}
                       change-api-response (POST (str new-revision-location-2 "/appends")
-                                                {:query-params change-3-ednld
+                                                {:query-params query-params
                                                  :headers {"content-type" "text/csv"}
                                                  :body (th/file-upload csv-2021-path)})]
                   (is (= 201 (:status change-api-response)))

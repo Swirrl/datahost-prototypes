@@ -1,4 +1,4 @@
-PUT http://localhost:3000/data/test-011
+PUT http://localhost:3000/data/{{series}}
 Accept: application/json
 Content-Type: application/json
 {
@@ -10,7 +10,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT http://localhost:3000/data/test-011/releases/release-1
+PUT http://localhost:3000/data/{{series}}/releases/release-1
 Accept: application/json
 Content-Type: application/json
 {
@@ -20,13 +20,13 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/test-011/releases/release-1/schema
-[MultipartFormData]
-schema-file: file,bin/hurl-data/test-schema.json; application/json
+POST http://localhost:3000/data/{{series}}/releases/release-1/schema
+Content-Type: application/json
+file,test-schema.json;
 
 HTTP 201
 
-POST http://localhost:3000/data/test-011/releases/release-1/revisions
+POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -39,18 +39,21 @@ HTTP 201
 revision1_url: header "Location"
 
 POST http://localhost:3000{{revision1_url}}/appends
-[MultipartFormData]
-appends: file,bin/hurl-data/change1.csv; text/csv
-jsonld-doc: file,bin/hurl-data/change1.meta.json; application/json
+Content-Type: text/csv
+[QueryStringParams]
+title: A schema
+description: Schema for {{series}}/release-1
+format: text/csv
+file,change1.csv;
 
 HTTP 201
 
-GET http://localhost:3000/data/test-011/releases/release-1
+GET http://localhost:3000/data/{{series}}/releases/release-1
 Accept: text/csv
 
 HTTP 200
 
-POST http://localhost:3000/data/test-011/releases/release-1/revisions
+POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -63,18 +66,21 @@ HTTP 201
 revision2_url: header "Location"
 
 POST http://localhost:3000{{revision2_url}}/retractions
-[MultipartFormData]
-appends: file,bin/hurl-data/change2.csv; text/csv
-jsonld-doc: file,bin/hurl-data/change2.meta.json; application/json
+Content-Type: text/csv
+[QueryStringParams]
+title: A retraction
+description: retraction for the release
+format: text/csv
+file,change2.csv;
 
 HTTP 201
 
-GET http://localhost:3000/data/test-011/releases/release-1
+GET http://localhost:3000/data/{{series}}/releases/release-1
 Accept: text/csv
 
 HTTP 200
 
-POST http://localhost:3000/data/test-011/releases/release-1/revisions
+POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -87,15 +93,16 @@ HTTP 201
 revision3_url: header "Location"
 
 POST http://localhost:3000{{revision3_url}}/corrections
-#[Options]
-#very-verbose: true
-[MultipartFormData]
-appends: file,bin/hurl-data/change3.csv; text/csv
-jsonld-doc: file,bin/hurl-data/change3.meta.json; application/json
+Content-Type: text/csv
+[QueryStringParams]
+title: A correction
+description: correction for the release
+format: text/csv
+file,change3.csv;
 
 HTTP 201
 
-GET http://localhost:3000/data/test-011/releases/release-1
+GET http://localhost:3000/data/{{series}}/releases/release-1
 Accept: text/csv
 
 HTTP 200

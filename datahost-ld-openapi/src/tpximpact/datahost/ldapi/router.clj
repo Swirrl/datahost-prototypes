@@ -228,7 +228,7 @@
         ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]]
 
        ["/:revision-id/retractions"
-        {:post (routes.rev/post-revision-deletes-changes-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-retractions-changes-route-config triplestore change-store system-uris)}]
        ["/:revision-id/corrections"
         {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]
        ]]]]
