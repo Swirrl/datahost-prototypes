@@ -115,3 +115,12 @@
                     :body [:map
                            [:status [:enum "error"]]
                            [:message string?]]}}})
+
+; Curl command used to test the delta route:
+;
+; curl -X 'POST' 'http://localhost:3000/delta' -H 'accept: application/json' \
+;   -H 'Content-Type: multipart/form-data' \
+;   -F 'base-csv=@./env/test/resources/test-inputs/delta/orig.csv;type=text/csv' \
+;   -F 'delta-csv=@./env/test/resources/test-inputs/delta/new.csv;type=text/csv' \
+;   --output ./delta-test.zip
+;
