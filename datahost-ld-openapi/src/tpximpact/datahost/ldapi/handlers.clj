@@ -269,7 +269,7 @@
    system-uris
    change-kind
    {path-params :path-params
-    jsonld-doc :query-params
+    query-params :query-params
     appends :body
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
@@ -293,7 +293,6 @@
                                                                                system-uris
                                                                                {:api-params (get-api-params request)
                                                                                 :ld-root (su/rdf-base-uri system-uris)
-                                                                                :jsonld-doc jsonld-doc
                                                                                 :store-key (:key insert-req)
                                                                                 :change-uri change-uri
                                                                                 :datahost.change/kind change-kind
@@ -322,7 +321,7 @@
                                            :change-id change-id
                                            :dataset change-ds
                                            :row-schema row-schema
-                                           "dcterms:format" (get jsonld-doc "dcterms:format")})]
+                                           "dcterms:format" (get query-params "format")})]
           (log/debug (format "post-change: '%s' stored snapshot" (.getPath change-uri))
                      {:new-snapshot-key new-snapshot-key})
           (db/tag-with-snapshot triplestore change-uri {:dh/revisionSnapshotCSV new-snapshot-key}))

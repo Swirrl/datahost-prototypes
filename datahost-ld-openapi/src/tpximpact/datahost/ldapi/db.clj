@@ -449,15 +449,15 @@
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/appliesToRelease) release-uri))))
 
-(defn- request->change [change-kind api-params json-doc ld-root revision-uri change-uri]
-  (let [change-doc (annotate-json-resource json-doc change-uri (compact/expand :dh/Change) ld-root)
+(defn- request->change [change-kind api-params ld-root revision-uri change-uri]
+  (let [change-doc (annotate-json-resource {} change-uri (compact/expand :dh/Change) ld-root)
         doc-resource (resource/from-json-ld-doc change-doc)
         param-properties (params->title-description-properties api-params)]
     (-> doc-resource
         (resource/set-properties param-properties)
         (resource/set-property1 (compact/expand :dh/changeKind) change-kind)
         (resource/set-property1 (compact/expand :dh/appliesToRevision) revision-uri)
-        (resource/set-property1 (compact/expand :dcterms/format) (get json-doc "dcterms:format")))))
+        (resource/set-property1 (compact/expand :dcterms/format) (get api-params :format)))))
 
 (defn- request->schema [json-doc ld-root schema-uri release-uri]
   (let [schema-doc (annotate-json-resource json-doc schema-uri (compact/expand :dh/TableSchema) ld-root)
@@ -533,10 +533,10 @@
   {:message STRING} when an insert could not be performed."
   [triplestore
    _system-uris
-   {:keys [api-params jsonld-doc ld-root store-key datahost.change/kind change-uri]
+   {:keys [api-params ld-root store-key datahost.change/kind change-uri]
     {rev-uri :dh/Revision } :datahost.request/uris}]
   {:pre [(some? kind) (some? store-key) (some? change-uri) (some? rev-uri)]}
-  (let [change (request->change kind api-params jsonld-doc ld-root rev-uri change-uri)
+  (let [change (request->change kind api-params ld-root rev-uri change-uri)
         change (resource/set-property1 change (compact/expand :dh/updates) store-key)
         last-change-num (fn [conn] (select-max-n conn rev-uri (compact/expand :dh/hasChange)))
         {:keys [before after]}

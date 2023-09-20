@@ -1,15 +1,15 @@
 {
  "dh:columns": [
      {"@type": "dh:DimensionColumn",
-      "csvw:name": "year",
+      "csvw:name": "Year",
       "csvw:datatype": "integer",
       "csvw:titles": "Year"},
      {"@type": "dh:MeasureColumn",
-      "csvw:name": "measure",
+      "csvw:name": "Aged 16 to 64 years level 3 or above qualifications",
       "csvw:datatype": "double",
       "csvw:titles": ["Aged 16 to 64 years level 3 or above qualifications"]},
      {"@type": "dh:DimensionColumn",
-      "csvw:name": "upper_confidence_interval",
+      "csvw:name": "Upper Confidence Interval",
       "csvw:datatype": "double",
       "csvw:required": true,
       "csvw:titles": "Upper Confidence Interval"}

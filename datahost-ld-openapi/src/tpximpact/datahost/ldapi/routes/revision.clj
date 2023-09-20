@@ -81,7 +81,7 @@
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}
-                :query routes-shared/CreateChangeInput}
+                :query routes-shared/CreateChangeInputQueryParams}
    :openapi {:security [{"basic" []}]
              :requestBody {:content {"text/csv" {:schema {:type "sting" :format "binary"}}}}}
    ::rc/parameter-coercion {:query (rc/->ParameterCoercion :query-params :string false true)}
@@ -98,9 +98,9 @@
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindAppend)
          {:summary "Add appends changes to a Revision via a CSV file."}))
 
-(defn post-revision-deletes-changes-route-config [triplestore change-store system-uris]
+(defn post-revision-retractions-changes-route-config [triplestore change-store system-uris]
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
-         {:summary "Add deletes changes to a Revision via a CSV file."}))
+         {:summary "Add retractions changes to a Revision via a CSV file."}))
 
 (defn post-revision-corrections-changes-route-config [triplestore change-store system-uris]
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindCorrect)
