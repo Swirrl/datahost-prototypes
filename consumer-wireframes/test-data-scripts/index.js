@@ -13,7 +13,6 @@ const openAPI = "http://127.0.0.1:3000";
 createSeries = async (series) => {
     let title = data[i].title
     let description = data[i].description
-
     let url = `${openAPI}/data/${series}?title=${title}&description=${description}`
     const response = await fetch(url, {
         method: 'PUT',
@@ -33,8 +32,9 @@ createRelease = async (series) => {
     let releases = data[i].releases
     for (j = 0; j < releases.length; j++) {
         let title = releases[j].title
+        let description = releases[j].description
         let id = releases[j].id
-        let url = `${openAPI}/data/${series}/releases/${id}?title=${title}&description=test`
+        let url = `${openAPI}/data/${series}/releases/${id}?title=${title}&description=${description}`
         const response = await fetch(url, {
             method: 'PUT',
             headers: {
@@ -53,47 +53,50 @@ createRelease = async (series) => {
 createSchemas = async (releases, series) => {
     if (releases[j].schema != null) {
         let schemaFile = `./data/${releases[j].schema}`
+        let schema = require(schemaFile);
         let id = releases[j].id
         let url = `${openAPI}/data/${series}/releases/${id}/schema`
-        const formData = new FormData();
-        formData.append('schema-file', fs.createReadStream(schemaFile));
+        // const formData = new FormData();
+        // formData.append('schema-file', fs.createReadStream(schemaFile));
         const settings = {
             method: 'POST',
-            body: formData,
+            body: JSON.stringify(schema),
             headers: {
+                "Content-Type": "application/json",
                 "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
             },
         };
         try {
             const fetchResponse = await fetch(url, settings);
             const data = await fetchResponse.json();
-            console.log(`Added data to: ${url}`)
+            console.log(`Added schema to: ${url}`)
         } catch (e) {
             console.log(e)
             return e;
         }
-        console.log(`Added schema to: ${url}`)
     }
 }
 
 createRevision = async (series) => {
     let releases = data[i].releases
-    body = `{"dcterms:title":"Revision","dcterms:description":"Test"}`
     for (j = 0; j < releases.length; j++) {
-        let id = releases[j].id
-        let url = `${openAPI}/data/${series}/releases/${id}/revisions`
         if (releases[j].revisions != null) {
+            let id = releases[j].id
+            let url = `${openAPI}/data/${series}/releases/${id}/revisions`
             for (k = 0; k < releases[j].revisions.length; k++) {
                 let file = releases[j].revisions[k].file
+                let title = releases[j].revisions[k].title
+                let description = releases[j].revisions[k].description
+                body = `{"dcterms:title":"${title}","dcterms:description":"${description}"}`
 
-                await postRevision(url, file)
+                await postRevision(url, file, title, description)
             }
         }
     }
 }
 
-postRevision = async (url, file) => {
-    url = url + "?title=Revision&description=Test"
+postRevision = async (url, file, title, description) => {
+    url = url + `?title=${title}&description=${description}`
     const response = await fetch(url, {
         method: 'POST',
         body: body,
@@ -111,25 +114,18 @@ postRevision = async (url, file) => {
 
 uploadData = async (revision, file) => {
     const formData = new FormData();
-    const obj = {
-        'dcterms:title': "Test",
-        'dcterms:description': "Test desc",
-        'dcterms:format': "text/csv"
-      };
     formData.append('appends', fs.createReadStream(file));
-    formData.append("jsonld-doc", JSON.stringify(obj));
     const settings = {
         method: 'POST',
-        body: formData,
+        body: fs.createReadStream(file),
         headers: {
-            'Content-Type': 'application/json-ld',
+            'Content-Type': 'text/csv',
             "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
         },
     };
     try {
-        url = `${openAPI}/data/${revision}/changes`
+        url = `${openAPI}/data/${revision}/appends?dcterms%3Atitle=test&dcterms%3Adescription=test&dcterms%3Aformat=text%2Fcsv`
         const fetchResponse = await fetch(url, settings);
-        console.log(fetchResponse)
         const data = await fetchResponse.json();
         console.log(`Added data to: ${url}`)
     } catch (e) {
