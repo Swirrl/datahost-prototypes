@@ -4,6 +4,7 @@
    [grafter.matcha.alpha :as matcha]
    [ring.util.io :as ring-io]
    [tablecloth.api :as tc]
+   [reitit.core :as rc]
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.ldapi.compact :as cmp]
    [tpximpact.datahost.ldapi.db :as db]
@@ -231,6 +232,7 @@
                  :body response-body})))
 
 (defn post-revision [triplestore system-uris {{:keys [series-slug release-slug]} :path-params
+                                              router :reitit.core/router
                                               body-params :body-params :as request}]
   (let [api-params (get-api-params request)
         release-uri (su/dataset-release-uri system-uris (su/dataset-series-uri system-uris series-slug) release-slug)]
@@ -241,7 +243,12 @@
                                                                   body-params (su/rdf-base-uri system-uris)
                                                                   release-uri revision-uri next-revision-id)]
         (as-json-ld {:status 201
-                     :headers {"Location" (.getPath revision-uri)}
+                     :headers {"Location" (-> (rc/match-by-name router
+                                                                :tpximpact.datahost.ldapi.router/revision
+                                                                {:series-slug series-slug
+                                                                 :release-slug release-slug
+                                                                 :revision-id resource-id})
+                                              (rc/match->path))}
                      :body jsonld-doc}))
 
       {:status 422
@@ -268,7 +275,8 @@
    change-store
    system-uris
    change-kind
-   {path-params :path-params
+   {router :reitit.core/router
+    {:keys [series-slug release-slug revision-id] :as path-params} :path-params
     query-params :query-params
     appends :body
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
@@ -327,7 +335,13 @@
           (db/tag-with-snapshot triplestore change-uri {:dh/revisionSnapshotCSV new-snapshot-key}))
 
         (as-json-ld {:status 201
-                     :headers {"Location" (.getPath change-uri)}
+                     :headers {"Location" (-> (rc/match-by-name router
+                                                                :tpximpact.datahost.ldapi.router/change
+                                                                {:series-slug series-slug
+                                                                 :release-slug release-slug
+                                                                 :revision-id revision-id
+                                                                 :change-id change-id})
+                                              (rc/match->path))}
                      :body inserted-jsonld-doc})))))
 
 (defn change->csv-stream [change-store change]

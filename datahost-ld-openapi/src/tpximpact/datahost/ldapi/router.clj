@@ -218,11 +218,13 @@
             :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
 
        ["/:revision-id"
-        {:get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
+        {:name ::revision
+         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/changes"
         ["/:change-id"
-         {:get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]]
+         {:name ::change
+          :get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]]
 
        ["/:revision-id/appends"
         ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]]
