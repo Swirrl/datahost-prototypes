@@ -14,7 +14,7 @@
     :refer [-as-dataset as-dataset]
     :as data-validation])
   (:import
-   (org.apache.commons.codec.digest MurmurHash3)))
+   (net.openhft.hashing LongHashFunction)))
 
 (def hash-column-name
   "Name of the column holding the hash of the row (excluding the measurement itself.)"
@@ -31,13 +31,18 @@
   (with-open [is (store/get-data store v)]
    (as-dataset is opts)))
 
-(defn make-columnwise-hasher []
+(def ^:private hash-fn (LongHashFunction/xx128low 1337))
+
+(defn make-columnwise-hasher
+  "Returns a function seq -> long"
+  []
   (fn hasher* [& columns]
-    (let [^StringBuilder sb (StringBuilder.)]
+    (let [^StringBuilder sb (StringBuilder.)
+          h ^LongHashFunction hash-fn]
       (.append sb "|")
       (loop [columns columns]
         (if-not (seq columns)
-          (MurmurHash3/hash32 (.toString sb))
+          (.hashChars h sb)
           (do
             (.append sb (first columns))
             (.append sb "|")
@@ -92,7 +97,7 @@
     (check-dataset-has-columns dataset col-names)
     (-> dataset
         (tc/map-columns hash-column-name
-                        :int
+                        :long
                         col-names
                         hasher)
         (vary-meta assoc ::hash-column hash-column-name))))
