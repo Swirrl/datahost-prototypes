@@ -41,8 +41,8 @@ revision1_url: header "Location"
 POST http://localhost:3000{{revision1_url}}/appends
 Content-Type: text/csv
 [QueryStringParams]
-title: A schema
-description: Schema for {{series}}/release-1
+title: changes (appends)
+description: change for {{series}}
 format: text/csv
 file,change1.csv;
 
