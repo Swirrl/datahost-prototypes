@@ -85,11 +85,25 @@
                                             {:registry s.common/registry}))]
     [:and
      [:fn {:error/message "Not a malli schema."} m/schema?]
+     [:fn {:error/message "Not a non-empty tuple schema"}
+      (fn [s]
+        (let [children (m/children s)]
+         (and (sequential? children)
+              (seq children))))]
      [:fn {:error/message "Properties of children schemas are invalid"}
       (fn props-pred [s]
         (validate-seq (map m/properties (m/children s))))]]))
 
-(def row-schema-valid? (m/validator DatasetRow))
+(def ^:private row-schema-valid?
+  "This validator is meant to be used in dev environment as assertion
+  condition."
+  (let [validator (m/validator DatasetRow)]
+    (fn row-schema-valildator [schema]
+      (or (validator schema)
+          (throw (java.lang.AssertionError.
+                  "Invalid DatasetRow schema"
+                  (ex-info "Invalid DatasetRow schema"
+                           {:malli/explanation (me/humanize (m/explain DatasetRow schema))})))))))
 
 (defn make-row-schema
   "Make a malli schema for a tuple of row values specified by
