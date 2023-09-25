@@ -316,28 +316,29 @@
                            (count change-resp-body-seq))
                         "responds CSV contents")))))
 
-            (testing "Ensure we can't add more than 1 change to a revision."
+            (testing "Ensure we can add more than 1 change to a revision."
               ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
-              (let [query-params {"description" "A new second change"
+              (let [query-params {"description" "A second change"
                                   "format" "text/csv"}
                     change-api-response (POST (str new-revision-location "/appends")
                                               {:query-params query-params
                                                :headers {"content-type" "text/csv"}
                                                :body (th/file-upload csv-2020-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
-                (is (= 422 (:status change-api-response)))
-                (is (nil? new-change-resource-location))))
+                (is (= 201 (:status change-api-response)))
+                (is new-change-resource-location)))
 
             (testing "Fetching Revision as CSV after 'appending' a single CSV"
               (let [response (GET new-revision-location {:headers {"accept" "text/csv"}})
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
                 ;; length of one csv file
-                (is (= (count csv-2019-seq)
+                (is (= (+ (count csv-2019-seq)
+                          (dec (count csv-2020-seq)))
                        (count resp-body-seq))
                     "responds with concatenated changes from both CSVs")
                 (is (= (first resp-body-seq) (first csv-2020-seq)))
-                (is (str/includes? (last resp-body-seq) ",2019,")))))
+                (is (str/includes? (last resp-body-seq) ",2020,")))))
 
           (let [revision-title-2 (str "A second revision for release " release-slug)
                 revision-url-2 (str release-url "/revisions")
@@ -370,7 +371,9 @@
                       valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
                   (is (= 200 (:status response)))
                   ;; length of all csv files minus duplicated headers
-                  (is (= (+ (count csv-2019-seq) (- (count csv-2021-seq) 1))
+                  (is (= (+ (count csv-2019-seq)
+                            (dec (count csv-2020-seq))
+                            (dec (count csv-2021-seq)))
                          (count resp-body-seq))
                       "responds with concatenated changes from all uploaded CSVs")
                   (is (= (first resp-body-seq) (first csv-2019-seq)))
@@ -384,7 +387,9 @@
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
                 ;; length of all csv files minus duplicated headers
-                (is (= (+ (count csv-2019-seq) (- (count csv-2021-seq) 1))
+                (is (= (+ (count csv-2019-seq)
+                          (dec (count csv-2020-seq))
+                          (dec (count csv-2021-seq)))
                        (count resp-body-seq))
                     "responds with concatenated changes from all uploaded CSVs")
                 (is (= (first resp-body-seq) (first csv-2019-seq)))
@@ -410,6 +415,7 @@
                                                      {})]
                  (is (= 200 (:status resp)))
                  (is (= (+ (dec (count csv-2019-seq))
+                           (dec (count csv-2020-seq))
                            (dec (count csv-2021-seq))
                            (- (dec (count csv-2021-deletes-seq))))
                         (tc/row-count ds)))

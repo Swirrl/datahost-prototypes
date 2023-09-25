@@ -163,18 +163,19 @@
     {release-uri :dh/Release} :datahost.request/uris
     {:strs [accept]} :headers
     :as request}]
-
   (let [revision-ld (->> revision matcha/index-triples triples->ld-resource)]
     (if (= accept "text/csv")
       (-> {:status 200
            :headers {"content-type" "text/csv"
                      "content-disposition" "attachment ; filename=revision.csv"}
-           :body (if (empty? (db/get-changes-info triplestore release-uri (revision-number (resource/id revision-ld))))
-                   ""
-                   (let [key (get revision-ld (cmp/expand :dh/revisionSnapshotCSV))]
-                     (when (nil? key)
-                       (throw (ex-info "No snapshot reference for revision" {:revision revision})))
-                     (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key))))}
+           :body (let [change-infos (db/get-changes-info triplestore release-uri (revision-number (resource/id revision-ld)))]
+                  (if (empty? change-infos)
+                    "" ;TODO: return table header here, need to get schema first
+                    (let [key (get (last change-infos) :snapshotKey)]
+                      (assert (string? key))
+                      (when (nil? key)
+                        (throw (ex-info "No snapshot reference for revision" {:revision revision})))
+                      (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key)))))}
           (shared/set-csvm-header request))
 
       (as-json-ld {:status 200
@@ -273,9 +274,7 @@
     appends :body
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
-  (let [change-id 1
-        change-uri ^URI (su/change-uri* system-uris (assoc path-params :change-id change-id))
-        ;; validate incoming data
+  (let [;; validate incoming data
         release-schema (db/get-release-schema triplestore release-uri)
         ;; If there's no release-schema, then no validation happens, and db/insert
         ;; is a NOOP. This fails further down in the `let` body in
@@ -289,16 +288,18 @@
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         _ (.reset appends)
         ;; insert relevant triples
-        {:keys [inserted-jsonld-doc resource-id message]} (when-not validation-err
-                                                            (db/insert-change! triplestore
-                                                                               system-uris
-                                                                               {:api-params (get-api-params request)
-                                                                                :ld-root (su/rdf-base-uri system-uris)
-                                                                                :store-key (:key insert-req)
-                                                                                :change-uri change-uri
-                                                                                :datahost.change/kind change-kind
-                                                                                :datahost.request/uris request-uris}))]
-    (assert (= resource-id change-id))
+        insert-req (store/make-insert-request! change-store appends)
+        {:keys [inserted-jsonld-doc
+                change-id
+                change-uri
+                message]} (when-not validation-err
+                            (db/insert-change! triplestore
+                                               system-uris
+                                               {:api-params (get-api-params request)
+                                                :ld-root (su/rdf-base-uri system-uris)
+                                                :store-key (:key insert-req)
+                                                :datahost.change/kind change-kind
+                                                :datahost.request/uris request-uris}))]
     (log/info (format "post-change: '%s' validation: found-schema? = %s, change-valid? = %s, insert-ok? = %s"
                       (.getPath change-uri) (some? release-schema) (nil? validation-err) (nil? message)))
     (cond
@@ -313,19 +314,20 @@
         (log/debug (format "post-change: '%s' stored-change: '%s'" (.getPath change-uri) (:key insert-req)))
 
         ;; generate and store the dataset snapshot
-        (let [{:keys [new-snapshot-key]} (internal/post-change--generate-csv-snapshot
-                                          {:triplestore triplestore
-                                           :change-store change-store
-                                           :system-uris system-uris}
-                                          {:path-params path-params
-                                           :change-kind change-kind
-                                           :change-id change-id
-                                           :dataset change-ds
-                                           :row-schema row-schema
-                                           "dcterms:format" (get query-params "format")})]
+        (let [{:keys [new-snapshot-key] :as snapshot-result}
+              (internal/post-change--generate-csv-snapshot
+               {:triplestore triplestore
+                :change-store change-store
+                :system-uris system-uris}
+               {:path-params path-params
+                :change-kind change-kind
+                :change-id change-id
+                :dataset change-ds
+                :row-schema row-schema
+                "dcterms:format" (get query-params "format")})]
           (log/debug (format "post-change: '%s' stored snapshot" (.getPath change-uri))
                      {:new-snapshot-key new-snapshot-key})
-          (db/tag-with-snapshot triplestore change-uri {:dh/revisionSnapshotCSV new-snapshot-key}))
+          (db/tag-with-snapshot triplestore change-uri snapshot-result))
 
         (as-json-ld {:status 201
                      :headers {"Location" (-> (rc/match-by-name router

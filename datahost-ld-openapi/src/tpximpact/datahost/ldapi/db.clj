@@ -187,15 +187,18 @@
 (defn- get-changes-info-query
   [release-uri max-rev]
   {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh :dcterms]))
-   :select ['?rev '?updates '?rev_number '?kind '?format]
+   :select ['?rev '?updates '?rev_number '?change_number '?kind '?format '?snapshotKey]
    :where (cond-> [['?rev :dh/appliesToRelease release-uri]
                    ['?rev :dh/hasChange '?change]
                    ['?change :dh/updates '?updates]
                    ['?change :dh/changeKind '?kind]
                    ['?change :dcterms/format '?format]
-                   [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]]
+                   ['?change :dh/revisionSnapshotCSV '?snapshotKey]
+                   [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]
+                   [:bind ['(:xsd/integer (replace (str ?change) "^.*/([^/]*)$" "$1")) '?change_number]]]
             (some? max-rev) (conj [:filter (list '<= '?rev_number max-rev)]))
-   :order-by ['(asc ?rev_number)]})
+   :order-by ['(asc ?rev_number)
+              '(asc ?change_number)]})
 
 (defn get-changes-info
   "Returns records for all changes, optionally up to `?max-rev` (int)
@@ -494,14 +497,18 @@
 
   Assumes m contains keys:
 
-  - :dh/revisionSnapshotCSV"
-  [triplestore ^URI uri m]
-  (let [key (:dh/revisionSnapshotCSV m)
-        statements (dataset-snapshot-statements uri key)]
-    (assert key)
+  - :new-snapshot-key
+  - :previous-snapshot-key (when available) - to remove the snapshot
+    key from the revision."
+  [triplestore ^URI uri {key :new-snapshot-key prev-key :previous-snapshot-key}]
+  (assert key)
+  (let [insert-statements (dataset-snapshot-statements uri key)]
     (log/debug "tag-revision-with-snapshot:" (.getPath uri) (format "key='%s'" key))
     (with-open [conn (repo/->connection triplestore)]
-      (pr/add conn statements))))
+      (when prev-key
+        (log/debug "tag-with-snapshot: delete" (.getPath uri) (format "prev-key='%s'" prev-key))
+        (pr/delete conn (dataset-snapshot-statements uri prev-key)))
+      (pr/add conn insert-statements))))
 
 (defn insert-revision! [triplestore api-params incoming-jsonld-doc ld-root release-uri revision-uri revision-number]
   (let [revision (request->revision release-uri revision-uri api-params incoming-jsonld-doc ld-root)]
@@ -513,46 +520,63 @@
 
 (defn- insert-change-statement*
   "Statement for: insert only when the revision has no changes already."
-  [revision-uri statements]
-  {:prefixes (select-keys default-prefixes [:dh :xsd])
-   :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
-   :where
-   [[:where {:select [['(max (:xsd/integer (replace (str ?e) "^.*/([^/]*)$" "$1"))) '?last]]
-             :where [['?e (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                      (compact/expand :dh/Change)]]}]
-    [:filter (list 'not-exists
-                   [['?e
-                     (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
-                     (compact/expand :dh/Change)]
-                    ['?e 
-                     (compact/expand :dh/appliesToRevision)
-                     revision-uri]])]]})
+  [revision-uri change-uri statements]
+  (let [type-uri (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")]
+    {:prefixes (select-keys default-prefixes [:dh :xsd])
+     :insert (mapv #(vector (:s %) (:p %) (:o %))  statements)
+     :where
+     [[:where {:select [['(max (:xsd/integer (replace (str ?e) "^.*/([^/]*)$" "$1"))) '?last]]
+               :where [['?e type-uri (compact/expand :dh/Change)]]}]
+      [:filter (list 'not-exists
+                     [[change-uri type-uri (compact/expand :dh/Change)]])]]}))
+
+(defn- last-change-num
+  "Returns an integer zero or positive integer."
+  [conn revision-uri]
+  (select-max-n conn revision-uri (compact/expand :dh/hasChange)))
+
+
+(defn- maybe-insert-change
+  "Returns a map {:before number :after number}, where
+  the before and after numbers are the last change-id
+  before and after the insert.
+
+  The [[pr/update]] function's return value doesn't say whether the
+  insert actually happened."
+  [^RepositoryConnection conn rev-uri change-uri change]
+  (let [before (last-change-num conn rev-uri)
+        statements (concat (resource/->statements change)
+                           (revision-change-statements change))]
+    (->> (insert-change-statement* rev-uri change-uri statements)
+         (f/format-update)
+         (pr/update! conn))
+    {:before before :after (last-change-num conn rev-uri)}))
 
 (defn insert-change!
-  "Returns {:resource-id NUMBER :jsonld-doc DOC} on success,
+  "Returns {:change-id NUMBER :inserted-jsonld-doc DOC :change-uri URI} on success,
   {:message STRING} when an insert could not be performed."
   [triplestore
-   _system-uris
-   {:keys [api-params ld-root store-key datahost.change/kind change-uri]
-    {rev-uri :dh/Revision } :datahost.request/uris}]
-  {:pre [(some? kind) (some? store-key) (some? change-uri) (some? rev-uri)]}
-  (let [change (request->change kind api-params ld-root rev-uri change-uri)
-        change (resource/set-property1 change (compact/expand :dh/updates) store-key)
-        last-change-num (fn [conn] (select-max-n conn rev-uri (compact/expand :dh/hasChange)))
-        {:keys [before after]}
-        (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
-          (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
-          (repo/with-transaction conn
-            (let [before (last-change-num conn)
-                  statements (concat (resource/->statements change) (revision-change-statements change))
-                  _ (pr/update! conn
-                                (f/format-update (insert-change-statement* rev-uri statements)))
-                  after (last-change-num conn)]
-              {:before before :after after})))]
-    (if (and (= 0N before) (= 1N after))
-      {:resource-id 1
-       :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
-      {:message "Change already exists."})))
+   system-uris
+   {:keys [api-params ld-root store-key datahost.change/kind]
+    {rev-uri :dh/Revision} :datahost.request/uris}]
+  {:pre [(some? kind) (some? store-key) (some? rev-uri)]}
+  (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
+    (let [prev-change-id (last-change-num conn rev-uri)
+          change-id (inc prev-change-id)
+          change-uri (su/change-uri* system-uris (assoc api-params :change-id change-id))
+          _ (log/debug (format "will insert-change for '%s', new change id = %s"
+                               (.getPath ^URI rev-uri) change-id))
+          change (request->change kind api-params ld-root rev-uri change-uri)
+          change (resource/set-property1 change (compact/expand :dh/updates) store-key)
+          {:keys [before after]} (do
+                                   (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
+                                   (maybe-insert-change conn rev-uri change-uri change))]
+      (log/debug "insert-change: " {:change-id change-id :before before :after after})
+      (if (and (= prev-change-id before) (= change-id after))
+        {:change-id change-id
+         :change-uri change-uri
+         :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
+        {:message "Change already exists."}))))
 
 (defn- previous-change-coords
   "Given revision and change id, tries to find the preceding change's
@@ -580,7 +604,7 @@
       (= :new c)                        ; the given revision+change is the first
       nil
 
-      (int? c)                          ; we got a definitive answer
+      (number? c)                          ; we got a definitive answer
       (get-change triplestore
                   (su/change-uri* system-uris (assoc params :revision-id prev-rev-id :change-id c)))
       
