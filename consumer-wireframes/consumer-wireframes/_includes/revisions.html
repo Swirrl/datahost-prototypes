@@ -8,9 +8,10 @@ layout: basic
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Home</a></li>
                 <li class="breadcrumb-item"><a href="/datasets">Datasets</a></li>
-                <li class="breadcrumb-item"><a href="/datasets/dataset-series">Population aged 16 to 64 years level 3 or
-                        above qualifications</a></li>
-                <li class="breadcrumb-item"><a href="/datasets/dataset-series/dataset-release">2010 onwards</a></li>
+                <li class="breadcrumb-item"><a id="seriesBreadcrumbID" href="/datasets/dataset-series"><span
+                            id="seriesBreadcrumb"></span></a></li>
+                <li class="breadcrumb-item" aria-current="page"><a id="releaseBreadcrumbID"
+                        href="/datasets/dataset-series"><span id="titleBreadcrumb"></span></a></li>
                 <li class="breadcrumb-item active" aria-current="page">All revisions</li>
             </ol>
         </nav>
@@ -19,9 +20,11 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold h3 pr-5">Population aged 16 to 64 years level 3 or above qualifications: 2010 onwards</h1>
+                    <h1 class="font-weight-bold h3 pr-5"><span id="subTitle"></span>: <span id="title"></span></h1>
                     <h1 class="font-weight-bold pr-5">
-                            List of all revisions</h1>
+                    </h1>
+                    <h1 class="font-weight-bold pr-5">
+                        List of all revisions</h1>
                     <p class="lead"></p>
                 </div>
             </div>
@@ -29,58 +32,122 @@ layout: basic
     </div>
     <div class="container">
 
-            <div class="row pt-4">
-                <div class="col-lg-10">
-                    <!-- <h2>List of all revisions</h2> -->
-                    <table class = "table table-striped">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="fixed" scope="col">Revision</th>
-                                <th class="fixed" scope="col">Update date</th>
-                                <th scope="col">Description</th>
-                                <th class="fixed"  scope="col">Link</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>5 <span class="badge rounded-pill text-bg-success">Latest</span></td>
-                                <td>19 November 2022</td>
-                                <td>The latest version of this data contains additional data for the new year of 2021. In
-                                    addition
-                                    some minor corrections to to rounding issues for some historic data in 2011 have been fixed.
-                                    One duplicate piece of data was also deleted.</td>
-                                <td><a href = "../dataset-revision">View revision 5</a></td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>19 November 2021</td>
-                                <td>The latest version of this data contains additional data for the new year of 2020</td>
-                                <td><a href = "../dataset-revision-archived">View revision 4</a></td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>9 November 2020</td>
-                                <td>The latest version of this data contains additional data for the new year of 2019
-                                </td>
-                                <td><a href = "#">View revision 3</a></td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>1 March 2020</td>
-                                <td>A correction was made to values for the North East of england and containing local authorities</td>
-                                <td><a href = "#">View revision 2</a></td>
-                            </tr>
-                            <tr>
-                                <td>1</td>
-                                <td>17 November 2019</td>
-                                <td>The latest version of this data contains additional data for the new year of 2018</td>
-                                <td><a href = "#">View revision 1</a></td>
-                            </tr>
+        <div class="row pt-4">
+            <div class="col-lg-10">
+                <!-- <h2>List of all revisions</h2> -->
+                <table class="table table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="fixed" scope="col">Revision</th>
+                            <th scope="col">Description</th>
+                            <th class="fixed" scope="col">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tbody id="table"></tbody>
 
-                        </tbody>
-                    </table>
-                </div>
+                    </tbody>
+                </table>
             </div>
+        </div>
 
     </div>
 </main>
+
+<script>
+    let url = window.location.href
+    let uri = domain + url.split('?')[1]
+
+    const tableStructure = [{
+        "name": "dcterms:title"
+    }, {
+        "name": "dcterms:description"
+    }, {
+        "name": "@id"
+    }]
+    const tableRef = document.getElementById("table");
+    const tr = tableRef.getElementsByTagName("tr");
+
+    const settings = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    };
+
+    fetch(uri, settings)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            fetchSeries(data)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+
+    fetchSeries = release => {
+        fetch(release["dcat:inSeries"], settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                populatePage(release, data)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+    populatePage = (release, series) => {
+        document.getElementById('title').innerHTML = release["dcterms:title"]
+        document.getElementById('subTitle').innerHTML = series["dcterms:title"]
+        document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
+        document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('releaseBreadcrumbID').href =
+            `/datasets/dataset-series/dataset-release/?/data/${release["@id"]}`
+
+        getRevision(release)
+    }
+
+    getRevision = (release) => {
+        fetch(`${uri}/revisions`, settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                populateRevision(data, release)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+
+    populateRevision = data => {
+            console.log(data)
+            revision = data.contents
+            for (i = 0; i < revision.length; i++) {
+                let newRow = tableRef.insertRow(-1);
+                for (j = 0; j < tableStructure.length; j++) {
+                    if (tableStructure[j].name == "@id") {
+                            let cellValue = `View ${revision[i]["dcterms:title"]}`
+                            let cell = newRow.insertCell(j);
+                            let text = document.createTextNode(cellValue);
+                            let a = document.createElement('a');
+                            a.href = `/datasets/dataset-series/dataset-release/dataset-revision?/data/${revision[i]["@id"]}`;
+                            a.appendChild(text);
+                            cell.appendChild(a);
+                        } else {
+                            let cellValue = revision[i][tableStructure[j].name]
+                            let cell = newRow.insertCell(j);
+                            let text = document.createTextNode(cellValue);
+                            cell.appendChild(text);
+                        }
+
+                    }
+                }
+            }
+</script>

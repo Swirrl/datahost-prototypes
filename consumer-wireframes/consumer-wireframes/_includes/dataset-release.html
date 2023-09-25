@@ -186,6 +186,7 @@ layout: basic
     }
 
     populateRevision = (data, release) => {
+        console.log(data)
         document.getElementById('revisionReason').innerHTML = data["dcterms:description"]
 
         let schema = release["dh:hasSchema"]
