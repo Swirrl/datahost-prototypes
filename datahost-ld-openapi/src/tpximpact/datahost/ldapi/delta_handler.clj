@@ -2,7 +2,6 @@
   (:require [clojure.string :as str]
             [ring.util.io :as ring-io]
             [tablecloth.api :as tc]
-            [tech.v3.dataset.zip :as zip]
             [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
   (:import (net.openhft.hashing LongHashFunction)))
 
@@ -58,12 +57,17 @@
             column-names)
        (into {})))
 
+(defn write-dataset-to-outputstream [tc-dataset]
+  (ring-io/piped-input-stream
+   (fn [out-stream]
+     (tc/write! tc-dataset out-stream {:file-type :csv}))))
+
 (defn derive-deltas [original-ds new-ds]
   (let [old (add-ids original-ds)
         new (add-ids new-ds)
         measure-column-name (get-measure-column-name default-schema)
         right-measure-column-name (str "right." measure-column-name)
-        column-names (tc/column-names original-ds)
+        column-names (cons "ID" (tc/column-names original-ds))
         right-column-names (map #(str "right." %) column-names)
         labelled-ds (tc/map-columns (tc/full-join old new "ID")
                                     :status
@@ -72,22 +76,29 @@
                                       (cond
                                         (nil? old-measure-val) :added
                                         (nil? new-measure-val) :deleted
-                                        (not= old-measure-val new-measure-val) :modified)))]
-    [(-> labelled-ds
-         (tc/select-rows (comp #(= :added %) :status))
-         (tc/select-columns right-column-names)
-         (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names))
-         (tc/set-dataset-name "additions"))
-     (-> labelled-ds
-         (tc/select-rows (comp #(= :deleted %) :status))
-         (tc/select-columns column-names)
-         (tc/set-dataset-name "deletions"))
-     (-> labelled-ds
-         (tc/select-rows (comp #(= :modified %) :status))
-         (tc/select-columns (conj column-names (str "right." measure-column-name)))
-         (tc/drop-columns measure-column-name)
-         (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names))
-         (tc/set-dataset-name "modifications"))]))
+                                        (not= old-measure-val new-measure-val) :modified)))
+
+        added (-> (tc/select-rows labelled-ds (comp #(= :added %) :status))
+                  (tc/select-columns (cons :status right-column-names))
+                  (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
+
+        deleted (-> (tc/select-rows labelled-ds (comp #(= :deleted %) :status))
+            (tc/select-columns (cons :status column-names)))
+
+        modified-added (-> labelled-ds
+                           (tc/select-rows (comp #(= :modified %) :status))
+                           (tc/select-columns (conj column-names (str "right." measure-column-name)))
+                           (tc/map-columns :status [right-measure-column-name] (constantly :added))
+                           (tc/drop-columns measure-column-name)
+                           (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
+        modified-deleted (-> labelled-ds
+                             (tc/select-rows (comp #(= :modified %) :status))
+                             (tc/select-columns column-names)
+                             (tc/map-columns :status [measure-column-name] (constantly :deleted)))]
+    (tc/concat deleted
+               modified-deleted
+               modified-added
+               added)))
 
 (defn post-delta-files
   [{{{:keys [base-csv delta-csv]} :multipart} :parameters :as _request}]
@@ -96,9 +107,7 @@
                                     (data-validation/slurpable->dataset (:tempfile delta-csv)
                                                                         {:file-type :csv :encoding "UTF-8"}))]
     {:status 200
-     :body (ring-io/piped-input-stream
-            (fn [out-stream]
-              (zip/dataset-seq->zipfile! out-stream {:file-type :csv} diff-results)))}))
+     :body (write-dataset-to-outputstream diff-results)}))
 
 (defn delta-tool-route-config []
   {:handler (partial post-delta-files)
@@ -122,5 +131,5 @@
 ;   -H 'Content-Type: multipart/form-data' \
 ;   -F 'base-csv=@./env/test/resources/test-inputs/delta/orig.csv;type=text/csv' \
 ;   -F 'delta-csv=@./env/test/resources/test-inputs/delta/new.csv;type=text/csv' \
-;   --output ./delta-test.zip
+;   --output ./deltas.csv
 ;
