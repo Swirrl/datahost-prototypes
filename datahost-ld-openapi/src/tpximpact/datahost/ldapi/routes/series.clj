@@ -44,9 +44,9 @@
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn delete-series-route-config [triplestore system-uris]
+(defn delete-series-route-config [triplestore change-store system-uris]
   {:summary "Delete a series and all its child resources"
-   :handler (partial handlers/delete-dataset-series triplestore system-uris)
+   :handler (partial handlers/delete-dataset-series triplestore change-store system-uris)
    :parameters {:path {:series-slug string?}}
    :responses {204 {:description "Series existed and was successfully deleted"}
                404 {:description "Series does not exist"}}})

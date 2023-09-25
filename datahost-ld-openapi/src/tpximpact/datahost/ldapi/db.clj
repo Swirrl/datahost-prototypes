@@ -417,15 +417,43 @@
   {:delete [[series-uri '?p '?o]]
    :where [[series-uri '?p '?o]]})
 
+(defn- find-orphaned-changes-query
+  "Query to find all change keys which are only referenced by series-uri"
+  [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :select ['?key]
+   :where [[:where {:select ['?key]
+                    :where [['?release :dcat/inSeries series-uri]
+                            ['?revision :dh/appliesToRelease '?release]
+                            ['?revision :dh/hasChange '?change]
+                            ['?change :dh/updates '?key]]}]
+           [:minus [[:where {:select ['?key]
+                             :where [['?release :dcat/inSeries '?series]
+                                     [:filter (list 'not= '?series series-uri)]
+                                     ['?revision :dh/appliesToRelease '?release]
+                                     ['?revision :dh/hasChange '?change]
+                                     ['?change :dh/updates '?key]]}]]]]})
+
+(defn- find-orphaned-changes [triplestore series-uri]
+  (let [q (find-orphaned-changes-query series-uri)
+        qs (f/format-query q :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (let [results (repo/query conn qs)]
+        (set (map :key results))))))
+
 (defn delete-series!
+  "Deletes a series and all associated child resources. Returns a collection of change
+  keys which have been orphaned by the deletion within the change store."
   [triplestore system-uris series-slug]
   (let [series-uri (su/dataset-series-uri system-uris series-slug)
+        orphaned-changes (find-orphaned-changes triplestore series-uri)
         queries [(delete-series-changes-query series-uri)
                  (delete-series-releases-schemas-query series-uri)
                  (delete-series-revisions-query series-uri)
                  (delete-series-releases-query series-uri)
                  (delete-series-query series-uri)]]
-    (submit-updates triplestore queries)))
+    (submit-updates triplestore queries)
+    orphaned-changes))
 
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to

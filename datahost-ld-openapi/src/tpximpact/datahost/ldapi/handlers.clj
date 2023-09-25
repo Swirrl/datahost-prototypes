@@ -72,10 +72,11 @@
     (as-json-ld {:status (op->response-code op)
                  :body jsonld-doc})))
 
-(defn delete-dataset-series [triplestore system-uris {{:keys [series-slug]} :path-params :as request}]
+(defn delete-dataset-series [triplestore change-store system-uris {{:keys [series-slug]} :path-params :as request}]
   (if-let [_series (db/get-dataset-series triplestore (su/dataset-series-uri system-uris series-slug))]
-    (do
-      (db/delete-series! triplestore system-uris series-slug)
+    (let [orphaned-change-keys (db/delete-series! triplestore system-uris series-slug)]
+      (doseq [change-key orphaned-change-keys]
+        (store/-delete change-store change-key))
       {:status 204})
     (errors/not-found-response request)))
 
