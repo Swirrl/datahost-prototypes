@@ -118,7 +118,7 @@ data "aws_route53_zone" "graphql_zone" {
 
 resource "aws_route53_record" "graphql_record" {
   zone_id = data.aws_route53_zone.graphql_zone.zone_id
-  name = "graphql-prototype.gss-data.org.uk"
+  name = local.fqdn
   type = "A"
   ttl = 300
   records = [google_compute_global_address.lb_address.address]

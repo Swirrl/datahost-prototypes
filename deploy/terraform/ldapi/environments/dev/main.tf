@@ -19,7 +19,7 @@ module "dev" {
 
   gcloud_zone = "europe-west2-a"
   dns = {
-    host = "ldapi-prototype"
+    host = "ldapi-dev"
     zone = "gss-data.org.uk"
   }
 }
