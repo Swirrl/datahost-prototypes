@@ -8,10 +8,11 @@ layout: basic
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Home</a></li>
                 <li class="breadcrumb-item"><a href="/datasets">Datasets</a></li>
-                <li class="breadcrumb-item"><a href="/datasets/dataset-series">Population aged 16 to 64 years level 3 or
-                        above qualifications</a></li>
-                <li class="breadcrumb-item"><a href="/datasets/dataset-series/dataset-release">2010 onwards</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Revision {{number}}</li>
+                <li class="breadcrumb-item"><a id="seriesBreadcrumbID" href="/datasets/dataset-series"><span
+                            id="seriesBreadcrumb"></span></a></li>
+                            <li class="breadcrumb-item"><a id="releaseBreadcrumbID" href="/datasets/dataset-series"><span
+                                id="releaseBreadcrumb"></span></a></li>
+                <li class="breadcrumb-item active" aria-current="page"><span id="titleBreadcrumb"></span></li>
             </ol>
         </nav>
     </div>
@@ -19,12 +20,12 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold h3 pr-5">Population aged 16 to 64 years level 3 or above qualifications: 2010 onwards</h1>
+                    <h1 class="font-weight-bold h3 pr-5"><span id="seriesTitle"></span>: <span id="releaseTitle"></span></h1>
                     <h1 class="font-weight-bold pr-5">
-                            Revision  {{number}}</h1>
-                    <p class="lead"><strong>Last update:</strong> {{update}} | <strong> Next update:</strong> {{next}}</p>
-                    <p>Percentage of the population aged 16 - 64 with National Vocational Qualification (NVQ) level 3+
-                        qualifications, Great Britain (Northern Ireland national figure included).</p>
+                        <span id="title"></span></h1>
+                    <!-- <p class="lead"><strong>Last update:</strong> <span id="modified"></span> | <strong> Next
+                            update:</strong> </p> -->
+                    <p><span id="description"></span></p>
                 </div>
             </div>
         </div>
@@ -33,27 +34,29 @@ layout: basic
         <div class="row">
             <div class="col-lg-8">
                 <h2 class="pt-4">Data</h2>
-                {% if old == true %}
-                <div class="alert alert-warning" role="alert"> <svg xmlns="http://www.w3.org/2000/svg" width="24"
-                        height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2"
-                        viewBox="0 0 16 16" role="img" aria-label="Warning:">
-                        <path
-                            d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                    </svg>
-                    This is an archived version. <a href="../" class="alert-link">View latest</a>
-                </div>
-                {%- endif -%}
-                <h3 class="h4 pt-3"><a class="btn btn-primary" href="/downloads/data.csv">Download dataset (CSV,
-                        300Kb)</a> <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a></h3>
-                <h3 class="h5 pt-3">
-                    What has changed in this revision
+
+
+                <h3 class="h4 pt-3"><a class="btn btn-primary" onclick="downloadCSV(uri,'revision')">Download dataset
+                        (CSV)</a>
+                    <!-- <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a> -->
                 </h3>
-                {{changed}}
-                <h3 class="h5 pt-3">Download changes made in this revision:</h3>
-                {% if appends != 0 %}<p><a href="#">Appends.csv</a> ({{appends}} rows)</p>{%- endif -%}
-                {% if corrections != 0 %}<p><a href="#">Corrections.csv</a> ({{corrections}} rows)</p>{%- endif -%}
-                {% if deletes != 0 %}<p><a href="#">Deletions.csv</a> ({{deletes}} rows)</p>{%- endif -%}
                 <h3 class="h5 pt-3">
+                    <a class="" data-bs-toggle="collapse" href="#1986-2010explain" role="button" aria-expanded="false"
+                        aria-controls="collapseExample">
+                        What has changed in this revision
+                    </a>
+                </h3>
+                <div class="collapse" id="1986-2010explain">
+                    <div class="card card-body">
+                        <strong><span id="revisionReason"></span></strong><br>
+                        <h5>Download changes since last revision:</h5>
+                        <span id="changes"></span>
+                        <!-- <p><a href="#">Appends.csv</a> (100 rows)</p>
+                        <p><a href="#">Corrections.csv</a> (20 rows)</p>
+                        <p><a href="#">Deletions.csv</a> (1 row)</p> -->
+                    </div>
+                </div>
+                <!-- <h3 class="h5 pt-3">
                     <a class="" data-bs-toggle="collapse" href="#citation" role="button" aria-expanded="false"
                         aria-controls="collapseExample">
                         Citation information for this revision
@@ -64,17 +67,140 @@ layout: basic
                         <p>Population aged 16 to 64 years level 3 or above qualifications: 2010 onwards: Revision {{number}}, {{year}}, electronic dataset, Office for National Statistics, https://doi.org/10.1000/182.</p>
                     </div>
                 </div>
-                <hr>
-                <h3 class="h3 pt-3 pb-4"><a href="../revisions">View all revisions for this release</a></h4>
+                <hr> -->
+                <!-- <h3 class="h3 pt-3 pb-4"><a href="../revisions">View all revisions for this release</a></h4> -->
             </div>
             <div class="col-lg-4 pt-5 pb-5">
-                {% include "api-helper.html" 
-                type: "REST"
-                method: "GET"
-                example: "{example}"
-                details: "Query this specific revision and what changed in this update."
-                %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Did you know you can automate access to this data by using the API</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>View this resource in the API</p>
+
+                        <h3 class="h5">
+                            <a class="btn btn-secondary" id="apiLink" href="{{example}}"" role=" button"
+                                target=”_blank”>
+                                Try it out
+                            </a>
+                        </h3>
+                        <p class="pt-2">Read the <a href "#">developer guidelines</a> for more information.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </main>
+<script>
+    let url = window.location.href
+    let uri = domain + url.split('?')[1]
+    document.getElementById('apiLink').href = uri
+
+    const settings = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    };
+
+    fetch(uri, settings)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            populatePage(data)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+
+
+    populatePage = (data) => {
+        document.getElementById('title').innerHTML = data["dcterms:title"]
+        document.getElementById('titleBreadcrumb').innerHTML = data["dcterms:title"]
+        document.getElementById('description').innerHTML = data["dcterms:description"]
+        document.getElementById('revisionReason').innerHTML = data["dcterms:description"]
+        let changes = ""
+        let changeURI = ""
+        if (typeof data["dh:hasChange"] != "string") {
+            html = ""
+            for (i = 0; i < data["dh:hasChange"].length; i++) {
+                changeURI = data["dh:hasChange"][i]
+                changes = document.getElementById("changes")
+                html +=
+                    `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
+
+            }
+            changes.innerHTML = html
+        } else {
+            changeURI = data["dh:hasChange"]
+            changes = document.getElementById("changes")
+            changes.innerHTML =
+                `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
+        }
+
+        let release = data["dh:appliesToRelease"]
+        fetchRelease (release)
+    }
+
+    fetchRelease = release => {
+        fetch(release, settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                populateRelease(data)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+    populateRelease = data => {
+        document.getElementById('releaseBreadcrumb').innerHTML = data["dcterms:title"]
+        document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?/data/${data["@id"]}`
+        document.getElementById('releaseTitle').innerHTML = data["dcterms:title"]
+        series = data["dcat:inSeries"]
+        console.log(series)
+        fetchSeries(series)
+    }
+
+
+    fetchSeries = series => {
+        fetch(series, settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                populateSeries(data)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+    populateSeries = data => {
+        document.getElementById('seriesBreadcrumb').innerHTML = data["dcterms:title"]
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${data["@id"]}`
+        document.getElementById('seriesTitle').innerHTML = data["dcterms:title"]
+    }
+
+
+    downloadCSV = (url, type) => {
+        let request = new XMLHttpRequest();
+        request.open("GET", url, true);
+        request.setRequestHeader("Accept", "text/csv")
+        request.responseType = "blob";
+        request.onload = function () {
+            let blob = request.response;
+            let fileName = `${type}.csv`
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        };
+
+        request.send();
+    }
+</script>

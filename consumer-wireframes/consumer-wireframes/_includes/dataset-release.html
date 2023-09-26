@@ -35,7 +35,7 @@ layout: basic
                 <h2 class="pt-4">Latest data</h2>
 
 
-                <h3 class="h4 pt-3"><a class="btn btn-primary" onclick="downloadCSV(uri)">Download dataset (CSV)</a>
+                <h3 class="h4 pt-3"><a class="btn btn-primary" onclick="downloadCSV(uri,'release')">Download dataset (CSV)</a>
                     <!-- <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a> -->
                 </h3>
                 <h3 class="h5 pt-3">
@@ -60,12 +60,12 @@ layout: basic
                         Citation information for this revision
                     </a>
                 </h3> -->
-                <div class="collapse" id="citation">
+                <!-- <div class="collapse" id="citation">
                     <div class="card card-body">
                         <p>Population aged 16 to 64 years level 3 or above qualifications: 2010 onwards: Revision 5,
                             2023, electronic dataset, Office for National Statistics, https://doi.org/10.1000/182.</p>
                     </div>
-                </div>
+                </div> -->
 
                 <hr>
                 <h3 class="h5"><a id="revisions" href="./revisions">View all revisions</a></h3>
@@ -90,7 +90,7 @@ layout: basic
                         <h5 class="card-title">Did you know you can automate access to this data by using the API</h5>
                     </div>
                     <div class="card-body">
-                        <p>Get more detail on this dataset and available releases</p>
+                        <p>View this resource in the API</p>
 
                         <h3 class="h5">
                             <a class="btn btn-secondary" id="apiLink" href="{{example}}"" role=" button"
@@ -190,20 +190,18 @@ layout: basic
         let changes = ""
         let changeURI = ""
         if (typeof data["dh:hasChange"] != "string") {
-            console.log("multiples")
             html = ""
             for (i=0; i<data["dh:hasChange"].length; i++){
                 changeURI = data["dh:hasChange"][i]
                 changes = document.getElementById("changes")
-                html += `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
+                html += `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
 
             }
             changes.innerHTML = html
         } else {
-            console.log("single")
             changeURI = data["dh:hasChange"]
             changes = document.getElementById("changes")
-            changes.innerHTML = `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}')">Download changes (CSV)</a>`
+            changes.innerHTML = `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
         }
 
         let schema = release["dh:hasSchema"]
@@ -236,15 +234,14 @@ layout: basic
         }
     }
 
-    downloadCSV = url => {
-        console.log(url)
+    downloadCSV = (url, type) => {
         let request = new XMLHttpRequest();
         request.open("GET", url, true);
         request.setRequestHeader("Accept", "text/csv")
         request.responseType = "blob";
         request.onload = function () {
             let blob = request.response;
-            let fileName = "release.csv"
+            let fileName = `${type}.csv`
             let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = fileName;
