@@ -86,12 +86,14 @@
       (-> {:status 200
            :headers {"content-type" "text/csv"
                      "content-disposition" "attachment ; filename=release.csv"}
-           :body (if (empty? (db/get-changes-info triplestore release-uri Integer/MAX_VALUE))
-                   ""
-                   (let [{:keys [data-key]} (db/get-release-snapshot-info triplestore system-uris path-params)]
-                     (when-not data-key (throw (ex-info "No CSV snapshot for release found."
-                                                        {:path-params path-params})))
-                     (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store data-key))))}
+           :body (let [change-infos (db/get-changes-info triplestore release-uri Integer/MAX_VALUE)]
+                   (if (empty? change-infos)
+                     "" ;TODO: return table header here, need to get schema first
+                     (let [key (:snapshotKey (last change-infos))]
+                       (when (nil? key)
+                         (throw (ex-info "No CSV snapshot for release found."
+                                         {:path-params path-params})))
+                       (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key)))))}
           (shared/set-csvm-header request))
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
@@ -170,8 +172,8 @@
                      "content-disposition" "attachment ; filename=revision.csv"}
            :body (let [change-infos (db/get-changes-info triplestore release-uri (revision-number (resource/id revision-ld)))]
                   (if (empty? change-infos)
-                    "" ;TODO: return table header here, need to get schema first
-                    (let [key (get (last change-infos) :snapshotKey)]
+                    "" ;TODO: return table header here, need to get schema first``
+                    (let [key (:snapshotKey (last change-infos))]
                       (assert (string? key))
                       (when (nil? key)
                         (throw (ex-info "No snapshot reference for revision" {:revision revision})))
@@ -256,7 +258,11 @@
         {:keys [explanation]} (data-validation/validate-dataset dataset row-schema
                                                                 {:fail-fast? true})]
     (cond-> {:dataset dataset :row-schema row-schema}
-      (some? explanation) (assoc :error-response {:status 400 :body explanation}))))
+      (some? explanation) (assoc :error-response
+                                 {:status 400
+                                  :body {:message "Invalid data"
+                                         :explanation explanation
+                                         :column-names (data-validation/row-schema->column-names row-schema)}}))))
 
 (defn ->byte-array-input-stream [input-stream]
   (with-open [intermediate (ByteArrayOutputStream.)]
@@ -301,7 +307,7 @@
                                                 :datahost.change/kind change-kind
                                                 :datahost.request/uris request-uris}))]
     (log/info (format "post-change: '%s' validation: found-schema? = %s, change-valid? = %s, insert-ok? = %s"
-                      (.getPath change-uri) (some? release-schema) (nil? validation-err) (nil? message)))
+                      change-uri (some? release-schema) (nil? validation-err) (nil? message)))
     (cond
       (some? validation-err) validation-err
 
