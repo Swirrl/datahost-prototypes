@@ -35,7 +35,7 @@ layout: basic
                 <h2 class="pt-4">Latest data</h2>
 
 
-                <h3 class="h4 pt-3"><a class="btn btn-primary" onclick="downloadCSV()">Download dataset (CSV)</a>
+                <h3 class="h4 pt-3"><a class="btn btn-primary" onclick="downloadCSV(uri)">Download dataset (CSV)</a>
                     <!-- <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a> -->
                 </h3>
                 <h3 class="h5 pt-3">
@@ -47,7 +47,8 @@ layout: basic
                 <div class="collapse" id="1986-2010explain">
                     <div class="card card-body">
                         <strong><span id="revisionReason"></span></strong><br>
-                        <!-- <h5>Download changes since last revision:</h5> -->
+                        <h5>Download changes since last revision:</h5>
+                        <span id="changes"></span>
                         <!-- <p><a href="#">Appends.csv</a> (100 rows)</p>
                         <p><a href="#">Corrections.csv</a> (20 rows)</p>
                         <p><a href="#">Deletions.csv</a> (1 row)</p> -->
@@ -119,8 +120,7 @@ layout: basic
         "name": "csvw:titles"
     }, {
         "name": "@type"
-    }
-    , {
+    }, {
         "name": "csvw:datatype"
     }]
     const tableRef = document.getElementById("table");
@@ -186,8 +186,25 @@ layout: basic
     }
 
     populateRevision = (data, release) => {
-        console.log(data)
         document.getElementById('revisionReason').innerHTML = data["dcterms:description"]
+        let changes = ""
+        let changeURI = ""
+        if (typeof data["dh:hasChange"] != "string") {
+            console.log("multiples")
+            html = ""
+            for (i=0; i<data["dh:hasChange"].length; i++){
+                changeURI = data["dh:hasChange"][i]
+                changes = document.getElementById("changes")
+                html += `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
+
+            }
+            changes.innerHTML = html
+        } else {
+            console.log("single")
+            changeURI = data["dh:hasChange"]
+            changes = document.getElementById("changes")
+            changes.innerHTML = `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}')">Download changes (CSV)</a>`
+        }
 
         let schema = release["dh:hasSchema"]
         getSchema(schema)
@@ -219,9 +236,10 @@ layout: basic
         }
     }
 
-    downloadCSV = () => {
+    downloadCSV = url => {
+        console.log(url)
         let request = new XMLHttpRequest();
-        request.open("GET", uri, true);
+        request.open("GET", url, true);
         request.setRequestHeader("Accept", "text/csv")
         request.responseType = "blob";
         request.onload = function () {
