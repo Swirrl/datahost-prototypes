@@ -74,31 +74,31 @@
                                     [measure-column-name right-measure-column-name]
                                     (fn [old-measure-val new-measure-val]
                                       (cond
-                                        (nil? old-measure-val) :added
-                                        (nil? new-measure-val) :deleted
+                                        (nil? old-measure-val) :append
+                                        (nil? new-measure-val) :retract
                                         (not= old-measure-val new-measure-val) :modified)))
 
-        added (-> (tc/select-rows labelled-ds (comp #(= :added %) :status))
-                  (tc/select-columns (cons :status right-column-names))
-                  (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
+        append (-> (tc/select-rows labelled-ds (comp #(= :append %) :status))
+                   (tc/select-columns (cons :status right-column-names))
+                   (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
 
-        deleted (-> (tc/select-rows labelled-ds (comp #(= :deleted %) :status))
-            (tc/select-columns (cons :status column-names)))
+        retracted (-> (tc/select-rows labelled-ds (comp #(= :retract %) :status))
+                      (tc/select-columns (cons :status column-names)))
 
-        modified-added (-> labelled-ds
-                           (tc/select-rows (comp #(= :modified %) :status))
-                           (tc/select-columns (conj column-names (str "right." measure-column-name)))
-                           (tc/map-columns :status [right-measure-column-name] (constantly :added))
-                           (tc/drop-columns measure-column-name)
-                           (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
-        modified-deleted (-> labelled-ds
-                             (tc/select-rows (comp #(= :modified %) :status))
-                             (tc/select-columns column-names)
-                             (tc/map-columns :status [measure-column-name] (constantly :deleted)))]
-    (tc/concat deleted
-               modified-deleted
-               modified-added
-               added)))
+        modified-appended (-> labelled-ds
+                              (tc/select-rows (comp #(= :modified %) :status))
+                              (tc/select-columns (conj column-names (str "right." measure-column-name)))
+                              (tc/map-columns :status [right-measure-column-name] (constantly :append))
+                              (tc/drop-columns measure-column-name)
+                              (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
+        modified-retracted (-> labelled-ds
+                               (tc/select-rows (comp #(= :modified %) :status))
+                               (tc/select-columns column-names)
+                               (tc/map-columns :status [measure-column-name] (constantly :retract)))]
+    (tc/concat retracted
+               modified-retracted
+               modified-appended
+               append)))
 
 (defn post-delta-files
   [{{{:keys [base-csv delta-csv]} :multipart} :parameters :as _request}]
