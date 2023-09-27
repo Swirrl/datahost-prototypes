@@ -80,26 +80,26 @@
 
         ;; the hashing function used here is only for the observation coordinates (no measure)
         labelled-ds (-> (tc/map-columns (tc/full-join base-ds delta-ds obs-coordinate-cols {:hashing hash-fn})
-                                        :status
+                                        :operation
                                         [measure-column-name right-measure-column-name]
                                         (fn [old-measure-val new-measure-val]
                                           (cond
                                             (nil? old-measure-val) :append
                                             (nil? new-measure-val) :retract
                                             (not= old-measure-val new-measure-val) :modified)))
-                        (tc/group-by :status)
+                        (tc/group-by :operation)
                         (tc/groups->map))
 
         append-dataset (-> (add-user-schema-ids (:append labelled-ds) right-measure-column-name right-obs-coordinate-cols)
                            (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
 
         retracted-dataset (-> (tc/select-columns (:retract labelled-ds)
-                                                 (concat [:status] column-names [measure-column-name]))
+                                                 (concat [:operation] column-names [measure-column-name]))
                               (add-user-schema-ids measure-column-name obs-coordinate-cols))
 
         corrections-dataset (add-user-schema-ids (:modified labelled-ds) measure-column-name obs-coordinate-cols)
 
-        amended-appends-ds (-> (tc/map-columns corrections-dataset :status [right-measure-column-name] (constantly :append))
+        amended-appends-ds (-> (tc/map-columns corrections-dataset :operation [right-measure-column-name] (constantly :append))
                                ;; copy left :id column for the :correction_for pointer pairing
                                ((fn [dataset]
                                   (tc/add-column dataset :correction_for (dataset :id))))
@@ -110,13 +110,13 @@
                                                                           right-column-names)))
 
         amended-retracts-ds (-> (tc/select-columns corrections-dataset (cons :id column-names))
-                                (tc/map-columns :status [measure-column-name] (constantly :retract)))]
+                                (tc/map-columns :operation [measure-column-name] (constantly :retract)))]
     (debug
      (-> (tc/concat retracted-dataset
                     amended-retracts-ds
                     amended-appends-ds
                     append-dataset)
-         (tc/reorder-columns (concat [:id :status] column-names [:correction_for]))))))
+         (tc/reorder-columns (concat [:id :operation] column-names [:correction_for]))))))
 
 (defn post-delta-files
   [{{{:keys [base-csv delta-csv]} :multipart} :parameters :as _request}]
