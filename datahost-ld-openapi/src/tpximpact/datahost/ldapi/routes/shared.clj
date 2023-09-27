@@ -38,7 +38,18 @@
 
 (def CreateSeriesInput
   "Input schema for creating a new series."
-  required-input-fragment)
+  (m/schema
+   [:map
+    ["dcterms:title" {:optional false} :title-string]
+    ["dcterms:description" {:optional false} :description-string]
+    ["rdfs:comment" {:optional true} :string]
+    ["dcterms:publisher" {:optional true} :datahost/url-string]
+    ["dcat:theme" {:optional true} :datahost/url-string]
+    ["dcterms:license" {:optional true} :datahost/url-string]
+    ["dh:contactName" {:optional true} :string]
+    ["dh:contactEmail" {:optional true} :email-string]
+    ["dh:contactPhone" {:optional true} :string]]
+   {:registry s.common/registry}))
 
 (def CreateReleaseInput
   "Input schema for creating a new release."

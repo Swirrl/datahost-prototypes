@@ -44,7 +44,17 @@
           system-uris (su/make-system-uris (URI. "https://example.org/data/"))
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           request (create-put-request "new-series" {"dcterms:title" "A title"
-                                                    "dcterms:description" "Description"})
+                                                    "dcterms:description" "Description"
+                                                    "rdfs:comment" "Comment"
+                                                    "dcterms:publisher" "http://publisher-uri"
+                                                    "dcat:theme" "http://theme-uri"
+                                                    "dcterms:license" "http://uri-of-a-licence.org"
+                                                    "dcat:keywords" #{"keyword1" "keyword2"}
+                                                    "dh:nextUpdate" "2024-06-30"
+                                                    "dh:relatedLinks" #{"http://related-1" "http://related-2"}
+                                                    "dh:contactName" "Rob Chambers"
+                                                    "dh:contactEmail" "heyrob@example.com"
+                                                    "dh:contactPhone" "123234234234"})
           {:keys [status body]} (handler request)
           new-series-doc (json/read-str body)]
       (t/is (= 201 status))
@@ -53,6 +63,18 @@
       (t/is (= (str t) (get new-series-doc "dcterms:modified")))
       (t/is (= (str t) (get new-series-doc "dcterms:issued")))
       (t/is (= (get new-series-doc "dh:baseEntity") "https://example.org/data/new-series"))
+
+      (t/is (= "Comment" (get new-series-doc "rdfs:comment")))
+      (t/is (= "http://publisher-uri" (get new-series-doc "dcterms:publisher")))
+      (t/is (= "http://theme-uri" (get new-series-doc "dcat:theme")))
+      (t/is (= "http://uri-of-a-licence.org" (get new-series-doc "dcterms:license")))
+      (t/is (= #{"keyword1"  "keyword2"} (set (get new-series-doc "dcat:keywords"))))
+      (t/is (= "2024-06-30" (get new-series-doc "dh:nextUpdate")))
+      (t/is (= ["http://related-1"
+                "http://related-2"] (get new-series-doc "dh:relatedLinks")))
+      (t/is (= "Rob Chambers" (get new-series-doc "dh:contactName")))
+      (t/is (= "heyrob@example.com" (get new-series-doc "dh:contactEmail")))
+      (t/is (= "123234234234" (get new-series-doc "dh:contactPhone")))
 
       ;; fetch created series
       (let [request {:uri "/data/new-series"

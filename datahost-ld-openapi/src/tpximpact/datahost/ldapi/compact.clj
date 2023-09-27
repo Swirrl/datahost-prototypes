@@ -27,4 +27,5 @@
 (add-prefix :dh (URI. "https://publishmydata.com/def/datahost/"))
 (add-prefix :appropriate-csvw (URI. "https://publishmydata.com/def/appropriate-csvw/"))
 (add-prefix :csvw (URI. "http://www.w3.org/ns/csvw#"))
+(add-prefix :rdfs (URI. "http://www.w3.org/2000/01/rdf-schema#"))
 (add-grafter-prefixes)
