@@ -39,18 +39,12 @@
   (println x)
   x)
 
-(defn hash-chars [^String s]
-  (.hashChars long-hash-fn-instance s))
-
 (defn hash-fn [dims]
-  (->> (map #(.toString %) dims)
-       (interpose "|")
-       (apply str)
-       hash-chars))
+  (->> (apply str (interpose \| dims))
+       (.hashChars long-hash-fn-instance)))
 
 (defn get-measure-column-name [schema]
-  (->> schema
-       :columns
+  (->> (:columns schema)
        (some #(when ((comp #{:qb/measure} :coltype) %) %))
        :name))
 
