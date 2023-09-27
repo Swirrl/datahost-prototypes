@@ -66,20 +66,17 @@
 
 (defn add-user-schema-ids [ds measure-column-name obs-coordinate-cols]
   (tc/map-columns ds :id
-                  (cons measure-column-name obs-coordinate-cols)
-                  (fn [measure-column & dims]
-                    (if measure-column
-                      (do (println "Hashing: " (conj dims measure-column) ","
-                                   (hash-fn (conj dims measure-column)))
-                          (hash-fn (conj dims measure-column)))
-                      :missing))))
+                  (conj obs-coordinate-cols measure-column-name)
+                  ;; map-fn arity must match number of columns selected
+                  (fn map-fn [& dims]
+                    (println "Hashing: " dims "," (hash-fn dims))
+                    (hash-fn dims))))
 
 (defn derive-deltas [base-ds delta-ds]
   (let [measure-column-name (get-measure-column-name default-schema)
         right-measure-column-name (str "right." measure-column-name)
         column-names (tc/column-names base-ds)
         right-column-names (map #(str "right." %) column-names)
-
 
         ;; the hashing function used here is only for the observation coordinates (no measure)
         labelled-ds (-> (tc/map-columns (tc/full-join base-ds delta-ds obs-coordinate-cols {:hashing hash-fn})
@@ -92,35 +89,34 @@
                                             (not= old-measure-val new-measure-val) :modified)))
                         (tc/group-by :status)
                         (tc/groups->map))
-        append (-> (tc/select-columns (:append labelled-ds)
-                                      (concat [measure-column-name right-measure-column-name :status]
-                                              right-column-names))
-                   (add-user-schema-ids right-measure-column-name right-obs-coordinate-cols)
-                   (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
 
-        retracted (-> (tc/select-columns (:retract labelled-ds)
-                                         (concat [measure-column-name :status] column-names))
-                      (add-user-schema-ids measure-column-name obs-coordinate-cols))
+        append-dataset (-> (add-user-schema-ids (:append labelled-ds) right-measure-column-name right-obs-coordinate-cols)
+                           (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
+
+        retracted-dataset (-> (tc/select-columns (:retract labelled-ds)
+                                                 (concat [:status] column-names [measure-column-name]))
+                              (add-user-schema-ids measure-column-name obs-coordinate-cols))
 
         corrections-dataset (add-user-schema-ids (:modified labelled-ds) measure-column-name obs-coordinate-cols)
 
-        modified-appended (-> (tc/map-columns corrections-dataset :status [right-measure-column-name] (constantly :append))
-                              ;; copy left :id column for the :correction_for pointer pairing
-                              ((fn [dataset]
-                                 (tc/add-column dataset :correction_for (dataset :id))))
-                              ;; add tx id for right measure user schema
-                              (add-user-schema-ids right-measure-column-name obs-coordinate-cols)
-                              (tc/drop-columns measure-column-name)
-                              (tc/rename-columns (rename-column-mappings right-column-prefix-pattern
-                                                                         right-column-names)))
+        amended-appends-ds (-> (tc/map-columns corrections-dataset :status [right-measure-column-name] (constantly :append))
+                               ;; copy left :id column for the :correction_for pointer pairing
+                               ((fn [dataset]
+                                  (tc/add-column dataset :correction_for (dataset :id))))
+                               ;; add tx id for right measure user schema
+                               (add-user-schema-ids right-measure-column-name obs-coordinate-cols)
+                               (tc/drop-columns measure-column-name)
+                               (tc/rename-columns (rename-column-mappings right-column-prefix-pattern
+                                                                          right-column-names)))
 
-        modified-retracted (-> (tc/select-columns corrections-dataset (cons :id column-names))
-                               (tc/map-columns :status [measure-column-name] (constantly :retract)))]
+        amended-retracts-ds (-> (tc/select-columns corrections-dataset (cons :id column-names))
+                                (tc/map-columns :status [measure-column-name] (constantly :retract)))]
     (debug
-     (tc/concat retracted
-                modified-retracted
-                modified-appended
-                append))))
+     (-> (tc/concat retracted-dataset
+                    amended-retracts-ds
+                    amended-appends-ds
+                    append-dataset)
+         (tc/reorder-columns (concat [:id :status] column-names [:correction_for]))))))
 
 (defn post-delta-files
   [{{{:keys [base-csv delta-csv]} :multipart} :parameters :as _request}]
