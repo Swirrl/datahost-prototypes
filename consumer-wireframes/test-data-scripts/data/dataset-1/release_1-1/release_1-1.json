@@ -1,0 +1,51 @@
+{
+    "dh:columns": [{
+            "@type": "dh:DimensionColumn",
+            "csvw:name": "Measure type",
+            "csvw:titles": ["Measure type"],
+            "csvw:datatype": "string"
+        },
+        {
+            "@type": "dh:DimensionColumn",
+            "csvw:name": "Statistical Geography",
+            "csvw:titles": ["Statistical Geography"],
+            "csvw:datatype": "string"
+        },
+        {
+            "@type": "dh:DimensionColumn",
+            "csvw:name": "Year",
+            "csvw:titles": ["Year"],
+            "csvw:datatype": "integer"
+        },
+        {
+            "@type": "dh:MeasureColumn",
+            "csvw:name": "Aged 16 to 64 years level 3 or above qualifications",
+            "csvw:titles": ["Aged 16 to 64 years level 3 or above qualifications"],
+            "csvw:datatype": "double"
+        },
+        {
+            "@type": "dh:DimensionColumn",
+            "csvw:name": "Unit of Measure",
+            "csvw:titles": ["Unit of Measure"],
+            "csvw:datatype": "string"
+        },
+        {
+            "@type": "dh:AttributeColumn",
+            "csvw:name": "Upper Confidence Interval",
+            "csvw:titles": ["Upper Confidence Interval"],
+            "csvw:datatype": "double"
+        },
+        {
+            "@type": "dh:AttributeColumn",
+            "csvw:name": "Lower Confidence Interval",
+            "csvw:titles": ["Lower Confidence Interval"],
+            "csvw:datatype": "double"
+        },
+        {
+            "@type": "dh:AttributeColumn",
+            "csvw:datatype": "string",
+            "csvw:name": "Observation Status",
+            "csvw:titles": ["Observation Status"]
+        }
+    ]
+}

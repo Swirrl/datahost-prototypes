@@ -6,29 +6,41 @@
     "theme": "https://www.ons.gov.uk/businessindustryandtrade/itandinternetindustry",
     "releases": [{
       "title": "Release 1-1",
-      "description":"First release of data",
+      "description": "First release of data",
       "id": "1-1",
-      "schema": "release_1-1.json",
+      "schema": "data/dataset-1/release_1-1/release_1-1.json",
       "revisions": [{
-        "file": "data/2019.csv",
-        "title": "Append",
-        "description":"First set of appends"
-      },{
-        "file": "data/2020.csv",
-        "title": "Append",
-        "description":"Second set of appends"
-      },{
-        "file": "data/2021.csv",
-        "title": "Append",
-        "description":"Third set of appends"
+        "title": "Revision 1",
+        "description": "First set of appends for 2019",
+        "append": {
+          "file": "data/dataset-1/release_1-1/2019.csv",
+          "title": "Append",
+          "description": "Appends"
+        }
+      }, {
+        "title": "Revision 2",
+        "description": "Set of appends for 2020",
+        "append": {
+          "file": "data/dataset-1/release_1-1/2020.csv",
+          "title": "Append",
+          "description": "Appends"
+        }
+      }, {
+        "title": "Revision 3",
+        "description": "Set of appends for 2021",
+        "append": {
+          "file": "data/dataset-1/release_1-1/2021.csv",
+          "title": "Append",
+          "description": "Appends"
+        }
       }]
     }, {
       "title": "Release 1-2",
-      "description":"A new release due to a change of schema",
+      "description": "A new release due to a change of schema",
       "id": "1-2"
     }, {
       "title": "Release 1-3",
-      "description":"A new release due to a change of schema",
+      "description": "A new release due to a change of schema",
       "id": "1-3"
     }]
   },
@@ -40,11 +52,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/housing",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -56,11 +68,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/educationandchildcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -72,11 +84,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/educationandchildcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -88,11 +100,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/educationandchildcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -104,11 +116,11 @@
     "theme": "https://www.ons.gov.uk/businessindustryandtrade/business/businessservices",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -120,11 +132,11 @@
     "theme": "https://www.ons.gov.uk/businessindustryandtrade/business/businessservices",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -136,11 +148,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/wellbeing",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -152,11 +164,11 @@
     "theme": "https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -168,11 +180,11 @@
     "theme": "https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -184,11 +196,11 @@
     "theme": "https://www.ons.gov.uk/economy/environmentalaccounts",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -200,11 +212,11 @@
     "theme": "https://www.ons.gov.uk/economy/environmentalaccounts",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -216,11 +228,11 @@
     "theme": "https://www.ons.gov.uk/economy/environmentalaccounts",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -232,11 +244,11 @@
     "theme": "https://www.ons.gov.uk/economy/environmentalaccounts",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -248,11 +260,11 @@
     "theme": "https://www.ons.gov.uk/economy/nationalaccounts/balanceofpayments",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -264,11 +276,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -280,11 +292,11 @@
     "theme": "http://gss-data.org.uk/def/gdp#climate-change",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -296,11 +308,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/healthandsocialcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -312,11 +324,11 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/educationandchildcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
     }]
   },
@@ -328,12 +340,89 @@
     "theme": "https://www.ons.gov.uk/peoplepopulationandcommunity/educationandchildcare",
     "releases": [{
       "title": "Release 1-1",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-1"
     }, {
       "title": "Release 1-2",
-      "description":"Placeholder",
+      "description": "Placeholder",
       "id": "1-2"
+    }]
+  },
+  {
+    "id": "test-data",
+    "title": "Test",
+    "description": "Description",
+    "license": "",
+    "creator": "",
+    "theme": "",
+    "releases": [{
+      "title": "Release 1-1",
+      "description": "First release of data",
+      "id": "1-1",
+      "schema": "data/test-data/release_1-1.json",
+      "revisions": [{
+        "title": "Revision 1",
+        "description": "First set of appends",
+        "append": {
+          "file": "data/test-data/test-original.csv",
+          "title": "Append",
+          "description": "Appends"
+        }
+      }, {
+        "title": "Revision 2",
+        "description": "First update with appends, corrections and deletes",
+        "append": {
+          "file": "data/test-data/append-correction-delete-appends.csv",
+          "title": "Append",
+          "description": "Appends"
+        },
+        "deletes": {
+          "file": "data/test-data/append-correction-delete-deletes.csv",
+          "title": "Delete",
+          "description": "Deletes"
+        },
+        "corrects": {
+          "file": "data/test-data/append-correction-delete-corrections.csv",
+          "title": "Corrections",
+          "description": "Corrections"
+        }
+      }]
+    }]
+  },
+  {
+    "id": "wellbeing-local-authority",
+    "title": "Personal well-being estimates by local authority",
+    "description": "Estimates of life satisfaction, feeling that the things done in life are worthwhile, happiness and anxiety at the UK, country, regional, county, local and unitary authority level.",
+    "license": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+    "creator": "https://www.gov.uk/government/organisations/office-for-national-statistics",
+    "theme": "",
+    "releases": [{
+      "title": "Release 1-1",
+      "description": "First release of data",
+      "id": "1-1",
+      "schema": "data/well-being/release_1-1/release_1-1.json",
+      "revisions": [{
+        "title": "Revision 1",
+        "description": "First set of appends",
+        "append": {
+          "file": "data/well-being/release_1-1/wellbeing-local-authority-time-series-v1.csv",
+          "title": "Append",
+          "description": "Appends"
+        }
+      }, {
+        "title": "Revision 2",
+        "description": "First update with appends and deletes",
+        "append": {
+          "file": "data/well-being/release_1-1/wellbeing-local-authority-2-appends.csv",
+          "title": "Append",
+          "description": "Appends"
+        },
+        "deletes": {
+          "file": "data/well-being/release_1-1/wellbeing-local-authority-2-deletes.csv",
+          "title": "Delete",
+          "description": "Deletes"
+        }
+      }]
     }]
   }
 ]

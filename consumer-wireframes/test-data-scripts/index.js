@@ -10,6 +10,23 @@ const password = user.password
 const openAPI = "http://127.0.0.1:3000";
 // const openAPI = "https://ldapi-prototype.gss-data.org.uk"
 
+sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  deleteSeries = async (series) => {
+    let url = `${openAPI}/data/${series}`
+    const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
+        },
+    });
+
+    console.log(`Deleted: ${url}`)
+}
+
 createSeries = async (series) => {
     let title = data[i].title
     let description = data[i].description
@@ -52,12 +69,10 @@ createRelease = async (series) => {
 
 createSchemas = async (releases, series) => {
     if (releases[j].schema != null) {
-        let schemaFile = `./data/${releases[j].schema}`
-        let schema = require(schemaFile);
         let id = releases[j].id
+        let schemaFile = releases[j].schema
+        let schema = require(`./${schemaFile}`);
         let url = `${openAPI}/data/${series}/releases/${id}/schema`
-        // const formData = new FormData();
-        // formData.append('schema-file', fs.createReadStream(schemaFile));
         const settings = {
             method: 'POST',
             body: JSON.stringify(schema),
@@ -84,18 +99,19 @@ createRevision = async (series) => {
             let id = releases[j].id
             let url = `${openAPI}/data/${series}/releases/${id}/revisions`
             for (k = 0; k < releases[j].revisions.length; k++) {
-                let file = releases[j].revisions[k].file
-                let title = releases[j].revisions[k].title
-                let description = releases[j].revisions[k].description
-                body = `{"dcterms:title":"${title}","dcterms:description":"${description}"}`
+                let revision = releases[j].revisions[k]
 
-                await postRevision(url, file, title, description)
+                await postRevision(url, revision)
             }
         }
     }
 }
 
-postRevision = async (url, file, title, description) => {
+postRevision = async (url, revision) => {
+    
+    let title = revision.title
+    let description = revision.description
+    body = `{"dcterms:title":"${title}","dcterms:description":"${description}"}`
     url = url + `?title=${title}&description=${description}`
     const response = await fetch(url, {
         method: 'POST',
@@ -106,15 +122,27 @@ postRevision = async (url, file, title, description) => {
         },
     });
     const api = await response.json()
-    let revision = api["@id"]
-    console.log(`Created: ${openAPI}/data/${revision}`)
+    let revisionID = api["@id"]
+    console.log(`Created: ${openAPI}/data/${revisionID}`)
 
-    await uploadData(revision, file)
+    if (revision.deletes) {
+        let file = revision.deletes.file
+        await uploadData(revisionID, file, "retractions")
+    }
+    if (revision.corrects) {
+        let file = revision.corrects.file
+        await uploadData(revisionID, file, "corrections")
+    }
+    if (revision.append) {
+        let file = revision.append.file
+        await uploadData(revisionID, file, "appends")
+    }
+
+    
 }
 
-uploadData = async (revision, file) => {
-    const formData = new FormData();
-    formData.append('appends', fs.createReadStream(file));
+uploadData = async (revision, file, type) => {
+    await sleep(2000);
     const settings = {
         method: 'POST',
         body: fs.createReadStream(file),
@@ -124,7 +152,7 @@ uploadData = async (revision, file) => {
         },
     };
     try {
-        url = `${openAPI}/data/${revision}/appends?dcterms%3Atitle=test&dcterms%3Adescription=test&dcterms%3Aformat=text%2Fcsv`
+        url = `${openAPI}/data/${revision}/${type}?title=${type}&description=Placeholder&format=text%2Fcsv`
         const fetchResponse = await fetch(url, settings);
         const data = await fetchResponse.json();
         console.log(`Added data to: ${url}`)
@@ -142,6 +170,7 @@ start = async () => {
         } else {
             series = data[i].id
         }
+        // await deleteSeries(series)
         await createSeries(series)
         await createRelease(series)
         await createRevision(series)
