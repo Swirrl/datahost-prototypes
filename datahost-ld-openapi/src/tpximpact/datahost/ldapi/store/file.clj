@@ -78,7 +78,12 @@
         (throw (ex-info "Data not found for key" {:key data-key})))))
 
   (-data-key [_this data]
-    (file->digest data "SHA-256")))
+    (file->digest data "SHA-256"))
+
+  (-delete [_this data-key]
+    (let [location (file-location root-dir data-key)]
+      (when (.exists location)
+        (.delete location)))))
 
 (defn get-root-dir
   "Returns the root directory of a file store"

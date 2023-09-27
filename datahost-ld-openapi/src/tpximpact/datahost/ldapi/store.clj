@@ -24,7 +24,10 @@
   (-data-key [this data]
     "Returns a unique key for the given data. The key can be used to
     look up if the store already contains the data. The returned value
-    should be treated as an opaque object."))
+    should be treated as an opaque object.")
+
+  (-delete [this data-key]
+    "Deletes the data associated with data-key from this store"))
 
 (defn insert-data
   [store data]

@@ -200,7 +200,8 @@
 
      ["/:series-slug"
       {:get (routes.s/get-series-route-config triplestore system-uris)
-       :put (routes.s/put-series-route-config clock triplestore system-uris)}]
+       :put (routes.s/put-series-route-config clock triplestore system-uris)
+       :delete (routes.s/delete-series-route-config triplestore change-store system-uris)}]
 
      ["/:series-slug/releases"
       ["" {:get (routes.rev/get-release-list-route-config triplestore system-uris)}]

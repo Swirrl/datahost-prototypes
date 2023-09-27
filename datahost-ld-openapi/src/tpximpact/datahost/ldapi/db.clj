@@ -257,6 +257,16 @@
              [resource-uri :dcterms/description '?description]
              [resource-uri :dcterms/modified '?modified]]}))
 
+(defn- submit-update [triplestore update-query]
+  (let [qs (f/format-update update-query :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/update! conn qs))))
+
+(defn- submit-updates [triplestore update-queries]
+  (let [qs (f/format-updates update-queries :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (pr/update! conn qs))))
+
 (defn- update-resource-title-description-modified [triplestore resource]
   (let [q (update-resource-title-description-modified-query resource)
         qs (f/format-update q :pretty? true)]
@@ -372,6 +382,79 @@
       (let [created-series (insert-series clock triplestore request-series)]
         {:op :create :jsonld-doc (series->response-body created-series ld-root)}))))
 
+(defn delete-series-changes-query [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :delete [['?change '?p '?o]
+            ['?revision :dh/hasChange '?change]]
+   :where [['?release :dcat/inSeries series-uri]
+           ['?revision :dh/appliesToRelease '?release]
+           ['?revision :dh/hasChange '?change]
+           ['?change '?p '?o]]})
+
+(defn delete-series-revisions-query [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :delete [['?revision '?p '?o]
+            ['?release :dh/hasRevision '?revision]]
+   :where [['?release :dcat/inSeries series-uri]
+           ['?revision :dh/appliesToRelease '?release]
+           ['?revision '?p '?o]]})
+
+(defn delete-series-releases-schemas-query [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :delete [['?schema '?p '?o]
+            ['?release :dh/hasSchema '?schema]]
+   :where [['?release :dcat/inSeries series-uri]
+           ['?release :dh/hasSchema '?schema]
+           ['?schema '?p '?o]]})
+
+(defn delete-series-releases-query [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :delete [['?release '?p '?o]]
+   :where [['?release :dcat/inSeries series-uri]
+           ['?release '?p '?o]]})
+
+(defn delete-series-query [series-uri]
+  {:delete [[series-uri '?p '?o]]
+   :where [[series-uri '?p '?o]]})
+
+(defn- find-orphaned-changes-query
+  "Query to find all change keys which are only referenced by series-uri"
+  [series-uri]
+  {:prefixes (compact/as-flint-prefixes)
+   :select ['?key]
+   :where [[:where {:select ['?key]
+                    :where [['?release :dcat/inSeries series-uri]
+                            ['?revision :dh/appliesToRelease '?release]
+                            ['?revision :dh/hasChange '?change]
+                            ['?change :dh/updates '?key]]}]
+           [:minus [[:where {:select ['?key]
+                             :where [['?release :dcat/inSeries '?series]
+                                     [:filter (list 'not= '?series series-uri)]
+                                     ['?revision :dh/appliesToRelease '?release]
+                                     ['?revision :dh/hasChange '?change]
+                                     ['?change :dh/updates '?key]]}]]]]})
+
+(defn- find-orphaned-changes [triplestore series-uri]
+  (let [q (find-orphaned-changes-query series-uri)
+        qs (f/format-query q :pretty? true)]
+    (with-open [conn (repo/->connection triplestore)]
+      (let [results (repo/query conn qs)]
+        (set (map :key results))))))
+
+(defn delete-series!
+  "Deletes a series and all associated child resources. Returns a collection of change
+  keys which have been orphaned by the deletion within the change store."
+  [triplestore system-uris series-slug]
+  (let [series-uri (su/dataset-series-uri system-uris series-slug)
+        orphaned-changes (find-orphaned-changes triplestore series-uri)
+        queries [(delete-series-changes-query series-uri)
+                 (delete-series-releases-schemas-query series-uri)
+                 (delete-series-revisions-query series-uri)
+                 (delete-series-releases-query series-uri)
+                 (delete-series-query series-uri)]]
+    (submit-updates triplestore queries)
+    orphaned-changes))
+
 (defn upsert-release!
   "Returns a map {:op ... :jsonld-doc ...} where :op conforms to
   `tpximpact.datahost.ldapi.schemas.api/UpsertOp`"
@@ -416,7 +499,7 @@
   "Given a release (as path-params) attempts to fetch the latest
   revision-id and the key of the dataset snapshot (as
   in :dh/revisionSnapshotCSV).
-  
+
   Returns a map of {:data-key ... :revision-id ...} or nil"
   [triplestore system-uris path-params]
   (let [release-uri (su/dataset-release-uri* system-uris  path-params)
@@ -524,7 +607,7 @@
                    [['?e
                      (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")
                      (compact/expand :dh/Change)]
-                    ['?e 
+                    ['?e
                      (compact/expand :dh/appliesToRevision)
                      revision-uri]])]]})
 
@@ -583,7 +666,7 @@
       (int? c)                          ; we got a definitive answer
       (get-change triplestore
                   (su/change-uri* system-uris (assoc params :revision-id prev-rev-id :change-id c)))
-      
+
       (= :find c)                       ; we need to find change-id
       (let [prev-rev-uri (su/dataset-revision-uri* system-uris (assoc params :revision-id prev-rev-id))
             prev-change-id (with-open [conn (repo/->connection triplestore)]
@@ -598,7 +681,7 @@
                                             (assoc params
                                                    :revision-id prev-rev-id
                                                    :change-id prev-change-id) )))
-      
+
       :else (throw (ex-info "Error: illegal state" {:params params})))))
 
 (defn- release-schema-statements [schema]
