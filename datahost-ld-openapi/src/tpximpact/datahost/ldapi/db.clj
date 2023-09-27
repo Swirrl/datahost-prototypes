@@ -415,26 +415,6 @@
       first
       :n))
 
-(defn get-release-snapshot-info
-  "Given a release (as path-params) attempts to fetch the latest
-  revision-id and the key of the dataset snapshot (as
-  in :dh/revisionSnapshotCSV).
-  
-  Returns a map of {:data-key ... :revision-id ...} or nil"
-  [triplestore system-uris path-params]
-  (let [release-uri (su/dataset-release-uri* system-uris  path-params)
-        rev-id (with-open [conn (repo/->connection triplestore)]
-                 (select-max-n conn release-uri (compact/expand :dh/hasRevision)))
-        revision (when (pos? rev-id)
-                   (get-revision triplestore
-                                 (su/dataset-revision-uri* system-uris
-                                                           (assoc path-params :revision-id rev-id))))
-        pred (compact/expand :dh/revisionSnapshotCSV)
-        pred-fn (fn [q] (= pred (:p q)))
-        data-key (:o (first (filter pred-fn revision)))]
-    (when revision
-      {:n rev-id :data-key data-key})))
-
 (defn fetch-next-child-resource-number [triplestore parent-uri child-pred]
   (let [q (select-auto-increment-query parent-uri child-pred)
         qs (f/format-query q :pretty? true)
