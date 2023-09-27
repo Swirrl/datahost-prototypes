@@ -40,12 +40,6 @@
   (-> (apply str (interpose "|" dims))
       hash-chars))
 
-(defn add-ids [ds]
-  (-> ds
-      ;; adds a new column named "ID" by applying `hash-fn` to the
-      ;; vals in the selected columns
-      (tc/map-columns "ID" id-columns hash-fn)))
-
 (defn get-measure-column-name [schema]
   (->> schema
        :columns
@@ -63,38 +57,37 @@
      (tc/write! tc-dataset out-stream {:file-type :csv}))))
 
 (defn derive-deltas [original-ds new-ds]
-  (let [old (add-ids original-ds)
-        new (add-ids new-ds)
-        measure-column-name (get-measure-column-name default-schema)
+  (let [measure-column-name (get-measure-column-name default-schema)
         right-measure-column-name (str "right." measure-column-name)
-        column-names (cons "ID" (tc/column-names original-ds))
+        column-names (tc/column-names original-ds)
         right-column-names (map #(str "right." %) column-names)
-        labelled-ds (tc/map-columns (tc/full-join old new "ID")
-                                    :status
-                                    [measure-column-name right-measure-column-name]
-                                    (fn [old-measure-val new-measure-val]
-                                      (cond
-                                        (nil? old-measure-val) :append
-                                        (nil? new-measure-val) :retract
-                                        (not= old-measure-val new-measure-val) :modified)))
-
-        append (-> (tc/select-rows labelled-ds (comp #(= :append %) :status))
-                   (tc/select-columns (cons :status right-column-names))
+        labelled-ds (-> (tc/map-columns (tc/full-join original-ds new-ds id-columns {:hashing hash-fn})
+                                        :status
+                                        [measure-column-name right-measure-column-name]
+                                        (fn [old-measure-val new-measure-val]
+                                          (cond
+                                            (nil? old-measure-val) :append
+                                            (nil? new-measure-val) :retract
+                                            (not= old-measure-val new-measure-val) :modified)))
+                        (tc/group-by :status)
+                        (tc/groups->map))
+        append (-> (tc/select-columns (:append labelled-ds)
+                                      (cons :status right-column-names))
                    (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
 
-        retracted (-> (tc/select-rows labelled-ds (comp #(= :retract %) :status))
-                      (tc/select-columns (cons :status column-names)))
+        retracted (tc/select-columns (:retract labelled-ds)
+                                     (cons :status column-names))
 
-        modified-appended (-> labelled-ds
-                              (tc/select-rows (comp #(= :modified %) :status))
-                              (tc/select-columns (conj column-names (str "right." measure-column-name)))
+        modified-appended (-> (tc/select-columns (:modified labelled-ds)
+                                                 (conj column-names right-measure-column-name))
                               (tc/map-columns :status [right-measure-column-name] (constantly :append))
                               (tc/drop-columns measure-column-name)
                               (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
-        modified-retracted (-> labelled-ds
-                               (tc/select-rows (comp #(= :modified %) :status))
-                               (tc/select-columns column-names)
-                               (tc/map-columns :status [measure-column-name] (constantly :retract)))]
+        modified-retracted (-> (tc/select-rows (:modified labelled-ds)
+                                               (comp #(= :modified %) :status))
+                               (tc/select-columns (cons :result-type column-names))
+                               (tc/map-columns :status [measure-column-name] (constantly :retract)))
+        ]
     (tc/concat retracted
                modified-retracted
                modified-appended
