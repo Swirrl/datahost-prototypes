@@ -43,17 +43,9 @@
   (with-open [in ^InputStream (store/get-data change-store data-key)]
     (.transferTo in out-stream)))
 
-(defn csv-file-locations->dataset [change-store append-keys]
-  (let [as-dataset (fn [k]
-                     (with-open [in (store/get-data change-store k)]
-                       (data-validation/as-dataset in {:file-type :csv})))]
-   (if (sequential? append-keys)
-     (some->> (remove nil? append-keys)
-              (map as-dataset)
-              (seq)
-              (apply tc/concat))
-     (some->> (store/get-data change-store append-keys)
-              (as-dataset)))))
+(defn csv-file-location->dataset [change-store key]
+  (with-open [in (store/get-data change-store key)]
+    (data-validation/as-dataset in {:file-type :csv})))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
@@ -290,12 +282,13 @@
         ;; #'internal/post-change--generate-csv-snapshot
         ;; We don't need to proceed further if there's no release-schema!
         _ (assert release-schema (str "No release schema found for: " release-uri))
-        appends (->byte-array-input-stream appends)
+        appends ^InputStream (->byte-array-input-stream appends)
+        insert-req (store/make-insert-request! change-store appends)
         {validation-err :error-response
          row-schema :row-schema
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
+        _ (.reset appends)
         ;; insert relevant triples
-        insert-req (store/make-insert-request! change-store appends)
         {:keys [inserted-jsonld-doc resource-id message]} (when-not validation-err
                                                             (db/insert-change! triplestore
                                                                                system-uris
@@ -346,7 +339,7 @@
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/updates))]
-    (when-let [dataset (csv-file-locations->dataset change-store [appends])]
+    (when-let [dataset (csv-file-location->dataset change-store appends)]
       (write-dataset-to-outputstream dataset))))
 
 (defn get-change [triplestore change-store system-uris {{:keys [series-slug release-slug revision-id change-id]} :path-params
