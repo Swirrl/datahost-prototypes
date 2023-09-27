@@ -15,6 +15,8 @@
     (store/get-data file-store data-key))
   (-data-key [_this data]
     (store/data-key file-store data))
+  (-delete [_this data-key]
+    (store/-delete file-store data-key))
 
   AutoCloseable
   (close [_]
