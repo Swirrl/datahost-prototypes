@@ -349,47 +349,6 @@
     }]
   },
   {
-    "id": "test-data",
-    "title": "Test",
-    "description": "Description",
-    "license": "",
-    "creator": "",
-    "theme": "",
-    "releases": [{
-      "title": "Release 1-1",
-      "description": "First release of data",
-      "id": "1-1",
-      "schema": "data/test-data/release_1-1.json",
-      "revisions": [{
-        "title": "Revision 1",
-        "description": "First set of appends",
-        "append": {
-          "file": "data/test-data/test-original.csv",
-          "title": "Append",
-          "description": "Appends"
-        }
-      }, {
-        "title": "Revision 2",
-        "description": "First update with appends, corrections and deletes",
-        "append": {
-          "file": "data/test-data/append-correction-delete-appends.csv",
-          "title": "Append",
-          "description": "Appends"
-        },
-        "deletes": {
-          "file": "data/test-data/append-correction-delete-deletes.csv",
-          "title": "Delete",
-          "description": "Deletes"
-        },
-        "corrects": {
-          "file": "data/test-data/append-correction-delete-corrections.csv",
-          "title": "Corrections",
-          "description": "Corrections"
-        }
-      }]
-    }]
-  },
-  {
     "id": "wellbeing-local-authority",
     "title": "Personal well-being estimates by local authority",
     "description": "Estimates of life satisfaction, feeling that the things done in life are worthwhile, happiness and anxiety at the UK, country, regional, county, local and unitary authority level.",

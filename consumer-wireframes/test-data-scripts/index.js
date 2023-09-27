@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const base64 = require('base-64');
-const data = require('./data/series.json');
+// const data = require('./data/series.json');
 const FormData = require('form-data');
 const fs = require('fs');
 const user = require('./data/user.json');
@@ -10,11 +10,14 @@ const password = user.password
 const openAPI = "http://127.0.0.1:3000";
 // const openAPI = "https://ldapi-prototype.gss-data.org.uk"
 
+const args = process.argv.slice(2);
+const data = require(args[0]);;
+
 sleep = ms => {
     return new Promise(resolve => setTimeout(resolve, ms));
-  }
+}
 
-  deleteSeries = async (series) => {
+deleteSeries = async (series) => {
     let url = `${openAPI}/data/${series}`
     const response = await fetch(url, {
         method: 'DELETE',
@@ -31,15 +34,15 @@ createSeries = async (series) => {
     let title = data[i].title
     let description = data[i].description
     let url = `${openAPI}/data/${series}?title=${title}&description=${description}`
-    const response = await fetch(url, {
+    await fetch(url, {
+    // const response = await fetch(url, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
             "Authorization": `Basic ${base64.encode(`${login}:${password}`)}`
         },
     });
-    const api = await response.json();
-
+    // const api = await response.json();
     url = url.split("?")[0]
     console.log(`Created: ${url}`)
 
@@ -52,6 +55,7 @@ createRelease = async (series) => {
         let description = releases[j].description
         let id = releases[j].id
         let url = `${openAPI}/data/${series}/releases/${id}?title=${title}&description=${description}`
+        // await fetch(url, {
         const response = await fetch(url, {
             method: 'PUT',
             headers: {
@@ -82,8 +86,9 @@ createSchemas = async (releases, series) => {
             },
         };
         try {
-            const fetchResponse = await fetch(url, settings);
-            const data = await fetchResponse.json();
+            await fetch(url, settings);
+            // const fetchResponse = await fetch(url, settings);
+            // const data = await fetchResponse.json();
             console.log(`Added schema to: ${url}`)
         } catch (e) {
             console.log(e)
@@ -108,7 +113,7 @@ createRevision = async (series) => {
 }
 
 postRevision = async (url, revision) => {
-    
+
     let title = revision.title
     let description = revision.description
     body = `{"dcterms:title":"${title}","dcterms:description":"${description}"}`
@@ -138,7 +143,6 @@ postRevision = async (url, revision) => {
         await uploadData(revisionID, file, "appends")
     }
 
-    
 }
 
 uploadData = async (revision, file, type) => {
@@ -153,8 +157,9 @@ uploadData = async (revision, file, type) => {
     };
     try {
         url = `${openAPI}/data/${revision}/${type}?title=${type}&description=Placeholder&format=text%2Fcsv`
-        const fetchResponse = await fetch(url, settings);
-        const data = await fetchResponse.json();
+        // const fetchResponse = await fetch(url, settings);
+        await fetch(url, settings);
+        // const data = await fetchResponse.json();
         console.log(`Added data to: ${url}`)
     } catch (e) {
         console.log(e)

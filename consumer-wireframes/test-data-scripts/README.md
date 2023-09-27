@@ -11,7 +11,11 @@ Designed to get a set of datasets into a known state.
 
 Will delete then recreate the datasets series, releases and revisions within the `series.json` file. Will also upload the files and schemas referenced there.
 
-`node index.js`
+`node index.js ./data/series.json`
+
+Some test data can be loaded with
+
+`node index.js ./data/test.json`
 
 ### Deletes
 
