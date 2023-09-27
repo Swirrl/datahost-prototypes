@@ -422,6 +422,24 @@
           "title": "Delete",
           "description": "Deletes"
         }
+      }, {
+        "title": "Revision 3",
+        "description": "Second update with appends, corrections and deletes",
+        "append": {
+          "file": "data/well-being/release_1-1/wellbeing-local-authority-3-appends.csv",
+          "title": "Append",
+          "description": "Appends"
+        },
+        "deletes": {
+          "file": "data/well-being/release_1-1/wellbeing-local-authority-3-deletes.csv",
+          "title": "Delete",
+          "description": "Deletes"
+        },
+        "corrects": {
+          "file": "data/well-being/release_1-1/wellbeing-local-authority-3-corrections.csv",
+          "title": "Corrections",
+          "description": "Corrections"
+        }
       }]
     }]
   }
