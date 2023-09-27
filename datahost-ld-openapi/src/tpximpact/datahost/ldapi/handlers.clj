@@ -294,7 +294,6 @@
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         _ (.reset appends)
         ;; insert relevant triples
-        insert-req (store/make-insert-request! change-store appends)
         {:keys [inserted-jsonld-doc
                 change-id
                 change-uri
