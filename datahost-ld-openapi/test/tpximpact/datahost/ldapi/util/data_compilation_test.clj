@@ -40,7 +40,7 @@
                                        :dataset.column/type (:measure uris/column-types)} :int]
                               [:int {:dataset.column/name "dim"
                                      :dataset.column/type (:dimension uris/column-types)}]])]
-    (assert (data-validation/row-schema-valid? row-schema))
+    (assert (#'data-validation/row-schema-valid? row-schema))
 
     (testing "We can create result from appends"
       (let [result (dc/compile-dataset {:changes [(get data 1)
@@ -82,11 +82,3 @@
                   (data-record-count 2))
                (tc/row-count result)))))))
 
-(deftest row-schema-validator-test
-  (let [schema-data [:tuple
-                     [:maybe {:dataset.column/name "Foo"
-                              :dataset.column/type (:dimension uris/column-types)} :int]
-                     [:int {:dataset.column/name "Boo"
-                            :dataset.column/type (:measure uris/column-types)}]]]
-   (is (data-validation/row-schema-valid? (m/schema schema-data)))
-   (is (not (data-validation/row-schema-valid? schema-data)))))

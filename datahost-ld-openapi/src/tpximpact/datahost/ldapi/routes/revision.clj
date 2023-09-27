@@ -74,9 +74,12 @@
   {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
    :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
                 [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]
+                ;; don't allow changes to revision N when revision N+1 already exists
                 [(partial middleware/resource-already-created?
                           triplestore system-uris
-                          {:resource :dh/Change :missing-params {:change-id 1}} )
+                          {:resource :dh/Revision
+                           :param-fn (fn [{:keys [revision-id]}]
+                                       {:revision-id (inc (Integer/parseInt  revision-id))})})
                  :resource-already-created?]]
    :parameters {:path {:series-slug string?
                        :release-slug string?

@@ -73,11 +73,16 @@
 
   - :resource - :dh/DataSeries etc
   - :missing-params - map of params possibly missing from path
-  params (e.g. when the request generates an ID)"
-  [triplestore system-uris {:keys [resource missing-params]} handler _id]
+  params (e.g. when the request generates an ID)
+  - :param-fn - (fn [path-params] ...) -> path-params"
+  [triplestore system-uris {:keys [resource missing-params param-fn]} handler _id]
   {:pre [(m/validate s.common/EntityType resource)]}
   (fn created? [{:keys [path-params] :as request}]
-    (if (db/resource-exists? triplestore (resource-uri resource system-uris (merge path-params missing-params)))
+    (if (db/resource-exists? triplestore
+                             (resource-uri resource system-uris
+                                           (cond-> path-params
+                                             (not (empty? missing-params)) (merge missing-params)
+                                             (some? param-fn) (merge (param-fn path-params)))))
       {:status 422 :body "Resource already exists"}
       (handler request))))
 
