@@ -175,7 +175,7 @@ start = async () => {
         } else {
             series = data[i].id
         }
-        // await deleteSeries(series)
+        await deleteSeries(series)
         await createSeries(series)
         await createRelease(series)
         await createRevision(series)
