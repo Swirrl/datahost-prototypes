@@ -411,7 +411,7 @@
         }
       }, {
         "title": "Revision 2",
-        "description": "First updates with appends and deletes",
+        "description": "First set of updates with appends and deletes",
         "append": {
           "file": "data/well-being/release_1-1/wellbeing-local-authority-2-appends.csv",
           "title": "Append",
@@ -424,7 +424,7 @@
         }
       }, {
         "title": "Revision 3",
-        "description": "Second updates with appends, corrections and deletes",
+        "description": "Second set of updates with appends, corrections and deletes",
         "append": {
           "file": "data/well-being/release_1-1/wellbeing-local-authority-3-appends.csv",
           "title": "Append",
