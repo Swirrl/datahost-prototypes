@@ -66,23 +66,27 @@
                     (println "Hashing: " dims "," (hash-fn dims))
                     (hash-fn dims))))
 
+(defn join-and-partition-deltas
+  [base-ds delta-ds measure-column-name right-measure-column-name]
+  ;; the hashing function used here is only for the observation coordinates (no measure)
+  (-> (tc/full-join base-ds delta-ds obs-coordinate-cols {:hashing hash-fn})
+      (tc/map-columns :operation
+                      [measure-column-name right-measure-column-name]
+                      (fn [old-measure-val new-measure-val]
+                        (cond
+                          (nil? old-measure-val) :append
+                          (nil? new-measure-val) :retract
+                          (not= old-measure-val new-measure-val) :modified)))
+      (tc/group-by :operation)
+      (tc/groups->map)))
+
 (defn derive-deltas [base-ds delta-ds]
   (let [measure-column-name (get-measure-column-name default-schema)
         right-measure-column-name (str "right." measure-column-name)
         column-names (tc/column-names base-ds)
         right-column-names (map #(str "right." %) column-names)
 
-        ;; the hashing function used here is only for the observation coordinates (no measure)
-        labelled-ds (-> (tc/map-columns (tc/full-join base-ds delta-ds obs-coordinate-cols {:hashing hash-fn})
-                                        :operation
-                                        [measure-column-name right-measure-column-name]
-                                        (fn [old-measure-val new-measure-val]
-                                          (cond
-                                            (nil? old-measure-val) :append
-                                            (nil? new-measure-val) :retract
-                                            (not= old-measure-val new-measure-val) :modified)))
-                        (tc/group-by :operation)
-                        (tc/groups->map))
+        labelled-ds (join-and-partition-deltas base-ds delta-ds measure-column-name right-measure-column-name)
 
         append-dataset (-> (add-user-schema-ids (:append labelled-ds) right-measure-column-name right-obs-coordinate-cols)
                            (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
@@ -127,9 +131,8 @@
                             [:base-csv reitit.ring.malli/temp-file-part]
                             [:delta-csv reitit.ring.malli/temp-file-part]]}
    :openapi {:security [{"basic" []}]}
-   :responses {201 {:description "Differences between input files calculated"
-                    :content {"application/json"
-                              {:body string?}}
+   :responses {200 {:description "Differences between input files calculated"
+                    :content {"text/csv" any?}
                     ;; headers is not currently supported
                     :headers {"Location" string?}}
                500 {:description "Internal server error"
@@ -139,7 +142,7 @@
 
 ; Curl command used to test the delta route:
 ;
-; curl -X 'POST' 'http://localhost:3000/delta' -H 'accept: application/json' \
+; curl -X 'POST' 'http://localhost:3000/delta' -H 'accept: text/csv' \
 ;   -H 'Content-Type: multipart/form-data' \
 ;   -F 'base-csv=@./env/test/resources/test-inputs/delta/orig.csv;type=text/csv' \
 ;   -F 'delta-csv=@./env/test/resources/test-inputs/delta/new.csv;type=text/csv' \
