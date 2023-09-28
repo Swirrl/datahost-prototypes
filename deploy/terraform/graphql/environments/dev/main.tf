@@ -18,7 +18,7 @@ module "dev" {
   digest = var.digest
   gcloud_zone = "europe-west2-a"
   dns = {
-    host = "graphql-prototype"
+    host = "graphql-dev"
     zone = "gss-data.org.uk"
   }
 }

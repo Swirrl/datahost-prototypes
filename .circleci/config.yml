@@ -209,3 +209,21 @@ workflows:
           filters:
             branches:
               only: main
+      - deploy-graphql-vm:
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - deploy-graphql-service
+          env: ons
+          filters:
+            branches:
+              only: ons
+      - deploy-ldapi-vm:
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - deploy-ld-openapi-service
+          env: ons
+          filters:
+            branches:
+              only: ons
