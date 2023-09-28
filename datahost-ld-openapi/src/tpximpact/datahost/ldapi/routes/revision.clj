@@ -22,7 +22,8 @@
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn get-revision-list-route-config [triplestore system-uris]
   {:summary "All revisions metadata in the given release"
@@ -31,7 +32,8 @@
                        routes-shared/series-slug-param-spec
                        routes-shared/release-slug-param-spec]}
    :responses {200 {:content {"application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn post-revision-route-config [triplestore system-uris]
   {:summary (str "Create metadata for a revision. The successfully created resource "
@@ -64,7 +66,8 @@
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]
-                           [:message string?]]}}})
+                           [:message string?]]}}
+   :tags ["Publisher API"]})
 
 (defn changes-route-base [triplestore change-store system-uris change-kind]
   {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
@@ -100,15 +103,18 @@
 
 (defn post-revision-appends-changes-route-config [triplestore change-store system-uris]
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindAppend)
-         {:summary "Add appends changes to a Revision via a CSV file."}))
+         {:summary "Add appends changes to a Revision via a CSV file."
+          :tags ["Publisher API"]}))
 
 (defn post-revision-retractions-changes-route-config [triplestore change-store system-uris]
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
-         {:summary "Add retractions changes to a Revision via a CSV file."}))
+         {:summary "Add retractions changes to a Revision via a CSV file."
+          :tags ["Publisher API"]}))
 
 (defn post-revision-corrections-changes-route-config [triplestore change-store system-uris]
   (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindCorrect)
-         {:summary "Add corrections to a Revision via a CSV file."}))
+         {:summary "Add corrections to a Revision via a CSV file."
+          :tags ["Publisher API"]}))
 
 (defn get-revision-changes-route-config [triplestore change-store system-uris]
   {:summary "Retrieve CSV contents for an existing change"
@@ -121,4 +127,5 @@
                        routes-shared/change-id-param-spec]}
    :responses {200 {:content
                     {"text/csv" any?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})

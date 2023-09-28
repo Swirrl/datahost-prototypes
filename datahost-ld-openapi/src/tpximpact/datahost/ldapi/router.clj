@@ -194,7 +194,7 @@
               ;; coerced, especially on the way out as the response. Otherwise
               ;; keywords will remain ":keyword" and swagger.json will be
               ;; invalid
-              :tags ["linked data api"]}
+              }
      [""
       {:get (routes.s/get-series-list-route-config triplestore system-uris)}]
 

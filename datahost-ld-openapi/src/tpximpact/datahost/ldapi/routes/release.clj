@@ -14,7 +14,8 @@
    :handler (partial handlers/get-release-list triplestore system-uris)
    :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {200 {:content {"application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn get-release-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata for an existing release"
@@ -28,7 +29,8 @@
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn put-release-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata for a release"
@@ -54,7 +56,8 @@
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]
-                           [:message string?]]}}})
+                           [:message string?]]}}
+   :tags ["Publisher API"]})
 
 (defn get-release-ld-schema-config
   [triplestore system-uris]
@@ -65,7 +68,8 @@
                        routes-shared/release-slug-param-spec]}
    :responses {200 {:description "Release schema successfully retrieved"
                     :content {"application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn post-release-ld-schema-config
   [clock triplestore system-uris]
@@ -84,4 +88,5 @@
                500 {:description internal-server-error-desc
                     :body [:map
                            [:status [:enum "error"]]
-                           [:message :string]]}}})
+                           [:message :string]]}}
+   :tags ["Publisher API"]})

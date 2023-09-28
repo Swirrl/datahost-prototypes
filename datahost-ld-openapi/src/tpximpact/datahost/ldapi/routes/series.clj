@@ -9,7 +9,8 @@
    :description "Lists all dataset-series stored in the database."
    :handler (partial handlers/get-series-list triplestore system-uris)
    :responses {200 {:content {"application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn get-series-route-config [triplestore system-uris]
   {:summary "Retrieve metadata for an existing dataset-series"
@@ -25,7 +26,8 @@ release or revision as part of its name."
    :handler (partial handlers/get-dataset-series triplestore system-uris)
    :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {200 {:content {"application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
 
 (defn put-series-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata on a dataset-series"
@@ -66,11 +68,13 @@ _Note: Setting this parameter will override the value of `dcterms:description` i
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]
-                           [:message string?]]}}})
+                           [:message string?]]}}
+   :tags ["Publisher API"]})
 
 (defn delete-series-route-config [triplestore change-store system-uris]
   {:summary "Delete a series and all its child resources"
    :handler (partial handlers/delete-dataset-series triplestore change-store system-uris)
    :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {204 {:description "Series existed and was successfully deleted"}
-               404 {:description "Series does not exist"}}})
+               404 {:description "Series does not exist"}}
+   :tags ["Publisher API"]})
