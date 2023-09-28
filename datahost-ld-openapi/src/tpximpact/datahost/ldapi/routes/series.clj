@@ -5,7 +5,7 @@
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
 (defn get-series-list-route-config [triplestore system-uris]
-  {:summary "All series metadata in the database"
+  {:summary "List all series metadata in the database"
    :description "Lists all dataset-series stored in the database."
    :handler (partial handlers/get-series-list triplestore system-uris)
    :responses {200 {:content {"application/ld+json" string?}}
@@ -31,12 +31,18 @@ release or revision as part of its name."
 
 (defn put-series-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata on a dataset-series"
-   :description "Creates or updates the dataset-series with the supplied metadata.
+   :description "Create or update metadata on a dataset-series.
 
-Additionally Datahost will augment the supplied metadata with some
-additional managed properties, such as `dcterms:issued` and
-`dcterms:modified`.
-"
+If the release did not previously exist and the data
+is valid a new release will be created in the specified
+dataset-series.
+
+If the release previously did exist the metadata document associated
+with it will be updated.
+
+NOTE: some fields of metadata are considered \"managed\" and will be
+managed by the Datahost platform; for example Datahost will add and
+set `dcterms:modified` times for you."
    :middleware [[middleware/json-only :json-only]
                 [(partial middleware/flag-resource-exists triplestore system-uris
                           :dh/DatasetSeries ::series)
@@ -73,6 +79,9 @@ _Note: Setting this parameter will override the value of `dcterms:description` i
 
 (defn delete-series-route-config [triplestore change-store system-uris]
   {:summary "Delete a series and all its child resources"
+   :description "Delete's the given dataset-series and all of its child resources, i.e. releases, schemas, revisions, and commits.
+
+**WARNING: This route is highly destructive and should not be used as part of a standard workflow, as it will break commitments to dataset consumers.**"
    :handler (partial handlers/delete-dataset-series triplestore change-store system-uris)
    :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {204 {:description "Series existed and was successfully deleted"}
