@@ -53,7 +53,7 @@
   :test {:extra-paths ["test" "env/test/resources"]
          :extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}
                       lambdaisland/kaocha-junit-xml {:mvn/version "1.17.101"}
-											org.clojure/data.csv {:mvn/version "1.0.1"}}
+		      org.clojure/data.csv {:mvn/version "1.0.1"}}
          :exec-fn kaocha.runner/exec-fn
          :exec-args {:tests [{:id :unit
                               :test-paths ["test"]
