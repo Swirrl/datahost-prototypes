@@ -166,19 +166,142 @@
                                 :access-control-allow-origin (constantly true)
                                 :access-control-allow-methods [:get :post :put])))})
 
-(def ^:private api-github-link
-  (str "Source viewable in GitHub "
-       "[here](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi)."))
+(def ^:private api-description
+  "Datahost is a prototype service aiming to simplify the publication
+and consumption of statistical datasets on the web, whilst following
+Linked Data Principles, best practices and web standards, without
+assuming detailed knowledge of them.
+
+It has been developed by TPXImpact in partnership with the Office of
+National Statistics.
+
+More details of the project can be found on the projects [GitHub
+repository](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi).
+
+Datahost's API is broadly divided to support two distinct audiences:
+
+1. Data users and consumers via the [Consumer API](#/Consumer%20API).
+2. Data publishers, who use both the [Publisher API](#/Publisher%20API) and [Consumer API](#/Consumer%20API).
+
+# Data Model
+
+## Overview
+
+Datahost aims to give improved guarantees to data consumers, by
+requiring publishers make commitments to consumers about the
+management and shape of the data. These commitments govern how the
+data will be managed over time, and come in the form of a versioning
+model enforced by Datahost and dataset schemas.
+
+With datahost publishers are encouraged to declare their datasets
+schema in advance by associating releases of their dataset with a
+schema. Datahost ensures that all revisions of a dataset/release must
+then conform to that releases declared schema.
+
+To understand the Datahost data model, we first need to understand
+some datahost terminology:
+
+- Dataset-Series - In Datahost a dataset-series is a name and global
+  identifier representing a dataset over its whole lifetime. It can
+  cover all historic and future releases of that Dataset. A good
+  example would be \"[The Census](https://www.ons.gov.uk/census)\",
+  which has been assembled every ten years since 1801. Throughout this
+  time the methodology and shape/schema of the data has changed many
+  times, but its purpose to measure the population has remained. -
+
+- Release - In Datahost a release is how we identify a dataset with a
+  specific schema and methodology. Releases may be updated over time,
+  but they make the commitment to consumers that any changes to them
+  will be explicitly captured in change logs, and that all such
+  revisions will conform to the schema for the release.
+
+  This allows publishers to make improvements to a release after
+  publication, for example correcting mistakes in the figures whilst
+  providing transparency to consumers that changes were made, and that
+  those changes will always be compatible with the releases published
+  schema.
+
+  A release has a name e.g. \"2021\" which when combined with the
+  dataset-series name forms the full name of the dataset release e.g.
+  \"The Census 2021\". Users will usually want the latest revision of
+  a release, and knowing the combined series and release name will let
+  them do that.
+
+- Schema - In Datahost we define a simple schema language which is a
+  valid subset of CSVW, but introduces a few extra properties to help
+  support versioning. We surface these schemas as datahost/CSVW
+  schemas to consumers.
+
+- Revision - In Datahost a revision represents a named published set
+  of changes to a dataset release. All changes within a revision
+  *MUST* conform to the Release's pre-published schema. Revisions
+  contain a sequence of changes or commits.
+
+- Change/Commit - In Datahost there are 3 types of change that can occur.
+
+  - Appends - Represent the addition of more data to a release. Adding
+    more data providing it conforms to the pre-published schema should
+    never be a breaking change to consumers. Datahost will enforce
+    this guarantee.
+
+  - Retracts - We don't encourage publishers removing data from
+    releases, however from time to time there is a need for publishers
+    to do it. Datahost will support publishers in removing the
+    information as a soft-delete, which retains the previous revision
+    containing the deletion and also a retraction commit stating
+    explicitly what data was removed. This is useful information for
+    consumers, and provides a method to safely stay up to date.
+
+  - Corrections - Are a special composite form of a retraction and an
+    append that represent an ammended figure in the data. In addition
+    corrections contain a backlink to the previous figure, allowing
+    users and publishers an easy way to explore figure changes.
+
+  All commits contain a message in the form of a description.
+
+## Data and Metadata
+
+The Datahost data model follows linked data principles and web best
+practices to ensure as much as possible a resource oriented approach
+to our API.
+
+In particular resource's may contain many representations, and those
+representations may partially represent that entity.
+
+Broadly speaking Datahost assumes that when we're speaking about the
+data behind a resource we will refer it to with a mimetype of
+`text/csv`, whilst if we're speaking about the metadata we'll refer to
+it as `application/json` (or `application/ld+json`). Typically this is
+done by setting the `Accept` and `Content-Type` HTTP headers as
+appropriate.
+
+For example a revision to a dataset-series's release is represented by it's URI e.g.
+
+`/data/census/releases/2021/revisions/1`
+
+If we want to know what all the data in this revision looks like, we
+can request it by setting the `Accept` header to `text/csv`, which
+will return all the data in that revision. However if we want to know
+what metadata there is about that revision, we will request it by
+setting the `Accept` header to `application/json`.
+
+In Datahost it's possible for some resources to only have metadata or
+data representations available. This should be documented in the API
+specifications for each route.")
 
 (defn router [{:keys [clock triplestore change-store auth system-uris]}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
             :openapi {:openapi "3.0.0"
-                      :info {:title "Prototype OpenData API"
-                             :description api-github-link
+                      :info {:title "Datahost Prototype API"
+                             :description api-description
                              :version "0.1.0"}
-                      :components {:securitySchemes {"basic" {:type "http" :scheme "basic"}}}}
+                      :components {:securitySchemes {"basic" {:type "http" :scheme "basic"}}}
+                      :tags [{:name "Consumer API"
+                              :description "Operations for data consumers (including publishers)"}
+                             {:name "Publisher API"
+                              :description "Operations for data publishers"}]}
             :handler (openapi/create-openapi-handler)}}]
     ["/.well-known"
      ["/csvm" {:no-doc true
@@ -233,8 +356,7 @@
        ["/:revision-id/retractions"
         {:post (routes.rev/post-revision-retractions-changes-route-config triplestore change-store system-uris)}]
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]
-       ]]]]
+        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
