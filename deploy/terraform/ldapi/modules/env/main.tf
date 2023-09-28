@@ -23,6 +23,7 @@ provider "aws" {
 
 module "server" {
   source = "../server"
+  gcloud_project = var.gcloud_project
   digest = var.digest
   name = "${var.name}-ldapi"
   zone = var.gcloud_zone

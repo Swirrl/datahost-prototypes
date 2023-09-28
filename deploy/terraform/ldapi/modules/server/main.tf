@@ -3,6 +3,7 @@ locals {
   service_account_id = "${var.name}-account"
   data_disk_name = "${var.name}-data"
   files_disk_name = "${var.name}-files"
+  basic_auth_password_secret_name = "${var.name}-basic-auth-password"
 }
 
 module "gce_container_spec" {
@@ -11,6 +12,16 @@ module "gce_container_spec" {
 
   container = {
     image = "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi@sha256:${var.digest}"
+    env = [
+      {
+        name = "GCLOUD_PROJECT"
+        value = var.gcloud_project
+      },
+      {
+        name = "BASIC_AUTH_PASSWORD_SECRET_NAME"
+        value = local.basic_auth_password_secret_name
+      }
+    ]
     volumeMounts = [
       {
         mountPath = "/cache"
@@ -43,6 +54,14 @@ module "gce_container_spec" {
   ]
 
   restart_policy = "Always"
+}
+
+resource "google_secret_manager_secret" "basic_auth_password" {
+  secret_id = local.basic_auth_password_secret_name
+
+  replication {
+    automatic = true
+  }
 }
 
 resource "google_service_account" "ldapi_service_account" {
