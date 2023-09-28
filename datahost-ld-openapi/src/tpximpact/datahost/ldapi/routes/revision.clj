@@ -15,9 +15,10 @@
                 [(partial middleware/entity-or-not-found triplestore system-uris :dh/Revision)
                  :entity-or-not-found]
                 [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
-   :parameters {:path {:series-slug string?
-                       :release-slug string?
-                       :revision-id int?}}
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec
+                       routes-shared/revision-id-param-spec]}
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" string?}}
@@ -26,8 +27,9 @@
 (defn get-revision-list-route-config [triplestore system-uris]
   {:summary "All revisions metadata in the given release"
    :handler (partial handlers/get-revision-list triplestore system-uris)
-   :parameters {:path {:series-slug string?
-                       :release-slug string?}}
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]}
    :responses {200 {:content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
@@ -44,8 +46,9 @@
                            :query-explainer (get-in routes-shared/explainers [:post-revision :query])})
                  :validate-body+query]]
    :parameters {:body [:any]
-                :path {:series-slug string?
-                       :release-slug string?}
+                :path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]
                 :query [:map
                         [:title {:title "Title"
                                  :description "Title of revision"
@@ -78,9 +81,10 @@
                           (malli.core/validator routes-shared/CreateChangeHeaders)
                           (malli.core/explainer routes-shared/CreateChangeHeaders))
                  :validate-change-request-header]]
-   :parameters {:path {:series-slug string?
-                       :release-slug string?
-                       :revision-id int?}
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec
+                       routes-shared/revision-id-param-spec]
                 :query routes-shared/CreateChangeInputQueryParams}
    :openapi {:security [{"basic" []}]
              :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
@@ -110,10 +114,11 @@
   {:summary "Retrieve CSV contents for an existing change"
    :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-change triplestore change-store system-uris)
-   :parameters {:path {:series-slug string?
-                       :release-slug string?
-                       :revision-id int?
-                       :change-id int?}}
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec
+                       routes-shared/revision-id-param-spec
+                       routes-shared/change-id-param-spec]}
    :responses {200 {:content
                     {"text/csv" any?}}
                404 {:body routes-shared/NotFoundErrorBody}}})

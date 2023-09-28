@@ -16,6 +16,13 @@
 
 (def release-slug-param-spec
   [:release-slug [:string {:description "Release slug. A URI safe identifier which is unique within its URI namespace/prefix, used to identify a release within a dataset-series."}]])
+
+(def revision-id-param-spec
+  [:revision-id [:int {:description "Revision identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])
+
+(def change-id-param-spec
+  [:change-id [:int {:description "Change/Commit identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])
+
 (def NotFoundErrorBody
   "Default body for 404 errors, for 'application/[ld+]json and others."
   [:or
@@ -74,8 +81,8 @@
 (def CreateChangeInputQueryParams
   (m/schema
    [:map
-    ["title" {:optional true} :title-string]
-    ["description" {:optional false} :description-string]]
+    ["title" {:description "Title for the commit message." :optional true} :title-string]
+    ["description" {:description "A description/message for the commit." :optional false} :description-string]]
    {:registry s.common/registry}))
 
 (def CreateChangeHeaders
