@@ -2,8 +2,7 @@
   (:require
    [tpximpact.datahost.ldapi.handlers :as handlers]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
-   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
-   [tpximpact.datahost.ldapi.schemas.series :as schema]))
+   [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
 (defn get-series-list-route-config [triplestore system-uris]
   {:summary "All series metadata in the database"
@@ -46,9 +45,15 @@ additional managed properties, such as `dcterms:issued` and
                            :query-explainer (get-in routes-shared/explainers [:put-series :query])})
                  :validate-body+query]]
    :handler (partial handlers/put-dataset-series clock triplestore system-uris)
-   :parameters {:body [:any]            ; validation logic via middleware
+   :parameters {:body [:any]         ; validation logic via middleware
                 :path {:series-slug string?}
-                :query schema/ApiQueryParams}
+                :query [:map
+                        [:title {:title "Title"
+                                 :description "Title of dataset series.  _Note: Setting this parameter will override the value of `dcterms:title` in the JSON/LD metadata document in the request body._"
+                                 :optional true} string?]
+                        [:description {:title "Description"
+                                       :description "Description of dataset series. _Note: Setting this parameter will override the value of `dcterms:description` in the JSON/LD metadata document in the request body._"
+                                       :optional true} string?]]}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Series already existed and was successfully updated"
                     :content {"application/ld+json" routes-shared/ResourceSchema}}
