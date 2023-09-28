@@ -7,13 +7,22 @@
 
 (defn get-series-list-route-config [triplestore system-uris]
   {:summary "All series metadata in the database"
+   :description "Lists all dataset-series stored in the database."
    :handler (partial handlers/get-series-list triplestore system-uris)
    :responses {200 {:content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
 (defn get-series-route-config [triplestore system-uris]
   {:summary "Retrieve metadata for an existing dataset-series"
-   :description "A dataset series is a named dataset regardless of schema, methodology or compatibility changes"
+   :description "A dataset-series refers to a dataset over time irrespective of any
+potential schema or methodology changes which may occur throughout
+its life time.
+
+For example \"The Census\" is a dataset-series, which has had
+many releases and revisions over its long life.
+
+By convention a series should not contain any notion of a specific
+release or revision as part of its name."
    :handler (partial handlers/get-dataset-series triplestore system-uris)
    :parameters {:path {:series-slug string?}}
    :responses {200 {:content {"application/ld+json" string?}}
@@ -21,6 +30,12 @@
 
 (defn put-series-route-config [clock triplestore system-uris]
   {:summary "Create or update metadata on a dataset-series"
+   :description "Creates or updates the dataset-series with the supplied metadata.
+
+Additionally Datahost will augment the supplied metadata with some
+additional managed properties, such as `dcterms:issued` and
+`dcterms:modified`.
+"
    :middleware [[middleware/json-only :json-only]
                 [(partial middleware/flag-resource-exists triplestore system-uris
                           :dh/DatasetSeries ::series)
