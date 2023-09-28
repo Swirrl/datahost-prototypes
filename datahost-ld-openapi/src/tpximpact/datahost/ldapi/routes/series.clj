@@ -23,7 +23,7 @@ many releases and revisions over its long life.
 By convention a series should not contain any notion of a specific
 release or revision as part of its name."
    :handler (partial handlers/get-dataset-series triplestore system-uris)
-   :parameters {:path {:series-slug string?}}
+   :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {200 {:content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
@@ -46,13 +46,17 @@ additional managed properties, such as `dcterms:issued` and
                  :validate-body+query]]
    :handler (partial handlers/put-dataset-series clock triplestore system-uris)
    :parameters {:body [:any]         ; validation logic via middleware
-                :path {:series-slug string?}
+                :path [:map routes-shared/series-slug-param-spec]
                 :query [:map
                         [:title {:title "Title"
-                                 :description "Title of dataset series.  _Note: Setting this parameter will override the value of `dcterms:title` in the JSON/LD metadata document in the request body._"
+                                 :description "Title of dataset series.
+
+_Note: Setting this parameter will override the value of `dcterms:title` in the JSON/LD metadata document in the request body._"
                                  :optional true} string?]
                         [:description {:title "Description"
-                                       :description "Description of dataset series. _Note: Setting this parameter will override the value of `dcterms:description` in the JSON/LD metadata document in the request body._"
+                                       :description "Description of dataset series.
+
+_Note: Setting this parameter will override the value of `dcterms:description` in the JSON/LD metadata document in the request body._"
                                        :optional true} string?]]}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Series already existed and was successfully updated"
@@ -67,6 +71,6 @@ additional managed properties, such as `dcterms:issued` and
 (defn delete-series-route-config [triplestore change-store system-uris]
   {:summary "Delete a series and all its child resources"
    :handler (partial handlers/delete-dataset-series triplestore change-store system-uris)
-   :parameters {:path {:series-slug string?}}
+   :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {204 {:description "Series existed and was successfully deleted"}
                404 {:description "Series does not exist"}}})
