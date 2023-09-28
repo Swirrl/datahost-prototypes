@@ -52,5 +52,13 @@ It is recommended you configure the GCloud provider by generating a short-lived 
 
     export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
 
+## Secrets
+
+The LDAPI service is protected by basic authentication. The username is `idp` and the password is configured for each environment
+within a secret manager secret. The ldapi Terraform configuration only creates the secret and does not configure the secret value.
+The name of the secret is defined as an output `basic_auth_password_secret_name` of the corresponding environment root module.
+This output is displayed when running a `terraform apply`, and the corresponding secret should be configured manually via the CLI or web UI.
+The LDAPI application always uses the latest version of this secret to configure basic authentication on startup.
+
 
 
