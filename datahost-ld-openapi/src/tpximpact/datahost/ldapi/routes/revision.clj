@@ -80,13 +80,17 @@
                           {:resource :dh/Revision
                            :param-fn (fn [{:keys [revision-id]}]
                                        {:revision-id (inc (Integer/parseInt  revision-id))})})
-                 :resource-already-created?]]
+                 :resource-already-created?]
+                [(partial middleware/validate-headers
+                          (malli.core/validator routes-shared/CreateChangeHeaders)
+                          (malli.core/explainer routes-shared/CreateChangeHeaders))
+                 :validate-change-request-header]]
    :parameters {:path {:series-slug string?
                        :release-slug string?
                        :revision-id int?}
                 :query routes-shared/CreateChangeInputQueryParams}
    :openapi {:security [{"basic" []}]
-             :requestBody {:content {"text/csv" {:schema {:type "sting" :format "binary"}}}}}
+             :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
    ::rc/parameter-coercion {:query (rc/->ParameterCoercion :query-params :string false true)}
    :responses {201 {:description "Changes were added to a Revision"
                     :content {"application/ld+json" string?}
