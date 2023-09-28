@@ -26,7 +26,7 @@
    :tags ["Consumer API"]})
 
 (defn get-revision-list-route-config [triplestore system-uris]
-  {:summary "All revisions metadata in the given release"
+  {:summary "List all revisions metadata in the given release"
    :handler (partial handlers/get-revision-list triplestore system-uris)
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
