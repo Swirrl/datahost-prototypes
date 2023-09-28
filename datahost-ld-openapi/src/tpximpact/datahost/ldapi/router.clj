@@ -204,7 +204,7 @@
        :delete (routes.s/delete-series-route-config triplestore change-store system-uris)}]
 
      ["/:series-slug/releases"
-      ["" {:get (routes.rev/get-release-list-route-config triplestore system-uris)}]
+      ["" {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
 
       ["/:release-slug"
        {:get (routes.rel/get-release-route-config triplestore change-store system-uris)

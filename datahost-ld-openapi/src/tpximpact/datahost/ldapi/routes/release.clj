@@ -9,6 +9,13 @@
 
 (def internal-server-error-desc "Internal server error")
 
+(defn get-release-list-route-config [triplestore system-uris]
+  {:summary "All releases metadata in the given series"
+   :handler (partial handlers/get-release-list triplestore system-uris)
+   :parameters {:path [:map routes-shared/series-slug-param-spec]}
+   :responses {200 {:content {"application/ld+json" string?}}
+               404 {:body routes-shared/NotFoundErrorBody}}})
+
 (defn get-release-route-config [triplestore change-store system-uris]
   {:summary "Retrieve metadata for an existing release"
    :handler (partial handlers/get-release triplestore change-store system-uris)

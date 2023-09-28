@@ -23,13 +23,6 @@
                      "application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
 
-(defn get-release-list-route-config [triplestore system-uris]
-  {:summary "All releases metadata in the given series"
-   :handler (partial handlers/get-release-list triplestore system-uris)
-   :parameters {:path {:series-slug string?}}
-   :responses {200 {:content {"application/ld+json" string?}}
-               404 {:body routes-shared/NotFoundErrorBody}}})
-
 (defn get-revision-list-route-config [triplestore system-uris]
   {:summary "All revisions metadata in the given release"
    :handler (partial handlers/get-revision-list triplestore system-uris)
