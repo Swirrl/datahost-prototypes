@@ -281,13 +281,9 @@
   {:pre [(as-dataset-opts-valid? opts)]}
   (let [{convert-opts :convert-types} opts]
     (cond-> (-as-dataset v (merge {:file-type :csv :encoding "UTF-8"} opts))
-      convert-types (convert-types (:row-schema convert-opts)))))
+      convert-opts (convert-types (:row-schema convert-opts)))))
 
 (defn validate-ld-release-schema-input [ld-schema]
   (when-not (validate-ld-release-schema-input-valid? ld-schema)
     (throw (ex-info "Invalid Release schema input" {:ld-schema ld-schema}))))
 
-(comment
-  
-
-  )
