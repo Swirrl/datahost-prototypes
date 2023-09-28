@@ -37,7 +37,8 @@ locals {
     "roles/compute.loadBalancerAdmin",
     "roles/iam.serviceAccountDeleter",
     "roles/iam.serviceAccountCreator",
-    "roles/iam.securityAdmin"
+    "roles/iam.securityAdmin",
+    "roles/secretmanager.admin"
   ]
   swirrl_circleci_organisation_id = "294dc3ff-773f-44a8-820e-f12f3ba2e1ac"
 }
