@@ -15,8 +15,9 @@
    :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
                 [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
    :coercion (rcm/create {:transformers {}, :validate false})
-   :parameters {:path {:series-slug string?
-                       :release-slug string?}}
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]}
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" string?}}
@@ -34,8 +35,9 @@
                            :query-explainer (get-in routes-shared/explainers [:put-release :query])})
                  :validate-body+query]]
    :parameters {:body [:any]
-                :path {:series-slug string?
-                       :release-slug string?}
+                :path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]
                 :query schema/ApiQueryParams}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Release already existed and was successfully updated"
@@ -51,8 +53,9 @@
   [triplestore system-uris]
   {:summary "Retrieve release schema"
    :handler (partial handlers/get-release-schema triplestore system-uris)
-   :parameters {:path {:series-slug :string
-                       :release-slug :string}}
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]}
    :responses {200 {:description "Release schema successfully retrieved"
                     :content {"application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}})
@@ -63,8 +66,9 @@
    :handler (partial handlers/post-release-schema clock triplestore system-uris)
    ;; NOTE: file schema JSON content string is validated within the handler itself
    :parameters {:body routes-shared/LdSchemaInput
-                :path {:series-slug :string
-                       :release-slug :string}}
+                :path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]}
    :openapi {:security [{"basic" []}]}
    :responses {200 {:description "Schema already exists."
                     :content {"application/ld+json" string?}}

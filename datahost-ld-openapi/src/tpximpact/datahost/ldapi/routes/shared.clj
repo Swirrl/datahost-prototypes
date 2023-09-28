@@ -8,6 +8,14 @@
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.ldapi.db :as db]))
 
+
+;; Reitit map specs in reitit's vector format associating a parameter
+;; key with a spec-fn and its metadata
+(def series-slug-param-spec
+  [:series-slug [:string {:description "Series slug.  A URI safe identifier which is unique within its URI namespace/prefix, used to identify the dataset-series."}]])
+
+(def release-slug-param-spec
+  [:release-slug [:string {:description "Release slug. A URI safe identifier which is unique within its URI namespace/prefix, used to identify a release within a dataset-series."}]])
 (def NotFoundErrorBody
   "Default body for 404 errors, for 'application/[ld+]json and others."
   [:or
