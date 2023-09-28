@@ -139,11 +139,17 @@
              :construct (conj bgps
                               [revision-uri :dh/hasChange '?change]
                               [revision-uri :dcterms/description '?description]
-                              [revision-uri :dh/revisionSnapshotCSV '?snapshot])
+                              [revision-uri :dh/revisionSnapshotCSV '?snapshot]
+                              [revision-uri :dh/publicationDate '?publicationDate]
+                              [revision-uri :dcterms/license '?license]
+                              [revision-uri :dh/reasonForChange '?reasonForChange])
              :where (conj bgps
                           [:optional [[revision-uri :dh/hasChange '?change]]]
                           [:optional [[revision-uri :dcterms/description '?description]]]
-                          [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]])})]
+                          [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]]
+                          [:optional [[revision-uri :dh/publicationDate '?publicationDate]]]
+                          [:optional [[revision-uri :dcterms/license '?license]]]
+                          [:optional [[revision-uri :dh/reasonForChange '?reasonForChange]]])})]
     (datastore/eager-query triplestore
                            (f/format-query q :pretty? true))))
 

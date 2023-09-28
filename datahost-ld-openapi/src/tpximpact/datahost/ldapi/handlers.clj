@@ -111,6 +111,7 @@
 
 (defn put-release [clock triplestore system-uris {path-params :path-params
                                                   body-params :body-params :as request}]
+
   (if (db/resource-exists? triplestore (su/dataset-series-uri* system-uris path-params))
     (let [api-params (get-api-params request)
           incoming-jsonld-doc body-params
