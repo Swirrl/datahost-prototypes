@@ -53,7 +53,7 @@
   - the existing dataset snapshot fits in memory
   - the new snapshot (existing snapshot + changes) fits in memory."
   [{:keys [triplestore change-store system-uris] :as sys}
-   {:keys [change-id change-kind path-params] change-ds :dataset :as change-info}]
+   {:keys [change-id change-kind path-params row-schema] change-ds :dataset :as change-info}]
   {:pre [(m/validate s.common/ChangeKind change-kind) (contains? change-info "dcterms:format")]}
   (let [prev-ds-snapshot-key (previous-dataset-snapshot-key sys (assoc path-params :change-id change-id))
         change-ds-fmt (get change-info "dcterms:format")
@@ -63,7 +63,8 @@
                   [(->change-info change-ds change-kind change-ds-fmt)])
         os ^ByteArrayOutputStream (ByteArrayOutputStream.)
         ds (data-compilation/compile-dataset {:changes changes :store change-store
-                                              :row-schema (:row-schema change-info)})
+                                              :convert-types {:row-schema row-schema}
+                                              :row-schema row-schema})
         _ (tc/write! ds os {:file-type :csv})
         is ^ByteArrayInputStream (ByteArrayInputStream. (.toByteArray os))
         insert-request (store/make-insert-request! change-store is)]
