@@ -31,7 +31,7 @@
   (with-open [is (store/get-data store v)]
    (as-dataset is opts)))
 
-(def ^:private hash-fn (LongHashFunction/xx128low 1337))
+(def ^:private hash-fn (LongHashFunction/xx128low))
 
 (defn make-columnwise-hasher
   "Returns a function seq -> long"
