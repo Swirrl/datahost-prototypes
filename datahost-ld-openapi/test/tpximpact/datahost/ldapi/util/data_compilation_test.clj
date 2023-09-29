@@ -2,6 +2,7 @@
   (:require
    [clojure.test :refer [deftest is testing]]
    [malli.core :as m]
+   [malli.error :as me]
    [tablecloth.api :as tc]
    [tpximpact.datahost.ldapi.util.data-compilation :as dc]
    [tpximpact.datahost.ldapi.util.data-validation
@@ -37,9 +38,11 @@
   (let [system-uris (system-uris/make-system-uris (URI. "https://example.org/data/"))
         row-schema (m/schema [:tuple
                               [:maybe {:dataset.column/name "n"
-                                       :dataset.column/type (:measure uris/column-types)} :int]
+                                       :dataset.column/type (:measure uris/column-types)
+                                       :dataset.column/datatype :int} :int]
                               [:int {:dataset.column/name "dim"
-                                     :dataset.column/type (:dimension uris/column-types)}]])]
+                                     :dataset.column/type (:dimension uris/column-types)
+                                     :dataset.column/datatype :int}]])]
     (assert (#'data-validation/row-schema-valid? row-schema))
 
     (testing "We can create result from appends"

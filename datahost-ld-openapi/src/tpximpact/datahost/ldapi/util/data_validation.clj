@@ -74,13 +74,18 @@
 
   ```
     [:tuple [:maybe {:dataset.column/name \"Foo\"
-                     :dataset.column/type <URI>} :string]
+                     :dataset.column/type <URI>} :string
+                     :dataset.column/datatype :string]
             [:int {:dataset.column/name \"My Measure\"
-                   :dataset.column/type <URI>}]]
+                   :dataset.column/type <URI>
+                   :dataset.column/datatype :int}]]
   ```"
   (let [props-schema [:map
                       [:dataset.column/name :string]
-                      [:dataset.column/type (into [:enum ] (vals uris/column-types))]]
+                      [:dataset.column/type (into [:enum ] (vals uris/column-types))]
+                      [:dataset.column/datatype
+                       {:description "Keyword that [[tablecloth.api]] can use as a column type"}
+                       :keyword]]
         validate-seq (m/validator (m/schema [:sequential props-schema]
                                             {:registry s.common/registry}))]
     [:and
@@ -131,6 +136,9 @@
                               schema (extract-column-datatype ld-val)]
                           (assoc r col-name
                                  (mu/update-properties schema assoc
+                                                       :dataset.column/datatype (if (vector? schema)
+                                                                                  (second schema)
+                                                                                  schema)
                                                        :dataset.column/name col-name
                                                        :dataset.column/type (first (get ld-val (column-key :type)))))))
                       {}
@@ -244,9 +252,22 @@
   [:map
    [:file-type {:optional true} [:enum :csv]]
    [:encoding {:optional true} [:enum "UTF-8"]]
-   [:store {:optional true} [:fn some?]]])
+   [:store {:optional true} [:fn some?]]
+   [:convert-types {:optional true} [:map
+                                     [:row-schema DatasetRow]]]])
 
 (def ^:private as-dataset-opts-valid? (m/validator AsDatasetOpts))
+
+
+(defn convert-types
+  [dataset row-schema]
+  {:pre [(m/validate DatasetRow row-schema)]}
+  (let [cols (for [col (m/children row-schema)
+                   :let [props (m/properties col)]]
+               props)]
+    (tc/convert-types dataset
+                      (map :dataset.column/name cols)
+                      (map :dataset.column/datatype cols))))
 
 (defn as-dataset
   "Tries to turn passed value into a dataset.
@@ -255,11 +276,14 @@
   - `java.io.File`
   - `java.net.URL` (e.g. a resource)
 
-  See also: [[tc/dataset]]"
+  See also: [[AsDatasetOpts]], [[tc/dataset]]"
   [v opts]
   {:pre [(as-dataset-opts-valid? opts)]}
-  (-as-dataset v (merge {:file-type :csv :encoding "UTF-8"} opts)))
+  (let [{convert-opts :convert-types} opts]
+    (cond-> (-as-dataset v (merge {:file-type :csv :encoding "UTF-8"} opts))
+      convert-opts (convert-types (:row-schema convert-opts)))))
 
 (defn validate-ld-release-schema-input [ld-schema]
   (when-not (validate-ld-release-schema-input-valid? ld-schema)
     (throw (ex-info "Invalid Release schema input" {:ld-schema ld-schema}))))
+

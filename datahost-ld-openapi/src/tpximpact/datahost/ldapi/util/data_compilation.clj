@@ -122,6 +122,7 @@
    [:datahost.change/kind s.common/ChangeKind]])
 
 (def CompileDatasetOptions
+  "Note: the options will also be passed to [[as-dataset]]."
   (m/schema
    [:map
     [:changes [:sequential ChangeInfo]]

@@ -263,8 +263,8 @@
   "Returns a map {:dataset DATASET (optional-key :error-response) ..., row-schema MALLI-SCHEMA},
   containing :error-response entry when validation failed."
   [release-schema appends]
-  (let [dataset (data-validation/as-dataset appends {})
-        row-schema (data-validation/make-row-schema release-schema)
+  (let [row-schema (data-validation/make-row-schema release-schema)
+        dataset (data-validation/as-dataset appends {:convert-types {:row-schema row-schema}})
         {:keys [explanation]} (data-validation/validate-dataset dataset row-schema
                                                                 {:fail-fast? true})]
     (cond-> {:dataset dataset :row-schema row-schema}
