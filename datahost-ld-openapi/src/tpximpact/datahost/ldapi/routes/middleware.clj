@@ -223,3 +223,11 @@
                          (let [coerced (coercion/coerce-request coercers request)]
                            (handler (impl/fast-assoc request :parameters coerced) respond raise)))))
                     {}))))})
+
+(defn validate-headers
+  [validator explainer handler _id]
+  (fn [{headers :headers :as request}]
+    (if (validator headers)
+      (handler request)
+      {:status status/bad-request
+       :body {:headers (me/humanize (explainer headers))}})))

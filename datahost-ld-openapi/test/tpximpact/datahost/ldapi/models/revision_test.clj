@@ -84,8 +84,7 @@
                                          "/data/whatever/revisions/3/changes/1")
         _ (assert revision-id)
         _ (assert change-id)
-        change-ednld {"description" (str revision-title " -- changes")
-                      "format" "text/csv"}
+        change-ednld {"description" (str revision-title " -- changes")}
 
         change-api-response (POST (str new-revision-location
                                        (case change-kind
@@ -301,8 +300,7 @@
 
             (testing "Changes append resource created with CSV appends file"
               ;; "/:series-slug/releases/:release-slug/revisions/:revision-id/appends"
-              (let [query-params {"description" "A new change"
-                                  "format" "text/csv"}
+              (let [query-params {"description" "A new change"}
                     change-api-response (POST (str new-revision-location "/appends")
                                           {:query-params query-params
                                            :headers {"content-type" "text/csv"}
@@ -324,8 +322,7 @@
 
             (testing "Ensure we can add more than 1 change to a revision."
               ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
-              (let [query-params {"description" "A second change"
-                                  "format" "text/csv"}
+              (let [query-params {"description" "A second change"}
                     change-api-response (POST (str new-revision-location "/appends")
                                           {:query-params query-params
                                            :headers {"content-type" "text/csv"}
@@ -360,22 +357,21 @@
             (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                 "Created with the resource URI provided in the Location header")
 
-            (testing "Third Changes append resource created against 2nd Revision"
-              (let [query-params {"description" "A new third change"
-                                  "format" "text/csv"}
-                    change-api-response (POST (str new-revision-location-2 "/appends")
-                                          {:query-params query-params
-                                           :headers {"content-type" "text/csv"}
-                                           :body (th/file-upload csv-2021-path)})]
-                (is (= 201 (:status change-api-response)))
-                (is (id-matches? (:body change-api-response) "/changes/1"))))
+              (testing "Third Changes append resource created against 2nd Revision"
+                (let [query-params {"description" "A new third change"}
+                      change-api-response (POST (str new-revision-location-2 "/appends")
+                                                {:query-params query-params
+                                                 :headers {"content-type" "text/csv"}
+                                                 :body (th/file-upload csv-2021-path)})]
+                  (is (= 201 (:status change-api-response)))
+                  (is (id-matches? (:body change-api-response) "/changes/1"))))
 
-            (testing "Fetching Release as CSV with multiple Revisions and CSV append changes"
+              (testing "Fetching Release as CSV with multiple Revisions and CSV append changes"
 
-              (let [response (GET release-url {:headers {"accept" "text/csv"}})
-                    resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
-                    valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
-                (is (= 200 (:status response)))
+                (let [response (GET release-url {:headers {"accept" "text/csv"}})
+                      resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
+                      valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
+                  (is (= 200 (:status response)))
                   ;; length of all csv files minus duplicated headers
                 (is (= (+ (count csv-2019-seq)
                           (dec (count csv-2020-seq))

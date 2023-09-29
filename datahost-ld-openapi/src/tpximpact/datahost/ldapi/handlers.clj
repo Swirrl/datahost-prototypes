@@ -5,6 +5,7 @@
    [ring.util.io :as ring-io]
    [tablecloth.api :as tc]
    [reitit.core :as rc]
+   [ring.util.request :as util.request]
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.ldapi.compact :as cmp]
    [tpximpact.datahost.ldapi.db :as db]
@@ -302,6 +303,7 @@
          row-schema :row-schema
          change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
         _ (.reset appends)
+        content-type (util.request/content-type request)
         ;; insert relevant triples
         {:keys [inserted-jsonld-doc
                 change-id
@@ -309,7 +311,8 @@
                 message]} (when-not validation-err
                             (db/insert-change! triplestore
                                                system-uris
-                                               {:api-params (get-api-params request)
+                                               {:api-params (assoc (get-api-params request)
+                                                                   :format content-type)
                                                 :ld-root (su/rdf-base-uri system-uris)
                                                 :store-key (:key insert-req)
                                                 :datahost.change/kind change-kind
@@ -338,7 +341,7 @@
                 :change-id change-id
                 :dataset change-ds
                 :row-schema row-schema
-                "dcterms:format" (get query-params "format")})]
+                "dcterms:format" content-type})]
           (log/debug (format "post-change: '%s' stored snapshot" (.getPath change-uri))
                      {:new-snapshot-key new-snapshot-key})
           (db/tag-with-snapshot triplestore change-uri snapshot-result))

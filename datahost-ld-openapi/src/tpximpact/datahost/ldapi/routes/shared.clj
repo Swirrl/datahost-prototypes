@@ -67,9 +67,17 @@
   (m/schema
    [:map
     ["title" {:optional true} :title-string]
-    ["description" {:optional false} :description-string]
-    ["format" {:optional false :json-schema/example "text/csv"} :string]]
+    ["description" {:optional false} :description-string]]
    {:registry s.common/registry}))
+
+(def CreateChangeHeaders
+  (m/schema
+   [:map
+    ["content-type"
+     {:error/message "content-type header is required"
+      :optional false
+      :json-schema/example "text/csv"}
+     [:enum "text/csv"]]]))
 
 (def LdSchemaInputColumn
   [:map
