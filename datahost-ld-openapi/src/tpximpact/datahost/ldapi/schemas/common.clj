@@ -22,7 +22,7 @@
                                                 false))))})
      :datahost/timestamp (let [utc-tz (ZoneId/of "UTC")]
                            (m/-simple-schema
-                             {:type :datahost/timestamp
+                            {:type :datahost/timestamp
                              :pred (fn timestamp-pred [ts]
                                      (and (instance? ZonedDateTime ts)
                                           (= (.getZone ^ZonedDateTime ts) utc-tz)))}))
@@ -34,7 +34,7 @@
      ;; description allows newlines
      :description-string (let [regex #"^\w[\w\s\S\D]+$"]
                            [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
-     :email-string (let [regex #"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$"]
+     :email-string (let [regex #"^\S+@\S+\.\S+$"]
                      [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
 
      :datahost/uri (m/-simple-schema
