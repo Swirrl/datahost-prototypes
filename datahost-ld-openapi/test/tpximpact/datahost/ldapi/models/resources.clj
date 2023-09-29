@@ -47,7 +47,7 @@
   (str "/data/" slug))
 
 (defmethod resource-path :dh/Release [{:keys [slug] :as release}]
-  (str (resource-path (get-parent release)) "/releases/" slug))
+  (str (resource-path (get-parent release)) "/release/" slug))
 
 (defmethod resource-path :dh/TableSchema [schema]
   (str (resource-path (get-parent schema)) "/schema"))
