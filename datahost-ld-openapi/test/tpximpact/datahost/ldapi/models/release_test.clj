@@ -38,7 +38,8 @@
           clock (time/manual-clock t)
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
           series-slug (create-series handler)
-          request-json {"dcterms:title" "Release title" "dcterms:description" "Description"}
+          request-json {"dcterms:title" "Release title"
+                        "dcterms:description" "Description"}
           release-request (create-put-request series-slug "test-release" request-json)
           {:keys [body status]} (handler release-request)
           release-doc (json/read-str body)]
@@ -49,6 +50,7 @@
       (t/is (= "Description" (get release-doc "dcterms:description")))
       (t/is (= (str t) (get release-doc "dcterms:issued")))
       (t/is (= (str t) (get release-doc "dcterms:modified")))
+
       (t/is (= (format "https://example.org/data/%s" series-slug) (get release-doc "dcat:inSeries"))))))
 
 (t/deftest put-release-update-test
@@ -125,19 +127,27 @@
       (testing "Creating a release for a series that is not found fails gracefully"
         (let [{:keys [status body]}
               (PUT (str "/data/this-series-does-not-exist/releases/release-xyz")
-                   {:content-type :json
-                    :body (json/write-str {"dcterms:title" "Example Release"
-                                           "dcterms:description" "Description"})})]
+                {:content-type :json
+                 :body (json/write-str {"dcterms:title" "Example Release"
+                                        "dcterms:description" "Description"})})]
           (is (= 422 status))
           (is (= "Series for this release does not exist" body))))
 
       (PUT new-series-path
-           {:content-type :json
-            :body (json/write-str {"dcterms:title" "A title"
-                                   "dcterms:description" "Description"})})
+        {:content-type :json
+         :body (json/write-str {"dcterms:title" "A title"
+                                "dcterms:description" "Description"
+                                "dcterms:license" "http://license-link"
+                                "dh:coverage" "http://some-geo-reference"
+                                "dh:geographyDefinition" "http://geo-definition"
+                                "dh:reasonForChange" "Comment about change"})})
 
       (let [request-ednld {"dcterms:title" "Example Release"
-                           "dcterms:description" "Description"}
+                           "dcterms:description" "Description"
+                           "dcterms:license" "http://license-link"
+                           "dh:coverage" "http://some-geo-reference"
+                           "dh:geographyDefinition" "http://geo-definition"
+                           "dh:reasonForChange" "Comment about change"}
             normalised-ednld {"@context"
                               {"@base" (.toString rdf-base-uri)
                                "appropriate-csvw" "https://publishmydata.com/def/appropriate-csvw/",
@@ -145,17 +155,22 @@
                                "dcat" "http://www.w3.org/ns/dcat#"
                                "dcterms" "http://purl.org/dc/terms/"
                                "dh" "https://publishmydata.com/def/datahost/"
-                               "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
+                               "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                               "rdfs" "http://www.w3.org/2000/01/rdf-schema#"}
                               "@id" (str new-series-slug "/releases/" release-1-id)
                               "@type" "dh:Release"
                               "dcat:inSeries" (str rdf-base-uri new-series-slug)
                               "dcterms:description" "Description"
-                              "dcterms:title" "Example Release"}]
+                              "dcterms:title" "Example Release"
+                              "dcterms:license" "http://license-link"
+                              "dh:coverage" "http://some-geo-reference"
+                              "dh:geographyDefinition" "http://geo-definition"
+                              "dh:reasonForChange" "Comment about change"}]
 
         (testing "Creating a release for a series that does exist works"
           (let [response (PUT release-1-path
-                              {:content-type :json
-                               :body (json/write-str request-ednld)})
+                           {:content-type :json
+                            :body (json/write-str request-ednld)})
                 body (json/read-str (:body response))]
             (is (= 201 (:status response)))
             (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))
@@ -170,9 +185,9 @@
 
         (testing "Multiple releases can be can be retrieved via the API"
           (PUT (str new-series-path "/releases/release-2")
-               {:content-type :json
-                :body (json/write-str {"dcterms:title" "A Second Release"
-                                       "dcterms:description" "Description 2"})})
+            {:content-type :json
+             :body (json/write-str {"dcterms:title" "A Second Release"
+                                    "dcterms:description" "Description 2"})})
 
           (let [{:keys [body status]} (GET (str new-series-path "/releases"))
                 releases-doc (json/read-str body)
@@ -188,8 +203,8 @@
         (testing "A release can be updated, query params take precedence"
           (let [{body-str-before :body} (GET release-1-path)
                 {:keys [body] :as response} (PUT (str release-1-path "?title=A%20new%20title")
-                                                 {:content-type :json
-                                                  :body (json/write-str request-ednld)})
+                                              {:content-type :json
+                                               :body (json/write-str request-ednld)})
                 body-before (json/read-str body-str-before)
                 body (json/read-str body)]
             (is (= 200 (:status response)))
@@ -201,8 +216,8 @@
 
             (testing "No update when query params same as in existing doc"
               (let [response (PUT (str release-1-path "?title=A%20new%20title")
-                                  {:content-type :application/json
-                                   :body nil})
+                               {:content-type :application/json
+                                :body nil})
                     body' (-> response :body json/read-str)]
                 (is (= 200 (:status response)))
                 (is (= "A new title" (get body' "dcterms:title")))

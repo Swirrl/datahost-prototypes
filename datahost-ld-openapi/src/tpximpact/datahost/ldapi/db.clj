@@ -54,13 +54,21 @@
                        [release-uri :dh/hasRevision '?revision]
                        [release-uri :dh/hasSchema '?schema]
                        [release-uri :dcterms/modified '?modified]
-                       [release-uri :dcterms/issued '?issued]]
+                       [release-uri :dcterms/issued '?issued]
+                       [release-uri :dcterms/license '?license]
+                       [release-uri :dh/coverage '?coverage]
+                       [release-uri :dh/geographyDefinition '?geoDefinition]
+                       [release-uri :dh/reasonForChange '?reasonForChange]]
            :where [[release-uri 'a :dh/Release]
                    [release-uri :dcterms/title '?title]
                    [release-uri :dcat/inSeries '?series]
                    [:optional [[release-uri :dh/hasRevision '?revision]]]
                    [:optional [[release-uri :dh/hasSchema '?schema]]]
                    [:optional [[release-uri :dcterms/description '?description]]]
+                   [:optional [[release-uri :dcterms/license '?license]]]
+                   [:optional [[release-uri :dh/coverage '?coverage]]]
+                   [:optional [[release-uri :dh/geographyDefinition '?geoDefinition]]]
+                   [:optional [[release-uri :dh/reasonForChange '?reasonForChange]]]
                    [release-uri :dcterms/modified '?modified]
                    [release-uri :dcterms/issued '?issued]]}]
     (datastore/eager-query triplestore
@@ -73,8 +81,31 @@
               [series-uri :dcterms/modified '?modified]
               [series-uri :dcterms/issued '?issued]]
         series-query {:prefixes default-prefixes
-                      :construct (conj bgps [series-uri :dcterms/description '?description])
-                      :where (conj bgps [:optional [[series-uri :dcterms/description '?description]]])}]
+                      :construct (conj bgps
+                                       [series-uri :dcterms/description '?description]
+                                       [series-uri :rdfs/comment '?comment]
+                                       [series-uri :dcterms/publisher '?publisher]
+                                       [series-uri :dcat/theme '?theme]
+                                       [series-uri :dcterms/license '?license]
+                                       [series-uri :dcat/keywords '?keywords]
+                                       [series-uri :dh/nextUpdate '?nextUpdate]
+                                       [series-uri :dh/relatedLinks '?links]
+                                       [series-uri :dh/contactName '?contactName]
+                                       [series-uri :dh/contactEmail '?contactEmail]
+                                       [series-uri :dh/contactPhone '?contactPhone])
+                      :where (conj bgps
+                                   [:optional [[series-uri :dcterms/description '?description]]]
+                                   [:optional [[series-uri :rdfs/comment '?comment]]]
+                                   [:optional [[series-uri :dcterms/publisher '?publisher]]]
+                                   [:optional [[series-uri :dcat/theme '?theme]]]
+                                   [:optional [[series-uri :dcterms/license '?license]]]
+                                   [:optional [[series-uri :dcat/keywords '?keywords]]]
+                                   [:optional [[series-uri :dh/nextUpdate '?nextUpdate]]]
+                                   [:optional [[series-uri :dh/relatedLinks '?links]]]
+                                   [:optional [[series-uri :dh/contactName '?contactName]]]
+                                   [:optional [[series-uri :dh/contactEmail '?contactEmail]]]
+                                   [:optional [[series-uri :dh/contactPhone '?contactPhone]]])}]
+
     (datastore/eager-query triplestore
                            (f/format-query series-query :pretty? true))))
 
@@ -108,11 +139,17 @@
              :construct (conj bgps
                               [revision-uri :dh/hasChange '?change]
                               [revision-uri :dcterms/description '?description]
-                              [revision-uri :dh/revisionSnapshotCSV '?snapshot])
+                              [revision-uri :dh/revisionSnapshotCSV '?snapshot]
+                              [revision-uri :dh/publicationDate '?publicationDate]
+                              [revision-uri :dcterms/license '?license]
+                              [revision-uri :dh/reasonForChange '?reasonForChange])
              :where (conj bgps
                           [:optional [[revision-uri :dh/hasChange '?change]]]
                           [:optional [[revision-uri :dcterms/description '?description]]]
-                          [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]])})]
+                          [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]]
+                          [:optional [[revision-uri :dh/publicationDate '?publicationDate]]]
+                          [:optional [[revision-uri :dcterms/license '?license]]]
+                          [:optional [[revision-uri :dh/reasonForChange '?reasonForChange]]])})]
     (datastore/eager-query triplestore
                            (f/format-query q :pretty? true))))
 
@@ -330,10 +367,10 @@
 
 ;; TODO: move this!
 (defn series->response-body [series ld-root]
-  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf" "dcat" "csvw" "appropriate-csvw"] ld-root)))
+  (resource/->json-ld series (output-context ["dh" "dcterms" "rdf" "rdfs" "dcat" "csvw" "appropriate-csvw"] ld-root)))
 
 (defn release->response-body [release ld-root]
-  (resource/->json-ld release (output-context ["dh" "dcterms" "rdf" "dcat" "csvw" "appropriate-csvw"] ld-root)))
+  (resource/->json-ld release (output-context ["dh" "dcterms" "rdf" "rdfs" "dcat" "csvw" "appropriate-csvw"] ld-root)))
 
 (defn revision->response-body [revision ld-root]
   (resource/->json-ld revision (output-context ["dh" "dcterms" "rdf"] ld-root)))
@@ -497,6 +534,26 @@
       (doall)
       first
       :n))
+
+(defn get-release-snapshot-info
+  "Given a release (as path-params) attempts to fetch the latest
+  revision-id and the key of the dataset snapshot (as
+  in :dh/revisionSnapshotCSV).
+
+  Returns a map of {:data-key ... :revision-id ...} or nil"
+  [triplestore system-uris path-params]
+  (let [release-uri (su/dataset-release-uri* system-uris  path-params)
+        rev-id (with-open [conn (repo/->connection triplestore)]
+                 (select-max-n conn release-uri (compact/expand :dh/hasRevision)))
+        revision (when (pos? rev-id)
+                   (get-revision triplestore
+                                 (su/dataset-revision-uri* system-uris
+                                                           (assoc path-params :revision-id rev-id))))
+        pred (compact/expand :dh/revisionSnapshotCSV)
+        pred-fn (fn [q] (= pred (:p q)))
+        data-key (:o (first (filter pred-fn revision)))]
+    (when revision
+      {:n rev-id :data-key data-key})))
 
 (defn fetch-next-child-resource-number [triplestore parent-uri child-pred]
   (let [q (select-auto-increment-query parent-uri child-pred)
@@ -711,4 +768,3 @@
        :jsonld-doc (schema->response-body existing-schema ld-root)}
       (let [new-schema (insert-schema clock triplestore request-schema)]
         {:op :create :jsonld-doc (schema->response-body new-schema ld-root)}))))
-

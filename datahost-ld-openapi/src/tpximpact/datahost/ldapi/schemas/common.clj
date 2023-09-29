@@ -8,8 +8,8 @@
 
 (def ^:private custom-registry-keys
   (let [slug-error-msg "should contain alpha numeric characters and hyphens only."]
-    {:datahost/slug-string [:and 
-                            :string 
+    {:datahost/slug-string [:and
+                            :string
                             [:re {:error/message slug-error-msg}
                              #"^[a-z,A-Z,\-,0-9]+$"]]
      :datahost/url-string (m/-simple-schema
@@ -26,7 +26,7 @@
                              :pred (fn timestamp-pred [ts]
                                      (and (instance? ZonedDateTime ts)
                                           (= (.getZone ^ZonedDateTime ts) utc-tz)))}))
-     
+
      ;; swagger-ui complains when namespaced keys are used,
      ;; so using non-namespaced
      :title-string (let [regex (str #"^\w[\w\s\D]+$")]
@@ -34,6 +34,9 @@
      ;; description allows newlines
      :description-string (let [regex #"^\w[\w\s\S\D]+$"]
                            [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
+     :email-string (let [regex #"^\S+@\S+\.\S+$"]
+                     [:re {:error/message (format "Should match regex: %s" (str regex))} regex])
+
      :datahost/uri (m/-simple-schema
                     {:type :uri
                      :pred #(instance? URI %)})}))

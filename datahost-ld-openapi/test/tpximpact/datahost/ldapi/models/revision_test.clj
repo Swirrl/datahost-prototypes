@@ -203,20 +203,20 @@
 
       ;; SERIES
       (PUT (str "/data/" series-slug)
-           {:content-type :json
-            :headers {"accept" "application/ld+json"}
-            :body (json/write-str {"dcterms:title" series-title
-                                   "dcterms:description" "Description"})})
+        {:content-type :json
+         :headers {"accept" "application/ld+json"}
+         :body (json/write-str {"dcterms:title" series-title
+                                "dcterms:description" "Description"})})
 
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
         (let [release-slug (str "release-" (UUID/randomUUID))
               release-url (str "/data/" series-slug "/releases/" release-slug)
               release-resp (PUT release-url
-                                {:content-type :application/json
-                                 :headers {"accept" "application/ld+json"}
-                                 :body (json/write-str {"dcterms:title" "Release 34"
-                                                        "dcterms:description" "Description 34"})})
+                             {:content-type :application/json
+                              :headers {"accept" "application/ld+json"}
+                              :body (json/write-str {"dcterms:title" "Release 34"
+                                                     "dcterms:description" "Description 34"})})
 
               schema-req-body {"dcterms:title" "Test schema"
                                "dh:columns"
@@ -229,7 +229,7 @@
                                  [(csvw-type "dh:DimensionColumn" "Measure type"
                                              ["Measure type"] :string)
                                   (csvw-type "dh:DimensionColumn" "Statistical Geography"
-                                            "Statistical Geography" :string)
+                                             "Statistical Geography" :string)
                                   (csvw-type "dh:DimensionColumn" "Year"
                                              "Year" :integer)
                                   (csvw-type "dh:MeasureColumn"
@@ -237,20 +237,20 @@
                                              "Aged 16 to 64 years level 3 or above qualifications"
                                              :double)
                                   (csvw-type "dh:DimensionColumn" "Unit of Measure"
-                                            "Unit of Measure" :string)
+                                             "Unit of Measure" :string)
                                   (csvw-type "dh:DimensionColumn" "Upper Confidence Interval"
-                                            "Upper Confidence Interval" :double)
+                                             "Upper Confidence Interval" :double)
                                   (csvw-type "dh:DimensionColumn" "Lower Confidence Interval"
-                                            "Lower Confidence Interval" :double)
+                                             "Lower Confidence Interval" :double)
                                   (csvw-type "dh:AttributeColumn" "Observation Status"
-                                            "Observation Status" :string)])}
+                                             "Observation Status" :string)])}
 
               _validated (when-not (m/validate LdSchemaInput schema-req-body)
                            (throw (ex-info (str (me/humanize (m/explain LdSchemaInput schema-req-body)))
                                            {:schema schema-req-body})))
 
               _resp (POST (str release-url "/schema")
-                          (th/jsonld-body-request schema-req-body))]
+                      (th/jsonld-body-request schema-req-body))]
           (is (= 201 (:status release-resp)))
 
           ;; REVISION
@@ -258,16 +258,22 @@
                 revision-description "Revision description"
                 revision-post-url (str release-url "/revisions")
                 revision-ednld {"dcterms:title" revision-title
-                                "dcterms:description" revision-description}
+                                "dcterms:description" revision-description
+                                "dh:publicationDate" "2023-09-01"
+                                "dcterms:license" "http://license-link"
+                                "dh:reasonForChange" "Comment.."}
 
                 normalised-revision-ld {"dcterms:title" revision-title
                                         "dcterms:description" revision-description
                                         "@type" "dh:Revision"
-                                        "dh:appliesToRelease" (str rdf-base-uri series-slug "/releases/" release-slug)}
+                                        "dh:appliesToRelease" (str rdf-base-uri series-slug "/releases/" release-slug)
+                                        "dh:publicationDate" "2023-09-01"
+                                        "dcterms:license" "http://license-link"
+                                        "dh:reasonForChange" "Comment.."}
 
                 revision-resp (POST revision-post-url
-                                    {:content-type :application/json
-                                     :body (json/write-str revision-ednld)})
+                                {:content-type :application/json
+                                 :body (json/write-str revision-ednld)})
                 inserted-revision-id (get (json/read-str (:body revision-resp)) "@id")
                 new-revision-location (-> revision-resp :headers (get "Location"))
                 revision-doc (json/read-str (:body revision-resp))]
@@ -280,7 +286,7 @@
 
             (testing "Fetching an existing Revision as default application/json format works"
               (let [response (GET new-revision-location
-                                  {:headers {"accept" "application/ld+json"}})
+                               {:headers {"accept" "application/ld+json"}})
                     revision-doc (json/read-str (:body response))]
                 (is (= 200 (:status response)))
                 (is (= normalised-revision-ld (select-keys revision-doc (keys normalised-revision-ld)))
@@ -298,9 +304,9 @@
               (let [query-params {"description" "A new change"
                                   "format" "text/csv"}
                     change-api-response (POST (str new-revision-location "/appends")
-                                              {:query-params query-params
-                                               :headers {"content-type" "text/csv"}
-                                               :body (th/file-upload csv-2019-path)})
+                                          {:query-params query-params
+                                           :headers {"content-type" "text/csv"}
+                                           :body (th/file-upload csv-2019-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
                 (is (= 201 (:status change-api-response)))
@@ -321,9 +327,9 @@
               (let [query-params {"description" "A second change"
                                   "format" "text/csv"}
                     change-api-response (POST (str new-revision-location "/appends")
-                                              {:query-params query-params
-                                               :headers {"content-type" "text/csv"}
-                                               :body (th/file-upload csv-2020-path)})
+                                          {:query-params query-params
+                                           :headers {"content-type" "text/csv"}
+                                           :body (th/file-upload csv-2020-path)})
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
                 (is (= 201 (:status change-api-response)))
                 (is new-change-resource-location)))
@@ -343,9 +349,9 @@
           (let [revision-title-2 (str "A second revision for release " release-slug)
                 revision-url-2 (str release-url "/revisions")
                 revision-resp-2 (POST revision-url-2
-                                      {:content-type :json
+                                  {:content-type :json
                                        ;; NOTE: this revision purposefully DOES NOT have dcterms:description
-                                       :body (json/write-str {"dcterms:title" revision-title-2})})
+                                   :body (json/write-str {"dcterms:title" revision-title-2})})
                 inserted-revision-id-2 (get (json/read-str (:body revision-resp-2)) "@id")
                 new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
 
@@ -354,33 +360,33 @@
             (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                 "Created with the resource URI provided in the Location header")
 
-              (testing "Third Changes append resource created against 2nd Revision"
-                (let [query-params {"description" "A new third change"
-                                      "format" "text/csv"}
-                      change-api-response (POST (str new-revision-location-2 "/appends")
-                                                {:query-params query-params
-                                                 :headers {"content-type" "text/csv"}
-                                                 :body (th/file-upload csv-2021-path)})]
-                  (is (= 201 (:status change-api-response)))
-                  (is (id-matches? (:body change-api-response) "/changes/1"))))
+            (testing "Third Changes append resource created against 2nd Revision"
+              (let [query-params {"description" "A new third change"
+                                  "format" "text/csv"}
+                    change-api-response (POST (str new-revision-location-2 "/appends")
+                                          {:query-params query-params
+                                           :headers {"content-type" "text/csv"}
+                                           :body (th/file-upload csv-2021-path)})]
+                (is (= 201 (:status change-api-response)))
+                (is (id-matches? (:body change-api-response) "/changes/1"))))
 
-              (testing "Fetching Release as CSV with multiple Revisions and CSV append changes"
+            (testing "Fetching Release as CSV with multiple Revisions and CSV append changes"
 
-                (let [response (GET release-url {:headers {"accept" "text/csv"}})
-                      resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
-                      valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
-                  (is (= 200 (:status response)))
+              (let [response (GET release-url {:headers {"accept" "text/csv"}})
+                    resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
+                    valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
+                (is (= 200 (:status response)))
                   ;; length of all csv files minus duplicated headers
-                  (is (= (+ (count csv-2019-seq)
-                            (dec (count csv-2020-seq))
-                            (dec (count csv-2021-seq)))
-                         (count resp-body-seq))
-                      "responds with concatenated changes from all uploaded CSVs")
-                  (is (= (first resp-body-seq) (first csv-2019-seq)))
-                  (is (str/includes? (last resp-body-seq) ",2021,"))
-                  (is (str/includes? (second resp-body-seq) ",2019,"))
-                  (is (= (find-first #(= % valid-row-sample) resp-body-seq)
-                         valid-row-sample))))
+                (is (= (+ (count csv-2019-seq)
+                          (dec (count csv-2020-seq))
+                          (dec (count csv-2021-seq)))
+                       (count resp-body-seq))
+                    "responds with concatenated changes from all uploaded CSVs")
+                (is (= (first resp-body-seq) (first csv-2019-seq)))
+                (is (str/includes? (last resp-body-seq) ",2021,"))
+                (is (str/includes? (second resp-body-seq) ",2019,"))
+                (is (= (find-first #(= % valid-row-sample) resp-body-seq)
+                       valid-row-sample))))
 
             (testing "Fetching Revision as accumulated CSV from all revisions so far."
               (let [response (GET (str release-url "/revisions/2") {:headers {"accept" "text/csv"}})
@@ -413,35 +419,35 @@
                                                          .getBytes
                                                          (java.io.ByteArrayInputStream.))
                                                      {})]
-                 (is (= 200 (:status resp)))
-                 (is (= (+ (dec (count csv-2019-seq))
-                           (dec (count csv-2020-seq))
-                           (dec (count csv-2021-seq))
-                           (- (dec (count csv-2021-deletes-seq))))
-                        (tc/row-count ds)))
+                  (is (= 200 (:status resp)))
+                  (is (= (+ (dec (count csv-2019-seq))
+                            (dec (count csv-2020-seq))
+                            (dec (count csv-2021-seq))
+                            (- (dec (count csv-2021-deletes-seq))))
+                         (tc/row-count ds)))
                  ;; the corrections set measure column to 99.0'
-                 (is (= 10 (tc/row-count (tc/select-rows ds
-                                                         (comp #(= 99.0 %)
-                                                               #(get % measure-column))))))))))
+                  (is (= 10 (tc/row-count (tc/select-rows ds
+                                                          (comp #(= 99.0 %)
+                                                                #(get % measure-column))))))))))
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)
                   revision-ednld {"dcterms:title" revision-title}
                   new-revision-ids (for [_ (range 1 11)
                                          :let [resp (POST (str release-url "/revisions")
-                                                          {:content-type :json
-                                                           :body (json/write-str revision-ednld)})]]
+                                                      {:content-type :json
+                                                       :body (json/write-str revision-ednld)})]]
                                      (get (json/read-str (:body resp)) "@id"))]
               ;; This Release already has 4 Revisions, so we expect another 10 in the series
               (is (= (for [i (range 5 15)]
                        (format "%s/releases/%s/revisions/%d" series-slug release-slug i))
-                     new-revision-ids )
+                     new-revision-ids)
                   "Expected Revision IDs integers increase in an orderly sequence")))
 
           (testing "Create revision with query params only"
             (let [{status :status body :body} (POST (str release-url "/revisions")
-                                                    {:content-type :json
-                                                     :query-params {:title "final revision"}})]
+                                                {:content-type :json
+                                                 :query-params {:title "final revision"}})]
               (is (= 201 status)))))))))
 
 (deftest csvm-revision-test
