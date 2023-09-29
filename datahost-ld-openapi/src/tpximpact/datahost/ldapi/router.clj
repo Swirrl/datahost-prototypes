@@ -244,7 +244,7 @@ some datahost terminology:
     never be a breaking change to consumers. Datahost will enforce
     this guarantee.
 
-  - Retracts - We don't encourage publishers removing data from
+  - Retractions - We don't encourage publishers removing data from
     releases, however from time to time there is a need for publishers
     to do it. Datahost will support publishers in removing the
     information as a soft-delete, which retains the previous revision
