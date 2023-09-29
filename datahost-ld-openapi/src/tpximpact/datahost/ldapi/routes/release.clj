@@ -29,7 +29,38 @@ result in a redirection to the latest revision of the data.
 
 The metadata associated with the release can be obtained by issuing a
 request with an `Accept` header of `application/ld+json`, which will
-return a JSON/LD metadata document describing the release resource."
+return a JSON/LD metadata document describing the release resource.
+
+Releases themselves do not contain data, and instead defer to
+revisions to describe the data at a particular point in time. This
+means that all releases that contain any data MUST have at least one
+revision containing at least one change/commit.
+
+To load a release with data you must first create a revision with
+it (representing the identifier for the next update), then within that
+revision you create any number of changes/commits.
+
+e.g. looking at the following diagram:
+
+- My Release
+  - Revision 1
+    - Commit 1 (append 100 Rows)
+  - Revision 2
+    - Commit 1 (delete 1 Row)
+    - Commit 2 (append 100 Rows)
+    - Commit 3 (correct 2 Rows)
+
+We can see that the Revision 1 contains the first commit of data to
+the dataset.
+
+Revision 2 however follows Revision 1, and it contains 3 further
+commits (R2.1 R2.2 & R2.3), but it also follows R1.1, so the state of
+the Revision when materialised contains the data supplied in
+R1.1, less the delete made in R2.1.
+
+It is currently considered an error to put data into a revision which
+has been succeeded by another.
+"
    :handler (partial handlers/get-release triplestore change-store system-uris)
    :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
                 [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
