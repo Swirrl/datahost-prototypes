@@ -20,11 +20,44 @@ Definitions of the terminology used to describe the resources available through 
 
 The resources available are structured as a tree, with dataset series at the top. Each dataset series can have one or more releases, which each have exactly one schema. Each release can have one or more revisions, which each have a series of commits that describe the contents of the revision. A schematic of this resource tree can be seen [in this diagram](https://github.com/Swirrl/datahost-prototypes/blob/main/doc/data-model.md).
 
-
-
 # Usage
 
-The API is deployed and available for use at https://ldapi-prototype.gss-data.org.uk/index.html. Documentation is available inline in the swagger spec there or in the [doc folder for this project](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi/doc).
+The API is deployed, documented, and available for use at https://ldapi-prototype.gss-data.org.uk/index.html. Documentation is available inline in the swagger spec there or in the [doc folder for this project](https://github.com/Swirrl/datahost-prototypes/tree/main/datahost-ld-openapi/doc).
+
+## Publisher Endpoints
+
+Briefly, the API supports creating and retrieving all types of resources (dataset series, releases, schemas, revisions, and commits).
+
+Publishers need to provide:
+
+- What series the data belongs to
+- What releases exist in a series
+- What type of data is in each column for a release
+  -e.g. strings, ints, dates, etc. Full list of potential supportable datatypes can be found here
+- Which type of datacube component property the column represents.
+- Schemas will be validated as well and must include exactly one measure, at least one dimension, and zero or many attributes
+- What changed since the previous revision of the dataset?
+  - We require that changes be made explicit by uploading only the contents that changed, i.e. we are asking publishers to provide us with the specific rows that are being added, dropped or corrected. We realise this is not how many datasets are currently published and have a proposed solution. See details under Delta tool for data below.
+- Optionally, which codelist represent the contents of a given column
+  - If we know which codelist a column is using we can validate the data in it for free, and this will also enable consumer-side features like connecting datasets and browsing by codelist
+
+The information will be provided by posting JSON-LD objects and CSV files to a REST API.
+
+## CSV(W) Downloads
+Downloads of dataset contents (and changes) can be requested by dereferencing a URI and asking for CSV.
+
+A revision can be requested as either JSON (which will return the revision’s metadata) or as CSV (which will return the contents of the revision snapshot) by requesting different media types in the accept headers. See the [W3C draft on Content Negotiation by Profile](https://www.w3.org/TR/dx-prof-conneg/) for a more in depth rationale and precedent for this approach.
+
+Note that requesting CSV for a release will redirect to the latest revision for that release, and then return it.
+
+## CWVW JSON-LD metadata
+
+We will also provide a JSON-LD metadata sidecar and support the CSVW conventions (paths and link headers etc) so that all downloads are valid CSVW. In the private beta phase, the CSVW metadata supplied will not be sufficient to generate a full cube’s RDF through csv2rdf.  But we leave the possibility open for the future if more information is provided.
+
+Initially the CSVW metadata will include:
+- the table schema
+- how to generate observation identifiers from the contents of the CSV (see section below on observation identifiers).
+- catalogue metadata
 
 # Builds
 

@@ -13,3 +13,17 @@ Our philosophy is that we'll take the best parts of RDF, Linked Data, CSVW, Link
 At each stage we will only request from publishers (and serve to consumers) information that is stable and we have a concrete use for. This allows us to remain backward compatible, but leave the door open for additional features.  Not stating and requiring compliance earlier than we need too is a key part of the approach to ensuring that the commitments we make are minimal, and well supported.
 
 In the private beta phase we're focusing on the consumer-side, but still putting in place the basics to support publication (and create valid test data etc). More advanced publisher-side features such as drafting/previewing workflow and user management will come later.
+
+## Linked Data in Datahost
+
+Datahost is inspired heavily influenced by the principles of linked data.
+
+A key feature of the datahost API is that the URLs for routes in the REST API are one and the same as the URIs that are used in the underlying RDF model.
+
+In the consumer API, the GET endpoints the return individual (and collections of) catalogue resources will return JSON-LD that return valid RDF representations of the resources.
+
+The base URI in datahost will be configurable per deployment, such that URIs served by a given datahost instance will resolve on that server.
+
+In all these ways, we're supporting Linked Data dereferencing and simultaneously supporting JSON and RDF APIs (although not a SPARQL endpoint in this phase).
+
+This requires that we make consistent use of the correct base URIs, both in the context of the API (i.e. anything referenced on and by our own server), but also anything external to it, like downloads. The base URI must be set properly in all RDF representations of the data, including any CSVW that we publish and JSON-LD endpoints.
