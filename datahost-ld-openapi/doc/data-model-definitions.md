@@ -1,6 +1,6 @@
 # Datahost Data Model
 
-## Purpose of this document
+This document aims to describe the high level entities of the data model and the relationships between them, and how the model is used to support the publishing of versioned statistical datasets.
 
 Some terms have different meanings in different domains (e.g. "release" as used by some statisticians, and as typically used in software development). This document aims to clarify terms used across the codebase and in discussions with stakeholders. It should also aid in defining our data model, the _verbs_ and the _nouns_ of the built software.
 
@@ -34,4 +34,6 @@ Each [revision](#revision) has a series of commits attached. The commit specifie
 
 ### Dataset
 
-Dataset is the accumulation of all commits added within successive [revisions](#revision), up to a particular revision. To avoid ambiguities, we can specify: dataset of series "S", release "A" at revision "N".
+The term Dataset doesn't really have a datahost specific meaning, a Dataset in datahost could refer to either a `DatasetSeries`, a `Release` or a `Revision`.
+
+In DCAT terms a `DatasetSeries` is always also considered a `Dataset` as it is a subclass of it; whilst datahost's `Release`'s or `Revision`'s could also optionally be modelled as `dcat:Dataset`'s.  At the moment datahost is agnostic to this point, as the distinction isn't fundamentally important to Datahosts versioning model.  Applications of Datahost can currently decide themselves exactly which entitites to catalog.
