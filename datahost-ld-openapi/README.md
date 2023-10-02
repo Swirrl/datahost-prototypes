@@ -4,14 +4,14 @@
 
 The goals of Datahost are to support the following requirements:
 
-- Provide a dataset catalogue
-- Provide CSVW downloads of datasets
+- Provide a dataset catalogue derived from [DCAT](https://www.w3.org/TR/vocab-dcat-3/)
+- Support appropriate web standards and linked data principles for describing data (e.g. REST, OpenAPI, DCAT, JSON/LD, CSVW)
 - Allow publishers to make and keep promises about datasets' structure
-- When structure needs to change, make this clear to consumers
-- Provide a version history of data over time, where data can be added, corrected or retracted, with details of what's changed
-- Help support publishers in using this model correctly
-- Reduce barriers to publication over the previous PMD4 approach: publishers don't need to generate and supply RDF
-- Reduce barriers to consumption: a REST based API and CSV(W) downloads mean that users don't need to be RDF experts to programmatically access the data. CSV downloads will be quick to download at a single, easy to find URL.
+  - When a datasets structure/schema needs to change, make this clear to consumers
+- Provide a detailed version history of data over time, where data can be added, corrected or retracted, and where details of what's changed are available as  deltas
+- Help support data publishers in using this model correctly
+- Reduce barriers to publication over previous approaches.  Support producers with lightweight ways of describing their data with RDF (e.g. JSON/LD)
+- Reduce barriers to consumption: a REST based API and JSON/LD with CSV(W) downloads mean that users don't need to be RDF experts to programmatically access the data. CSV downloads will be quick to download at a single, easy to find URL.
 - Establish a scalable architecture, where we optimise for the simple and most common cases (e.g. for consumers: finding and downloading a dataset, or for publishers: publishing datasets and making them available at a known time), while providing a foundation to add more complex features later.
 
 ## Background
