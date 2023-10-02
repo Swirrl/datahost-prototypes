@@ -1,4 +1,4 @@
-# Data Model
+# Datahost Data Model
 
 ## Purpose of this document
 
@@ -14,9 +14,9 @@ A series is a collection of related statistical [releases](#release).
 
 ### Release
 
-"Release" (in this context) is a term from ONS / stats publishing world. A 'statistical release' represents some data being released to the outside world. But unlike a book or a software release, there's no finality in a statistical release: the data associated with a 'statistical release' can be revised or changed over time. 
+"Release" (in this context) is a term from ONS / stats publishing world. A 'statistical release' represents some data being released to the outside world. But unlike a book or a software release, there's no finality in a statistical release: the data associated with a 'statistical release' can be revised or changed over time.
 
-The release itself doesn't contain any data. Users add/update/delete data via [revisions](#revision). 
+The release itself doesn't contain any data. Users add/update/delete data via [revisions](#revision).
 
 When users ask for the data in a ‘statistical release’ it’s equivalent to  downloading the dataset’s contents (in old PMD parlance) - full replay of the revision history up to the latest [revision](#revision) for that statistical release.
 
@@ -24,15 +24,14 @@ Each release can have a schema associated with it. That schema is immutable. If 
 
 ### Revision
 
-Revisions are like ‘versions’ of the dataset (from a users point of view): snapshots in particular point in time, a close analogy would be a git commit. Each revision specifies updates to previous snapshot by including what data records to append, delete, or correct. 
+Revisions are like ‘versions’ of the dataset (from a users point of view): snapshots in particular point in time, a close analogy would be a git commit. Each revision specifies updates to previous snapshot by including what data records to append, delete, or correct.
 
 While revisions specify only the data updates relative to _previous_ revision, the user should be able to fetch the full dataset snapshot (at this particular revision). This snapshot is a dataset accumulated by replaying all revisions in order.
 
-### Change
+### Commit
 
-Each [revision](#revision) has a change attached (at the moment only one change per revision is supported). The change specifies a set of records to append, retract, or correct in the [dataset](#dataset) resulting from previous revisions. Change can have only one data file attached.
+Each [revision](#revision) has a series of commits attached. The commit specifies a set of records to append, retract, or correct in the [dataset](#dataset) resulting from previous revisions. Each commit can have exactly one data file attached.
 
 ### Dataset
 
-Dataset is the accumulation of all changes added with successive [revisions](#revision), up to a particular revision. To avoid ambiguities, we can specify: dataset of series "S", release "A" at revision "N".
-
+Dataset is the accumulation of all commits added within successive [revisions](#revision), up to a particular revision. To avoid ambiguities, we can specify: dataset of series "S", release "A" at revision "N".
