@@ -151,10 +151,11 @@ to the revision and a commit ID of `1`, creating a composite ID of
 `1.1`
 
 If the publisher were to look at the 2022 Revision in this state it
-would contain all of the data provided in commit `1.1`. NOTE
-identifiers for revisions and commits should be considered opaque, and
+would contain all of the data provided in commit `1.1`.
+
+_NOTE: identifiers for revisions and commits should be considered opaque, and
 users should not assume that they will always be identified by
-integers.
+integers._
 
 The user then makes some more changes as they prepare the 2022
 revision of the data; they do this by introducing some more commits in
