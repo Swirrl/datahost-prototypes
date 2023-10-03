@@ -6,33 +6,7 @@ Some terms have different meanings in different domains (e.g. "release" as used 
 
 ## Definitions
 
-[Releases](#release) and [revisions](#revision) etc are all public concepts. [Dataset](#dataset) is an internal concept.
-
-### Series
-
-A series is a collection of related statistical [releases](#release).
-
-### Release
-
-"Release" (in this context) is a term from ONS / stats publishing world. A 'statistical release' represents some data being released to the outside world. But unlike a book or a software release, there's no finality in a statistical release: the data associated with a 'statistical release' can be revised or changed over time.
-
-The release itself doesn't contain any data. Users add/update/delete data via [revisions](#revision).
-
-When users ask for the data in a ‘statistical release’ it’s equivalent to  downloading the dataset’s contents (in old PMD parlance) - full replay of the revision history up to the latest [revision](#revision) for that statistical release.
-
-Each release can have a schema associated with it. That schema is immutable. If the fundamental structure of the data changes so that data can’t be compared any more, statisticians make a new statistical ‘release.’
-
-### Revision
-
-Revisions are used to name and identify a succession of commits which trace back to the ancestral root commit.  Revisions (without a successor) are best thought of as mutable pointers to the head of that revision.  Put another way they identify a range of commits from the head commit, to the ancestral root commit.
-
-Revisions allow consumers of a dataset to stay upto date with schema compatible ammendments to a dataset.
-
-The range of commits identified by a revision, when replayed in order from the root commit to the head of the revision will
-
-Revisions are like ‘versions’ of the dataset (from a users point of view): snapshots in particular point in time, a close analogy would be a git commit. Each revision specifies updates to previous snapshot by including what data records to append, delete, or correct.
-
-While revisions specify only the data updates relative to _previous_ revision, the user should be able to fetch the full dataset snapshot (at this particular revision). This snapshot is a dataset accumulated by replaying all revisions in order.
+[Series](#series), [Releases](#release), [Revisions](#revision) and [Commits](#commit) are the primary entities we are concerned with in the datahost data model.  We describe them below in a bottom up manner.
 
 ### Commit
 
@@ -44,6 +18,21 @@ Datahost supports three kinds of commit, appends, deletes and corrections. Appen
 
 Each kind of commit, references a single table of data which should be applied with the commits operation.  This means that each commit operation may apply many rows of changes at once.
 
+The diagram below shows a succession of commits, each pointing to its parent commit:
+
+```mermaid
+flowchart LR
+   1.4["1.4 Append"] --> 1.3["1.3 Retract"] --> 1.2["1.2 Correct"] --> 1.1["1.1 Append (root commit)"]
+```
+
+Commits form an immutable foundation of the data model, help communicate complex changes to consumers, and ensure we can unambiguously refer to the state of a dataset at any point in its history.  By replaying the list of commits in reverse order we can reconstruct the state of the dataset at any point in time.
+
+### Revision
+
+Commits on their own aren't enough though, we use Revisions to name and identify a succession of commits which trace back to the ancestral root commit.  Revisions (without a successor) are best thought of as mutable pointers to the head commit of that revision, creating a commit in a revision updates the revision to point to the new commit.  Put another way revisions identify a range of commits from the head commit, to the ancestral root commit.
+
+This is what the data model looks like with two revisions (`2022`, and `2023`), sharing a history:
+
 ```mermaid
 flowchart LR
    R1(Revision 2022) --> 1.4["1.4 Append"] --> 1.3["1.3 Retract"] --> 1.2["1.2 Correct"] --> 1.1["1.1 Append"]
@@ -51,6 +40,25 @@ flowchart LR
    style R1 fill:#0f0
    style R2 fill:#0f0
 ```
+
+
+Revisions allow consumers of a dataset to stay upto date with schema compatible ammendments to a dataset.
+
+Datahost will currently prevent you from putting commits in a revision which has a successor revision.  This is currently necessary to prevent revisions diverging without a [merge mechanism](https://github.com/Swirrl/datahost-prototypes/issues/289), we may [relax this restriction](https://github.com/Swirrl/datahost-prototypes/issues/288) in the future.
+
+### Release
+
+"Release" (in this context) is a term from ONS / stats publishing world. A 'statistical release' represents some data being released to the outside world. But unlike a book or a software release, there's no finality in a statistical release: the data associated with a 'statistical release' can be revised or changed over time.
+
+The release itself doesn't contain any data. Users add/update/delete data via [revisions](#revision).
+
+When users ask for the data in a ‘statistical release’ it’s equivalent to  downloading the dataset’s contents (in old PMD parlance) - full replay of the revision history up to the latest [revision](#revision) for that statistical release.
+
+Each release can have a schema associated with it. That schema is immutable. If the fundamental structure of the data changes so that data can’t be compared any more, statisticians make a new statistical ‘release.’
+
+### Series
+
+A series is a collection of related statistical [releases](#release).
 
 ### Dataset
 
@@ -115,9 +123,11 @@ erDiagram
     RELEASE ||--o{ REVISION : has
     RELEASE ||--o| SCHEMA : has
     REVISION ||--o{ COMMIT : has
-```
+``**
 
 # Revisions & Commits explained
+
+**TODO: Revise or remove this section, perhaps turn it into a guide**
 
 Here we assume a dataset series and a release have already been
 created, and a schema attached.
