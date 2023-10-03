@@ -101,7 +101,6 @@
           :else (let [rev-uri ^URI (-> change-infos last :rev)]
                   (-> (.getPath rev-uri)
                       (util.response/redirect)
-                      (util.response/header "accept" accept)
                       (shared/set-csvm-header request)))))
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
