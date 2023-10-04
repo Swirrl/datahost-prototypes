@@ -16,7 +16,7 @@ The goals of Datahost are to support the following requirements:
 
 ## Background
 
-Definitions of the terminology used to describe the resources available through this API are available in the [Data Model Definitions doc here](https://github.com/Swirrl/datahost-prototypes/blob/main/datahost-ld-openapi/doc/data-model-definitions.md).
+Definitions of the terminology used to describe the resources available through this API are available in the [Data Model doc here](https://github.com/Swirrl/datahost-prototypes/blob/main/datahost-ld-openapi/doc/data-model.md).
 
 The resources available are structured as a tree, with dataset series at the top. Each dataset series can have one or more releases, which each have exactly one schema. Each release can have one or more revisions, which each have a series of commits that describe the contents of the revision. A schematic of this resource tree can be seen [in this diagram](https://github.com/Swirrl/datahost-prototypes/blob/main/doc/data-model.md).
 

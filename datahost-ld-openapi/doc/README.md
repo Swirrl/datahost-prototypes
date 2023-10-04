@@ -1,10 +1,7 @@
-# Datahost API Documentation
+# Understanding Datahost
 
-This is a collection of documentation for the Datahost API project.
-
-Here you can find:
-
-1. [Definition of terms used in the data model](/datahost-ld-openapi/doc/data-model-definitions.md)
-2. [Diagram of the data model](/doc/data-model.md)
-3. [Descriptions of the RDF predicates available and used by the resources](/datahost-ld-openapi/doc/data-model-rdf-descriptions.md)
-3. [Discussion of the role of standards in the project](/datahost-ld-openapi/doc/standards-compliance.md)
+1. [The Datahost Vision](./vision.md)
+2. [The Datahost model](/datahost-ld-openapi/doc/data-model.md)
+3. [OpenAPI v3 API Specification](https://ldapi-dev.gss-data.org.uk/index.html)
+4. [Metadata Usage](/datahost-ld-openapi/doc/data-model-rdf-descriptions.md)
+5. [Standards used in the project](/datahost-ld-openapi/doc/standards-compliance.md)
