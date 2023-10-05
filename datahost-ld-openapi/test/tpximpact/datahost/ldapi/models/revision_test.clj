@@ -370,8 +370,11 @@
 
                 (let [response (GET release-url {:headers {"accept" "text/csv"}})
                       resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))
-                      valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"]
+                      valid-row-sample "Aged 16 to 64 years level 3 or above qualifications,Merseyside,2021,59.6,per cent,62.7,56.5,"
+                      [_ _ path :as v] (re-find #"<http:\/\/(.+):\d+(\S+)>; rel=\"describedBy\"; type=\"application\/csvm\+json\""
+                                                (get-in response [:headers "link"]))]
                   (is (= 200 (:status response)))
+                  (is (some? path))
                   ;; length of all csv files minus duplicated headers
                 (is (= (+ (count csv-2019-seq)
                           (dec (count csv-2020-seq))
@@ -382,7 +385,14 @@
                 (is (str/includes? (last resp-body-seq) ",2021,"))
                 (is (str/includes? (second resp-body-seq) ",2019,"))
                 (is (= (find-first #(= % valid-row-sample) resp-body-seq)
-                       valid-row-sample))))
+                       valid-row-sample))
+
+                (testing "Fetching csvm for release that does exist works"
+                  (let [response (GET path)
+                        body (json/read-str (:body response))]
+                    (is (= 200 (:status response)))
+                    (is (= {"@context" ["http://www.w3.org/ns/csvw" {"@language" "en"}]}
+                           body))))))
 
             (testing "Fetching Revision as accumulated CSV from all revisions so far."
               (let [response (GET (str release-url "/revisions/2") {:headers {"accept" "text/csv"}})

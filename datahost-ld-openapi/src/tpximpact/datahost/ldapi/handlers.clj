@@ -6,6 +6,7 @@
    [tablecloth.api :as tc]
    [reitit.core :as rc]
    [ring.util.request :as util.request]
+   [ring.util.response :as util.response]
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.ldapi.compact :as cmp]
    [tpximpact.datahost.ldapi.db :as db]
@@ -82,7 +83,7 @@
     (errors/not-found-response request)))
 
 (defn get-release
-  [triplestore change-store system-uris
+  [triplestore _change-store system-uris
    {path-params :path-params
     {:strs [accept]} :headers
     {release-uri :dh/Release} :datahost.request/uris
@@ -92,18 +93,15 @@
                         (matcha/index-triples)
                         (triples->ld-resource))]
     (if (= accept "text/csv")
-      (-> {:status 200
-           :headers {"content-type" "text/csv"
-                     "content-disposition" "attachment ; filename=release.csv"}
-           :body (let [change-infos (db/get-changes-info triplestore release-uri Integer/MAX_VALUE)]
-                   (if (empty? change-infos)
-                     "" ;TODO: return table header here, need to get schema first
-                     (let [key (:snapshotKey (last change-infos))]
-                       (when (nil? key)
-                         (throw (ex-info "No CSV snapshot for release found."
-                                         {:path-params path-params})))
-                       (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key)))))}
-          (shared/set-csvm-header request))
+      (let [change-infos (db/get-changes-info triplestore release-uri Integer/MAX_VALUE)]
+        (cond
+          (empty? change-infos) (-> (util.response/response "This release has no revisions yet")
+                                    (util.response/status 422)
+                                    (util.response/header "content-type" "text/plain"))
+          :else (let [rev-uri ^URI (-> change-infos last :rev)]
+                  (-> (.getPath rev-uri)
+                      (util.response/redirect)
+                      (shared/set-csvm-header request)))))
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
                              (.toString))}))
