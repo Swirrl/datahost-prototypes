@@ -8,13 +8,13 @@
    [tablecloth.api :as tc]
    [tech.v3.dataset :as ds]
    [tpximpact.datahost.uris :as uris]
+   [tpximpact.datahost.ldapi.compact :as compact]
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.common :as s.common])
   (:import (clojure.lang ExceptionInfo)
            (java.io ByteArrayInputStream File)
-           [java.net URL]
-           [java.net URI]))
+           (java.net URI URL)))
 
 (def MakeRowSchemaOptions
   [:map])
@@ -110,6 +110,16 @@
                   (ex-info "Invalid DatasetRow schema"
                            {:malli/explanation (me/humanize (m/explain DatasetRow schema))})))))))
 
+
+(defn- set-col-schema-props
+  [datatype-schema col-name col-type]
+  (mu/update-properties datatype-schema assoc
+                        :dataset.column/datatype (if (vector? datatype-schema)
+                                                   (second datatype-schema)
+                                                   datatype-schema)
+                        :dataset.column/name col-name
+                        :dataset.column/type col-type))
+
 (defn make-row-schema
   "Make a malli schema for a tuple of row values specified by
   column-names. If column names were not specified, uses all columns
@@ -125,9 +135,10 @@
          json-cols (schema-columns json-ld-schema)
          unpack-name (fn [schema] (update schema name-key first))
          indexed (set/index (into #{} (map unpack-name) json-cols) [name-key])
-         _ (assert (= (count json-cols) (count indexed))
-                   (format "column names in schema should be distinct: schema=%s, indexed=%s"
-                           (count json-cols) (count indexed)))
+         _ (when (not= (count json-cols) (count indexed))
+             (throw (ex-info (format "column names in schema should be distinct: schema=%s, indexed=%s"
+                                     (count json-cols) (count indexed))
+                             {:json-columns json-cols})))
          m (reduce-kv (fn reducer [r k v]
                         ;; we know there's only item per index key,
                         ;; so we can safely unpack the value
@@ -135,12 +146,9 @@
                               col-name (get k name-key)
                               schema (extract-column-datatype ld-val)]
                           (assoc r col-name
-                                 (mu/update-properties schema assoc
-                                                       :dataset.column/datatype (if (vector? schema)
-                                                                                  (second schema)
-                                                                                  schema)
-                                                       :dataset.column/name col-name
-                                                       :dataset.column/type (first (get ld-val (column-key :type)))))))
+                                 (set-col-schema-props schema
+                                                       col-name
+                                                       (first (get ld-val (column-key :type)))))))
                       {}
                       indexed)
          components (map #(get m %) (or column-names (keys m)))]
@@ -150,7 +158,58 @@
                         :keys (keys m)
                         :extracted-components components
                         :schema-cols json-cols})))
-     (m/schema (into [:tuple] components)))))
+     (vary-meta (m/schema (into [:tuple] components))
+                assoc :datahost/type :datahost.types/dataset-row-schema))))
+
+(defn parsing-errors? [column]
+  (assert (instance? tech.v3.dataset.impl.column.Column column))
+  (some? (:unparsed-data (meta column))))
+
+(defn dataset-errors?
+  [ds]
+  (contains? (set (tc/column-names ds)) :$error))
+
+(defmulti -dataset-ctor-opts
+  "Create dataset creation options based on :datahost/type."
+  (comp :datahost/type meta))
+
+(defn dataset-ctor-opts [value]
+  (-dataset-ctor-opts value))
+
+(defn- parse-double*
+  "Returns a double or nil."
+  [v]
+  (when (re-find #"^\-{0,1}\d+\.\d+$" v)
+    (clojure.core/parse-double v)))
+
+(defn- datatype+parse-fn
+  "Returns a tuple of [datatype parse-fn] as required
+  by [[tablecloth.api]]"
+  [{:dataset.column/keys [name datatype] :as props}]
+  (let [parse-col (fn parse-col* [parse-fn v]
+                    ;;NOTE: the parse-fn should return parsed value or nil
+                    (cond
+                      (= "" v) :tech.v3.dataset/missing
+                      :else (or (parse-fn v) :tech.v3.dataset/parse-failure)))]
+    [name
+     (cond 
+       (= :int datatype)
+       [datatype (partial parse-col #(clojure.core/parse-long %))]
+
+       (= :double datatype)
+       [datatype (partial parse-col parse-double*)]
+       
+
+       :else
+       (throw (ex-info (str "Unsupported datatype: " datatype)
+                       {:props props})))]))
+
+(defmethod -dataset-ctor-opts :datahost.types/dataset-row-schema [schema]
+  (let []
+    {:parser-fn (into {} (comp (map m/properties)
+                               (filter #(not= :string (:dataset.column/datatype %)))
+                               (map datatype+parse-fn))
+                      (m/children schema))}))
 
 (defn row-schema->column-names
   "Returns a seq of column names supported by the row schema."
@@ -213,7 +272,8 @@
                                     column-names
                                     (fn col-mapper [& args]
                                       (validator-fn (vec args))))
-                    (ds/filter (fn [{:strs [valid]}] (not valid))))}
+                    (ds/filter (fn [{:strs [valid]}] (not valid)))
+                    (cond-> fail-fast? (ds/remove-column "valid")))}
       (catch ExceptionInfo ex
         (if-not (= :dataset.validation/error (-> ex ex-data :type))
           (throw ex)
@@ -225,12 +285,12 @@
 
 (defn- slurpable->dataset
   "If `slurp` can handle, so does this fn. Returns a dataset."
-  [v {:keys [file-type encoding]}]
+  [v {:keys [encoding] :as opts}]
   (-> v
       slurp
       (.getBytes ^String (or encoding "UTF-8"))
       (ByteArrayInputStream.)
-      (tc/dataset {:file-type file-type})))
+      (tc/dataset opts)))
 
 (defmethod -as-dataset File [v opts]
   (tc/set-dataset-name (slurpable->dataset v opts) (.getPath ^File v)))
@@ -253,6 +313,12 @@
    [:file-type {:optional true} [:enum :csv]]
    [:encoding {:optional true} [:enum "UTF-8"]]
    [:store {:optional true} [:fn some?]]
+   [:enforce-schema
+    {:optional true
+     :description "Schema to validate against on dataset creation."}
+    [:and
+     [:fn m/schema?]
+     [:fn #(-> % meta :datahost/type)]]]
    [:convert-types {:optional true} [:map
                                      [:row-schema DatasetRow]]]])
 
@@ -262,9 +328,8 @@
 (defn convert-types
   [dataset row-schema]
   {:pre [(m/validate DatasetRow row-schema)]}
-  (let [cols (for [col (m/children row-schema)
-                   :let [props (m/properties col)]]
-               props)]
+  (let [cols (for [col (m/children row-schema)]
+               (m/properties col))]
     (tc/convert-types dataset
                       (map :dataset.column/name cols)
                       (map :dataset.column/datatype cols))))
@@ -272,6 +337,11 @@
 (defn as-dataset
   "Tries to turn passed value into a dataset.
 
+  Pass :enforce-schema option to ensure the created dataset conforms
+  to a particular schema. The value should have an implementation of
+  `-dataset-ctor-opts`. When the data does not conform to the schema,
+  an exception with :type ::dataset-creation is thrown.
+  
   The value can be:
   - `java.io.File`
   - `java.net.URL` (e.g. a resource)
@@ -279,8 +349,24 @@
   See also: [[AsDatasetOpts]], [[tc/dataset]]"
   [v opts]
   {:pre [(as-dataset-opts-valid? opts)]}
-  (let [{convert-opts :convert-types} opts]
-    (cond-> (-as-dataset v (merge {:file-type :csv :encoding "UTF-8"} opts))
+  (let [{convert-opts :convert-types row-schema :enforce-schema} opts
+        opts (cond-> opts
+               row-schema (merge (dataset-ctor-opts row-schema)))
+        ds (-as-dataset v (merge {:file-type :csv :encoding "UTF-8"} opts))]
+    (when (dataset-errors? ds)
+      (throw (ex-info "Dataset creation failure. See dataset ':$error' column."
+                      {:type ::dataset-creation :options opts})))
+    (when row-schema
+      (when-some [err-columns (seq (into [] (comp (map #(tc/column ds %))
+                                                  (filter parsing-errors?)
+                                                  (map (comp :name meta)))
+                                         (row-schema->column-names row-schema)))]
+        (throw (ex-info (str "Dataset creation failure: failures in columns: " err-columns)
+                        {:type ::dataset-creation
+                         :error-columns err-columns
+                         :options opts}))))
+    
+    (cond-> ds
       convert-opts (convert-types (:row-schema convert-opts)))))
 
 (defn validate-ld-release-schema-input [ld-schema]

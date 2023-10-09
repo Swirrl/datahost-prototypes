@@ -63,7 +63,6 @@
                   [(->change-info change-ds change-kind change-ds-fmt)])
         os ^ByteArrayOutputStream (ByteArrayOutputStream.)
         ds (data-compilation/compile-dataset {:changes changes :store change-store
-                                              :convert-types {:row-schema row-schema}
                                               :row-schema row-schema})
         _ (tc/write! ds os {:file-type :csv})
         is ^ByteArrayInputStream (ByteArrayInputStream. (.toByteArray os))
