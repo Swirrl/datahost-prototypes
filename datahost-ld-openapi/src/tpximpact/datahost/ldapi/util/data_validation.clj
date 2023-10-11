@@ -361,7 +361,7 @@
                                                   (filter parsing-errors?)
                                                   (map (comp :name meta)))
                                          (row-schema->column-names row-schema)))]
-        (throw (ex-info (str "Dataset creation failure: failures in columns: " err-columns)
+        (throw (ex-info (str "Dataset creation failure: failures in columns: " (vec err-columns))
                         {:type ::dataset-creation
                          :error-columns err-columns
                          :options opts}))))
