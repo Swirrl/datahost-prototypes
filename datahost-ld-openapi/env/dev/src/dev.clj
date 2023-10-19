@@ -3,7 +3,7 @@
   (:require
    [clojure.repl :refer :all]
    [clojure.tools.namespace.repl :as tns]
-   [integrant.repl :refer [go reset]]
+   [integrant.repl :refer [go reset halt]]
    [tpximpact.datahost.sys :as sys]))
 
 ;; temp disable this line if working on the dev namespace, obviously.

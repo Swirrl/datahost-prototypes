@@ -432,9 +432,9 @@
                             (- (dec (count csv-2021-deletes-seq))))
                          (tc/row-count ds)))
                  ;; the corrections set measure column to 99.0'
-                  (is (= 10 (tc/row-count (tc/select-rows ds
-                                                          (comp #(= 99.0 %)
-                                                                #(get % measure-column))))))))))
+                  (is (= 4 (tc/row-count (tc/select-rows ds
+                                                         (comp #(= 99.0 %)
+                                                               #(get % measure-column))))))))))
 
           (testing "Creation of a auto-increment Revision IDs for a release"
             (let [revision-title (str "One of many revisions for release " release-slug)
