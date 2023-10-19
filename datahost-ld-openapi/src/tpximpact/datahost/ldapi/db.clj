@@ -519,7 +519,8 @@
            [:bind ['(coalesce (+ ?highest 1) 1) '?next]]]})
 
 (defn- select-max-n-query [parent-uri child-pred]
-  (assert parent-uri)
+  (when (nil? parent-uri)
+    (throw (java.lang.IllegalArgumentException. "'parent-uri' must be non nil.")))
   {:prefixes (select-keys default-prefixes [:dh :xsd])
    :select ['?n]
    :where [[:where {:select '[[(max (:xsd/integer (replace (str ?child) "^.*/([^/]*)$" "$1"))) ?highest]]
@@ -621,7 +622,8 @@
   - :previous-snapshot-key (when available) - to remove the snapshot
     key from the revision."
   [triplestore ^URI uri {key :new-snapshot-key prev-key :previous-snapshot-key}]
-  (assert key)
+  (when (nil? key)
+    (throw (IllegalArgumentException. "'key' must be non nil.")))
   (let [insert-statements (dataset-snapshot-statements uri key)]
     (log/debug "tag-revision-with-snapshot:" (.getPath uri) (format "key='%s'" key))
     (with-open [conn (repo/->connection triplestore)]

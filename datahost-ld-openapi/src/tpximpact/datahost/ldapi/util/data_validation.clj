@@ -262,8 +262,9 @@
                                                           :explanation (-> (m/explain schema cols)
                                                                            (me/humanize))}))))
                        validator)]
-    (assert (every? some? column-names)
-            "Could not extract column names from row schema")
+    (when-not (every? some? column-names)
+      (throw (ex-info "Could not extract column names from row schema"
+                      {:row-schema schema :column-names column-names})))
     (validate-found-columns schema column-names (tc/column-names dataset))
     (try
       {:dataset (-> dataset

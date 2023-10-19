@@ -226,9 +226,10 @@
                             {:columns (vec (tc/column-names base-ds))})))
         base-ds (ensure-components-hash-column base-ds (:row-schema opts))]
     ;; let's ensure data issues in dev are immediately revealed
-    (assert (= (tc/row-count (tc/unique-by base-ds hash-column-name))
-               (tc/row-count base-ds))
-            "Possible data issue: are combinations of all non-measure values unique?")
+    (when-not (= (tc/row-count (tc/unique-by base-ds hash-column-name))
+                 (tc/row-count base-ds))
+      (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
+                      {:opts opts})))
     (-> (reduce (partial compile-reducer ds-opts)
                 base-ds
                 (next changes))

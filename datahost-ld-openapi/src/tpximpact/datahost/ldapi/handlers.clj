@@ -300,7 +300,9 @@
         ;; is a NOOP. This fails further down in the `let` body in
         ;; #'internal/post-change--generate-csv-snapshot
         ;; We don't need to proceed further if there's no release-schema!
-        _ (assert release-schema (str "No release schema found for: " release-uri))
+        _ (when (nil? release-schema)
+            (throw (ex-info (str "No release schema found for: " release-uri)
+                            {:release-uri release-uri})))
         appends ^InputStream (->byte-array-input-stream appends)
         insert-req (store/make-insert-request! change-store appends)
         {validation-err :error-response
