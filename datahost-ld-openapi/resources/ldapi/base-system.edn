@@ -17,8 +17,8 @@
   :ide-path "/ld-api"
   :default-subscriptions-path "/ws"}
 
- :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "/tmp/ld-dev-db"}
- :tpximpact.datahost.ldapi.store.file/store {:directory "/tmp/file-store"}
+ :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "./tmp/ld-dev-db"}
+ :tpximpact.datahost.ldapi.store.file/store {:directory "./tmp/file-store"}
 
  :tpximpact.datahost.ldapi.router/handler
  {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
