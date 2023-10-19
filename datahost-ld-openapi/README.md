@@ -1,8 +1,18 @@
-# Datahost LD API Service
+# Prototype Datahost Publication Service
+
+_Formerly referred to as the Prototype Datahost LD API Service_.
 
 # Rationale
 
-The goals of Datahost are to support the following requirements:
+The goals of Datahost Publication Service are to assist the publication of official statistics (and eventually other data) through a standards based data model that supports the following high level vision:
+
+1. Support the publication of statistical datasets with a [versioning model](/doc/data-model.md) that communicates changing schemas, and accurately describes how the data has been changed through synchronisable transaction logs.
+2. Dataset commitments.  The platform should guarantee consumers
+3. A headless / API & Data first model, separated from front end UI concerns.
+4. Less effort linked data foundations.  Data should still be unambiguously published with URIs as unique identifiers, however we focus efforts on the low hanging fruit of tidy-data CSV(W), with annotations only required to support user facing features.
+
+
+are to support the following requirements:
 
 - Provide a dataset catalogue derived from [DCAT](https://www.w3.org/TR/vocab-dcat-3/)
 - Support appropriate web standards and linked data principles for describing data (e.g. REST, OpenAPI, DCAT, JSON/LD, CSVW)
