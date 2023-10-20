@@ -1,0 +1,24 @@
+{
+ "@type": "dh:TableSchema",
+ "dcterms:title": "{{release}} schema",
+ "dh:columns": [
+		{
+		 "@type": "dh:DimensionColumn",
+		 "csvw:datatype": "string",
+		 "csvw:name": "area",
+                 "csvw:titles": "area"
+                 },
+                {
+		 "@type": "dh:DimensionColumn",
+		 "csvw:datatype": "string",
+		 "csvw:name": "age_range",
+                 "csvw:titles": "age_range"
+                 },
+                 {
+		 "@type": "dh:MeasureColumn",
+		 "csvw:datatype": "double",
+		 "csvw:name": "estimate",
+                 "csvw:titles": "Estimate"
+                 }
+	        ]
+ }
