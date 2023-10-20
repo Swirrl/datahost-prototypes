@@ -44,6 +44,7 @@ This prototype currently works off a SPARQL endpoint, which is not yet integrate
 
 ### Other Prototypes
 
+- We have a quick and dirty [UI prototype](https://ldapi-demo.netlify.app/) to visually illustrate how the Datahost Core Data Layer can be used to support a data.gov.uk like dataset catalogue front end.  This UI prototype is built on top of our Core Data Layer API.
 - The [QB Update Process Prototype](https://github.com/Swirrl/qb-update-process-prototype/) is an early demonstrator to the ideas behind our update model, including the role of schemas, commits, and computing precise deltas in the presence of a "drop and replace" workflow.
 
 ## License
