@@ -105,6 +105,7 @@ def main(args):
             change = change.replace("$CHANGE_FILE", file)
             result.append(change)
     result.append('''# run locally: hurl FILE_NAME --variable series=series-01 --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" ''')
+    result.append("# This Hurl script was created using hurl-gen.py with the following arguments- " + ' '.join(args))
     return result
 
 if __name__ == '__main__':
