@@ -230,7 +230,7 @@ workflows:
           filters:
             branches:
               only: main
-      - ldapi-dev-test:
+      - ldapi-blackbox-test:
           context:
             - swirrl-datahost-dev-client
           requires:
