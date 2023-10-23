@@ -152,7 +152,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "Put target hostname in a HOSTNAME file"
+          name: "Get hostname from terraform config for the passed 'env' param"
           command: |
             echo Extracting host name
             TF_FILE=deploy/terraform/ldapi/environments/<< parameters.env >>/main.tf
