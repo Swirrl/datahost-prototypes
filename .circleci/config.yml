@@ -7,15 +7,23 @@ orbs:
   gcp-cli: circleci/gcp-cli@3.1.0
   terraform: circleci/terraform@3.2.1
 
-# Define a job to be invoked later in a workflow.
-# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
-jobs:
-  test-graphql-service:
+executors:
+  clojure-executor:
     docker:
       - image: cimg/clojure:1.11.1
         auth:
           username: $DOCKERHUB_USERNAME # can specify string literal values
           password: $DOCKERHUB_PASSWORD # or project environment variable reference
+  hurl-executor:
+    docker:
+      - image: ghcr.io/orange-opensource/hurl:latest
+
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  test-graphql-service:
+    executor: clojure-executor
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
     steps:
@@ -29,11 +37,7 @@ jobs:
           path: datahost-graphql/test-results
 
   test-ld-openapi-service:
-    docker:
-      - image: cimg/clojure:1.11.1
-        auth:
-          username: $DOCKERHUB_USERNAME # can specify string literal values
-          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+    executor: clojure-executor
     steps:
       - checkout
       - run:
@@ -45,11 +49,7 @@ jobs:
           path: datahost-ld-openapi/test-results
 
   deploy-graphql-service:
-    docker:
-      - image: cimg/clojure:1.11.1
-        auth:
-          username: $DOCKERHUB_USERNAME # can specify string literal values
-          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+    executor: clojure-executor
     steps:
       - checkout
       - run:
@@ -63,11 +63,7 @@ jobs:
             - graphql_container_digest
 
   deploy-ld-openapi-service:
-    docker:
-      - image: cimg/clojure:1.11.1
-        auth:
-          username: $DOCKERHUB_USERNAME # can specify string literal values
-          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+    executor: clojure-executor
     steps:
       - checkout
       - run:
@@ -147,6 +143,31 @@ jobs:
       - run:
           command: terraform apply update.tfplan
           working_directory: deploy/terraform/ldapi/environments/<< parameters.env >>
+  ldapi-blackbox-test:
+    parameters:
+      env:
+        type: string
+        description: Terraform environment the service was deployed to.
+    executor: hurl-executor
+    steps:
+      - checkout
+      - run:
+          name: "Get hostname from terraform config for the passed 'env' param"
+          command: |
+            echo Extracting host name
+            TF_FILE=deploy/terraform/ldapi/environments/<< parameters.env >>/main.tf
+            grep -e "\shost =" -e "\szone =" $TF_FILE | \
+             sed 's/ //g' | \
+             sed 's/"//g' | \
+             awk -F"=" '/^host=/{host=$2} /^zone=/{zone=$2} END{print host "." zone}' > HOSTNAME
+      - run:
+          name: "Run the hurl scripts"
+          working_directory: datahost-ld-openapi
+          command: |
+            echo "running hurl against host: $(cat ../HOSTNAME)"
+            hurl --variable host_name=$(cat ../HOSTNAME) \
+                 --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
+              bin/hurl-data/minimal.hurl
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -205,10 +226,20 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - deploy-ld-openapi-service
+          name: deploy-ldapi-vm-dev
           env: dev
           filters:
             branches:
               only: main
+      # - ldapi-blackbox-test:
+      #     context:
+      #       - swirrl-datahost-dev-client
+      #     requires:
+      #       - deploy-ldapi-vm-dev
+      #     env: dev
+      #     filters:
+      #       branches:
+      #         only: main
       - deploy-graphql-vm:
           context:
             - swirrl-ons-datahost-gcloud

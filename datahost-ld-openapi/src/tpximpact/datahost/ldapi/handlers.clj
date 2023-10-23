@@ -258,14 +258,20 @@
        :body "Release for this revision does not exist"})))
 
 (defn- validate-incoming-change-data
-  "Returns a map {:dataset DATASET (optional-key :error-response) ..., row-schema MALLI-SCHEMA},
+  "Returns a map {:dataset ?DATASET (optional-key :error-response) ..., row-schema MALLI-SCHEMA},
   containing :error-response entry when validation failed."
   [release-schema appends]
   (let [row-schema (data-validation/make-row-schema release-schema)
-        dataset (data-validation/as-dataset appends {:convert-types {:row-schema row-schema}})
-        {:keys [explanation]} (data-validation/validate-dataset dataset row-schema
-                                                                {:fail-fast? true})]
-    (cond-> {:dataset dataset :row-schema row-schema}
+        {:keys [explanation dataset]}
+        (try
+          (->(data-validation/as-dataset appends {:enforce-schema row-schema})
+             (data-validation/validate-dataset row-schema {:fail-fast? true}))
+          (catch clojure.lang.ExceptionInfo ex
+            (if (= ::data-validation/dataset-creation (-> ex ex-data :type))
+              {:explanation (ex-message ex)}
+              (throw ex))))]
+    (cond-> {:row-schema row-schema}
+      (some? dataset) (assoc :dataset dataset)
       (some? explanation) (assoc :error-response
                                  {:status 400
                                   :body {:message "Invalid data"
@@ -294,7 +300,9 @@
         ;; is a NOOP. This fails further down in the `let` body in
         ;; #'internal/post-change--generate-csv-snapshot
         ;; We don't need to proceed further if there's no release-schema!
-        _ (assert release-schema (str "No release schema found for: " release-uri))
+        _ (when (nil? release-schema)
+            (throw (ex-info (str "No release schema found for: " release-uri)
+                            {:release-uri release-uri})))
         appends ^InputStream (->byte-array-input-stream appends)
         insert-req (store/make-insert-request! change-store appends)
         {validation-err :error-response

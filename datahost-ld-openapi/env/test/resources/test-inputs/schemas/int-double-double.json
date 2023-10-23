@@ -1,0 +1,16 @@
+{
+ "dh:columns": [
+     {"@type": "dh:DimensionColumn",
+      "csvw:name": "Year",
+      "csvw:datatype": "integer",
+      "csvw:titles": "Year"},
+     {"@type": "dh:MeasureColumn",
+      "csvw:name": "Double",
+      "csvw:datatype": "double",
+      "csvw:titles": ["Double"]},
+     {"@type": "dh:DimensionColumn",
+      "csvw:name": "Other Double",
+      "csvw:datatype": "double",
+      "csvw:required": true,
+      "csvw:titles": "Other Double"}
+ ]}
