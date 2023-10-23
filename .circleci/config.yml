@@ -165,7 +165,7 @@ jobs:
           working_directory: datahost-ld-openapi
           command: |
             echo "running hurl against host: $(cat ../HOSTNAME)"
-            hurl --variable host_url=$(cat ../HOSTNAME) \
+            hurl --variable host_name=$(cat ../HOSTNAME) \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
 
