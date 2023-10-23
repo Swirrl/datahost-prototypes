@@ -21,10 +21,12 @@ Note: Hurl expects the file paths to be relative to the hurl script location.
 
 import sys
 
+
 RELEASE_SETUP = """
-PUT http://localhost:3000/data/{{series}}
+PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
+Authorization: {{auth_token}}
 {
     "dcterms:title": "Test Dataset",
     "dcterms:description": "A very simple test"
@@ -34,9 +36,10 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT http://localhost:3000/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
 Accept: application/json
 Content-Type: application/json
+Authorization: {{auth_token}}
 {
     "dcterms:title": "Test Release",
     "dcterms:description": "A very simple Release"
@@ -44,17 +47,19 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
 Content-Type: application/json
+Authorization: {{auth_token}}
 file,$SCHEMA_FILE;
 
 HTTP 201
 """.strip()
 
 REVISION_SETUP = """
-POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 Content-Type: application/json
+Authorization: {{auth_token}}
 {
     "dcterms:title": "Rev $REV_NUMBER",
     "dcterms:description": "A test revision"
@@ -66,8 +71,9 @@ $REV_URL_VAR: header "Location"
 """
 
 CHANGE_SETUP = """
-POST http://localhost:3000{{$REV_URL_VAR}}/$CHANGE_KIND
+POST {{scheme}}://{{host_name}}{{$REV_URL_VAR}}/$CHANGE_KIND
 Content-Type: text/csv
+Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes $CHANGE_KIND
 description: change for {{series}}
@@ -98,7 +104,7 @@ def main(args):
             change = change.replace("$CHANGE_KIND", kind)
             change = change.replace("$CHANGE_FILE", file)
             result.append(change)
-    result.append("# run: hurl FILE_NAME --variable series=series-01")
+    result.append('''# run locally: hurl FILE_NAME --variable series=series-01 --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" ''')
     return result
 
 if __name__ == '__main__':
