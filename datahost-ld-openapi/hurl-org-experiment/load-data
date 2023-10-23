@@ -4,6 +4,6 @@ cat hurl/series/create.hurl \
     hurl/release/create.hurl \
     hurl/schema/create.hurl \
     hurl/revision/create.hurl \
-    hurl/data/myds/commit-1-append.hurl \
-    hurl/data/myds/commit-2-append.hurl \
+    data/myds/commit-1-append.hurl \
+    data/myds/commit-2-append.hurl \
     | hurl --variables-file=data/myds/vars.env --file-root=data/myds/ $@
