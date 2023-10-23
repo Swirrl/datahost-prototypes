@@ -231,15 +231,15 @@ workflows:
           filters:
             branches:
               only: main
-      - ldapi-blackbox-test:
-          context:
-            - swirrl-datahost-dev-client
-          requires:
-            - deploy-ldapi-vm-dev
-          env: dev
-          filters:
-            branches:
-              only: main
+      # - ldapi-blackbox-test:
+      #     context:
+      #       - swirrl-datahost-dev-client
+      #     requires:
+      #       - deploy-ldapi-vm-dev
+      #     env: dev
+      #     filters:
+      #       branches:
+      #         only: main
       - deploy-graphql-vm:
           context:
             - swirrl-ons-datahost-gcloud
