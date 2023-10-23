@@ -226,6 +226,7 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - deploy-ld-openapi-service
+          name: deploy-ldapi-vm-dev
           env: dev
           filters:
             branches:
@@ -234,7 +235,7 @@ workflows:
           context:
             - swirrl-datahost-dev-client
           requires:
-            - deploy-ldapi-vm
+            - deploy-ldapi-vm-dev
           env: dev
           filters:
             branches:
