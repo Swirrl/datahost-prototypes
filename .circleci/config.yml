@@ -189,7 +189,7 @@ jobs:
             echo "running hurl against host: localhost"
             hurl --variable scheme=http \
                  --variable host_name=localhost \
-                 --variable auth_token="ignore"
+                 --variable auth_token="ignore" \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
 
