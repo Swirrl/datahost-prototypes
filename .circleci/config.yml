@@ -177,10 +177,10 @@ jobs:
     docker:
       - image: ghcr.io/orange-opensource/hurl:latest
       - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:<< parameters.commit_sha >>
-    environment:
-      LD_API_DATA_DIR: ./DATA
-      LD_API_FILE_DIR: ./FILES
-      CI: true
+        environment:
+          LD_API_DATA_DIR: ./DATA
+          LD_API_FILE_DIR: ./FILES
+          CI: true
     steps:
       - checkout
       - run:
