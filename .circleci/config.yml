@@ -245,16 +245,16 @@ workflows:
           filters:
             branches:
               only: main
-      - deploy-ldapi-vm:
-          context:
-            - swirrl-ons-datahost-gcloud
-          requires:
-            - deploy-ld-openapi-service
-          name: deploy-ldapi-vm-dev
-          env: dev
-          filters:
-            branches:
-              only: main
+      # - deploy-ldapi-vm:
+      #     context:
+      #       - swirrl-ons-datahost-gcloud
+      #     requires:
+      #       - deploy-ld-openapi-service
+      #     name: deploy-ldapi-vm-dev
+      #     env: dev
+      #     filters:
+      #       branches:
+      #         only: main
       # - ldapi-blackbox-test:
       #     context:
       #       - swirrl-datahost-dev-client
