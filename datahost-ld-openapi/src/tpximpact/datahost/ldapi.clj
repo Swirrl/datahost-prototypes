@@ -52,6 +52,7 @@
                             (sys/load-configs)
                             (sys/prep-config)
                             (ig/init))]
+    (println "Service initialised")
     (alter-var-root #'system (constantly initialised-sys))
     initialised-sys))
 
