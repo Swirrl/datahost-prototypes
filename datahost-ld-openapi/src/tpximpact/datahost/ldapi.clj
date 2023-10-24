@@ -56,7 +56,7 @@
     initialised-sys))
 
 (defn -main [& _args]
-  (println "Starting Service...")
+  (println (format "Starting Service... CI='%s'" (System/getenv "CI")))
   (add-shutdown-hook!)
   (start-system ["ldapi/base-system.edn"
                  ;; env.edn contains environment specific
