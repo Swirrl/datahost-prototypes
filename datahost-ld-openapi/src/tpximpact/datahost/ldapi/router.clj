@@ -399,7 +399,7 @@ specifications for each route.")
                         ;; multipart
                         middleware/multipart-middleware
 
-                        (if auth
+                        (if (and auth (not (Boolean/valueOf (System/getenv "CI"))))
                           (basic-auth-middleware auth)
                           identity)
 
