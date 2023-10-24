@@ -266,7 +266,8 @@ workflows:
       - ldapi-blackbox-ci-test:
           # requires:
           #   - deploy-ldapi-vm-dev
-          commit_sha: << pipeline.git.revision >>
+          #commit_sha: << pipeline.git.revision >>
+          commit_sha: latest
           filters:
             branches:
               only: rs/issue-276-ci
