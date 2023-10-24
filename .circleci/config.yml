@@ -165,7 +165,8 @@ jobs:
           working_directory: datahost-ld-openapi
           command: |
             echo "running hurl against host: $(cat ../HOSTNAME)"
-            hurl --variable host_name=$(cat ../HOSTNAME) \
+            hurl --variable scheme=https \
+                 --variable host_name=$(cat ../HOSTNAME) \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
   ldapi-blackbox-ci-test:
@@ -186,7 +187,8 @@ jobs:
           working_directory: datahost-ld-openapi
           command: |
             echo "running hurl against host: localhost"
-            hurl --variable host_name=localhost \
+            hurl --variable scheme=http \
+                 --variable host_name=localhost \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
 
