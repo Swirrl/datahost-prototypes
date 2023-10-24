@@ -58,7 +58,9 @@
      initialised-sys)
    (catch Exception ex
      (println "ERROR: " (ex-message ex))
-     (throw ex))))
+     (throw ex))
+   (finally
+     (println "Leaving start-system"))))
 
 (defn -main [& _args]
   (println (format "Starting Service... CI='%s'" (System/getenv "CI")))
