@@ -180,7 +180,7 @@ jobs:
         environment:
           LD_API_DATA_DIR: ./DATA
           LD_API_FILE_DIR: ./FILES
-          CI: true
+          CI: "true"
     steps:
       - checkout
       - run:
