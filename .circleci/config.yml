@@ -229,10 +229,11 @@ workflows:
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
           filters:
-            tags:
-              only: /^v.*/
-            # branches:
-            #   ignore: /.*/
+            # tags:
+            #   only: /^v.*/
+            branches:
+              only: rs/issue-276
+          name: build-ldapi-docker-image
           requires:
             - test-ld-openapi-service
       - deploy-graphql-vm:
@@ -264,8 +265,9 @@ workflows:
       #       branches:
       #         only: main
       - ldapi-blackbox-ci-test:
-          # requires:
-          #   - deploy-ldapi-vm-dev
+          requires:
+            - build-ldapi-docker-image
+            #- deploy-ldapi-vm-dev
           #commit_sha: << pipeline.git.revision >>
           commit_sha: latest
           filters:
