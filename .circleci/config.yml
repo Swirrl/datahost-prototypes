@@ -184,7 +184,7 @@ jobs:
     steps:
       - checkout
       - run:
-          command: sleep 10
+          command: sleep 60
       - run:
           name: "Run the hurl scripts"
           working_directory: datahost-ld-openapi

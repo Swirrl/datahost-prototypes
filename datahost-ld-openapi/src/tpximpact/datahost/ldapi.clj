@@ -60,7 +60,7 @@
      (println "ERROR: " (ex-message ex))
      (throw ex))
    (finally
-     (println "Leaving start-system"))))
+     (println "Leaving `start-system`"))))
 
 (defn -main [& _args]
   (println (format "Starting Service... CI='%s'" (System/getenv "CI")))
