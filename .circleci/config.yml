@@ -268,8 +268,7 @@ workflows:
           requires:
             - build-ldapi-docker-image
             #- deploy-ldapi-vm-dev
-          #commit_sha: << pipeline.git.revision >>
-          commit_sha: latest
+          commit_sha: << pipeline.git.revision >>
           filters:
             branches:
               only: rs/issue-276-ci
