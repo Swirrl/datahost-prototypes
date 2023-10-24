@@ -232,7 +232,7 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: rs/issue-276
+              only: rs/issue-276-ci
           name: build-ldapi-docker-image
           requires:
             - test-ld-openapi-service
