@@ -168,6 +168,29 @@ jobs:
             hurl --variable host_name=$(cat ../HOSTNAME) \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
+  ldapi-blackbox-ci-test:
+    parameters:
+      commit_sha:
+        type: string
+        description: SHA of the git commit used as docker image tag.
+    docker:
+      - image: ghcr.io/orange-opensource/hurl:latest
+      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public:<< parameters.commit_sha >>
+    environment:
+      LD_API_DATA_DIR: ./DATA
+      LD_API_FILE_DIR: ./FILES      
+    steps:
+      - checkout
+      - run:
+          name: "Run the hurl scripts"
+          working_directory: datahost-ld-openapi
+          command: |
+            echo "running hurl against host: localhost"
+            hurl --variable host_name=localhost \
+                 --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
+              bin/hurl-data/minimal.hurl
+
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -240,6 +263,13 @@ workflows:
       #     filters:
       #       branches:
       #         only: main
+      - ldapi-blackbox-ci-test:
+          # requires:
+          #   - deploy-ldapi-vm-dev
+          commit_sha: << pipeline.git.revision >>
+          filters:
+            branches:
+              only: rs/issue-276-ci
       - deploy-graphql-vm:
           context:
             - swirrl-ons-datahost-gcloud
