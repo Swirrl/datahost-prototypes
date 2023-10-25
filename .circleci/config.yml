@@ -10,7 +10,7 @@ orbs:
 executors:
   clojure-executor:
     docker:
-      - image: cimg/clojure:1.11.1
+      - image: rosado/ci-clojure-hurl:1.11.1
         auth:
           username: $DOCKERHUB_USERNAME # can specify string literal values
           password: $DOCKERHUB_PASSWORD # or project environment variable reference
@@ -143,7 +143,7 @@ jobs:
       - run:
           command: terraform apply update.tfplan
           working_directory: deploy/terraform/ldapi/environments/<< parameters.env >>
-  ldapi-blackbox-test:
+  ldapi-blackbox-test: # this runs against a running instance
     parameters:
       env:
         type: string
@@ -169,7 +169,7 @@ jobs:
                  --variable host_name=$(cat ../HOSTNAME) \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
-  ldapi-blackbox-ci-test:
+  ldapi-blackbox-ci-test: # runs ldapi service + container with hurl
     parameters:
       commit_sha:
         type: string
@@ -186,6 +186,7 @@ jobs:
     steps:
       - checkout
       - run:
+          name: wait for the service to start
           command: sleep 60
       - run:
           name: "Run the hurl scripts"
@@ -197,8 +198,18 @@ jobs:
                  --variable auth_token="ignore" \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
-
-
+  ldapi-integration-test:
+    executor: clojure-executor
+    steps:
+      - checkout
+      - run:
+          name: Run integration tests
+          working_directory: datahost-ld-openapi
+          command: |
+            clojure -X:test:test-hurl
+      - store_test_results:
+          project-dir: datahost-ld-openapi
+          path: datahost-ld-openapi/test-results
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -281,6 +292,9 @@ workflows:
           filters:
             branches:
               only: rs/issue-276-ci
+      - ldapi-integration-test:
+          requires:
+            - test-ld-openapi-service
       - deploy-graphql-vm:
           context:
             - swirrl-ons-datahost-gcloud
