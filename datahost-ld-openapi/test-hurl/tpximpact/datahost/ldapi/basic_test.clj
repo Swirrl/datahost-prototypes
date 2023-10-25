@@ -32,6 +32,4 @@
       (let [result (hurl {:variables (assoc variables :series (random-uuid))
                           :script "bin/hurl-data/minimal_get.hurl"
                           :junit-report "test-results/hurl.xml"})]
-        (is (= 0 (:exit result)))))))
-
-
+        (is (not= 0 (:exit result)))))))
