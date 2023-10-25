@@ -181,6 +181,8 @@ jobs:
           LD_API_DATA_DIR: ./DATA
           LD_API_FILE_DIR: ./FILES
           CI: true
+          GCLOUD_PROJECT: none
+          BASIC_AUTH_PASSWORD_SECRET_NAME: none
     steps:
       - checkout
       - run:
