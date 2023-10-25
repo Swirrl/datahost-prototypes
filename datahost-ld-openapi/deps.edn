@@ -71,6 +71,8 @@
               :exec-args {:tests [{:id :integration
                                    :test-paths ["test-hurl"]
                                    :source-paths ["src"]}]
+                          ;; don't generate junit report when used with :test alias
+                          :plugins []
                           :reporter kaocha.report/documentation}}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
