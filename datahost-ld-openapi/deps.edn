@@ -66,6 +66,12 @@
                :exec-args {:watch? true
 	                       :skip-meta :pending
 	                       :fail-fast? true}}
+  :test-hurl {:extra-paths ["test-hurl"]
+              :exec-fn kaocha.runner/exec-fn
+              :exec-args {:tests [{:id :integration
+                                   :test-paths ["test-hurl"]
+                                   :source-paths ["src"]}]
+                          :reporter kaocha.report/documentation}}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}
