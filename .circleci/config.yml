@@ -142,7 +142,7 @@ jobs:
             hurl --variable scheme=https \
                  --variable host_name=$(cat ../HOSTNAME) \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
-              bin/hurl-data/minimal.hurl
+                 --glob hurl-scripts/*.hurl
 
   ci-live-service-test:
     # runs ldapi service container + container with hurl
@@ -180,7 +180,7 @@ jobs:
                  --variable host_name=localhost \
                  --variable auth_token="ignore" \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
-              bin/hurl-data/minimal.hurl
+                 --glob hurl-scripts/*.hurl
       - store_test_results:
           path: << parameters.project_dir >>/test-results
 
