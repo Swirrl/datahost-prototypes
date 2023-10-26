@@ -30,8 +30,8 @@ jobs:
     executor: clojure-executor
     steps:
       - checkout
-      - run
-          name: "Run unit tests"
+      - run:
+          name: Run unit tests
           command: |
             cd << parameters.project_dir >>
             clojure -X:test
@@ -105,7 +105,7 @@ jobs:
           command: terraform apply update.tfplan
           working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
 
-  ldapi-blackbox-test: # this runs against a running instance
+  live-service-test: # this runs against a running instance
     parameters:
       env:
         type: string
@@ -248,7 +248,7 @@ workflows:
       #     filters:
       #       branches:
       #         only: main
-      # - ldapi-blackbox-test:
+      # - live-service-test:
       #     context:
       #       - swirrl-datahost-dev-client
       #     requires:
