@@ -76,8 +76,12 @@ jobs:
           paths:
             - ldapi_container_digest
 
-  deploy-graphql-vm:
+  deploy-service:
     parameters:
+      service:
+        description: Service to deploy
+        type: enum
+        enum: ["graphql", "ldapi"]
       env:
         type: string
         description: Terraform environment to deploy
@@ -88,10 +92,10 @@ jobs:
           at: /tmp/workspace
       - checkout
       - terraform/install:
-          terraform_version: 1.4.6
+          terraform_version:  1.4.6
       - aws-cli/setup:
-          role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
-          session-duration: '900'
+        role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
+        session-duration: '900'
       - gcp-cli/setup:
           version: latest
           use_oidc: true
@@ -99,50 +103,17 @@ jobs:
           command: gcloud version
       - run:
           command: terraform init
-          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
       - run:
           command: terraform get
-          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
       - run:
-          command: terraform plan -out update.tfplan -var digest=$(cat /tmp/workspace/graphql_container_digest)
-          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
+          command: terraform plan -out update.tfplan -var digest=$(cat /tmp/workspace/<< parameters.service >>_container_digest)
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
       - run:
           command: terraform apply update.tfplan
-          working_directory: deploy/terraform/graphql/environments/<< parameters.env >>
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
 
-  deploy-ldapi-vm:
-    parameters:
-      env:
-        type: string
-        description: Terraform environment to deploy
-    docker:
-      - image: cimg/base:2023.05
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - checkout
-      - terraform/install:
-          terraform_version: 1.4.6
-      - aws-cli/setup:
-          role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
-          session-duration: '900'
-      - gcp-cli/setup:
-          version: latest
-          use_oidc: true
-      - run:
-          command: gcloud version
-      - run:
-          command: terraform init
-          working_directory: deploy/terraform/ldapi/environments/<< parameters.env >>
-      - run:
-          command: terraform get
-          working_directory: deploy/terraform/ldapi/environments/<< parameters.env >>
-      - run:
-          command: terraform plan -out update.tfplan -var digest=$(cat /tmp/workspace/ldapi_container_digest)
-          working_directory: deploy/terraform/ldapi/environments/<< parameters.env >>
-      - run:
-          command: terraform apply update.tfplan
-          working_directory: deploy/terraform/ldapi/environments/<< parameters.env >>
   ldapi-blackbox-test: # this runs against a running instance
     parameters:
       env:
@@ -255,22 +226,24 @@ workflows:
           name: build-ldapi-docker-image
           requires:
             - test-ld-openapi-service
-      - deploy-graphql-vm:
+      - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
           requires:
             - deploy-graphql-service
           env: dev
+          service: graphql
           filters:
             branches:
               only: main
-      # - deploy-ldapi-vm:
+      # - deploy-service:
       #     context:
       #       - swirrl-ons-datahost-gcloud
       #     requires:
       #       - deploy-ld-openapi-service
-      #     name: deploy-ldapi-vm-dev
+      #     name: deploy-ldapi-service-dev
       #     env: dev
+      #     service: ldapi
       #     filters:
       #       branches:
       #         only: main
@@ -278,7 +251,7 @@ workflows:
       #     context:
       #       - swirrl-datahost-dev-client
       #     requires:
-      #       - deploy-ldapi-vm-dev
+      #       - deploy-ldapi-service-dev
       #     env: dev
       #     filters:
       #       branches:
@@ -295,21 +268,23 @@ workflows:
       - ldapi-integration-test:
           requires:
             - test-ld-openapi-service
-      - deploy-graphql-vm:
+      - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
           requires:
             - deploy-graphql-service
           env: ons
+          service: graphql
           filters:
             branches:
               only: ons
-      # - deploy-ldapi-vm:
+      # - deploy-service:
       #     context:
       #       - swirrl-ons-datahost-gcloud
       #     requires:
       #       - deploy-ld-openapi-service
       #     env: ons
+      #     service: ldapi
       #     filters:
       #       branches:
       #         only: ons
