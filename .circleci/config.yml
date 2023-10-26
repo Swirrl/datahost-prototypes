@@ -22,31 +22,25 @@ executors:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  test-graphql-service:
-    executor: clojure-executor
-    # Add steps to the job
-    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
-    steps:
-      - checkout
-      - run:
-          name: "Test GraphQL Service"
-          command: "cd datahost-graphql && clojure -X:test"
-          project-dir: datahost-graphql
-      - store_test_results:
-          project-dir: datahost-graphql
-          path: datahost-graphql/test-results
-
-  test-ld-openapi-service:
+  unit-test:
+    parameters:
+      # service:
+      #   description: Service to unit test
+      #   type: enum
+      #   enum: ["graphql", "ldapi"]
+      project_dir:
+        description: Project directory
+        type: string
     executor: clojure-executor
     steps:
       - checkout
-      - run:
-          name: "Test LD Open API Service"
-          command: "cd datahost-ld-openapi && clojure -X:dev:test"
-          project-dir: datahost-ld-openapi
+      - run
+          name: "Run unit tests for << parameters.service >> service"
+          command: |
+            cd << parameters.project_dir >>
+            clojure -X:test
       - store_test_results:
-          project-dir: datahost-ld-openapi
-          path: datahost-ld-openapi/test-results
+          path: << parameters.project_dir >>/test-results
 
   build-docker-image:
     executor: clojure-executor
@@ -188,14 +182,18 @@ jobs:
 workflows:
   build-workflow:
     jobs:
-      - test-graphql-service:
+      - unit-test:
+          project_dir: datahost-graphql
+          name: unit-test-graphql
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
           filters:  # required since `deploy` has tag filters AND requires `test`
             tags:
               only: /.*/
-      - test-ld-openapi-service:
+      - unit-test:
+          project_dir: datahost-ld-openapi
+          name: unit-test-ldapi
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
@@ -217,7 +215,7 @@ workflows:
             # branches:
             #   ignore: /.*/
           requires:
-            - test-graphql-service
+            - unit-test-graphql
       - build-docker-image:
           service: ldapi
           project_dir: datahost-ld-openapi
@@ -232,7 +230,7 @@ workflows:
             branches:
               only: rs/issue-276-ci
           requires:
-            - test-ld-openapi-service
+            - unit-test-ldapi
       - deploy-service:
           service: graphql
           env: dev
@@ -274,7 +272,7 @@ workflows:
               only: rs/issue-276-ci
       - ldapi-integration-test:
           requires:
-            - test-ld-openapi-service
+            - unit-test-ldapi
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
