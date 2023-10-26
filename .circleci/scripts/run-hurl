@@ -1,14 +1,10 @@
 #!/bin/sh
 
-while getopts h:d:s:j: flag
-do
-    case "${flag}" in
-        h) hostname=${OPTARG};;
-        d) dir=${OPTARG};;
-        s) scheme=${OPTARG};;
-        j) junit_report="${OPTARG}";;
-    esac
-done
+
+scheme=$1
+hostname=$2
+dir=$3
+junit_report=$4
 
 echo "dir: '$dir'"
 
