@@ -166,7 +166,7 @@ jobs:
       - checkout
       - run:
           name: wait for the service to start
-          command: ./circleci/scripts/wait-for-service "http://localhost"
+          command: .circleci/scripts/wait-for-service "http://localhost"
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
