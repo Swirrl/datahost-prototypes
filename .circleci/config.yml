@@ -203,13 +203,14 @@ workflows:
             tags:
               only: /.*/
       - build-docker-image:
+          service: graphql
+          project_dir: datahost-graphql
+          name: build-docker-image-graphql
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
-          service: graphql
-          project_dir: datahost-graphql
-          name: build-docker-image-graphql
+
           filters:
             tags:
               only: /^v.*/
@@ -217,28 +218,28 @@ workflows:
             #   ignore: /.*/
           requires:
             - test-graphql-service
-      - build-docker-image: # deploy-ld-openapi-service:
+      - build-docker-image:
+          service: ldapi
+          project_dir: datahost-ld-openapi
+          name: build-docker-image-ldapi
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
-          service: ldapi
-          project_dir: datahost-ld-openapi
           filters:
             # tags:
             #   only: /^v.*/
             branches:
               only: rs/issue-276-ci
-          name: build-docker-image-ldapi
           requires:
             - test-ld-openapi-service
       - deploy-service:
+          service: graphql
+          env: dev
           context:
             - swirrl-ons-datahost-gcloud
           requires:
             - build-docker-image-graphql
-          env: dev
-          service: graphql
           filters:
             branches:
               only: main
@@ -285,12 +286,12 @@ workflows:
             branches:
               only: ons
       # - deploy-service:
+      #     service: ldapi
+      #     env: ons
       #     context:
       #       - swirrl-ons-datahost-gcloud
       #     requires:
       #       - build-docker-image-ldapi
-      #     env: ons
-      #     service: ldapi
       #     filters:
       #       branches:
       #         only: ons
