@@ -10,8 +10,11 @@ do
     esac
 done
 
+echo "dir: '$dir'"
+
 run_hurl_file() {
     local file=$1
+    echo "\tdir: $dir"
     hurl --test \
          --report-junit $junit_report \
          --variable scheme="$scheme" \
