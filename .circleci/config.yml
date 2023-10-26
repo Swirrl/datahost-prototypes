@@ -154,7 +154,7 @@ jobs:
         description: Project directory
         type: string
     docker:
-      - image: ghcr.io/orange-opensource/hurl:latest
+      - image: rosado/ci-clojure-hurl:1.11.1
       - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:<< parameters.commit_sha >>
         environment:
           LD_API_DATA_DIR: ./DATA
