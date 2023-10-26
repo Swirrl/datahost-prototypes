@@ -12,7 +12,7 @@ run_hurl_file() {
     local file=$1
     local series="series-$(date '+%Y-%m-%d')-$((RANDOM))"
     local release="release-$((RANDOM))"
-    echo "\t: ${scheme}://${host} vars: series=${scheme}, release=${release}"
+    echo "\t: ${scheme}://${hostname} vars: series=${series}, release=${release}"
     hurl --test \
          --report-junit $junit_report \
          --variable scheme="$scheme" \
