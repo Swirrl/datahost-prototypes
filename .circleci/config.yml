@@ -60,20 +60,18 @@ jobs:
         enum: ["datahost-graphql", "datahost-ld-openapi"]
     steps:
       - checkout
-      - when:
-          condition:
-            eq: ["ldapi", << parameters.service >>]
-          steps:
-            - run: 
-                command: "clojure -T:build docker :image-type :registry :to :remote > << parameters.service >>_container_digest"
-                working_directory: << parameters.project_dir >>
-      - when:
-          condition:
-            eq: ["graphql", << parameters.service >>]
-          steps:
-            - run:
-                command: "clojure -T:build docker :image-type :registry > << parameters.service >>_container_digest"
-                working_directory: << parameters.project_dir >>
+      - run:
+          working_directory: << parameters.project_dir >>
+          command: |
+            [ "ldapi" == "<< parameters.service >>" ] \
+              && clojure -T:build docker :image-type :registry :to :remote > << parameters.service >>_container_digest \
+              || true
+      - run:
+          working_directory: << parameters.project_dir >>
+          command: |
+            [ "graphql" == "<< parameters.service >>" ] \
+              && clojure -T:build docker :image-type :registry > << parameters.service >>_container_digest \
+              || true
       - persist_to_workspace:
           root: << parameters.project_dir >>
           paths:
