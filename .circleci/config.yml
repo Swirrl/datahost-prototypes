@@ -94,8 +94,8 @@ jobs:
       - terraform/install:
           terraform_version:  1.4.6
       - aws-cli/setup:
-        role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
-        session-duration: '900'
+          role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
+          session-duration: '900'
       - gcp-cli/setup:
           version: latest
           use_oidc: true
