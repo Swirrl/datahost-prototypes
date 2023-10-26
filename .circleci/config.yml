@@ -24,10 +24,6 @@ executors:
 jobs:
   unit-test:
     parameters:
-      # service:
-      #   description: Service to unit test
-      #   type: enum
-      #   enum: ["graphql", "ldapi"]
       project_dir:
         description: Project directory
         type: string
@@ -35,7 +31,7 @@ jobs:
     steps:
       - checkout
       - run
-          name: "Run unit tests for << parameters.service >> service"
+          name: "Run unit tests"
           command: |
             cd << parameters.project_dir >>
             clojure -X:test
