@@ -176,7 +176,7 @@ jobs:
             mkdir << parameters.project_dir >> test-results
             .circleci/scripts/run-hurl -s http -h localhost \ 
               -d << parameters.project_dir >>/hurl-scripts \
-              -j << parameters.projec_dir >>/test-results/ci-live.xml
+              -j << parameters.project_dir >>/test-results/ci-live.xml
       - store_test_results:
           path: << parameters.project_dir >>/test-results
 
