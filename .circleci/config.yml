@@ -176,11 +176,6 @@ jobs:
               bin/hurl-data/minimal.hurl
 
   integration-test:
-    # Runs hurl scripts via unit test in the project.
-    #
-    # Requirements:
-    # - `:test-hurl` alias in projet's deps.edn, configured 
-    #    to run hurl  scripts
     parameters:
       project_dir:
         description: Project directory
