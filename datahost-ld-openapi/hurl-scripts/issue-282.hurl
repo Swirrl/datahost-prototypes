@@ -1,27 +1,27 @@
 # Description: We try to append a data with incorrectly formatted 'double' value,
 # and that should be rejected by the API.
 
-PUT http://localhost:3000/data/{{series}}
+PUT {{scheme}}://{{host_name}}/data/{{series}}
 Content-Type: application/json
 {"dcterms:description": "Crimes Data - Float coercion test",
  "dcterms:title": "Column float coercion test"}
 
 HTTP 201
 
-GET http://localhost:3000/data/{{series}}
+GET {{scheme}}://{{host_name}}/data/{{series}}
 
 HTTP 200
 
-PUT http://localhost:3000/data/{{series}}/releases/{{release}}
+PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}
 Content-Type: application/json
 {"dcterms:description": "Release: {{release}}",
 "dcterms:title": "{{release}}"}
 
-GET http://localhost:3000/data/{{series}}/releases/{{release}}
+GET {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}
 
 HTTP 200
 
-POST http://localhost:3000/data/{{series}}/releases/{{release}}/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}/schema
 Content-Type: application/json
 {
  "@type": "dh:TableSchema",
@@ -50,7 +50,7 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/releases/{{release}}/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -62,14 +62,14 @@ HTTP 201
 [Captures]
 revision_url: header "Location"
 
-GET http://localhost:3000{{revision_url}}
+GET {{scheme}}://{{host_name}}{{revision_url}}
 Accept: application/json
 
 HTTP 200
 
 ## One append
 
-POST http://localhost:3000{{revision_url}}/appends
+POST {{scheme}}://{{host_name}}{{revision_url}}/appends
 Accept: application/json
 Content-Type: text/csv
 [QueryStringParams]
