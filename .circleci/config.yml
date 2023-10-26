@@ -219,7 +219,7 @@ workflows:
             #   ignore: /.*/
           requires:
             - test-graphql-service
-      - buld-docker-image: # deploy-ld-openapi-service:
+      - build-docker-image: # deploy-ld-openapi-service:
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
