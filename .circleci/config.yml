@@ -167,13 +167,13 @@ jobs:
       - run:
           name: wait for the service to start
           command: |
-            echo `ls -a .circleci/scripts`
             .circleci/scripts/wait-for-service "http://localhost"
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
           command: |
             echo "running hurl against host: localhost"
+            mkdir test-results
             hurl --test \
                  --report-junit test-results/ci-live.xml \
                  --variable scheme=http \
