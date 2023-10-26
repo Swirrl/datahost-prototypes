@@ -167,7 +167,7 @@ jobs:
       - run:
           name: wait for the service to start
           command: |
-            echo `ls -a`
+            echo `ls -a .circleci/scripts`
             .circleci/scripts/wait-for-service "http://localhost"
       - run:
           name: "Run the hurl scripts"
