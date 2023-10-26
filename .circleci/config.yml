@@ -166,7 +166,10 @@ jobs:
       - checkout
       - run:
           name: wait for the service to start
-          command: .circleci/scripts/wait-for-service "http://localhost"
+          command: |
+            echo `pwd`
+            echo `ls`
+            .circleci/scripts/wait-for-service "http://localhost"
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
@@ -292,6 +295,7 @@ workflows:
           project_dir: datahost-ld-openapi
           requires:
             - build-docker-image-ldapi
+            - integration-test-ldapi
           filters:
             branches:
               only: rs/issue-276-ci
