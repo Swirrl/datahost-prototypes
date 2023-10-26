@@ -170,17 +170,13 @@ jobs:
             .circleci/scripts/wait-for-service "http://localhost"
       - run:
           name: "Run the hurl scripts"
-          working_directory: << parameters.project_dir >>
+          #working_directory: << parameters.project_dir >>
           command: |
             echo "running hurl against host: localhost"
-            mkdir test-results
-            hurl --test \
-                 --report-junit test-results/ci-live.xml \
-                 --variable scheme=http \
-                 --variable host_name=localhost \
-                 --variable auth_token="ignore" \
-                 --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
-                 --glob hurl-scripts/*.hurl
+            mkdir << parameters.project_dir >> test-results
+            .circleci/scripts/run-hurl -s http -h localhost \ 
+              -d << parameters.project_dir >>/hurl-scripts \
+              -j << parameters.projec_dir >>/test-results/ci-live.xml
       - store_test_results:
           path: << parameters.project_dir >>/test-results
 

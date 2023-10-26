@@ -1,0 +1,27 @@
+#!/bin/sh
+
+while getopts h:d:f:j:s: flag
+do
+    case "${flag}" in
+        h) hostname=${OPTARG};;
+        d) dir=${OPTARG};;
+        s) scheme=${OPTARG};;
+        j) junit_report="${OPTARG}";;
+    esac
+done
+
+run_hurl_file() {
+    local file=$1
+    hurl --test \
+         --report-junit $junit_report \
+         --variable scheme="$scheme" \
+         --variable host_name="$hostname" \
+         --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
+         --variable release="release-$((RANDOM))" \
+         $file
+}
+
+for f in $(find "$dir" -type f -name "*.hurl"); do
+    echo "RUNNING: $f"
+    run_hurl_file $f
+done
