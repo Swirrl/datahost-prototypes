@@ -17,7 +17,7 @@
 
       (let [result (hurl {:variables (assoc variables :series (random-uuid))
                           :script "bin/hurl-data/minimal_get.hurl"
-                          :report-junit "test-results/hurl.xml"})]
+                          :report-junit "test-results/hurl-smoke-tests.xml"})]
         (is (not= 0 (:exit result)))))))
 
 (deftest regression-tests
@@ -28,5 +28,5 @@
                      :auth_token "ignore"}
           result (hurl/run-directory "hurl-scripts"
                                      {:variables variables
-                                      :report-junit "test-results/hurl.xml"})]
+                                      :report-junit "test-results/hurl-regression-tests.xml"})]
       (is (hurl/success? result)))))
