@@ -1,6 +1,6 @@
 #!/bin/sh
 
-while getopts h:d:f:j:s: flag
+while getopts h:d:s:j: flag
 do
     case "${flag}" in
         h) hostname=${OPTARG};;
