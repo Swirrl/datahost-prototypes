@@ -15,11 +15,12 @@
                           :report-junit "test-results/hurl.xml"})]
         (is (= 0 (:exit result))))
 
-      (let [result (hurl {:variables (assoc variables :series (random-uuid))
-                          :script "bin/hurl-data/minimal_get.hurl"
-                          :report-junit "test-results/hurl-smoke-tests.xml"})]
-        ;; this test will fail on purpose
-        (is (= 0 (:exit result)))))))
+      ;; (let [result (hurl {:variables (assoc variables :series (random-uuid))
+      ;;                     :script "bin/hurl-data/minimal_get.hurl"
+      ;;                     :report-junit "test-results/hurl-smoke-tests.xml"})]
+      ;;   ;; this test will fail on purpose
+      ;;   (is (= 0 (:exit result))))
+      )))
 
 (deftest regression-tests
   (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
