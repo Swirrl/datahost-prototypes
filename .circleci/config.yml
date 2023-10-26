@@ -144,7 +144,7 @@ jobs:
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
 
-  ldapi-blackbox-ci-test:
+  ci-live-service-test:
     # runs ldapi service container + container with hurl
     parameters:
       commit_sha:
@@ -174,18 +174,27 @@ jobs:
                  --variable auth_token="ignore" \
                  --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
               bin/hurl-data/minimal.hurl
-  ldapi-integration-test:
+
+  integration-test:
+    # Runs hurl scripts via unit test in the project.
+    #
+    # Requirements:
+    # - `:test-hurl` alias in projet's deps.edn, configured 
+    #    to run hurl  scripts
+    parameters:
+      project_dir:
+        description: Project directory
+        type: string
     executor: clojure-executor
     steps:
       - checkout
       - run:
           name: Run integration tests
-          working_directory: datahost-ld-openapi
+          working_directory: << parameters.project_dir >>
           command: |
             clojure -X:test:test-hurl
       - store_test_results:
-          project-dir: datahost-ld-openapi
-          path: datahost-ld-openapi/test-results
+          path: << pramameters.project_dir >>/test-results
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -271,14 +280,15 @@ workflows:
       #     filters:
       #       branches:
       #         only: main
-      - ldapi-blackbox-ci-test:
+      - ci-live-service-test:
           requires:
             - build-docker-image-ldapi
           commit_sha: << pipeline.git.revision >>
           filters:
             branches:
               only: rs/issue-276-ci
-      - ldapi-integration-test:
+      - integration-test:
+          project_dir: datahost-ld-openapi
           requires:
             - unit-test-ldapi
             - build-docker-image-ldapi
