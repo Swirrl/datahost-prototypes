@@ -10,13 +10,15 @@ echo "dir: '$dir'"
 
 run_hurl_file() {
     local file=$1
-    echo "\tdir: $dir"
+    local series="series-$(date '+%Y-%m-%d')-$((RANDOM))"
+    local release="release-$((RANDOM))"
+    echo "\t: ${scheme}://${host} vars: series=${scheme}, release=${release}"
     hurl --test \
          --report-junit $junit_report \
          --variable scheme="$scheme" \
          --variable host_name="$hostname" \
-         --variable series="series-$(date '+%Y-%m-%d')-$((RANDOM))" \
-         --variable release="release-$((RANDOM))" \
+         --variable series="${series}" \
+         --variable release="${release}" \
          $file
 }
 
