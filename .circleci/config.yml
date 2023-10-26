@@ -48,33 +48,36 @@ jobs:
           project-dir: datahost-ld-openapi
           path: datahost-ld-openapi/test-results
 
-  deploy-graphql-service:
+  build-docker-image:
     executor: clojure-executor
+    parameters:
+      service:
+        description: Service to deploy
+        type: enum
+        enum: ["graphql", "ldapi"]
+      project_dir:
+        type: enum
+        enum: ["datahost-graphql", "datahost-ld-openapi"]
     steps:
       - checkout
-      - run:
-          name: "Deploy GraphQL docker image to registry"
-          command: "clojure -T:build docker :image-type :registry > graphql_container_digest"
-          working_directory: datahost-graphql
-          project-dir: datahost-graphql
+      - when:
+          condition:
+            eq: ["ldapi", << parameters.service >>]
+          steps:
+            - run: 
+                command: "clojure -T:build docker :image-type :registry :to :remote > << parameters.service >>_container_digest"
+                working_directory: << parameters.project_dir >>
+      - when:
+          condition:
+            eq: ["graphql", << parameters.service >>]
+          steps:
+            - run:
+                command: "clojure -T:build docker :image-type :registry > << parameters.service >>_container_digest"
+                working_directory: << parameters.project_dir >>
       - persist_to_workspace:
-          root: datahost-graphql
+          root: << parameters.project_dir >>
           paths:
-            - graphql_container_digest
-
-  deploy-ld-openapi-service:
-    executor: clojure-executor
-    steps:
-      - checkout
-      - run:
-          name: "Deploy Open API docker image to registry"
-          command: "clojure -T:build docker :image-type :registry :to :remote > ldapi_container_digest"
-          working_directory: datahost-ld-openapi
-          project-dir: datahost-ld-openapi
-      - persist_to_workspace:
-          root: datahost-ld-openapi
-          paths:
-            - ldapi_container_digest
+            - << parameters.service >>_container_digest
 
   deploy-service:
     parameters:
@@ -201,11 +204,14 @@ workflows:
           filters: # required since `deploy` has tag filters AND requires `test`
             tags:
               only: /.*/
-      - deploy-graphql-service:
+      - build-docker-image:
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
+          service: graphql
+          project_dir: datahost-graphql
+          name: build-docker-image-graphql
           filters:
             tags:
               only: /^v.*/
@@ -213,24 +219,26 @@ workflows:
             #   ignore: /.*/
           requires:
             - test-graphql-service
-      - deploy-ld-openapi-service:
+      - buld-docker-image: # deploy-ld-openapi-service:
           context:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
+          service: ldapi
+          project_dir: datahost-ld-openapi
           filters:
             # tags:
             #   only: /^v.*/
             branches:
               only: rs/issue-276-ci
-          name: build-ldapi-docker-image
+          name: build-docker-image-ldapi
           requires:
             - test-ld-openapi-service
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
           requires:
-            - deploy-graphql-service
+            - build-docker-image-graphql
           env: dev
           service: graphql
           filters:
@@ -240,8 +248,8 @@ workflows:
       #     context:
       #       - swirrl-ons-datahost-gcloud
       #     requires:
-      #       - deploy-ld-openapi-service
-      #     name: deploy-ldapi-service-dev
+      #       - build-docker-image-ldapi
+      #     name: deploy-service-ldapi-dev
       #     env: dev
       #     service: ldapi
       #     filters:
@@ -251,14 +259,14 @@ workflows:
       #     context:
       #       - swirrl-datahost-dev-client
       #     requires:
-      #       - deploy-ldapi-service-dev
+      #       - deploy-service-ldapi-dev
       #     env: dev
       #     filters:
       #       branches:
       #         only: main
       - ldapi-blackbox-ci-test:
           requires:
-            - build-ldapi-docker-image
+            - build-docker-image-ldapi
             #- deploy-ldapi-vm-dev
           commit_sha: << pipeline.git.revision >>
           #commit_sha: 1b60efd
@@ -272,7 +280,7 @@ workflows:
           context:
             - swirrl-ons-datahost-gcloud
           requires:
-            - deploy-graphql-service
+            - build-docker-image-graphql
           env: ons
           service: graphql
           filters:
@@ -282,7 +290,7 @@ workflows:
       #     context:
       #       - swirrl-ons-datahost-gcloud
       #     requires:
-      #       - deploy-ld-openapi-service
+      #       - build-docker-image-ldapi
       #     env: ons
       #     service: ldapi
       #     filters:
