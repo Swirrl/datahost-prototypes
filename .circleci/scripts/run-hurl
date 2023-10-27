@@ -23,7 +23,6 @@ run_hurl_file() {
 
 for f in $(find "$dir" -type f -name "*.hurl"); do
     echo "RUNNING: $f"
-    # resorting to awk because I can't get $RANDOM to work in here...
     uuid="$(uuidgen -t)"
     run_hurl_file $f "${uuid}"
 done
