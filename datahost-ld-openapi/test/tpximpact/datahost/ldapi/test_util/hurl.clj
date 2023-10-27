@@ -1,4 +1,7 @@
 (ns tpximpact.datahost.ldapi.test-util.hurl
+  "Utilities for running Hurl scripts from Clojure.
+
+  Hurl: https://hurl.dev"
   (:require
    [clojure.java.shell :as shell]
    [clojure.java.io :as io])
