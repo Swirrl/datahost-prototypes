@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 scheme=$1
 hostname=$2
 dir=$3
@@ -25,6 +24,6 @@ run_hurl_file() {
 for f in $(find "$dir" -type f -name "*.hurl"); do
     echo "RUNNING: $f"
     # resorting to awk because I can't get $RANDOM to work in here...
-    rand_num=$(awk -v min=1 -v max=2048 'BEGIN{srand(); print int(min + rand() * (max - min + 1))}')
-    run_hurl_file $f "${rand_num}"
+    uuid="$(uuidgen -t)"
+    run_hurl_file $f "${uuid}"
 done
