@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.basic-test
+(ns tpximpact.datahost.ldapi.integration-test
   (:require
    [clojure.test :refer [deftest is testing]]
    [clojure.java.shell :as shell]
@@ -15,7 +15,7 @@
                           :report-junit "test-results/hurl.xml"})]
         (is (= 0 (:exit result)))))))
 
-(deftest regression-tests
+(deftest integration-tests
   (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
     (let [variables {:host_name (str "localhost:" http-port)
                      :series :hurl.variable.named/series
