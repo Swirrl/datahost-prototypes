@@ -48,19 +48,13 @@
   (.addShutdownHook (Runtime/getRuntime) (Thread. stop-system!)))
 
 (defn start-system [configs]
-  (try
-   (let [initialised-sys (-> configs
-                             (sys/load-configs)
-                             (sys/prep-config)
-                             (ig/init))]
-     (println "Service initialised")
-     (alter-var-root #'system (constantly initialised-sys))
-     initialised-sys)
-   (catch Exception ex
-     (println "ERROR: " (ex-message ex))
-     (throw ex))
-   (finally
-     (println "Leaving `start-system`"))))
+  (let [initialised-sys (-> configs
+                            (sys/load-configs)
+                            (sys/prep-config)
+                            (ig/init))]
+    (println "Service initialised")
+    (alter-var-root #'system (constantly initialised-sys))
+    initialised-sys))
 
 (defn -main [& _args]
   (println (format "Starting Service... CI='%s'" (System/getenv "CI")))
