@@ -25,7 +25,7 @@ HTTP 201
 POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file:schemas/int-double-double.json;
+file,schemas/int-double-double.json;
 
 HTTP 201
 
