@@ -1,0 +1,6 @@
+{"@context":["https://publishmydata.com/def/datahost/context",
+             {"@base": "https://example.org/data/my-dataset-series/"}],
+ "@id": "2018",
+ "dcterms:title": "2018",
+
+ "dcat:inSeries": "/data/my-dataset-series"}

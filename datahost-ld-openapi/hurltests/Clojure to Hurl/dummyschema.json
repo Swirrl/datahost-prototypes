@@ -1,0 +1,26 @@
+{
+	"@type": "dh:TableSchema",
+	"appropriate-csvw:modeling-of-dialect": "UTF-8,RFC4180",
+	"dh:appliesToRelease": "http://localhost:3000/data/dummydata/releases/release-1",
+	"dcterms:title": "Dummy Schema",
+	"dh:columns": [
+		{
+			"@type": "dh:DimensionColumn",
+			"csvw:datatype": "string",
+			"csvw:name": "name",
+            "csvw:titles": "name"
+        },
+        {
+			"@type": "dh:MeasureColumn",
+			"csvw:datatype": "int",
+			"csvw:name": "maxage",
+            "csvw:titles": "maxage"
+        },
+        {
+			"@type": "dh:DimensionColumn",
+			"csvw:datatype": "string",
+			"csvw:name": "colour",
+            "csvw:titles": "colour"
+        }
+	]
+}
