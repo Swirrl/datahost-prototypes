@@ -1,4 +1,4 @@
-#Create a series and make some appends and deletes
+#Create a series and make some changes
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
@@ -106,6 +106,13 @@ Authorization: {{auth_token}}
 
 HTTP 201
 
+POST {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1/schema
+Content-Type: application/json
+Authorization: {{auth_token}}
+file,simple.json;
+
+HTTP 201
+
 
 POST {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1/revisions
 Accept: application/json
@@ -118,8 +125,11 @@ Authorization: {{auth_token}}
 
 HTTP 201
 
+
 #make a json GET to the new revision that should have no changes yet
-#but you will see all revisions from all other series that have changes.
+#but you receive all revisions from all other series that have changes.
+#this only happens if the revision is empty. if you make the same request after adding
+#a change you will get the expected metadata.
 
 GET {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1/revisions/1
 Accept: application/json
