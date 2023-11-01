@@ -238,12 +238,11 @@ workflows:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
-
           filters:
             tags:
               only: /^v.*/
-            # branches:
-            #   ignore: /.*/
+            branches:
+              ignore: /.*/
           requires:
             - unit-test-graphql
       - build-docker-image:
