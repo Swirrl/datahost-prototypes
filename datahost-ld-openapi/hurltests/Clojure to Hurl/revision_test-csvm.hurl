@@ -36,13 +36,84 @@ HTTP 201
 [Captures]
 revision1_url: header "Location"
 
+
+#make sure non existant revision returns nothing
 GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions/does-not-exist
 
 HTTP 404
 [Asserts]
 body == "Not found"
 
-
+#make sure existing revision returns csv
+#this test in run while the revision is empty and returns nothing as is correct
+#but accepting application/json there is a report issue (#301)
 GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions/1
-Accept: application/json
+Accept: text/csv
+
 HTTP 200
+
+
+GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions/1-metadata.json
+
+
+HTTP 200
+[Asserts]
+body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
+
+
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
+Content-Type: application/json
+Authorization: {{auth_token}}
+file,simple.json;
+
+HTTP 201
+
+POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
+Content-Type: text/csv
+Authorization: {{auth_token}}
+[QueryStringParams]
+title: changes appends
+description: change for {{series}}
+file,2019.csv;
+
+HTTP 201
+
+#try agin with actual data to retrieve 
+GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions/1
+Accept: text/csv
+
+HTTP 200
+```
+Measure type,Statistical Geography,Year,Aged 16 to 64 years level 3 or above qualifications,Unit of Measure,Upper Confidence Interval,Lower Confidence Interval,Observation Status
+Aged 16 to 64 years level 3 or above qualifications,City of London,2019,,per cent,,,https://purl.org/csv-cubed/resources/attributes/af-obs-marker#x
+Aged 16 to 64 years level 3 or above qualifications,Hackney,2019,68.3,per cent,75.0,61.6,
+Aged 16 to 64 years level 3 or above qualifications,Lewisham,2019,75.6,per cent,81.7,69.5,
+Aged 16 to 64 years level 3 or above qualifications,North Lanarkshire,2019,52.5,per cent,58.2,46.8,
+Aged 16 to 64 years level 3 or above qualifications,Bury,2019,57.9,per cent,63.1,52.7,
+Aged 16 to 64 years level 3 or above qualifications,St. Helens,2019,53.9,per cent,59.6,48.2,
+Aged 16 to 64 years level 3 or above qualifications,Sunderland,2019,50.2,per cent,55.3,45.1,
+Aged 16 to 64 years level 3 or above qualifications,West Midlands (Combined Authority),2019,48.7,per cent,50.6,46.8,
+Aged 16 to 64 years level 3 or above qualifications,Runnymede,2019,73.4,per cent,87.7,59.1,
+Aged 16 to 64 years level 3 or above qualifications,Leeds,2019,61.0,per cent,65.5,56.5,
+Aged 16 to 64 years level 3 or above qualifications,Three Rivers,2019,74.8,per cent,88.3,61.3,
+Aged 16 to 64 years level 3 or above qualifications,Adur,2019,65.5,per cent,85.2,45.8,
+Aged 16 to 64 years level 3 or above qualifications,Swale,2019,42.5,per cent,53.6,31.4,
+Aged 16 to 64 years level 3 or above qualifications,Bromsgrove,2019,67.7,per cent,79.7,55.7,
+Aged 16 to 64 years level 3 or above qualifications,Ribble Valley,2019,76.6,per cent,92.3,60.9,
+Aged 16 to 64 years level 3 or above qualifications,West Suffolk,2019,49.1,per cent,59.8,38.4,
+Aged 16 to 64 years level 3 or above qualifications,Oadby and Wigston,2019,68.3,per cent,85.0,51.6,
+Aged 16 to 64 years level 3 or above qualifications,King's Lynn and West Norfolk,2019,51.8,per cent,62.8,40.8,
+Aged 16 to 64 years level 3 or above qualifications,Erewash,2019,55.2,per cent,66.8,43.6,
+Aged 16 to 64 years level 3 or above qualifications,West Devon,2019,67.1,per cent,84.2,50.0,
+Aged 16 to 64 years level 3 or above qualifications,Scarborough,2019,50.8,per cent,62.6,39.0,
+Aged 16 to 64 years level 3 or above qualifications,South Oxfordshire,2019,64.5,per cent,75.2,53.8,
+Aged 16 to 64 years level 3 or above qualifications,South West,2019,60.5,per cent,61.9,59.1,
+Aged 16 to 64 years level 3 or above qualifications,Stockton-on-Tees,2019,53.6,per cent,59.1,48.1,
+Aged 16 to 64 years level 3 or above qualifications,Castle Point,2019,43.3,per cent,59.5,27.1,
+Aged 16 to 64 years level 3 or above qualifications,Derby,2019,53.8,per cent,59.0,48.6,
+Aged 16 to 64 years level 3 or above qualifications,Great Britain,2019,58.5,per cent,58.9,58.1,
+Aged 16 to 64 years level 3 or above qualifications,Plymouth,2019,54.0,per cent,59.4,48.6,
+Aged 16 to 64 years level 3 or above qualifications,West Berkshire,2019,65.7,per cent,71.2,60.2,
+Aged 16 to 64 years level 3 or above qualifications,Dorset,2019,59.5,per cent,65.6,53.4,
+Aged 16 to 64 years level 3 or above qualifications,Scotland,2019,60.8,per cent,61.9,59.7,
+```
