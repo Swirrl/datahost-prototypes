@@ -1,6 +1,8 @@
-# HURL SCRIPTS
+# Integration Testing
 
-This directory contains integration tests in the form of [Hurl][hurl] scripts.
+The datahost-ld-openapi project's integration testing is done mainy with [Hurl][hurl].
+
+A test suite is defined by a directory structured according to certain [conventions](#conventions).
 
 ## Conventions
 
