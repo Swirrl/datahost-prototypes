@@ -136,12 +136,16 @@ jobs:
              awk -F"=" '/^host=/{host=$2} /^zone=/{zone=$2} END{print host "." zone}' > HOSTNAME
       - run:
           name: "Run the hurl scripts"
+          working_directory: << parameters.project_dir >>
           command: |
             echo "running hurl against host: $(cat ../HOSTNAME)"
-            mkdir << parameters.project_dir >>/test-results
-            .circleci/scripts/run-hurl https "$(cat ../HOSTNAME)" \
-              "<< parameters.project_dir >>/hurl-scripts" \
-              "<< parameters.project_dir >>/test-results/live.xml"
+            mkdir test-results
+            bb bin/hurl-runner.bb --dir hurl-scripts \
+              --variable scheme=https \
+              --variable "host_name=$(cat ../HOSTNAME)" \
+              --variable "series=hurl.variable.named/series" \
+              --variable "release=hurl.variable.named/release" \
+              --report-junit test-results/libe.xml
 
   ci-live-service-test:
     # runs ldapi service container + container with hurl
@@ -170,11 +174,14 @@ jobs:
       - run:
           name: "Run the hurl scripts"
           command: |
-            echo "running hurl against host: localhost"
-            mkdir << parameters.project_dir >>/test-results
-            .circleci/scripts/run-hurl http localhost \
-              "<< parameters.project_dir >>/hurl-scripts" \
-              "<< parameters.project_dir >>/test-results/ci-live.xml"
+            echo "running hurl against host: localahost"
+            mkdir test-results
+            bb bin/hurl-runner.bb --dir hurl-scripts \
+              --variable scheme=http \
+              --variable "host_name=localhost" \
+              --variable "series=hurl.variable.named/series" \
+              --variable "release=hurl.variable.named/release" \
+              --report-junit test-results/ci-live.xml
       - store_test_results:
           path: << parameters.project_dir >>/test-results
 

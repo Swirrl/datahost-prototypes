@@ -24,7 +24,7 @@ HTTP 201
 
 POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
 Content-Type: application/json
-file,schema-name-age.json;
+file,common/schema-name-age.json;
 
 HTTP 201
 
