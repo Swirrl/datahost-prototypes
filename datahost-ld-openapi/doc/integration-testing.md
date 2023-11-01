@@ -2,7 +2,7 @@
 
 The datahost-ld-openapi project's integration testing is done mainy with [Hurl][hurl].
 
-A test suite is defined by a directory structured according to certain [conventions](#conventions).
+A test suite is defined by a directory structured according to certain [conventions](#conventions). The test suite is executed by the `bin/hurl-runner.bb` script which takes care of detecting any setup file and executing them before the test.
 
 ## Conventions
 
