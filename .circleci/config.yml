@@ -316,13 +316,13 @@ workflows:
           filters:
             branches:
               only: ons
-      # - deploy-service:
-      #     service: ldapi
-      #     env: ons
-      #     context:
-      #       - swirrl-ons-datahost-gcloud
-      #     requires:
-      #       - build-docker-image-ldapi
-      #     filters:
-      #       branches:
-      #         only: ons
+      - deploy-service:
+          service: ldapi
+          env: ons
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - build-docker-image-ldapi
+          filters:
+            branches:
+              only: ons
