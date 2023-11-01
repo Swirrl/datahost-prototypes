@@ -16,7 +16,7 @@
 
 (defn hurl
   [{:keys [script variables report-junit report-html file-root]}]
-  (let [variables (merge {:scheme "http"} variables)
+  (let [variables (merge {"scheme" "http"} variables)
         hurl-variables (mapcat (fn [v] ["--variable" v])
                                (variables->args variables))
         args (cond-> ["--test"]
@@ -24,9 +24,9 @@
                report-html (conj "--report-html" report-html)
                file-root (conj "--file-root" (str file-root))
                :always (into hurl-variables))]
-    (assoc (apply shell/sh "hurl" script args) :hurl/args args)
-    ;;(println "RUNNING HURL: " (str script) args)
-    ))
+    (assoc (apply shell/sh "hurl" (str script) args)
+           :hurl/args args
+           :script (str script))))
 
 (defmulti -instantiate-value (fn [kw] (namespace kw)))
 
