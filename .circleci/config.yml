@@ -258,7 +258,7 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: rs/issue-276-ci
+              only: main
           requires:
             - unit-test-ldapi
       - deploy-service:
@@ -299,7 +299,7 @@ workflows:
             - integration-test-ldapi
           filters:
             branches:
-              only: rs/issue-276-ci
+              only: main
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
