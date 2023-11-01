@@ -1,6 +1,7 @@
 (ns hurl-runner
   (:require [clojure.java.io :as io]
             [clojure.java.shell :as shell]
+            [clojure.pprint :as pp]
             [babashka.fs :as fs]
             [babashka.cli :as cli]
             [tpximpact.datahost.ldapi.test-util.hurl :refer [run-directory]])
@@ -36,4 +37,5 @@
                        (dissoc :variable)
                        (assoc :variables (transform-cli-variables variable))))))
 
-(main *command-line-args*)
+(binding [pp/*print-right-margin* 200]
+ (pp/pprint (main *command-line-args*)))
