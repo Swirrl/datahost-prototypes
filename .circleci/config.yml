@@ -173,6 +173,7 @@ jobs:
             .circleci/scripts/wait-for-service "http://localhost"
       - run:
           name: "Run the hurl scripts"
+          working_directory: << parameters.project_dir >>
           command: |
             echo "running hurl against host: localahost"
             mkdir test-results
