@@ -4,7 +4,7 @@
             [clojure.pprint :as pp]
             [babashka.fs :as fs]
             [babashka.cli :as cli]
-            [tpximpact.datahost.ldapi.test-util.hurl :refer [run-directory]])
+            [tpximpact.datahost.ldapi.test-util.hurl :refer [run-directory success?]])
   (:import [java.nio.file Path Files]))
 
 (def cli-options {:dir {:coerce :string}
@@ -38,4 +38,14 @@
                        (assoc :variables (transform-cli-variables variable))))))
 
 (binding [pp/*print-right-margin* 200]
- (pp/pprint (main *command-line-args*)))
+  (let [results (main *command-line-args*)]
+    (doseq [result results]
+      (do
+        (println "🚀 running: " (:script result))
+        (pp/pprint (dissoc result :err :script))
+        (println "--- stderr ---")
+        (println (:err result))))
+    (when-not (success? results)
+      (println "🙅‍♂️ there were errors")
+      (System/exit 2))
+    (println " 👍 all good")))
