@@ -145,7 +145,10 @@ jobs:
               --variable "host_name=$(cat ../HOSTNAME)" \
               --variable "series=hurl.variable.named/series" \
               --variable "release=hurl.variable.named/release" \
-              --report-junit test-results/libe.xml
+              --report-junit test-results/live.xml \
+              --report-html test-report
+      - store_artifacts:
+          path: << parameters.project_dir >>/test-report
 
   ci-live-service-test:
     # runs ldapi service container + container with hurl
@@ -183,11 +186,11 @@ jobs:
               --variable "series=hurl.variable.named/series" \
               --variable "release=hurl.variable.named/release" \
               --report-junit test-results/ci-live.xml \
-              --report-html report-ci-live-service-test
+              --report-html test-report
       - store_test_results:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
-          path: << parameters.project_dir >>/report-ci-live-service-test
+          path: << parameters.project_dir >>/test-report
 
   integration-test:
     # Runs hurl scripts via unit test in the project.
