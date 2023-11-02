@@ -301,7 +301,7 @@ workflows:
             - integration-test-ldapi
           filters:
             branches:
-              only: main
+              only: rs/issue-276-ci
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
