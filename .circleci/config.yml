@@ -260,7 +260,7 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: main
+              only: rs/issue-276-ci
           requires:
             - unit-test-ldapi
       - deploy-service:
