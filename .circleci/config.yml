@@ -182,9 +182,12 @@ jobs:
               --variable "host_name=localhost" \
               --variable "series=hurl.variable.named/series" \
               --variable "release=hurl.variable.named/release" \
-              --report-junit test-results/ci-live.xml
+              --report-junit test-results/ci-live.xml \
+              --report-html report-ci-live-service-test
       - store_test_results:
           path: << parameters.project_dir >>/test-results
+      - store_artifacts:
+          path: report-ci-live-service-test
 
   integration-test:
     # Runs hurl scripts via unit test in the project.
