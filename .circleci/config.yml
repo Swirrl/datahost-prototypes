@@ -7,6 +7,17 @@ orbs:
   gcp-cli: circleci/gcp-cli@3.1.0
   terraform: circleci/terraform@3.2.1
 
+commands:
+  await:
+    description: "Wait for a service to start by polling it"
+    parameters:
+      service:
+        type: string
+    steps:
+      - run:
+          name: await service
+          command: wget -nv -O - --retry-connrefused --tries 30 --waitretry=2 << parameters.service >>
+
 executors:
   clojure-executor:
     docker:
@@ -170,10 +181,8 @@ jobs:
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
     steps:
       - checkout
-      - run:
-          name: wait for the service to start
-          command: |
-            .circleci/scripts/wait-for-service "http://localhost"
+      - await:
+          service: http://localhost
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
