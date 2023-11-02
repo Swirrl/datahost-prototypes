@@ -187,7 +187,7 @@ jobs:
       - store_test_results:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
-          path: report-ci-live-service-test
+          path: << parameters.project_dir >>/report-ci-live-service-test
 
   integration-test:
     # Runs hurl scripts via unit test in the project.
