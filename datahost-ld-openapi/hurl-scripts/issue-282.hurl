@@ -12,16 +12,16 @@ GET {{scheme}}://{{host_name}}/data/{{series}}
 
 HTTP 200
 
-PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}
 Content-Type: application/json
 {"dcterms:description": "Release: {{release}}",
 "dcterms:title": "{{release}}"}
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}
 
 HTTP 200
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}/schema
 Content-Type: application/json
 {
  "@type": "dh:TableSchema",
@@ -50,7 +50,7 @@ Content-Type: application/json
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/{{release}}/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}/revisions
 Accept: application/json
 Content-Type: application/json
 {

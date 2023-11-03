@@ -12,7 +12,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 {
@@ -22,13 +22,13 @@ Content-Type: application/json
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 file,common/schema-name-age.json;
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -63,7 +63,7 @@ file,issue-253/2.csv;
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -109,7 +109,7 @@ file,issue-253/1.csv;
 
 HTTP 422
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 
 HTTP 200
