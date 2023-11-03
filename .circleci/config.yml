@@ -285,26 +285,17 @@ workflows:
           filters:
             branches:
               only: main
-      # - deploy-service:
-      #     context:
-      #       - swirrl-ons-datahost-gcloud
-      #     requires:
-      #       - build-docker-image-ldapi
-      #     name: deploy-service-ldapi-dev
-      #     env: dev
-      #     service: ldapi
-      #     filters:
-      #       branches:
-      #         only: main
-      # - live-service-test:
-      #     context:
-      #       - swirrl-datahost-dev-client
-      #     requires:
-      #       - deploy-service-ldapi-dev
-      #     env: dev
-      #     filters:
-      #       branches:
-      #         only: main
+      - deploy-service:
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - build-docker-image-ldapi
+          name: deploy-service-ldapi-dev
+          env: dev
+          service: ldapi
+          filters:
+            branches:
+              only: main
       - ci-live-service-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
