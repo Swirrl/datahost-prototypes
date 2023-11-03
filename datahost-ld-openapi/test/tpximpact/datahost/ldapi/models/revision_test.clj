@@ -18,9 +18,9 @@
    [tpximpact.datahost.system-uris :as su]
    [tpximpact.datahost.time :as time]
    [tpximpact.test-helpers :as th])
-  (:import (java.io BufferedReader StringReader)
-           (java.net URI)
-           (java.util UUID)))
+  (:import [java.io BufferedReader StringReader ByteArrayInputStream]
+           [java.net URI]
+           [java.util UUID]))
 
 (defn find-first
   [f coll]
@@ -47,7 +47,7 @@
 (defn- create-release [handler series-slug]
   (let [release-slug (str "test-release-" (UUID/randomUUID))
         request-json {"dcterms:title" "Test release" "dcterms:description" "Description"}
-        request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
+        request {:uri (format "/data/%s/release/%s" series-slug release-slug)
                  :request-method :put
                  :headers {"accept" "application/ld+json"
                            "content-type" "application/json"}
@@ -80,8 +80,8 @@
                             {:content-type :application/json
                              :body (json/write-str {"dcterms:title" revision-title})})
         new-revision-location (-> revision-resp :headers (get "Location"))
-        [revision-id change-id] (re-find #"\/data\/.*\/revisions\/(\d+)\/changes\/(\d+)"
-                                         "/data/whatever/revisions/3/changes/1")
+        [revision-id change-id] (re-find #"\/data\/.*\/revision\/(\d+)\/commit\/(\d+)"
+                                         "/data/whatever/revision/3/commit/1")
         _ (assert revision-id)
         _ (assert change-id)
         change-ednld {"description" (str revision-title " -- changes")}
@@ -113,7 +113,7 @@
           series-slug (create-series handler)
           [release-slug release-doc] (create-release handler series-slug)
           release-uri (resource-id release-doc)
-          request1 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+          request1 {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
                     :request-method :post
                     :headers {"accept" "application/ld+json"
                               "content-type" "application/json"}
@@ -125,13 +125,13 @@
       (t/is (= "Test revision" (get revision-doc "dcterms:title")))
       (t/is (= "Description" (get revision-doc "dcterms:description")))
       (t/is (= release-uri (URI. (get revision-doc "dh:appliesToRelease"))))
-      (t/is (str/ends-with? (get revision-doc "@id") "/revisions/1")
+      (t/is (str/ends-with? (get revision-doc "@id") "/revision/1")
             "auto-increment revision ID is assigned")
 
       (testing "A single revision can be can be retrieved via the list API"
         ;; NOTE: this test is essential for ensuring that single item collections
         ;; are serialized within an array wrapper and not as a hash-map
-        (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+        (let [all-revisions-request {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
                                      :headers {"accept" "application/ld+json"}
                                      :request-method :get}
               {:keys [body status]} (handler all-revisions-request)
@@ -145,7 +145,7 @@
           (t/is (= (count (get release-doc "contents")) 1))
           (t/is (= nil missing))))
 
-      (let [request2 {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+      (let [request2 {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
                       :request-method :post
                       :headers {"accept" "application/ld+json"
                                 "content-type" "application/json"}
@@ -155,21 +155,21 @@
             revision-doc2 (json/read-str body)]
         (t/is (= 201 status)
               "second revision was successfully created")
-        (t/is (str/ends-with? (get revision-doc2 "@id") "/revisions/2")
+        (t/is (str/ends-with? (get revision-doc2 "@id") "/revision/2")
               "subsequent revision has next auto-increment revision ID assigned"))
 
-      (let [release-request {:uri (format "/data/%s/releases/%s" series-slug release-slug)
+      (let [release-request {:uri (format "/data/%s/release/%s" series-slug release-slug)
                              :headers {"accept" "application/ld+json"}
                              :request-method :get}
             {:keys [body]} (handler release-request)
             release-doc (json/read-str body)
             release-revisions (get-release-revisions release-doc)]
-        (t/is (= #{(format "https://example.org/data/%s/releases/%s/revisions/1" series-slug release-slug)
-                   (format "https://example.org/data/%s/releases/%s/revisions/2" series-slug release-slug)}
+        (t/is (= #{(format "https://example.org/data/%s/release/%s/revision/1" series-slug release-slug)
+                   (format "https://example.org/data/%s/release/%s/revision/2" series-slug release-slug)}
                  release-revisions)))
 
       (testing "Multiple revisions can be can be retrieved via the list API"
-        (let [all-revisions-request {:uri (format "/data/%s/releases/%s/revisions" series-slug release-slug)
+        (let [all-revisions-request {:uri (format "/data/%s/release/%s/revisions" series-slug release-slug)
                                      :headers {"accept" "application/ld+json"}
                                      :request-method :get}
               {:keys [body status]} (handler all-revisions-request)
@@ -210,7 +210,7 @@
       (testing "Creating a revision for an existing release and series"
         ;; RELEASE
         (let [release-slug (str "release-" (UUID/randomUUID))
-              release-url (str "/data/" series-slug "/releases/" release-slug)
+              release-url (str "/data/" series-slug "/release/" release-slug)
               release-resp (PUT release-url
                              {:content-type :application/json
                               :headers {"accept" "application/ld+json"}
@@ -265,7 +265,7 @@
                 normalised-revision-ld {"dcterms:title" revision-title
                                         "dcterms:description" revision-description
                                         "@type" "dh:Revision"
-                                        "dh:appliesToRelease" (str rdf-base-uri series-slug "/releases/" release-slug)
+                                        "dh:appliesToRelease" (str rdf-base-uri series-slug "/release/" release-slug)
                                         "dh:publicationDate" "2023-09-01"
                                         "dcterms:license" "http://license-link"
                                         "dh:reasonForChange" "Comment.."}
@@ -295,7 +295,7 @@
               (let [release-resp (GET release-url {:headers {"accept" "application/ld+json"}})
                     release-doc (json/read-str (:body release-resp))
                     release-revisions (get-release-revisions release-doc)]
-                (t/is (= #{(str rdf-base-uri series-slug "/releases/" release-slug "/revisions/1")}
+                (t/is (= #{(str rdf-base-uri series-slug "/release/" release-slug "/revision/1")}
                          release-revisions))))
 
             (testing "Changes append resource created with CSV appends file"
@@ -308,7 +308,7 @@
                     new-change-resource-location (-> change-api-response :headers (get "Location"))]
 
                 (is (= 201 (:status change-api-response)))
-                (is (= (str new-revision-location "/changes/1")
+                (is (= (str new-revision-location "/commit/1")
                        new-change-resource-location)
                     "Created with the resource URI provided in the Location header")
 
@@ -321,7 +321,7 @@
                         "responds CSV contents")))))
 
             (testing "Ensure we can add more than 1 change to a revision."
-              ; /data/:series-slug/releases/:release-slug/revisions/:revision-id/appends
+              ; /data/:series-slug/release/:release-slug/revision/:revision-id/appends
               (let [query-params {"description" "A second change"}
                     change-api-response (POST (str new-revision-location "/appends")
                                           {:query-params query-params
@@ -353,7 +353,7 @@
                 new-revision-location-2 (-> revision-resp-2 :headers (get "Location"))]
 
             (is (= 201 (:status revision-resp-2)))
-            (is (re-find #".*\/revisions\/2" inserted-revision-id-2))
+            (is (re-find #".*\/revision\/2" inserted-revision-id-2))
             (is (str/ends-with? new-revision-location-2 inserted-revision-id-2)
                 "Created with the resource URI provided in the Location header")
 
@@ -364,7 +364,7 @@
                                                  :headers {"content-type" "text/csv"}
                                                  :body (th/file-upload csv-2021-path)})]
                   (is (= 201 (:status change-api-response)))
-                  (is (id-matches? (:body change-api-response) "/changes/1"))))
+                  (is (id-matches? (:body change-api-response) "/commit/1"))))
 
               (testing "Fetching Release as CSV with multiple Revisions and CSV append changes"
 
@@ -395,7 +395,7 @@
                            body))))))
 
             (testing "Fetching Revision as accumulated CSV from all revisions so far."
-              (let [response (GET (str release-url "/revisions/2") {:headers {"accept" "text/csv"}})
+              (let [response (GET (str release-url "/revision/2") {:headers {"accept" "text/csv"}})
                     resp-body-seq (line-seq (BufferedReader. (StringReader. (:body response))))]
                 (is (= 200 (:status response)))
                 ;; length of all csv files minus duplicated headers
@@ -411,19 +411,19 @@
             (testing "POST retractions against against 3rd Revision"
               (change-test http-client release-url :dh/ChangeKindRetract "revision #3"
                            csv-2021-deletes-path
-                           "/revisions/3/changes/1"))
+                           "/revision/3/commit/1"))
 
             (testing "POST corrections against 4th Revision"
               (change-test http-client release-url :dh/ChangeKindCorrect "revision #4"
                            csv-2021-corrections-path
-                           "/revisions/4/changes/1")
+                           "/revision/4/commit/1")
 
               (testing "verifying the snapshot CSV"
                 (let [measure-column "Aged 16 to 64 years level 3 or above qualifications"
-                      resp (GET (str release-url "/revisions/4") {:headers {"accept" "text/csv"}})
+                      resp (GET (str release-url "/revision/4") {:headers {"accept" "text/csv"}})
                       ds (data-validation/as-dataset (-> (:body resp)
                                                          .getBytes
-                                                         (java.io.ByteArrayInputStream.))
+                                                         (ByteArrayInputStream.))
                                                      {})]
                   (is (= 200 (:status resp)))
                   (is (= (+ (dec (count csv-2019-seq))
@@ -446,7 +446,7 @@
                                      (get (json/read-str (:body resp)) "@id"))]
               ;; This Release already has 4 Revisions, so we expect another 10 in the series
               (is (= (for [i (range 5 15)]
-                       (format "%s/releases/%s/revisions/%d" series-slug release-slug i))
+                       (format "%s/release/%s/revision/%d" series-slug release-slug i))
                      new-revision-ids)
                   "Expected Revision IDs integers increase in an orderly sequence")))
 
@@ -463,8 +463,9 @@
     (let [new-series-slug (str "new-series-" (UUID/randomUUID))
           new-series-path (str "/data/" new-series-slug)
           release-1-id (str "release-" (UUID/randomUUID))
-          release-1-path (str new-series-path "/releases/" release-1-id)
+          release-1-path (str new-series-path "/release/" release-1-id)
           revision-post-url (str release-1-path "/revisions")
+          revision-get-url (str release-1-path "/revision")
           _
           (PUT new-series-path
                {:content-type :json
@@ -487,7 +488,7 @@
 
       (testing "Fetching csvw metadata for a revision that does not exist returns 'not found'"
 
-        (let [{:keys [status body]} (GET (str revision-post-url "/does-not-exist"))]
+        (let [{:keys [status body]} (GET (str revision-get-url "/does-not-exist"))]
           (is (= 404 status))
           (is (= "Not found" body))))
 

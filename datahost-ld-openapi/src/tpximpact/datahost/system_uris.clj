@@ -16,7 +16,7 @@
   (str (.getPath ld-root) series-slug))
 
 (defn- release-key [ld-root series-slug release-slug]
-  (str (dataset-series-key ld-root series-slug) "/releases/" release-slug))
+  (str (dataset-series-key ld-root series-slug) "/release/" release-slug))
 
 (defn- release-schema-key
   ([ld-root {:keys [series-slug release-slug]}]
@@ -25,10 +25,10 @@
    (str (release-key ld-root series-slug release-slug) "/schema" )))
 
 (defn- revision-key [ld-root series-slug release-slug revision-id]
-  (str (release-key ld-root series-slug release-slug) "/revisions/" revision-id))
+  (str (release-key ld-root series-slug release-slug) "/revision/" revision-id))
 
-(defn change-key [ld-root series-slug release-slug revision-id change-id]
-  (str (revision-key ld-root series-slug release-slug revision-id) "/changes/" change-id))
+(defn commit-key [ld-root series-slug release-slug revision-id commit-id]
+  (str (revision-key ld-root series-slug release-slug revision-id) "/commit/" commit-id))
 
 (defprotocol AppUri
   "Build LD API application URIs based upon a configurable base URI state"
@@ -48,9 +48,9 @@
 
   (dataset-revision-uri* [this api-params])
 
-  (change-uri [this series-slug release-slug revision-id change-id])
+  (commit-uri [this series-slug release-slug revision-id commit-id])
 
-  (change-uri* [this api-params]))
+  (commit-uri* [this api-params]))
 
 (defn make-system-uris
   "Returns an object that builds URIs based upon the configured RDF base URI"
@@ -66,10 +66,10 @@
       (dataset-series-uri this series-slug))
 
     (dataset-release-uri [_ series-uri release-slug]
-      (URI. (format "%s/releases/%s" series-uri release-slug)))
+      (URI. (format "%s/release/%s" series-uri release-slug)))
 
     (dataset-release-uri* [this {:keys [series-slug release-slug] :as _api-params}]
-      (URI. (format "%s/releases/%s" (dataset-series-uri this series-slug) release-slug)))
+      (URI. (format "%s/release/%s" (dataset-series-uri this series-slug) release-slug)))
 
     (release-schema-uri [_ {:keys [series-slug release-slug]}]
       (.resolve base-uri (release-schema-key base-uri series-slug release-slug)))
@@ -78,15 +78,15 @@
       (.resolve base-uri (revision-key base-uri series-slug release-slug revision-id)))
 
     (dataset-revision-uri* [this {:keys [series-slug release-slug revision-id]}]
-      (URI. (format "%s/releases/%s/revisions/%s" (dataset-series-uri this series-slug) release-slug revision-id)))
+      (URI. (format "%s/release/%s/revision/%s" (dataset-series-uri this series-slug) release-slug revision-id)))
 
-    (change-uri [_ series-slug release-slug revision-id change-id]
-      (assert change-id)
-      (.resolve base-uri (change-key base-uri series-slug release-slug revision-id change-id)))
+    (commit-uri [_ series-slug release-slug revision-id commit-id]
+      (assert commit-id)
+      (.resolve base-uri (commit-key base-uri series-slug release-slug revision-id commit-id)))
 
-    (change-uri* [_this {:keys [series-slug release-slug revision-id change-id]}]
-      (assert change-id)
-      (.resolve base-uri (change-key base-uri series-slug release-slug revision-id change-id)))))
+    (commit-uri* [_this {:keys [series-slug release-slug revision-id commit-id]}]
+      (assert commit-id)
+      (.resolve base-uri (commit-key base-uri series-slug release-slug revision-id commit-id)))))
 
 (defmethod ig/init-key ::uris [_ opts]
   (make-system-uris (:rdf-base-uri opts)))
@@ -105,7 +105,7 @@
   (dataset-revision-uri* system-uris params))
 
 (defmethod -resource-uri :dh/Change [_ system-uris {:keys [series-slug release-slug revision-id change-id]}]
-  (change-uri system-uris series-slug release-slug revision-id change-id))
+  (commit-uri system-uris series-slug release-slug revision-id change-id))
 
 (defn resource-uri
   "Returns an uri for resource, where resource in

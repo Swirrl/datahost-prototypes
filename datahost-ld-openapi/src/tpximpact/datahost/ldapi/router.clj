@@ -327,8 +327,9 @@ specifications for each route.")
        :delete (routes.s/delete-series-route-config triplestore change-store system-uris)}]
 
      ["/:series-slug/releases"
-      ["" {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
+      {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
 
+     ["/:series-slug/release"
       ["/:release-slug"
        {:get (routes.rel/get-release-route-config triplestore change-store system-uris)
         :put (routes.rel/put-release-route-config clock triplestore system-uris)}]
@@ -338,23 +339,24 @@ specifications for each route.")
         :post (routes.rel/post-release-ld-schema-config clock triplestore system-uris)}]
 
       ["/:release-slug/revisions"
-       ["" {:post (routes.rev/post-revision-route-config triplestore system-uris)
-            :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
+       {:post (routes.rev/post-revision-route-config triplestore system-uris)
+        :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
 
+      ["/:release-slug/revision"
        ["/:revision-id"
         {:name ::revision
          :get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
 
-       ["/:revision-id/changes"
-        ["/:change-id"
-         {:name ::change
-          :get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]]
+       ["/:revision-id/commit/:commit-id"
+        {:name ::change
+         :get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/appends"
-        ["" {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]]
+        {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/retractions"
         {:post (routes.rev/post-revision-retractions-changes-route-config triplestore change-store system-uris)}]
+
        ["/:revision-id/corrections"
         {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]]]]]
 

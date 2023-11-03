@@ -17,7 +17,7 @@
                                           {"@base" "https://example.org/data/"}],
                               "dcterms:title" "My series"
                               "dcterms:description" (format "some-description-%s" n)}}))
-    (PUT (format "/data/my-series-%s/releases/release-%s" n n)
+    (PUT (format "/data/my-series-%s/release/release-%s" n n)
          (prepare-req {:content-type :json
                        :body {"@context" ["https://publishmydata.com/debf/datahost/context"
                                           {"@base" (format "https://example.org/data/my-series-%s/" n)}]
@@ -30,7 +30,7 @@
   [tag rdf-base-uri]
   {"@type" "dh:TableSchema"
    "appropriate-csvw:modeling-of-dialect" "UTF-8,RFC4180"
-   "dh:appliesToRelease" (format "%smy-series-%s/releases/release-%s" rdf-base-uri tag tag)
+   "dh:appliesToRelease" (format "%smy-series-%s/release/release-%s" rdf-base-uri tag tag)
    "dcterms:title" "Fun schema"
    "dh:columns" [{"@type" "dh:DimensionColumn"
                   "csvw:datatype" "string"
@@ -55,7 +55,7 @@
                     "csvw:titles" titles
                     "@type" typ})]
     (testing "Creating a schema from file upload"
-      (let [schema-fragment (format "my-series-%s/releases/release-%s/schema" n n)
+      (let [schema-fragment (format "my-series-%s/release/release-%s/schema" n n)
             schema-resource-path (str "/data/" schema-fragment)
             schema-uri (str rdf-base-uri schema-fragment)
             rel-schema {"@context" ["https://publishmydata.com/def/datahost/context"
@@ -71,12 +71,12 @@
         (is (= nil missing))
 
         (testing "The release was updated with a reference to the schema"
-          (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s" n n))
+          (let [{body :body} (GET (format "/data/my-series-%s/release/release-%s" n n))
                 body (json/read-str body)]
             (is (= schema-uri (get body "dh:hasSchema")))))
 
         (testing "The schema can be retrieved"
-          (let [{body :body} (GET (format "/data/my-series-%s/releases/release-%s/schema" n n))
+          (let [{body :body} (GET (format "/data/my-series-%s/release/release-%s/schema" n n))
                 body (json/read-str body)
                 [missing _extra _matching] (diff expected-doc body)]
             (is (= nil missing))))))))
@@ -86,7 +86,7 @@
         _ (setup-release n)
         {{:keys [GET POST]} :tpximpact.datahost.ldapi.test/http-client
          ld-api-app :tpximpact.datahost.ldapi.router/handler} @th/*system*
-        schema-path (format "/data/my-series-%s/releases/release-%s/schema" n n)
+        schema-path (format "/data/my-series-%s/release/release-%s/schema" n n)
         schema {"dcterms:title" "Fun schema"
                 "dcterms:description" "Description"
                 "dh:columns" [{"@type" "dh:MeasureColumn"
@@ -100,7 +100,7 @@
 
         _response (POST schema-path (th/jsonld-body-request schema))
 
-        fetch-response (GET (format "/data/my-series-%s/releases/release-%s/schema" n n))
+        fetch-response (GET (format "/data/my-series-%s/release/release-%s/schema" n n))
         fetched-doc (json/read-str (:body fetch-response))
         [missing _ _ ] (diff schema fetched-doc)]
     (t/is (= nil missing))))

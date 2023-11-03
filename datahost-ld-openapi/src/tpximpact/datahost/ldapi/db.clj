@@ -685,7 +685,7 @@
   (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
     (let [prev-change-id (last-change-num conn rev-uri)
           change-id (inc prev-change-id)
-          change-uri (su/change-uri* system-uris (assoc api-params :change-id change-id))
+          change-uri (su/commit-uri* system-uris (assoc api-params :commit-id change-id))
           _ (log/debug (format "will insert-change for '%s', new change id = %s"
                                (.getPath ^URI rev-uri) change-id))
           change (request->change kind api-params ld-root rev-uri change-uri)
@@ -728,7 +728,7 @@
 
       (number? c)                          ; we got a definitive answer
       (get-change triplestore
-                  (su/change-uri* system-uris (assoc params :revision-id prev-rev-id :change-id c)))
+                  (su/commit-uri* system-uris (assoc params :revision-id prev-rev-id :commit-id c)))
 
       (= :find c)                       ; we need to find change-id
       (let [prev-rev-uri (su/dataset-revision-uri* system-uris (assoc params :revision-id prev-rev-id))
@@ -740,10 +740,10 @@
                                   (.getPath revision-uri))
                           {:params params :revision-uri revision-uri})))
         (get-change triplestore
-                    (su/change-uri* system-uris
-                                            (assoc params
-                                                   :revision-id prev-rev-id
-                                                   :change-id prev-change-id) )))
+                    (su/commit-uri* system-uris
+                                    (assoc params
+                                      :revision-id prev-rev-id
+                                      :commit-id prev-change-id))))
 
       :else (throw (ex-info "Error: illegal state" {:params params})))))
 

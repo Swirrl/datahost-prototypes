@@ -358,7 +358,7 @@
                                                                 {:series-slug series-slug
                                                                  :release-slug release-slug
                                                                  :revision-id revision-id
-                                                                 :change-id change-id})
+                                                                 :commit-id change-id})
                                               (rc/match->path))}
                      :body inserted-jsonld-doc})))))
 
@@ -367,9 +367,9 @@
     (when-let [dataset (csv-file-location->dataset change-store appends)]
       (write-dataset-to-outputstream dataset))))
 
-(defn get-change [triplestore change-store system-uris {{:keys [series-slug release-slug revision-id change-id]} :path-params
+(defn get-change [triplestore change-store system-uris {{:keys [series-slug release-slug revision-id commit-id]} :path-params
                         {:strs [accept]} :headers :as request}]
-  (if-let [change (->> (su/change-uri system-uris series-slug release-slug revision-id change-id)
+  (if-let [change (->> (su/commit-uri system-uris series-slug release-slug revision-id commit-id)
                        (db/get-change triplestore)
                        matcha/index-triples
                        triples->ld-resource)]

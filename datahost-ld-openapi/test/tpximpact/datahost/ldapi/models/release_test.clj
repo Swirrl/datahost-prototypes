@@ -9,8 +9,8 @@
    [tpximpact.datahost.time :as time]
    [tpximpact.test-helpers :as th]
    [tpximpact.datahost.ldapi.store.temp-file-store :as tfstore])
-  (:import (java.net URI)
-           (java.time Instant)
+  (:import [java.net URI]
+           [java.time Instant]
            [java.util UUID]))
 
 (def system-uris (su/make-system-uris (URI. "https://example.org/data/")))
@@ -26,7 +26,7 @@
     (get series-doc "@id")))
 
 (defn- create-put-request [series-slug release-slug properties]
-  {:uri (format "/data/%s/releases/%s" series-slug release-slug)
+  {:uri (format "/data/%s/release/%s" series-slug release-slug)
    :request-method :put
    :headers {"content-type" "application/json"}
    :body (json/write-str properties)})
@@ -62,18 +62,16 @@
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
           series-slug (create-series handler)
+          release-slug "test-release"
           create-request (create-put-request series-slug
-                                             "test-release"
+                                             release-slug
                                              {"dcterms:title" "Initial title" "dcterms:description" "Initial description"})
           _create-response (handler create-request)
 
           _ (time/set-now clock t2)
 
-          update-request {:uri (format "/data/%s/releases/test-release" series-slug)
-                          :request-method :put
-                          :headers {"content-type" "application/json"}
-                          :body (json/write-str {"dcterms:title" "Updated title"
-                                                 "dcterms:description" "Updated description"})}
+          update-request (create-put-request series-slug release-slug {"dcterms:title" "Updated title"
+                                                                       "dcterms:description" "Updated description"})
           {:keys [status body]} (handler update-request)
           updated-doc (json/read-str body)]
       (t/is (= 200 status))
@@ -92,15 +90,16 @@
           handler (router/handler {:clock clock :triplestore repo :change-store temp-store :system-uris system-uris})
 
           series-slug (create-series handler)
+          release-slug "new-release"
 
           properties {"dcterms:title" "Title" "dcterms:description" "Description"}
-          create-request (create-put-request series-slug "new-series" properties)
+          create-request (create-put-request series-slug release-slug properties)
           create-response (handler create-request)
           initial-doc (json/read-str (:body create-response))
 
           _ (time/set-now clock t2)
 
-          update-request (create-put-request series-slug "new-series" properties)
+          update-request (create-put-request series-slug release-slug properties)
           update-response (handler update-request)
           updated-doc (json/read-str (:body update-response))]
       (t/is (= initial-doc updated-doc)))))
@@ -113,7 +112,7 @@
           new-series-slug (str "new-series-" (UUID/randomUUID))
           new-series-path (str "/data/" new-series-slug)
           release-1-id (str "release-" (UUID/randomUUID))
-          release-1-path (str new-series-path "/releases/" release-1-id)]
+          release-1-path (str new-series-path "/release/" release-1-id)]
       (testing "Fetching a release for a series that does not exist returns 'not found'"
         (let [{:keys [status body]} (GET release-1-path)]
           (is (= 404 status))
@@ -126,7 +125,7 @@
 
       (testing "Creating a release for a series that is not found fails gracefully"
         (let [{:keys [status body]}
-              (PUT (str "/data/this-series-does-not-exist/releases/release-xyz")
+              (PUT (str "/data/this-series-does-not-exist/release/release-xyz")
                 {:content-type :json
                  :body (json/write-str {"dcterms:title" "Example Release"
                                         "dcterms:description" "Description"})})]
@@ -157,7 +156,7 @@
                                "dh" "https://publishmydata.com/def/datahost/"
                                "rdf" "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
                                "rdfs" "http://www.w3.org/2000/01/rdf-schema#"}
-                              "@id" (str new-series-slug "/releases/" release-1-id)
+                              "@id" (str new-series-slug "/release/" release-1-id)
                               "@type" "dh:Release"
                               "dcat:inSeries" (str rdf-base-uri new-series-slug)
                               "dcterms:description" "Description"
@@ -184,7 +183,7 @@
             (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
 
         (testing "Multiple releases can be can be retrieved via the API"
-          (PUT (str new-series-path "/releases/release-2")
+          (PUT (str new-series-path "/release/release-2")
             {:content-type :json
              :body (json/write-str {"dcterms:title" "A Second Release"
                                     "dcterms:description" "Description 2"})})
@@ -232,7 +231,7 @@
     (let [new-series-slug (str "new-series-" (UUID/randomUUID))
           new-series-path (str "/data/" new-series-slug)
           release-1-id (str "release-" (UUID/randomUUID))
-          release-1-path (str new-series-path "/releases/" release-1-id)
+          release-1-path (str new-series-path "/release/" release-1-id)
           release-1-csvm-path (str release-1-path "-metadata.json")]
 
       (testing "Fetching csvw metadata for a release that does not exist returns 'not found'"
