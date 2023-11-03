@@ -53,7 +53,8 @@
   :test {:extra-paths ["test" "env/test/resources"]
          :extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}
                       lambdaisland/kaocha-junit-xml {:mvn/version "1.17.101"}
-		      org.clojure/data.csv {:mvn/version "1.0.1"}}
+		              org.clojure/data.csv {:mvn/version "1.0.1"}
+                      babashka/fs {:mvn/version "0.4.19"}}
          :exec-fn kaocha.runner/exec-fn
          :exec-args {:tests [{:id :unit
                               :test-paths ["test"]
@@ -66,6 +67,14 @@
                :exec-args {:watch? true
 	                       :skip-meta :pending
 	                       :fail-fast? true}}
+  :test-hurl {:extra-paths ["test-hurl"]
+              :exec-fn kaocha.runner/exec-fn
+              :exec-args {:tests [{:id :integration
+                                   :test-paths ["test-hurl"]
+                                   :source-paths ["src"]}]
+                          ;; don't generate junit report when used with :test alias
+                          :plugins []
+                          :reporter kaocha.report/documentation}}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}

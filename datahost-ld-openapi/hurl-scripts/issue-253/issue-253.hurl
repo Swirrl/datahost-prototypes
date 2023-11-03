@@ -1,6 +1,6 @@
 ## Description: API interaction with multiple commits per revision
 
-PUT http://localhost:3000/data/{{series}}
+PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
 {
@@ -12,7 +12,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT http://localhost:3000/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
 Accept: application/json
 Content-Type: application/json
 {
@@ -22,13 +22,13 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
 Content-Type: application/json
-file,schema-name-age.json;
+file,common/schema-name-age.json;
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -41,7 +41,7 @@ HTTP 201
 revision1_url: header "Location"
 
 
-POST http://localhost:3000{{revision1_url}}/appends
+POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
 Content-Type: text/csv
 [QueryStringParams]
 title: changes appends
@@ -52,7 +52,7 @@ file,issue-253/1.csv;
 HTTP 201
 
 
-POST http://localhost:3000{{revision1_url}}/appends
+POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
 Content-Type: text/csv
 [QueryStringParams]
 title: changes appends
@@ -63,7 +63,7 @@ file,issue-253/2.csv;
 HTTP 201
 
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -76,7 +76,7 @@ HTTP 201
 revision2_url: header "Location"
 
 
-POST http://localhost:3000{{revision2_url}}/corrections
+POST {{scheme}}://{{host_name}}{{revision2_url}}/corrections
 Content-Type: text/csv
 [QueryStringParams]
 title: changes corrections
@@ -87,7 +87,7 @@ file,issue-253/3.csv;
 HTTP 201
 
 
-POST http://localhost:3000{{revision2_url}}/retractions
+POST {{scheme}}://{{host_name}}{{revision2_url}}/retractions
 Content-Type: text/csv
 [QueryStringParams]
 title: changes retractions
@@ -99,7 +99,7 @@ HTTP 201
 
 # let's try to append to revision 1 **after** revision 2 was created.
 
-POST http://localhost:3000{{revision1_url}}/appends
+POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
 Content-Type: text/csv
 [QueryStringParams]
 title: changes appends
@@ -109,12 +109,12 @@ file,issue-253/1.csv;
 
 HTTP 422
 
-GET http://localhost:3000/data/{{series}}/releases/release-1/revisions
+GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
 Accept: application/json
 
 HTTP 200
 
-GET http://localhost:3000{{revision2_url}}
+GET {{scheme}}://{{host_name}}{{revision2_url}}
 Accept: text/csv
 
 HTTP 200
