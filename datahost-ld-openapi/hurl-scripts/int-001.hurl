@@ -1,3 +1,5 @@
+# Description: Creates a new series
+
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Authorization: Basic {{auth_token}}
 Accept: application/json
@@ -8,4 +10,3 @@ Content-Type: application/json
 }
 
 HTTP 201
-

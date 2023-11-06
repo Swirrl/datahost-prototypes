@@ -1,4 +1,7 @@
-PUT http://localhost:3000/data/{{series}}
+# Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions, 
+# 3rd rev + corrections). We check the CSV contents of the release at the end.
+
+PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
 {
@@ -10,7 +13,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT http://localhost:3000/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 {
@@ -20,13 +23,13 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
-file,test-schema.json;
+file,common/schema-name-age.json;
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -38,22 +41,22 @@ HTTP 201
 [Captures]
 revision1_url: header "Location"
 
-POST http://localhost:3000{{revision1_url}}/appends
+POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
 Content-Type: text/csv
 [QueryStringParams]
 title: changes (appends)
 description: change for {{series}}
 format: text/csv
-file,change1.csv;
+file,common/name-age-01.csv;
 
 HTTP 201
 
-GET http://localhost:3000/data/{{series}}/releases/release-1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 
-HTTP 200
+HTTP 302
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -65,22 +68,22 @@ HTTP 201
 [Captures]
 revision2_url: header "Location"
 
-POST http://localhost:3000{{revision2_url}}/retractions
+POST {{scheme}}://{{host_name}}{{revision2_url}}/retractions
 Content-Type: text/csv
 [QueryStringParams]
 title: A retraction
 description: retraction for the release
 format: text/csv
-file,change2.csv;
+file,common/name-age-02.csv;
 
 HTTP 201
 
-GET http://localhost:3000/data/{{series}}/releases/release-1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 
-HTTP 200
+HTTP 302
 
-POST http://localhost:3000/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -92,17 +95,24 @@ HTTP 201
 [Captures]
 revision3_url: header "Location"
 
-POST http://localhost:3000{{revision3_url}}/corrections
+POST {{scheme}}://{{host_name}}{{revision3_url}}/corrections
 Content-Type: text/csv
 [QueryStringParams]
 title: A correction
 description: correction for the release
 format: text/csv
-file,change3.csv;
+file,common/name-age-03.csv;
 
 HTTP 201
 
-GET http://localhost:3000/data/{{series}}/releases/release-1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: text/csv
+
+HTTP 302
+[Captures]
+final_location: header "Location"
+
+GET {{scheme}}://{{host_name}}{{final_location}}
 Accept: text/csv
 
 HTTP 200
