@@ -30,7 +30,7 @@ The contents of the directory looks close to this:
 	...
 ```
 
-The scripts are run with the `--file-root` option set to this directory. The naming is important, but pretty easy to remember: if the test case can be contained in a single file, it ends up in an `pr-$NUM.hurl` or `issue-$NUM.hurl` file, otherwise it goes into a subdirectory `pr-$NUM` or `issue-$NUM` along with `setup.hurl` and any (optional) data files. 
+The scripts are run with the `--file-root` option set to this directory. The naming is important, but pretty easy to remember: if the test case can be contained in a single file, it ends up in an `pr-$NUM.hurl`, `issue-$NUM.hurl`, or `int-$NUM.hurl` file, otherwise it goes into a subdirectory `pr-$NUM`,`issue-$NUM`, or `int-$NUM` along with `setup.hurl` and any (optional) data files. 
 
 Instead of a custom setup script, we can also use a setup reference: file named `setup.ref` which contents of is  set to path of a setup script to use (relative to the `hurl-scripts` directory, for example `common/setup-revision.hurl`).
 
