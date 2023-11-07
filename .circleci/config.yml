@@ -312,6 +312,7 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
+            - build-docker-image-ldapi
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
