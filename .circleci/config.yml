@@ -290,6 +290,7 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - build-docker-image-ldapi
+            - ci-live-service-test
           name: deploy-service-ldapi-dev
           env: dev
           service: ldapi
