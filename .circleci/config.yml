@@ -192,6 +192,7 @@ jobs:
             bb bin/hurl-runner.bb --dir hurl-scripts \
               --variable scheme=http \
               --variable "host_name=localhost" \
+              --variable "auth_token=ignore" \
               --variable "series=hurl.variable.named/series" \
               --variable "release=hurl.variable.named/release" \
               --report-junit test-results/ci-live.xml \
