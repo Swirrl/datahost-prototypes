@@ -354,7 +354,7 @@
 
         (as-json-ld {:status 201
                      :headers {"Location" (-> (rc/match-by-name router
-                                                                :tpximpact.datahost.ldapi.router/change
+                                                                :tpximpact.datahost.ldapi.router/commit
                                                                 {:series-slug series-slug
                                                                  :release-slug release-slug
                                                                  :revision-id revision-id

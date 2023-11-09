@@ -350,7 +350,7 @@ specifications for each route.")
          :get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/commit/:commit-id"
-        {:name ::change
+        {:name ::commit
          :get (routes.rev/get-revision-commit-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/appends"
