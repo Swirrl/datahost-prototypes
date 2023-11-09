@@ -351,16 +351,16 @@ specifications for each route.")
 
        ["/:revision-id/commit/:commit-id"
         {:name ::change
-         :get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]
+         :get (routes.rev/get-revision-commit-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/appends"
-        {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-appends-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/retractions"
-        {:post (routes.rev/post-revision-retractions-changes-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]]]]
+        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]
 
     ["/delta"
      {:post (delta-handler/delta-tool-route-config)}]]
