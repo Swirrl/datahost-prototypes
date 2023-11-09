@@ -146,8 +146,8 @@ that make up that revision.
           :tags ["Publisher API"]}))
 
 (defn get-revision-commit-route-config [triplestore change-store system-uris]
-  {:summary "Retrieve CSV contents for an existing change"
-   :description "Return the data as a CSV file for the specified change.  This returns individual deltas."
+  {:summary "Retrieve CSV contents for an existing commit"
+   :description "Return the data as a CSV file for the specified commit. This returns individual deltas."
    :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-change triplestore change-store system-uris)
    :parameters {:path [:map
