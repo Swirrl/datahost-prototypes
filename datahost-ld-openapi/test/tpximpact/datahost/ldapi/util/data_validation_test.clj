@@ -69,8 +69,8 @@
     (db/upsert-release-schema! clock repo system-uris schema-int-double-double slugs2)
     
     (let [schema (db/get-release-schema repo (su/dataset-release-uri* system-uris slugs2))
-          cols ["Year" "Double" "Other Double"]
-          ]
+          cols ["Year" "Double" "Other Double"]]
+      
       (testing "Creating malli row schemas from JSON-LD schema"
         (is (= cols
                (-> (util.data-validation/make-row-schema schema cols)
