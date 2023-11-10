@@ -1,8 +1,9 @@
 (ns tpximpact.datahost.ldapi.routes.release
   (:require
-   [reitit.ring.malli]
+   [reitit.ring.malli :as ring.malli]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.delta-handler :as handlers.delta]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.release :as schema]))
@@ -150,3 +151,25 @@ The supplied document should conform to the Datahost TableSchema."
                            [:status [:enum "error"]]
                            [:message :string]]}}
    :tags ["Publisher API"]})
+
+(defmacro ->pack
+  "(->pack a b c) -> {:a a :b b :c c}"
+  [& symbs]
+  (assert (every? symbol? symbs))
+  (into {} (map (fn [sym] [(keyword (name sym)) sym]) symbs)))
+
+(defn delta-tool-route-config [triplestore file-store system-uris]
+  {:handler (partial handlers.delta/post-delta-files (->pack triplestore file-store system-uris))
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :release-uri]
+                [(partial middleware/resource-exist? system-uris :dh/Release) :release-exists?]]
+   :parameters {:multipart [:map
+                            [:csv ring.malli/temp-file-part]]}
+   :openapi {:security [{"basic" []}]}
+   :responses {200 {:description "Differences between input files calculated"
+                    :content {"text/csv" any?}
+                    ;; headers is not currently supported
+                    :headers {"Location" string?}}
+               500 {:description "Internal server error"
+                    :body [:map
+                           [:status [:enum "error"]]
+                           [:message string?]]}}})

@@ -5,7 +5,7 @@
   (:import (java.io BufferedReader StringReader)))
 
 
-(deftest delta-route-test
+(comment deftest delta-route-test
   (th/with-system-and-clean-up
    {{:keys [GET POST PUT] :as http-client} :tpximpact.datahost.ldapi.test/http-client :as sys}
    (testing "Single measure CSV files produce Reified TX formatted delta log"

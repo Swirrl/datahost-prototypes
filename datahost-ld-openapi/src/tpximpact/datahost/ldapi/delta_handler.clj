@@ -1,7 +1,12 @@
-(ns tpximpact.datahost.ldapi.delta-handler
+(ns tpximpact.datahost.ldapi.delta-handler ;TODO: move to *.handlers.delta
+  "Contains functionality for diffing datasets.
+
+  TODO: proper explanation."
   (:require [clojure.string :as str]
             [ring.util.io :as ring-io]
+            [reitit.ring.malli :as ring.malli]
             [tablecloth.api :as tc]
+            [tpximpact.datahost.ldapi.db :as db]
             [tpximpact.datahost.ldapi.util.data-validation :as data-validation])
   (:import (net.openhft.hashing LongHashFunction)))
 
@@ -72,7 +77,7 @@
   (-> (tc/full-join base-ds delta-ds obs-coordinate-cols {:hashing hash-fn})
       (tc/map-columns :operation
                       [measure-column-name right-measure-column-name]
-                      (fn [old-measure-val new-measure-val]
+                      (fn mapper [old-measure-val new-measure-val]
                         (cond
                           (nil? old-measure-val) :append
                           (nil? new-measure-val) :retract
@@ -80,15 +85,24 @@
       (tc/group-by :operation)
       (tc/groups->map)))
 
+(defn- joinable-name
+  [ds-name col-name]
+  (if (= "_unnamed" ds-name)
+    (str "right." col-name)
+    (str ds-name "." col-name)))
+
 (defn derive-deltas [base-ds delta-ds]
-  (let [measure-column-name (get-measure-column-name default-schema)
-        right-measure-column-name (str "right." measure-column-name)
+  (let [measure-column-name (get-measure-column-name default-schema);; FIX
+        right-measure-column-name (joinable-name measure-column-name (tc/dataset-name delta-ds))
         column-names (tc/column-names base-ds)
-        right-column-names (map #(str "right." %) column-names)
+        right-column-names (map #(joinable-name (tc/dataset-name delta-ds) %) column-names)
 
         labelled-ds (join-and-partition-deltas base-ds delta-ds measure-column-name right-measure-column-name)
 
-        append-dataset (-> (add-user-schema-ids (:append labelled-ds) right-measure-column-name right-obs-coordinate-cols)
+        append-dataset (-> (add-user-schema-ids (:append labelled-ds)
+                                                right-measure-column-name
+                                                (remove (fn [col-name] (= col-name right-measure-column-name))
+                                                        right-column-names))
                            (tc/rename-columns (rename-column-mappings right-column-prefix-pattern right-column-names)))
 
         retracted-dataset (-> (tc/select-columns (:retract labelled-ds)
@@ -117,28 +131,19 @@
          (tc/reorder-columns (concat [:id :operation] column-names [:correction_for]))))))
 
 (defn post-delta-files
-  [{{{:keys [base-csv delta-csv]} :multipart} :parameters :as _request}]
-  (let [diff-results (derive-deltas (data-validation/slurpable->dataset (:tempfile base-csv)
-                                                                        {:file-type :csv :encoding "UTF-8"})
-                                    (data-validation/slurpable->dataset (:tempfile delta-csv)
-                                                                        {:file-type :csv :encoding "UTF-8"}))]
+  [{:keys [triple-strore]}
+   {{{:keys [csv]} :multipart} :parameters
+    {release-uri :dh/Release} :datahost.request/uris
+    :as _request}]
+  (let [;; TODO: 1. get lateest dataset, 2. get the release schema
+        schema (db/get-release-schema triple-strore release-uri)
+        
+        diff-results (derive-deltas (data-validation/as-dataset (:tempfile csv)
+                                                                {:file-type :csv :encoding "UTF-8"})
+                                    (data-validation/as-dataset (:tempfile csv)
+                                                                {:file-type :csv :encoding "UTF-8"}))]
     {:status 200
      :body (write-dataset-to-outputstream diff-results)}))
-
-(defn delta-tool-route-config []
-  {:handler (partial post-delta-files)
-   :parameters {:multipart [:map
-                            [:base-csv reitit.ring.malli/temp-file-part]
-                            [:delta-csv reitit.ring.malli/temp-file-part]]}
-   :openapi {:security [{"basic" []}]}
-   :responses {200 {:description "Differences between input files calculated"
-                    :content {"text/csv" any?}
-                    ;; headers is not currently supported
-                    :headers {"Location" string?}}
-               500 {:description "Internal server error"
-                    :body [:map
-                           [:status [:enum "error"]]
-                           [:message string?]]}}})
 
 ; Curl command used to test the delta route:
 ;
