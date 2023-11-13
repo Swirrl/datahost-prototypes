@@ -24,4 +24,9 @@
 datahost-ld-openapi/tmp
 .datahost-*-db.edn
 
-
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets

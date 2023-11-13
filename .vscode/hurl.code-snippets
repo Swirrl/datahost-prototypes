@@ -1,0 +1,88 @@
+{
+	// Place your main workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and 
+	// description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope 
+	// is left empty or omitted, the snippet gets applied to all languages. The prefix is what is 
+	// used to trigger the snippet and the body will be expanded and inserted. Possible variables are: 
+	// $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders. 
+	// Placeholders with the same ids are connected.
+	// Example:
+	// "Print to console": {
+	// 	"scope": "javascript,typescript",
+	// 	"prefix": "log",
+	// 	"body": [
+	// 		"console.log('$1');",
+	// 		"$2"
+	// 	],
+	// 	"description": "Log output to console"
+	// }
+
+	"put-series": {
+		"prefix": "series",
+		"body": [
+			"PUT http://localhost:3000/data/{{series}}",
+			"Accept: application/json",
+			"Content-Type: application/json",
+			"{",
+				"\t\"dcterms:title\": \"${1:title}\",",
+				"\t\"dcterms:description\": \"${2:description}\"",
+			"}",
+			"",
+			"HTTP 201",
+			"[Captures]",
+			"dataset: jsonpath \"$['dh:baseEntity']\""
+		]
+	},
+	"put-release": {
+		"prefix": "release",
+		"body": [
+		  "PUT http://localhost:3000/data/{{series}}/release/${1:release-slug}",
+		  "Accept: application/json",
+		  "Content-Type: application/json",
+		  "{",
+		  "	\"dcterms:title\": \"${2:title}\",",
+		  "	\"dcterms:description\": \"${3:description}\"",
+		  "}",
+		  "",
+		  "HTTP 201",
+		  "",
+		  "POST http://localhost:3000/data/{{series}}/release/${1}/schema",
+		  "Content-Type: application/json",
+		  "file,${4:file-name.json};",
+		  "",
+		  "HTTP 201"
+		],
+		"description": "put-release"
+	  },
+	  "post-revision": {
+		"prefix": "revision",
+		"body": [
+		  "POST http://localhost:3000/data/{{series}}/release/${1:release}/revisions",
+		  "Accept: application/json",
+		  "Content-Type: application/json",
+		  "{",
+		  "	\"dcterms:title\": \"${2:title}\",",
+		  "	\"dcterms:description\": \"${3:revision description}\"",
+		  "}",
+		  "",
+		  "HTTP 201",
+		  "[Captures]",
+		  "${4:revision1_url}: header \"Location\"",
+		  "",
+		  "POST http://localhost:3000{{${4}}/${5|appends,retractions,corrections|}",
+		  "Content-Type: text/csv",
+		  "[QueryStringParams]",
+		  "title: A schema",
+		  "description: ${5} {{series}}/${1}",
+		  "format: text/csv",
+		  "file,${6:change.csv};",
+		  "",
+		  "HTTP 201",
+		  "",
+		  "GET http://localhost:3000/data/{{series}}/release/${1}",
+		  "Accept: text/csv",
+		  "",
+		  "HTTP 200"
+		],
+		"description": "post-revision"
+	  }
+}
