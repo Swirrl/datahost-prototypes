@@ -27,7 +27,7 @@ HTTP 201
 POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file,data/well-being/release_1-1/release_1-1.json;
+file,data/well-being/release_1-1/schema-release_1-1.json;
 
 HTTP 201
 
