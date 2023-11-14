@@ -374,3 +374,12 @@
   (when-not (validate-ld-release-schema-input-valid? ld-schema)
     (throw (ex-info "Invalid Release schema input" {:ld-schema ld-schema}))))
 
+(defn validate-row-uniqueness
+  "Throws when number of dataset's unique ids != number of rows."
+  ([ds hash-col-name] (validate-row-uniqueness ds hash-col-name nil))
+  ([ds hash-col-name ex-data-payload]
+   (when-not (= (tc/row-count (tc/unique-by ds hash-col-name))
+                (tc/row-count ds))
+     (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
+                     (cond-> {:hash-column-name hash-col-name}
+                       ex-data-payload (merge ex-data-payload)))))))

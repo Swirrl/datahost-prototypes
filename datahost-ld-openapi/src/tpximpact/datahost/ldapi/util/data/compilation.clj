@@ -12,13 +12,12 @@
    [tpximpact.datahost.ldapi.store :as store]
    [tpximpact.datahost.ldapi.util.data.validation
     :refer [-as-dataset as-dataset]
-    :as data-validation])
+    :as data.validation]
+   [tpximpact.datahost.ldapi.util.data.internal
+    :refer [hash-column-name]
+    :as internal])
   (:import
    (net.openhft.hashing LongHashFunction)))
-
-(def hash-column-name
-  "Name of the column holding the hash of the row (excluding the measurement itself.)"
-  "datahost.row/hash")
 
 (defmethod -as-dataset tech.v3.dataset.impl.dataset.Dataset [v _opts]
   v)
@@ -125,7 +124,7 @@
    [:map
     [:changes [:sequential ChangeInfo]]
     [:store {:optional true} [:fn some?]]
-    [:row-schema data-validation/DatasetRow]]))
+    [:row-schema data.validation/DatasetRow]]))
 
 (defn- has-hashed-column? [ds]
   (tc/has-column? ds hash-column-name))
@@ -210,25 +209,19 @@
                       :row-count (tc/row-count ds)}})
     (apply-change ctx (ensure-components-hash-column ds row-schema) dataset)))
 
-(defn validate-row-uniqueness
-  "Throws when number of dataset's unique ids != number of rows."
-  ([ds hash-col-name] (validate-row-uniqueness ds hash-col-name nil))
-  ([ds hash-col-name ex-data-payload]
-   (when-not (= (tc/row-count (tc/unique-by ds hash-col-name))
-                (tc/row-count ds))
-     (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
-                     (cond-> {:hash-column-name hash-col-name}
-                       ex-data-payload (merge ex-data-payload)))))))
+(defn- validate-compile-ds-opts
+  [opts]
+  (when-not (compile-dataset-opts-valid? opts)
+    (throw (ex-info "Illegal options" {:opts opts
+                                       :malli/explanation (-> (m/explain CompileDatasetOptions opts)
+                                                              (me/humanize))}))))
 
 (defn compile-dataset
   "Returns a dataset.
 
   'opts' should conform to `CompileDatasetOptions` schema."
   [opts]
-  (when-not (compile-dataset-opts-valid? opts)
-    (throw (ex-info "Illegal options" {:opts opts
-                                       :malli/explanation (-> (m/explain CompileDatasetOptions opts)
-                                                              (me/humanize))})))
+  (validate-compile-ds-opts opts)
   (let [{:keys [changes]} opts
         change (when-let [change (first changes)]
                  (when (not= :dh/ChangeKindAppend (:datahost.change/kind change))
@@ -243,7 +236,7 @@
                             {:columns (vec (tc/column-names base-ds))})))
         base-ds (ensure-components-hash-column base-ds (:row-schema opts))]
     ;; let's ensure data issues in dev are immediately revealed
-    (validate-row-uniqueness base-ds hash-column-name {:opts opts})
+    (data.validation/validate-row-uniqueness base-ds hash-column-name {:opts opts})
     (-> (reduce (partial compile-reducer ds-opts)
                 base-ds
                 (next changes))

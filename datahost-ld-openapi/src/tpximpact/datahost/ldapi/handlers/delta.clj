@@ -10,7 +10,8 @@
             [tpximpact.datahost.ldapi.db :as db]
             [tpximpact.datahost.ldapi.store :as store]
             [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
-            [tpximpact.datahost.ldapi.util.data.compilation :as data.compilation])
+            [tpximpact.datahost.ldapi.util.data.compilation :as data.compilation]
+            [tpximpact.datahost.ldapi.util.data.internal :as data.internal])
   (:import (net.openhft.hashing LongHashFunction)))
 
 (def default-schema
@@ -74,13 +75,6 @@
                     (println "Hashing: " dims "," (hash-fn dims))
                     (hash-fn dims))))
 
-(defn- joinable-name                    ;TODO: shouldl be shared, e.g. in "internal" ns.
-  [ds-name col-name]
-  (if (= "_unnamed" ds-name)
-    (str "right." col-name)
-    (str ds-name "." col-name)))
-
-
 (defn- tag-change
   [old-measure-val new-measure-val]
   (cond
@@ -88,16 +82,11 @@
     (nil? new-measure-val) :retract
     (not= old-measure-val new-measure-val) :modify))
 
-(def ^:private op-column-name "dh/op")
-(def ^:private parent-column-name "dh/parent")
-(def ^:private tx-column-name "dh/tx")
-(def ^:private id-column-name data.compilation/hash-column-name)
-
 ;; name,age,dh/kind,dh/id,dh/tx,dh/parent
 
 (defn operation-column
   [_ds]
-  op-column-name)
+  data.internal/op-column-name)
 
 (defn delta-dataset
   "Returns a dataset with extra columns: TODO(finalise names)
@@ -106,13 +95,13 @@
 
   Unchanged rows are not present in the delta dataset."
   [base-ds delta-ds {measure-column-name :measure-column hashable-columns :hashable-columns :as ctx}]
-  (let [right-measure-column-name (joinable-name (tc/dataset-name delta-ds) measure-column-name)
+  (let [right-measure-column-name (data.internal/r-joinable-name (tc/dataset-name delta-ds) measure-column-name)
         ]
     (-> (tc/full-join base-ds delta-ds hashable-columns {:hashing hash-fn
                                                          ;; :operation-space :int64
                                                          })
-        (tc/map-columns op-column-name [measure-column-name right-measure-column-name] tag-change)
-        (tc/select-rows (fn changed-only [row] (some? (get row op-column-name))))
+        (tc/map-columns data.internal/op-column-name [measure-column-name right-measure-column-name] tag-change)
+        (tc/select-rows (fn changed-only [row] (some? (get row data.internal/op-column-name))))
         ;; (tc/select-columns (conj (vec hashable-columns)
         ;;                          op-column-name
         ;;                          id-column-name))
@@ -124,9 +113,9 @@
   Assumptions:
   - the datasets were already validated/created against the same schema."
   [ds-left ds-right {measure-column :measure-column hashable-columns :hashable-columns :as ctx}]
-  (let [right-measure-column-name (joinable-name measure-column (tc/dataset-name ds-right))
+  (let [right-measure-column-name (data.internal/r-joinable-name measure-column (tc/dataset-name ds-right))
         column-names (tc/column-names ds-left)
-        right-column-names (map #(joinable-name (tc/dataset-name ds-right) %) column-names)
+        right-column-names (map #(data.internal/r-joinable-name (tc/dataset-name ds-right) %) column-names)
 
         delta-ds (delta-dataset ds-left ds-right ctx)
 
