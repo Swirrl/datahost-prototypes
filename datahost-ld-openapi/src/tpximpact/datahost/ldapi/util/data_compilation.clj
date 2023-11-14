@@ -77,14 +77,12 @@
   dataset."
   [row-schema]
   (sort (sequence tuple-schema-component-names-xform
-                  ;;(mu/subschemas row-schema)
                   (m/children row-schema))))
 
 (defn- compile--extract-measure-column-name
   [row-schema]
   {:post [some?]}
   (first (sort (sequence tuple-schema-measure-names-xform
-                         ;;(mu/subschemas row-schema)
                          (m/children row-schema)))))
 
 (defn- add-id-column
@@ -170,6 +168,15 @@
         (tc/concat corrections-ds)
         (tc/unique-by [hash-column-name] {:strategy :last}))))
 
+(defn make-schema-context
+  "Returns {:hashable-columns seq<COL-NAME> :measure-column COL-NAME}.
+
+  Motivation: get metadata necessary do diff two datasets (like name
+  of the measure column or attribute, and dimension columns)."
+  [row-schema]
+  {:hashable-columns (compile--extract-component-column-names row-schema)
+   :measure-column (compile--extract-measure-column-name row-schema)})
+
 (defn make-change-context
   [change-kind row-schema]
   {:row-schema row-schema
@@ -203,6 +210,16 @@
                       :row-count (tc/row-count ds)}})
     (apply-change ctx (ensure-components-hash-column ds row-schema) dataset)))
 
+(defn validate-row-uniqueness
+  "Throws when number of dataset's unique ids != number of rows."
+  ([ds hash-col-name] (validate-row-uniqueness ds hash-col-name nil))
+  ([ds hash-col-name ex-data-payload]
+   (when-not (= (tc/row-count (tc/unique-by ds hash-col-name))
+                (tc/row-count ds))
+     (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
+                     (cond-> {:hash-column-name hash-col-name}
+                       ex-data-payload (merge ex-data-payload)))))))
+
 (defn compile-dataset
   "Returns a dataset.
 
@@ -226,10 +243,7 @@
                             {:columns (vec (tc/column-names base-ds))})))
         base-ds (ensure-components-hash-column base-ds (:row-schema opts))]
     ;; let's ensure data issues in dev are immediately revealed
-    (when-not (= (tc/row-count (tc/unique-by base-ds hash-column-name))
-                 (tc/row-count base-ds))
-      (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
-                      {:opts opts})))
+    (validate-row-uniqueness base-ds hash-column-name {:opts opts})
     (-> (reduce (partial compile-reducer ds-opts)
                 base-ds
                 (next changes))
