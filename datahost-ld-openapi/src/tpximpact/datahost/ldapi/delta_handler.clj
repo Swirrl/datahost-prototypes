@@ -9,8 +9,8 @@
             [tablecloth.api :as tc]
             [tpximpact.datahost.ldapi.db :as db]
             [tpximpact.datahost.ldapi.store :as store]
-            [tpximpact.datahost.ldapi.util.data.validation :as data-validation]
-            [tpximpact.datahost.ldapi.util.data.compilation :as data-compilation])
+            [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
+            [tpximpact.datahost.ldapi.util.data.compilation :as data.compilation])
   (:import (net.openhft.hashing LongHashFunction)))
 
 (def default-schema
@@ -91,7 +91,7 @@
 (def ^:private op-column-name "dh/op")
 (def ^:private parent-column-name "dh/parent")
 (def ^:private tx-column-name "dh/tx")
-(def ^:private id-column-name data-compilation/hash-column-name)
+(def ^:private id-column-name data.compilation/hash-column-name)
 
 ;; name,age,dh/kind,dh/id,dh/tx,dh/parent
 
@@ -186,19 +186,19 @@
             (throw (ex-info (format "Missing :snapshotKey for '%s'" rev-uri)
                             {:type :tpximpact.datahost.ldapi.errors/exception})))
         
-        row-schema (data-validation/make-row-schema schema)
+        row-schema (data.validation/make-row-schema schema)
         opts {:store change-store :file-type :csv :enforce-schema row-schema}
-        ds-release (data-validation/as-dataset snapshot-key opts)
-        ds-input (data-validation/as-dataset (:tempfile csv) opts)
+        ds-release (data.validation/as-dataset snapshot-key opts)
+        ds-input (data.validation/as-dataset (:tempfile csv) opts)
         
-        ctx (data-compilation/make-schema-context row-schema)
+        ctx (data.compilation/make-schema-context row-schema)
         diff-results (derive-deltas ds-release ds-input ctx)]
     {:status 200
      :body (write-dataset-to-outputstream diff-results)}))
 
 (defn post-delta-files [sys request]    ;TODO: rename this fn
   ;; TODO: add basic validation for incoming dataset, (e.g.
-  ;; `data-compilation/validate-row-uniqueness`) after ns reorg
+  ;; `data.compilation/validate-row-uniqueness`) after ns reorg
   (-post-delta-files sys request))
 
 ; Curl command used to test the delta route:
