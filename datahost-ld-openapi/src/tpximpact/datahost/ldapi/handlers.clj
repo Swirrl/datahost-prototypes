@@ -88,7 +88,7 @@
     {:strs [accept]} :headers
     {release-uri :dh/Release} :datahost.request/uris
     :as request}]
-  (if-let [release (->> (su/dataset-release-uri* system-uris path-params)
+  (if-let [release (->> release-uri
                         (db/get-release-by-uri triplestore)
                         (matcha/index-triples)
                         (triples->ld-resource))]
