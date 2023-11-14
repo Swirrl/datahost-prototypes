@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.delta-handler ;TODO: move to *.handlers.delta
+(ns tpximpact.datahost.ldapi.handlers.delta ;TODO: move to *.handlers.delta
   "Contains functionality for diffing datasets.
 
   TODO: proper explanation."

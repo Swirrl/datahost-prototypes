@@ -1,9 +1,9 @@
-(ns tpximpact.datahost.ldapi.delta-test
+(ns tpximpact.datahost.ldapi.handlers.delta-test
   (:require
    [clojure.test :refer :all]
    [tpximpact.test-helpers :as th]
    [tablecloth.api :as tc]
-   [tpximpact.datahost.ldapi.delta-handler :as handler.delta]
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta]
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]))
 
 (deftest diffing-datasets
@@ -17,7 +17,7 @@
              ^{:type :datahost.types/seq-of-maps} [{"measure" 1.2 "attr1" "a"}
                                                    {"measure" 3.0 "attr1" "c"}
                                                    {"measure" 4.5 "attr1" "d"}] {})
-        result (handler.delta/delta-dataset ds1 ds2 {:measure-column "measure"
+        result (handlers.delta/delta-dataset ds1 ds2 {:measure-column "measure"
                                                      :hashable-columns ["attr1"]})]
     (is result)))
 

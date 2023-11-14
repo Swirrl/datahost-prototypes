@@ -30,7 +30,7 @@
    [muuntaja.format.json :as json-format]
    [clojure.data.json :as json]
    [clojure.java.io :as io]
-   [tpximpact.datahost.ldapi.delta-handler :as delta-handler])
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta])
   (:import
    (java.io InputStream InputStreamReader OutputStream)))
 
@@ -363,7 +363,7 @@ specifications for each route.")
         {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]
 
     ;; ["/delta"
-    ;;  {:post (delta-handler/delta-tool-route-config)}]
+    ;;  {:post (handlers.delta/delta-tool-route-config)}]
     ]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs

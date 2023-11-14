@@ -3,7 +3,7 @@
    [reitit.ring.malli :as ring.malli]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
-   [tpximpact.datahost.ldapi.delta-handler :as handlers.delta]
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.release :as schema]))
