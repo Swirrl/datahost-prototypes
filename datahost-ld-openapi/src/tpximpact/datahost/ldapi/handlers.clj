@@ -17,7 +17,7 @@
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
-   [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
+   [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
    [tpximpact.datahost.ldapi.util.triples
     :refer [triples->ld-resource triples->ld-resource-collection]]
    [clojure.java.io :as io])
@@ -47,7 +47,7 @@
 
 (defn csv-file-location->dataset [change-store key]
   (with-open [in (store/get-data change-store key)]
-    (data-validation/as-dataset in {:file-type :csv})))
+    (data.validation/as-dataset in {:file-type :csv})))
 
 (defn op->response-code
   "Takes [s.api/UpsertOp] and returns a HTTP status code (number)."
@@ -261,13 +261,13 @@
   "Returns a map {:dataset ?DATASET (optional-key :error-response) ..., row-schema MALLI-SCHEMA},
   containing :error-response entry when validation failed."
   [release-schema appends]
-  (let [row-schema (data-validation/make-row-schema release-schema)
+  (let [row-schema (data.validation/make-row-schema release-schema)
         {:keys [explanation dataset]}
         (try
-          (->(data-validation/as-dataset appends {:enforce-schema row-schema})
-             (data-validation/validate-dataset row-schema {:fail-fast? true}))
+          (->(data.validation/as-dataset appends {:enforce-schema row-schema})
+             (data.validation/validate-dataset row-schema {:fail-fast? true}))
           (catch clojure.lang.ExceptionInfo ex
-            (if (= ::data-validation/dataset-creation (-> ex ex-data :type))
+            (if (= ::data.validation/dataset-creation (-> ex ex-data :type))
               {:explanation (ex-message ex)}
               (throw ex))))]
     (cond-> {:row-schema row-schema}
@@ -276,7 +276,7 @@
                                  {:status 400
                                   :body {:message "Invalid data"
                                          :explanation explanation
-                                         :column-names (data-validation/row-schema->column-names row-schema)}}))))
+                                         :column-names (data.validation/row-schema->column-names row-schema)}}))))
 
 (defn ->byte-array-input-stream [input-stream]
   (with-open [intermediate (ByteArrayOutputStream.)]

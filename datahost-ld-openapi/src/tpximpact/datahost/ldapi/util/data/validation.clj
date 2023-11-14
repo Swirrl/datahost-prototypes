@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.util.data-validation
+(ns tpximpact.datahost.ldapi.util.data.validation
   (:require
    [clojure.set :as set]
    [malli.core :as m]

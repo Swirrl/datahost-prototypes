@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.util.data-compilation
+(ns tpximpact.datahost.ldapi.util.data.compilation
   "Functionality related to compiling a dataset for a Revision/Release.
 
   At the moment the only supported input/output type is CSV files."
@@ -10,7 +10,7 @@
    [tpximpact.datahost.uris :as uris]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]
    [tpximpact.datahost.ldapi.store :as store]
-   [tpximpact.datahost.ldapi.util.data-validation
+   [tpximpact.datahost.ldapi.util.data.validation
     :refer [-as-dataset as-dataset]
     :as data-validation])
   (:import

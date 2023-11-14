@@ -9,8 +9,8 @@
             [tablecloth.api :as tc]
             [tpximpact.datahost.ldapi.db :as db]
             [tpximpact.datahost.ldapi.store :as store]
-            [tpximpact.datahost.ldapi.util.data-validation :as data-validation]
-            [tpximpact.datahost.ldapi.util.data-compilation :as data-compilation])
+            [tpximpact.datahost.ldapi.util.data.validation :as data-validation]
+            [tpximpact.datahost.ldapi.util.data.compilation :as data-compilation])
   (:import (net.openhft.hashing LongHashFunction)))
 
 (def default-schema
