@@ -384,7 +384,9 @@
 (def ^:private as-dataset-opts-valid? (m/validator AsDatasetOpts))
 
 
-(defn convert-types
+(defn convert-dataset-types
+  "Returns a dataset with column types converted to ones specified in
+  row-schema."
   [dataset row-schema]
   {:pre [(m/validate DatasetRow row-schema)]}
   (let [cols (for [col (m/children row-schema)]
@@ -426,7 +428,7 @@
                          :options opts}))))
     
     (cond-> ds
-      convert-opts (convert-types (:row-schema convert-opts)))))
+      convert-opts (convert-dataset-types (:row-schema convert-opts)))))
 
 (defn validate-ld-release-schema-input [ld-schema]
   (when-not (validate-ld-release-schema-input-valid? ld-schema)
