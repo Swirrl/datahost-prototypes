@@ -7,7 +7,6 @@
    [malli.core :as m]
    [malli.error :as me]
    [tablecloth.api :as tc]
-   [tpximpact.datahost.uris :as uris]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]
    [tpximpact.datahost.ldapi.store :as store]
    [tpximpact.datahost.ldapi.util.data.validation
@@ -15,9 +14,7 @@
     :as data.validation]
    [tpximpact.datahost.ldapi.util.data.internal
     :refer [hash-column-name]
-    :as internal])
-  (:import
-   (net.openhft.hashing LongHashFunction)))
+    :as internal]))
 
 (defmethod -as-dataset tech.v3.dataset.impl.dataset.Dataset [v _opts]
   v)
@@ -29,75 +26,6 @@
   (assert store)
   (with-open [is (store/get-data store v)]
    (as-dataset is opts)))
-
-(def ^:private hash-fn (LongHashFunction/xx128low))
-
-(defn make-columnwise-hasher
-  "Returns a function seq -> long"
-  []
-  (fn hasher* [& columns]
-    (let [^StringBuilder sb (StringBuilder.)
-          h ^LongHashFunction hash-fn]
-      (.append sb "|")
-      (loop [columns columns]
-        (if-not (seq columns)
-          (.hashChars h sb)
-          (do
-            (.append sb (first columns))
-            (.append sb "|")
-            (recur (next columns))))))))
-
-(def ^:private measure-type-uri (:measure uris/column-types))
-
-(defn- make-column-info-xform
-  [filter-fn]
-  (comp (map m/properties)
-        (filter filter-fn)
-        (map #(get % :dataset.column/name))))
-
-(def ^:private tuple-schema-component-names-xform
-  "Transducer transforming elements of [[m/children]] output into strings."
-  (make-column-info-xform #(not= measure-type-uri (get % :dataset.column/type))))
-
-(def ^:private tuple-schema-measure-names-xform
-  "Transducer transforming elements of [[mu/children]] output into strings."
-  (make-column-info-xform #(= measure-type-uri (get % :dataset.column/type))))
-
-(defn check-dataset-has-columns
-  [dataset column-names]
-  (when-not (every? #(tc/has-column? dataset %) column-names)
-    (throw (ex-info "Not every required column is in the dataset"
-                    {:dataset-columns (tc/column-names dataset)
-                     :schema-columns column-names}))))
-
-(defn- compile--extract-component-column-names
-  "Returns a seq of column names. Throws when any of the component
-  columns extracted from release-schema are not present in the
-  dataset."
-  [row-schema]
-  (sort (sequence tuple-schema-component-names-xform
-                  (m/children row-schema))))
-
-(defn- compile--extract-measure-column-name
-  [row-schema]
-  {:post [some?]}
-  (first (sort (sequence tuple-schema-measure-names-xform
-                         (m/children row-schema)))))
-
-(defn- add-id-column
-  "Adds a column column containing unique id of the measurment
-  (based on component names from row-schema)."
-  [dataset row-schema]
-  (assert row-schema)
-  (let [col-names (compile--extract-component-column-names row-schema)
-        hasher (make-columnwise-hasher)]
-    (check-dataset-has-columns dataset col-names)
-    (-> dataset
-        (tc/map-columns hash-column-name
-                        :long
-                        col-names
-                        hasher)
-        (vary-meta assoc ::hash-column hash-column-name))))
 
 ;;; main functionality
 
@@ -142,13 +70,13 @@
   (assert (has-hashed-column? base-ds))
   (let [{:keys [row-schema]} ctx]
     (-> base-ds
-        (tc/concat (add-id-column change-ds row-schema))
+        (tc/concat (internal/add-id-column change-ds row-schema))
         ;; it's an 'append', so we remove already existing entries
         (tc/unique-by [hash-column-name] {:strategy :first}))))
 
 (defmethod -apply-change :dh/ChangeKindRetract [{:keys [row-schema] :as _ctx} base-ds change-ds]
   (assert (has-hashed-column? base-ds))
-  (let [change-ds+id (add-id-column change-ds row-schema)]
+  (let [change-ds+id (internal/add-id-column change-ds row-schema)]
     (tc/difference base-ds change-ds+id)))
 
 (defmethod -apply-change :dh/ChangeKindCorrect [ctx base-ds change-ds]
@@ -158,7 +86,7 @@
         right-col-name (if (= "_unnamed" change-ds-name)
                          (str "right." measure-column)
                          (str change-ds-name "." measure-column))
-        change-ds+id (add-id-column change-ds row-schema)
+        change-ds+id (internal/add-id-column change-ds row-schema)
         corrections-ds (-> (tc/inner-join change-ds+id base-ds [hash-column-name])
                            (tc/select-columns (-> (tc/column-names base-ds)
                                                   set
@@ -167,32 +95,10 @@
         (tc/concat corrections-ds)
         (tc/unique-by [hash-column-name] {:strategy :last}))))
 
-(defn make-schema-context
-  "Returns {:hashable-columns seq<COL-NAME> :measure-column COL-NAME}.
-
-  Motivation: get metadata necessary do diff two datasets (like name
-  of the measure column or attribute, and dimension columns)."
-  [row-schema]
-  {:hashable-columns (compile--extract-component-column-names row-schema)
-   :measure-column (compile--extract-measure-column-name row-schema)})
-
-(defn make-change-context
-  [change-kind row-schema]
-  {:row-schema row-schema
-   :datahost.change/kind change-kind
-   :hashable-columns (compile--extract-component-column-names row-schema)
-   :measure-column (compile--extract-measure-column-name row-schema)})
-
 (defn apply-change
   [context base-ds change-ds]
   {:pre [(has-hashed-column? base-ds)]}
   (-apply-change context base-ds change-ds))
-
-(defn- ensure-components-hash-column
-  [dataset row-schema]
-  (if (tc/has-column? dataset hash-column-name)
-    dataset
-    (add-id-column dataset row-schema)))
 
 (def ^:private compile-dataset-opts-valid? (m/validator CompileDatasetOptions))
 
@@ -200,14 +106,14 @@
   "Reducer function for creating a dataset out of a seq of [[ChangeInfo]]s"
   [{row-schema :row-schema :as opts} ds change]
   (let [{:datahost.change/keys [kind]} change
-        ctx (make-change-context kind row-schema)
+        ctx (internal/make-change-context kind row-schema)
         dataset (as-dataset (:datahost.change.data/ref change) opts)]
     (log/trace "compile-reducer:"
                {:new {:dataset (tc/dataset-name dataset)
                       :row-count (tc/row-count dataset) :kind kind}
                 :old {:dataset (tc/dataset-name ds)
                       :row-count (tc/row-count ds)}})
-    (apply-change ctx (ensure-components-hash-column ds row-schema) dataset)))
+    (apply-change ctx (internal/ensure-id-column ds row-schema) dataset)))
 
 (defn- validate-compile-ds-opts
   [opts]
@@ -234,7 +140,7 @@
             (throw (ex-info (format "Base dataset already contains '%s' column"
                                     hash-column-name)
                             {:columns (vec (tc/column-names base-ds))})))
-        base-ds (ensure-components-hash-column base-ds (:row-schema opts))]
+        base-ds (internal/ensure-id-column base-ds (:row-schema opts))]
     ;; let's ensure data issues in dev are immediately revealed
     (data.validation/validate-row-uniqueness base-ds hash-column-name {:opts opts})
     (-> (reduce (partial compile-reducer ds-opts)

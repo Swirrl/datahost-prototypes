@@ -84,22 +84,23 @@
 
 ;; name,age,dh/kind,dh/id,dh/tx,dh/parent
 
-(defn operation-column
-  [_ds]
-  data.internal/op-column-name)
-
 (defn delta-dataset
   "Returns a dataset with extra columns: TODO(finalise names)
 
   Value of the operation column can be TODO | TODO | TODO.
 
-  Unchanged rows are not present in the delta dataset."
-  [base-ds delta-ds {measure-column-name :measure-column hashable-columns :hashable-columns :as ctx}]
-  (let [right-measure-column-name (data.internal/r-joinable-name (tc/dataset-name delta-ds) measure-column-name)
+  Unchanged rows are not present in the delta dataset.
+
+  Assumptions:
+
+  - rows of both datasets conform to row-schema"
+  [base-ds new-ds {:keys [row-schema hashable-columns] measure-column-name :measure-column :as _ctx}]
+  (let [right-measure-column-name (data.internal/r-joinable-name (tc/dataset-name new-ds)
+                                                                 measure-column-name)
+        base-ds (data.internal/ensure-id-column base-ds row-schema)
+        new-ds (data.internal/ensure-id-column new-ds row-schema)
         ]
-    (-> (tc/full-join base-ds delta-ds hashable-columns {:hashing hash-fn
-                                                         ;; :operation-space :int64
-                                                         })
+    (-> (tc/full-join base-ds new-ds data.internal/hash-column-name {:operation-space :int64})
         (tc/map-columns data.internal/op-column-name [measure-column-name right-measure-column-name] tag-change)
         (tc/select-rows (fn changed-only [row] (some? (get row data.internal/op-column-name))))
         ;; (tc/select-columns (conj (vec hashable-columns)
@@ -112,7 +113,12 @@
   
   Assumptions:
   - the datasets were already validated/created against the same schema."
-  [ds-left ds-right {measure-column :measure-column hashable-columns :hashable-columns :as ctx}]
+  [ds-left
+   ds-right
+   {measure-column :measure-column
+    hashable-columns :hashable-columns
+    row-schema :row-schema
+    :as ctx}]
   (let [right-measure-column-name (data.internal/r-joinable-name measure-column (tc/dataset-name ds-right))
         column-names (tc/column-names ds-left)
         right-column-names (map #(data.internal/r-joinable-name (tc/dataset-name ds-right) %) column-names)
@@ -159,31 +165,32 @@
 (defmulti -post-delta-files (fn [sys {{:strs [accept]} :headers}] accept))
 
 (defmethod -post-delta-files "application/x-datahost-tx-csv" [sys request]
-  (let [{:keys [triplestore change-store]} sys
-        {{{:keys [csv]} :multipart} :parameters
-         {release-uri :dh/Release} :datahost.request/uris} request
+  ;; (let [{:keys [triplestore change-store]} sys
+  ;;       {{{:keys [csv]} :multipart} :parameters
+  ;;        {release-uri :dh/Release} :datahost.request/uris} request
 
-        schema (db/get-release-schema triplestore release-uri)
+  ;;       schema (db/get-release-schema triplestore release-uri)
 
-        change-infos (db/get-changes-info triplestore release-uri)
-        _ (when (empty? change-infos)
-            (throw (ex-info "This release has no revisions"
-                            {:type :tpximpact.datahost.ldapi.errors/exception})))
+  ;;       change-infos (db/get-changes-info triplestore release-uri)
+  ;;       _ (when (empty? change-infos)
+  ;;           (throw (ex-info "This release has no revisions"
+  ;;                           {:type :tpximpact.datahost.ldapi.errors/exception})))
         
-        {snapshot-key :snapshotKey rev-uri :rev} (last change-infos)
-        _ (when (nil? snapshot-key)
-            (throw (ex-info (format "Missing :snapshotKey for '%s'" rev-uri)
-                            {:type :tpximpact.datahost.ldapi.errors/exception})))
+  ;;       {snapshot-key :snapshotKey rev-uri :rev} (last change-infos)
+  ;;       _ (when (nil? snapshot-key)
+  ;;           (throw (ex-info (format "Missing :snapshotKey for '%s'" rev-uri)
+  ;;                           {:type :tpximpact.datahost.ldapi.errors/exception})))
         
-        row-schema (data.validation/make-row-schema schema)
-        opts {:store change-store :file-type :csv :enforce-schema row-schema}
-        ds-release (data.validation/as-dataset snapshot-key opts)
-        ds-input (data.validation/as-dataset (:tempfile csv) opts)
+  ;;       row-schema (data.validation/make-row-schema schema)
+  ;;       opts {:store change-store :file-type :csv :enforce-schema row-schema}
+  ;;       ds-release (data.validation/as-dataset snapshot-key opts)
+  ;;       ds-input (data.validation/as-dataset (:tempfile csv) opts)
         
-        ctx (data.compilation/make-schema-context row-schema)
-        diff-results (derive-deltas ds-release ds-input ctx)]
-    {:status 200
-     :body (write-dataset-to-outputstream diff-results)}))
+  ;;       ctx (data.compilation/make-schema-context row-schema)
+  ;;       diff-results (derive-deltas ds-release ds-input ctx)]
+  ;;   {:status 200
+  ;;    :body (write-dataset-to-outputstream diff-results)})
+  )
 
 (defn post-delta-files [sys request]    ;TODO: rename this fn
   ;; TODO: add basic validation for incoming dataset, (e.g.

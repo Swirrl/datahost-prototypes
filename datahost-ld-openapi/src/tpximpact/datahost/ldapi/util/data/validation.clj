@@ -29,17 +29,16 @@
 
 (def ^:private validate-ld-release-schema-input-valid? (m/validator routes-shared/LdSchemaInput))
 
-(defn column-key
-  [k]
-  (case k
-    :datatype (URI. "http://www.w3.org/ns/csvw#datatype")
-    :name (URI. "http://www.w3.org/ns/csvw#name")
-    :titles (URI. "http://www.w3.org/ns/csvw#titles")
-    :required (URI. "http://www.w3.org/ns/csvw#required")
-    :type (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")))
+(def column-uri-keys
+  {:datatype (URI. "http://www.w3.org/ns/csvw#datatype")
+   :name (URI. "http://www.w3.org/ns/csvw#name")
+   :titles (URI. "http://www.w3.org/ns/csvw#titles")
+   :required (URI. "http://www.w3.org/ns/csvw#required")
+   :type (URI. "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")})
 
-(defn- extract-column-datatype
-  "Returns a malli schema for column's value.
+(defmacro make-column-datatype-extractor
+  "Creates a function taking in a JSON or LD column schema (e.g. returned from
+  triplestore) and returning a malli schema for the column's value.
 
   At the moment only the simplest cases are supported, and the
   \"csvw:datatype\" field can be set to \"string\",\"double\",
@@ -51,12 +50,28 @@
   - {\"csvw:datatype\": \"double\", \"csvw:required\": false} -> [:maybe :double]
 
   "
-  [csvw-col-schema]
-  (let [datatype (first (get csvw-col-schema (column-key :datatype)))
-        schema (get {"int" :int "integer" :int "string" :string "double" :double} datatype datatype)]
-    (if-not (get csvw-col-schema (column-key :required))
-      [:maybe schema]
-      schema)))
+  [{:keys [input-format] :as opts}]
+  {:pre [(contains? #{:ld :json} input-format)]}
+  (let [{:keys [datatype required]}
+        (case input-format
+          :json {:datatype #(get % "csvw:datatype")
+                 :required #(get % "csvw:required")}
+          :ld {:datatype #(first (get % (:datatype column-uri-keys)))
+               :required #(get % (:required column-uri-keys))})
+        in-schema (gensym "in-schema-")]
+    `(fn extractor-fn# [~in-schema]
+       (let [datatype# (~datatype ~in-schema)
+             schema# (get {"int" :innt
+                           "integer" :int
+                           "string" :string
+                           "double" :double} datatype# datatype#)]
+         (if-not (~required ~in-schema)
+           [:maybe schema#]
+           schema#)))))
+
+(def json-column-datatype-extractor (make-column-datatype-extractor {:input-format :json}))
+
+(def ld-column-datatype-extractor (make-column-datatype-extractor {:input-format :ld}))
 
 (defn- schema-columns
   [json-ld-schema]
@@ -74,7 +89,7 @@
 
   ```
     [:tuple [:maybe {:dataset.column/name \"Foo\"
-                     :dataset.column/type <URI>} :string
+                     :dataset.column/type <URI>
                      :dataset.column/datatype :string]
             [:int {:dataset.column/name \"My Measure\"
                    :dataset.column/type <URI>
@@ -97,6 +112,7 @@
               (seq children))))]
      [:fn {:error/message "Properties of children schemas are invalid"}
       (fn props-pred [s]
+        ;;(tap> {:props-pred s})
         (validate-seq (map m/properties (m/children s))))]]))
 
 (def ^:private row-schema-valid?
@@ -120,6 +136,54 @@
                         :dataset.column/name col-name
                         :dataset.column/type col-type))
 
+(defn- make-row-schema--cont
+  [components]
+  (vary-meta (m/schema (into [:tuple] components))
+             assoc :datahost/type :datahost.types/dataset-row-schema))
+
+(defn- make-missing-components-error
+  [exception-data]
+  (ex-info "Could not find desired column names in passed in schema."
+           exception-data))
+
+(defn- validate-no-column-name-duplicates
+  [cols indexed]
+  (when (not= (count cols) (count indexed))
+    (throw (ex-info (format "column names in schema should be distinct: schema=%s, indexed=%s"
+                            (count cols) (count indexed))
+                    {:columns cols}))))
+
+(defn- make-row-schema*
+  [columns
+   column-names
+   {:keys [name-key type-key column-datatype-extractor uri-lookup unpack?]
+    :as options}]
+  {:pre [(make-row-schema-options-valid? options)]
+   :post [(row-schema-valid? %)]}
+  (let [get-name (cond->> #(get % name-key)
+                   unpack? (comp first))
+        indexed (set/index (set columns) [name-key])
+        _ (validate-no-column-name-duplicates columns indexed)
+        m (reduce-kv (fn reducer [result index-key v]
+                       ;; we validated that there's only item per
+                       ;; index key, so we can safely unpack the value
+                       (let [item (first v)
+                             col-name (get-name index-key)
+                             schema (column-datatype-extractor item)]
+                         (assoc result col-name
+                                (set-col-schema-props schema
+                                                      col-name
+                                                      (uri-lookup (get item type-key))))))
+                     {}
+                     indexed)
+        components (map #(get m %) (or column-names (keys m)))]
+    (when-not (every? some? components)
+      (throw (make-missing-components-error {:extracted-components components
+                                             :column-names column-names
+                                             :schema-cols columns
+                                             :keys (keys m)})))
+    (make-row-schema--cont components)))
+
 (defn make-row-schema
   "Make a malli schema for a tuple of row values specified by
   column-names. If column names were not specified, uses all columns
@@ -129,37 +193,31 @@
   ([json-ld-schema column-names]
    (make-row-schema json-ld-schema column-names {}))
   ([json-ld-schema column-names options]
-   {:pre [(make-row-schema-options-valid? options)]
-    :post [(row-schema-valid? %)]}
-   (let [name-key (column-key :name)
-         json-cols (schema-columns json-ld-schema)
-         unpack-name (fn [schema] (update schema name-key first))
-         indexed (set/index (into #{} (map unpack-name) json-cols) [name-key])
-         _ (when (not= (count json-cols) (count indexed))
-             (throw (ex-info (format "column names in schema should be distinct: schema=%s, indexed=%s"
-                                     (count json-cols) (count indexed))
-                             {:json-columns json-cols})))
-         m (reduce-kv (fn reducer [r k v]
-                        ;; we know there's only item per index key,
-                        ;; so we can safely unpack the value
-                        (let [ld-val (first v)
-                              col-name (get k name-key)
-                              schema (extract-column-datatype ld-val)]
-                          (assoc r col-name
-                                 (set-col-schema-props schema
-                                                       col-name
-                                                       (first (get ld-val (column-key :type)))))))
-                      {}
-                      indexed)
-         components (map #(get m %) (or column-names (keys m)))]
-     (when-not (every? some? components)
-       (throw (ex-info "Could not find desired column names in passed in schema."
-                       {:column-names column-names
-                        :keys (keys m)
-                        :extracted-components components
-                        :schema-cols json-cols})))
-     (vary-meta (m/schema (into [:tuple] components))
-                assoc :datahost/type :datahost.types/dataset-row-schema))))
+   (make-row-schema* (schema-columns json-ld-schema)
+                     column-names
+                     {:name-key (:name column-uri-keys)
+                      :type-key (:type column-uri-keys)
+                      :column-datatype-extractor ld-column-datatype-extractor
+                      :uri-lookup first
+                      :unpack? true} )))
+
+(defn make-row-schema-from-json
+  "Make a malli schema for a tuple of row values specified by
+  column-names. If column names were not specified, uses all columns
+  from the JSON schema.
+
+  The input json is the one "
+  ([json]
+   (make-row-schema-from-json json nil))
+  ([json column-names]
+   (when-not (validate-ld-release-schema-input-valid? json)
+     (throw (ex-info "Invalid input release schema" {:release-schema json})))
+   (make-row-schema* (get json "dh:columns")
+                     column-names
+                     {:name-key "csvw:name"
+                      :type-key "@type"
+                      :column-datatype-extractor json-column-datatype-extractor
+                      :uri-lookup uris/json-column-types})))
 
 (defn parsing-errors? [column]
   (assert (instance? tech.v3.dataset.impl.column.Column column))
