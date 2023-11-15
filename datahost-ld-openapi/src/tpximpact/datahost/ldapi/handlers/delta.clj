@@ -84,6 +84,8 @@
 
 ;; name,age,dh/kind,dh/id,dh/tx,dh/parent
 
+(defn- row-changed? [row] (some? (get row data.internal/op-column-name)))
+
 (defn delta-dataset
   "Returns a dataset with extra columns: TODO(finalise names)
 
@@ -102,7 +104,7 @@
         ]
     (-> (tc/full-join base-ds new-ds data.internal/hash-column-name {:operation-space :int64})
         (tc/map-columns data.internal/op-column-name [measure-column-name right-measure-column-name] tag-change)
-        (tc/select-rows (fn changed-only [row] (some? (get row data.internal/op-column-name))))
+        (tc/select-rows row-changed?)
         ;; (tc/select-columns (conj (vec hashable-columns)
         ;;                          op-column-name
         ;;                          id-column-name))
