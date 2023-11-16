@@ -13,7 +13,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -24,14 +24,14 @@ Authorization: {{auth_token}}
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
 file,data/well-being/release_1-1/schema-release_1-1.json;
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -56,7 +56,7 @@ file,data/well-being/release_1-1/wellbeing-local-authority-time-series-v1.csv;
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -81,7 +81,7 @@ file,data/well-being/release_1-1/wellbeing-local-authority-2-appends.csv;
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}{{revision2_url}}/deletes
+POST {{scheme}}://{{host_name}}{{revision2_url}}/retractions
 Content-Type: text/csv
 Authorization: {{auth_token}}
 [QueryStringParams]
@@ -92,7 +92,7 @@ file,data/well-being/release_1-1/wellbeing-local-authority-2-deletes.csv;
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -117,7 +117,7 @@ file,data/well-being/release_1-1/wellbeing-local-authority-3-appends.csv;
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}{{revision3_url}}/deletes
+POST {{scheme}}://{{host_name}}{{revision3_url}}/retractions
 Content-Type: text/csv
 Authorization: {{auth_token}}
 [QueryStringParams]
