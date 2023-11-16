@@ -219,9 +219,9 @@
                       :column-datatype-extractor json-column-datatype-extractor
                       :uri-lookup uris/json-column-types})))
 
-(defn parsing-errors? [column]
+(defn parsing-errors [column]
   (assert (instance? tech.v3.dataset.impl.column.Column column))
-  (some? (:unparsed-data (meta column))))
+  (-> column meta :unparsed-data))
 
 (defn dataset-errors?
   [ds]
@@ -258,6 +258,9 @@
        [datatype (partial parse-col parse-double*)]
        
 
+       (= :string datatype)
+       [datatype (partial parse-col str)]
+       
        :else
        (throw (ex-info (str "Unsupported datatype: " datatype)
                        {:props props})))]))
@@ -265,7 +268,6 @@
 (defmethod -dataset-ctor-opts :datahost.types/dataset-row-schema [schema]
   (let []
     {:parser-fn (into {} (comp (map m/properties)
-                               (filter #(not= :string (:dataset.column/datatype %)))
                                (map datatype+parse-fn))
                       (m/children schema))}))
 
@@ -418,14 +420,17 @@
       (throw (ex-info "Dataset creation failure. See dataset ':$error' column."
                       {:type ::dataset-creation :options opts})))
     (when row-schema
-      (when-some [err-columns (seq (into [] (comp (map #(tc/column ds %))
-                                                  (filter parsing-errors?)
-                                                  (map (comp :name meta)))
-                                         (row-schema->column-names row-schema)))]
-        (throw (ex-info (str "Dataset creation failure: failures in columns: " (vec err-columns))
-                        {:type ::dataset-creation
-                         :error-columns err-columns
-                         :options opts}))))
+      (let [err-samples (into {} (comp (map #(tc/column ds %))
+                                       (keep (fn [col]
+                                               ;; get a sample of values causing trouble
+                                               (when-let [errs (parsing-errors col)]
+                                                 [(-> col meta :name) (take 3 errs)]))))
+                              (row-schema->column-names row-schema))]
+        (when-not (empty? err-samples)
+         (throw (ex-info (str "Dataset creation failure: failures in columns: " err-samples)
+                         {:type ::dataset-creation
+                          :error-samples err-samples
+                          :options opts})))))
     
     (cond-> ds
       convert-opts (convert-dataset-types (:row-schema convert-opts)))))
