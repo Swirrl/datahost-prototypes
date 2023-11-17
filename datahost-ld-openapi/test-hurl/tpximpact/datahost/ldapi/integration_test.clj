@@ -25,5 +25,5 @@
           result (hurl/run-directory "hurl-scripts"
                                      {:variables variables
                                       :report-junit "test-results/hurl-regression-tests.xml"
-                                      :report-html "teset-report"})]
+                                      :report-html "test-report"})]
       (is (hurl/success? result)))))
