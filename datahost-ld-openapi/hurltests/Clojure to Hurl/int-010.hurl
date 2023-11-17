@@ -1,10 +1,9 @@
-#This test is for:
-#creating a new revision
-#getting the list of revisions from the release
-#getting the metadata of the revisions from the '{{release_slug}}/revisions'
+# Description: This test is for:
+# - creating a new revision
+# - getting the list of revisions from the release
+# - getting the metadata of the revisions from the '{{release_slug}}/revisions'
 
 #example run command: hurl revision_test-create.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" --variable series=dummy4
-
 
 #Create series
 PUT {{scheme}}://{{host_name}}/data/{{series}}

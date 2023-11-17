@@ -1,6 +1,5 @@
 # Description: basic appends test
 
-# run locally: hurl FILE_NAME --variable series=series-01 --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" 
 # This Hurl script was created using hurl-gen.py with the following arguments: ../common/release_1-1.json revision appends:2019.csv revision appends:2020.csv revision appends:2021.csv
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
