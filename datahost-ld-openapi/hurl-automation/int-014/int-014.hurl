@@ -1,4 +1,6 @@
-#basic append delete and correction test
+# Description: basic append delete and correction test
+
+# This Hurl script was created using hurl-gen.py with the following arguments: release_1-1.json revision appends:test-original.csv revision appends:data-appends.csv retractions:data-deletes.csv corrections:data-corrections.csv
 
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
@@ -28,7 +30,7 @@ HTTP 201
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file,data/test-data/schema-release_1-1.json;
+file,common/schema-01.json;
 
 HTTP 201
 
@@ -52,7 +54,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,data/test-data/test-original.csv;
+file,int-014/data-original.csv;
 
 HTTP 201
 
@@ -77,7 +79,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,data/test-data/append-correction-delete-appends.csv;
+file,int-014/data-appends.csv;
 
 HTTP 201
 
@@ -88,7 +90,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes retractions
 description: change for {{series}}
-file,data/test-data/append-correction-delete-deletes.csv;
+file,int-014/data-deletes.csv;
 
 HTTP 201
 
@@ -99,9 +101,6 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes corrections
 description: change for {{series}}
-file,data/test-data/append-correction-delete-corrections.csv;
+file,int-014/data-corrections.csv;
 
 HTTP 201
-
-# run locally: hurl FILE_NAME --variable series=series-01 --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" 
-# This Hurl script was created using hurl-gen.py with the following arguments- data/test-data/release_1-1.json revision appends:data/test-data/test-original.csv revision appends:data/test-data/append-correction-delete-appends.csv retractions:data/test-data/append-correction-delete-deletes.csv corrections:data/test-data/append-correction-delete-corrections.csv

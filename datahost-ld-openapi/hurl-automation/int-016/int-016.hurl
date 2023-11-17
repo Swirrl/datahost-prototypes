@@ -1,4 +1,6 @@
-#basic appends test
+# Description: basic append delete and correction test using a real-world dataset.
+
+# This Hurl script was created using hurl-gen.py with the following arguments: release_1-1.json revision appends:wellbeing-local-authority-time-series-v1.csv revision appends:wellbeing-local-authority-2-appends.csv deletes:wellbeing-local-authority-2-deletes.csv revision appends:wellbeing-local-authority-3-appends.csv deletes:wellbeing-local-authority-3-deletes.csv corrections:wellbeing-local-authority-3-corrections.csv
 
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
@@ -28,7 +30,7 @@ HTTP 201
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file,data/dataset-1/release_1-1/schema-release_1-1.json;
+file,int-016/schema-release_1-1.json;
 
 HTTP 201
 
@@ -52,7 +54,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,data/dataset-1/release_1-1/2019.csv;
+file,int-016/wellbeing-local-authority-time-series-v1.csv;
 
 HTTP 201
 
@@ -77,7 +79,18 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,data/dataset-1/release_1-1/2020.csv;
+file,int-016/wellbeing-local-authority-2-appends.csv;
+
+HTTP 201
+
+
+POST {{scheme}}://{{host_name}}{{revision2_url}}/retractions
+Content-Type: text/csv
+Authorization: {{auth_token}}
+[QueryStringParams]
+title: changes deletes
+description: change for {{series}}
+file,int-016/wellbeing-local-authority-2-deletes.csv;
 
 HTTP 201
 
@@ -102,9 +115,29 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,data/dataset-1/release_1-1/2021.csv;
+file,int-016/wellbeing-local-authority-3-appends.csv;
 
 HTTP 201
 
-# run locally: hurl FILE_NAME --variable series=series-01 --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" 
-# This Hurl script was created using hurl-gen.py with the following arguments- data/dataset-1/release_1-1/release_1-1.json revision appends:data/dataset-1/release_1-1/2019.csv revision appends:data/dataset-1/release_1-1/2020.csv revision appends:data/dataset-1/release_1-1/2021.csv
+
+POST {{scheme}}://{{host_name}}{{revision3_url}}/retractions
+Content-Type: text/csv
+Authorization: {{auth_token}}
+[QueryStringParams]
+title: changes deletes
+description: change for {{series}}
+file,int-016/wellbeing-local-authority-3-deletes.csv;
+
+HTTP 201
+
+
+POST {{scheme}}://{{host_name}}{{revision3_url}}/corrections
+Content-Type: text/csv
+Authorization: {{auth_token}}
+[QueryStringParams]
+title: changes corrections
+description: change for {{series}}
+file,int-016/wellbeing-local-authority-3-corrections.csv;
+
+HTTP 201
+
