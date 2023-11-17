@@ -13,7 +13,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 32.96,,28.31,37.6,2019-20,2019-20,E08000003,Manchester,worthwhile,Worthwhile,very-good,Very good
 16.39,,13.14,19.64,2019-20,2019-20,E08000003,Manchester,life-satisfaction,Life Satisfaction,fair,Fair
 22.99,,18.01,27.97,2020-21,2020-21,E08000003,Manchester,life-satisfaction,Life Satisfaction,fair,Fair
-13,,9.95,16.05,2019-20,2019-20,E08000003,Manchester,worthwhile,Worthwhile,fair,Fair
+13.0,9.95,16.05,2019-20,2019-20,E08000003,Manchester,worthwhile,Worthwhile,fair,Fair
 26.98,,22.84,31.12,2019-20,2019-20,E08000003,Manchester,life-satisfaction,Life Satisfaction,very-good,Very good
 50.24,,45.65,54.82,2019-20,2019-20,E08000003,Manchester,worthwhile,Worthwhile,good,Good
 15.71,,12.36,19.07,2019-20,2019-20,E08000003,Manchester,happiness,Happiness,fair,Fair
@@ -308,7 +308,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 3.15,,2.44,3.86,2020-21,2020-21,E07000042,Mid Devon,anxiety,Anxiety,average-mean,Average (mean)
 31.41,,20.72,42.1,2019-20,2019-20,E07000042,Mid Devon,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2020-21,2020-21,E07000042,Mid Devon,worthwhile,Worthwhile,fair,Fair
-60,,47.89,72.12,2020-21,2020-21,E07000042,Mid Devon,worthwhile,Worthwhile,good,Good
+60.0,47.89,72.12,2020-21,2020-21,E07000042,Mid Devon,worthwhile,Worthwhile,good,Good
 26.45,,16.25,36.66,2020-21,2020-21,E07000042,Mid Devon,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2016-17,2016-17,E07000042,Mid Devon,happiness,Happiness,poor,Poor
 3.37,,2.75,4.0,2019-20,2019-20,E07000042,Mid Devon,anxiety,Anxiety,average-mean,Average (mean)
@@ -1002,7 +1002,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.59,,7.45,7.74,2020-21,2020-21,E10000029,Suffolk,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 7.39,,7.21,7.57,2020-21,2020-21,E10000029,Suffolk,happiness,Happiness,average-mean,Average (mean)
 32.98,,28.92,37.04,2020-21,2020-21,E10000029,Suffolk,happiness,Happiness,very-good,Very good
-15,,11.51,18.5,2020-21,2020-21,E10000029,Suffolk,life-satisfaction,Life Satisfaction,fair,Fair
+15.0,11.51,18.5,2020-21,2020-21,E10000029,Suffolk,life-satisfaction,Life Satisfaction,fair,Fair
 4.29,,2.77,5.8,2019-20,2019-20,E10000029,Suffolk,life-satisfaction,Life Satisfaction,poor,Poor
 49.18,,45.23,53.12,2019-20,2019-20,E10000029,Suffolk,life-satisfaction,Life Satisfaction,good,Good
 51.21,,46.62,55.79,2020-21,2020-21,E10000029,Suffolk,life-satisfaction,Life Satisfaction,good,Good
@@ -1884,7 +1884,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 15.35,,11.7,19.0,2020-21,2020-21,E08000018,Rotherham,life-satisfaction,Life Satisfaction,fair,Fair
 48.22,,43.68,52.76,2019-20,2019-20,E08000018,Rotherham,life-satisfaction,Life Satisfaction,good,Good
 8.06,,7.9,8.22,2019-20,2019-20,E08000018,Rotherham,worthwhile,Worthwhile,average-mean,Average (mean)
-41,,36.41,45.59,2019-20,2019-20,E08000018,Rotherham,worthwhile,Worthwhile,very-good,Very good
+41.0,36.41,45.59,2019-20,2019-20,E08000018,Rotherham,worthwhile,Worthwhile,very-good,Very good
 47.17,,41.88,52.45,2020-21,2020-21,E08000018,Rotherham,worthwhile,Worthwhile,good,Good
 35.85,,31.22,40.47,2019-20,2019-20,E08000018,Rotherham,happiness,Happiness,very-good,Very good
 22.14,,17.66,26.61,2020-21,2020-21,E08000018,Rotherham,happiness,Happiness,fair,Fair
@@ -2146,7 +2146,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 2.71,,2.16,3.25,2019-20,2019-20,E07000041,Exeter,anxiety,Anxiety,average-mean,Average (mean)
 ,x,,,2013-14,2013-14,E07000041,Exeter,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2016-17,2016-17,E07000041,Exeter,life-satisfaction,Life Satisfaction,poor,Poor
-20,,12.16,27.69,2016-17,2016-17,E07000041,Exeter,life-satisfaction,Life Satisfaction,fair,Fair
+20.0,12.16,27.69,2016-17,2016-17,E07000041,Exeter,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2018-19,2018-19,E07000041,Exeter,life-satisfaction,Life Satisfaction,poor,Poor
 60.94,,50.19,71.69,2020-21,2020-21,E07000041,Exeter,life-satisfaction,Life Satisfaction,good,Good
 39.69,,28.55,50.83,2019-20,2019-20,E07000041,Exeter,happiness,Happiness,very-good,Very good
@@ -2195,7 +2195,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 32.33,,28.38,36.29,2019-20,2019-20,W06000005,Flintshire,life-satisfaction,Life Satisfaction,very-good,Very good
 23.69,,19.05,28.33,2020-21,2020-21,W06000005,Flintshire,life-satisfaction,Life Satisfaction,very-good,Very good
 7.21,,6.99,7.44,2020-21,2020-21,W06000005,Flintshire,happiness,Happiness,average-mean,Average (mean)
-40,,35.99,44.01,2019-20,2019-20,W06000005,Flintshire,worthwhile,Worthwhile,very-good,Very good
+40.0,35.99,44.01,2019-20,2019-20,W06000005,Flintshire,worthwhile,Worthwhile,very-good,Very good
 8.92,,6.64,11.21,2019-20,2019-20,W06000005,Flintshire,happiness,Happiness,poor,Poor
 54.20,,43.1,51.84,2014-15,2014-15,W06000005,Flintshire,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2014-15,2014-15,W06000005,Flintshire,worthwhile,Worthwhile,poor,Poor
@@ -2369,7 +2369,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,E07000088,Gosport,anxiety,Anxiety,fair,Fair
 ,x,,,2012-13,2012-13,E07000088,Gosport,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2018-19,2018-19,E07000088,Gosport,worthwhile,Worthwhile,fair,Fair
-44,,32.16,55.83,2019-20,2019-20,E07000088,Gosport,worthwhile,Worthwhile,good,Good
+44.0,32.16,55.83,2019-20,2019-20,E07000088,Gosport,worthwhile,Worthwhile,good,Good
 37.14,,25.42,48.85,2019-20,2019-20,E07000088,Gosport,worthwhile,Worthwhile,very-good,Very good
 7.35,,6.84,7.86,2019-20,2019-20,E07000088,Gosport,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 ,x,,,2011-12,2011-12,E07000088,Gosport,life-satisfaction,Life Satisfaction,fair,Fair
@@ -2791,7 +2791,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 24.53,,19.7,29.36,2020-21,2020-21,E10000019,Lincolnshire,anxiety,Anxiety,good,Good
 13.33,,10.59,16.07,2019-20,2019-20,E10000019,Lincolnshire,life-satisfaction,Life Satisfaction,fair,Fair
 44.49,,39.63,49.35,2020-21,2020-21,E10000019,Lincolnshire,happiness,Happiness,good,Good
-18,,14.85,21.16,2019-20,2019-20,E10000019,Lincolnshire,happiness,Happiness,fair,Fair
+18.0,14.85,21.16,2019-20,2019-20,E10000019,Lincolnshire,happiness,Happiness,fair,Fair
 33.28,,28.81,37.75,2020-21,2020-21,E10000019,Lincolnshire,happiness,Happiness,very-good,Very good
 3.31,,2.02,4.6,2019-20,2019-20,E10000019,Lincolnshire,life-satisfaction,Life Satisfaction,poor,Poor
 29.54,,26.32,29.54,2014-15,2014-15,E10000019,Lincolnshire,life-satisfaction,Life Satisfaction,very-good,Very good
@@ -3312,7 +3312,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2014-15,2014-15,E07000237,Worcester,happiness,Happiness,poor,Poor
 ,x,,,2014-15,2014-15,E07000237,Worcester,happiness,Happiness,fair,Fair
 ,x,,,2017-18,2017-18,E07000237,Worcester,happiness,Happiness,poor,Poor
-45,,35.75,54.26,2019-20,2019-20,E07000237,Worcester,happiness,Happiness,good,Good
+45.0,35.75,54.26,2019-20,2019-20,E07000237,Worcester,happiness,Happiness,good,Good
 ,x,,,2012-13,2012-13,E07000237,Worcester,anxiety,Anxiety,fair,Fair
 ,x,,,2015-16,2015-16,E07000237,Worcester,anxiety,Anxiety,poor,Poor
 ,x,,,2018-19,2018-19,E07000237,Worcester,happiness,Happiness,poor,Poor
@@ -3359,7 +3359,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2013-14,2013-14,E07000237,Worcester,life-satisfaction,Life Satisfaction,poor,Poor
 55.53,,44.87,66.2,2019-20,2019-20,E07000237,Worcester,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2020-21,2020-21,E07000237,Worcester,life-satisfaction,Life Satisfaction,very-good,Very good
-27,,17.03,36.96,2019-20,2019-20,E07000237,Worcester,life-satisfaction,Life Satisfaction,very-good,Very good
+27.0,17.03,36.96,2019-20,2019-20,E07000237,Worcester,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2013-14,2013-14,E07000237,Worcester,worthwhile,Worthwhile,poor,Poor
 ,x,,,2015-16,2015-16,E07000237,Worcester,worthwhile,Worthwhile,good,Good
 ,x,,,2016-17,2016-17,E07000237,Worcester,worthwhile,Worthwhile,fair,Fair
@@ -3418,7 +3418,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2012-13,2012-13,E06000056,Central Bedfordshire,worthwhile,Worthwhile,poor,Poor
 14.88,,11.04,18.72,2019-20,2019-20,E06000056,Central Bedfordshire,anxiety,Anxiety,fair,Fair
 39.18,,32.72,45.63,2020-21,2020-21,E06000056,Central Bedfordshire,anxiety,Anxiety,very-good,Very good
-21,,15.78,26.23,2020-21,2020-21,E06000056,Central Bedfordshire,anxiety,Anxiety,poor,Poor
+21.0,15.78,26.23,2020-21,2020-21,E06000056,Central Bedfordshire,anxiety,Anxiety,poor,Poor
 ,x,,,2015-16,2015-16,E06000056,Central Bedfordshire,happiness,Happiness,poor,Poor
 ,x,,,2020-21,2020-21,E06000056,Central Bedfordshire,worthwhile,Worthwhile,fair,Fair
 39.14,,32.86,45.43,2020-21,2020-21,E06000056,Central Bedfordshire,happiness,Happiness,good,Good
@@ -4095,7 +4095,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,W06000015,Cardiff,happiness,Happiness,poor,Poor
 15.21,,11.6,17.53,2014-15,2014-15,W06000015,Cardiff,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2016-17,2016-17,W06000015,Cardiff,life-satisfaction,Life Satisfaction,fair,Fair
-17,,12.63,21.37,2020-21,2020-21,W06000015,Cardiff,happiness,Happiness,fair,Fair
+17.0,12.63,21.37,2020-21,2020-21,W06000015,Cardiff,happiness,Happiness,fair,Fair
 ,x,,,2016-17,2016-17,W06000015,Cardiff,life-satisfaction,Life Satisfaction,poor,Poor
 27.05,,21.41,32.69,2020-21,2020-21,W06000015,Cardiff,anxiety,Anxiety,good,Good
 24.32,,18.16,30.47,2020-21,2020-21,W06000015,Cardiff,anxiety,Anxiety,poor,Poor
@@ -5025,7 +5025,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,E09000019,Islington,happiness,Happiness,poor,Poor
 22.18,,14.53,29.83,2020-21,2020-21,E09000019,Islington,happiness,Happiness,very-good,Very good
 23.15,,16.75,29.55,2020-21,2020-21,E09000019,Islington,anxiety,Anxiety,fair,Fair
-30,,24.02,35.97,2019-20,2019-20,E09000019,Islington,anxiety,Anxiety,good,Good
+30.0,24.02,35.97,2019-20,2019-20,E09000019,Islington,anxiety,Anxiety,good,Good
 ,x,,,2014-15,2014-15,E09000019,Islington,life-satisfaction,Life Satisfaction,poor,Poor
 58.82,,52.92,64.73,2019-20,2019-20,E09000019,Islington,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2018-19,2018-19,E09000019,Islington,life-satisfaction,Life Satisfaction,poor,Poor
@@ -5378,7 +5378,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 17.47,,13.71,21.23,2020-21,2020-21,E06000009,Blackpool,worthwhile,Worthwhile,fair,Fair
 21.33,,17.06,25.59,2020-21,2020-21,E06000009,Blackpool,anxiety,Anxiety,good,Good
 18.06,,15.1,21.01,2019-20,2019-20,E06000009,Blackpool,anxiety,Anxiety,good,Good
-17,,13.76,20.23,2020-21,2020-21,E06000009,Blackpool,anxiety,Anxiety,fair,Fair
+17.0,13.76,20.23,2020-21,2020-21,E06000009,Blackpool,anxiety,Anxiety,fair,Fair
 8.47,,5.58,11.36,2020-21,2020-21,E06000038,Reading,happiness,Happiness,poor,Poor
 22.76,,17.91,27.61,2020-21,2020-21,E06000038,Reading,anxiety,Anxiety,fair,Fair
 ,x,,,2020-21,2020-21,E06000038,Reading,life-satisfaction,Life Satisfaction,poor,Poor
@@ -5722,7 +5722,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 11.18,,10.3,15.76,2014-15,2014-15,S12000010,East Lothian,life-satisfaction,Life Satisfaction,fair,Fair
 53.60,,51.48,59.8,2014-15,2014-15,S12000010,East Lothian,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2015-16,2015-16,S12000010,East Lothian,life-satisfaction,Life Satisfaction,poor,Poor
-53,,48.21,57.79,2019-20,2019-20,S12000010,East Lothian,life-satisfaction,Life Satisfaction,good,Good
+53.0,48.21,57.79,2019-20,2019-20,S12000010,East Lothian,life-satisfaction,Life Satisfaction,good,Good
 16.59,,13.27,19.91,2019-20,2019-20,S12000010,East Lothian,happiness,Happiness,fair,Fair
 42.96,,38.69,47.22,2019-20,2019-20,S12000010,East Lothian,happiness,Happiness,good,Good
 32.96,,27.73,38.2,2020-21,2020-21,S12000010,East Lothian,anxiety,Anxiety,very-good,Very good
@@ -5769,7 +5769,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2013-14,2013-14,E07000145,Great Yarmouth,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2017-18,2017-18,E07000145,Great Yarmouth,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2017-18,2017-18,E07000145,Great Yarmouth,life-satisfaction,Life Satisfaction,fair,Fair
-37,,24.55,49.45,2019-20,2019-20,E07000145,Great Yarmouth,life-satisfaction,Life Satisfaction,very-good,Very good
+37.0,24.55,49.45,2019-20,2019-20,E07000145,Great Yarmouth,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2015-16,2015-16,E07000145,Great Yarmouth,worthwhile,Worthwhile,poor,Poor
 ,x,,,2016-17,2016-17,E07000145,Great Yarmouth,worthwhile,Worthwhile,poor,Poor
 ,x,,,2015-16,2015-16,E07000145,Great Yarmouth,life-satisfaction,Life Satisfaction,very-good,Very good
@@ -7075,7 +7075,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 3.04,,2.59,3.49,2020-21,2020-21,E09000017,Hillingdon,anxiety,Anxiety,average-mean,Average (mean)
 ,x,,,2016-17,2016-17,E09000017,Hillingdon,happiness,Happiness,poor,Poor
 29.70,,24.65,29.71,2014-15,2014-15,E09000017,Hillingdon,life-satisfaction,Life Satisfaction,very-good,Very good
-25,,16.7,33.3,2020-21,2020-21,E09000017,Hillingdon,anxiety,Anxiety,good,Good
+25.0,16.7,33.3,2020-21,2020-21,E09000017,Hillingdon,anxiety,Anxiety,good,Good
 57.71,,49.28,66.14,2020-21,2020-21,E09000017,Hillingdon,worthwhile,Worthwhile,good,Good
 ,x,,,2020-21,2020-21,E09000017,Hillingdon,happiness,Happiness,poor,Poor
 18.42,,12.03,24.8,2020-21,2020-21,E09000017,Hillingdon,anxiety,Anxiety,fair,Fair
@@ -8217,7 +8217,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.12,,6.52,7.73,2017-18,2017-18,E07000156,Wellingborough,happiness,Happiness,average-mean,Average (mean)
 ,x,,,2011-12,2011-12,E07000156,Wellingborough,life-satisfaction,Life Satisfaction,poor,Poor
 45.47,,35.23,55.71,2011-12,2011-12,E07000156,Wellingborough,life-satisfaction,Life Satisfaction,good,Good
-26,,15.82,36.16,2013-14,2013-14,E07000156,Wellingborough,life-satisfaction,Life Satisfaction,very-good,Very good
+26.0,15.82,36.16,2013-14,2013-14,E07000156,Wellingborough,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2020-21,2020-21,E07000156,Wellingborough,life-satisfaction,Life Satisfaction,fair,Fair
 44.51,,29.02,59.99,2020-21,2020-21,E07000156,Wellingborough,worthwhile,Worthwhile,very-good,Very good
 46.75,,35.86,57.65,2011-12,2011-12,E07000156,Wellingborough,happiness,Happiness,good,Good
@@ -8260,7 +8260,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 17.94,,13.02,22.87,2019-20,2019-20,E09000024,Merton,anxiety,Anxiety,fair,Fair
 39.25,,32.24,46.26,2019-20,2019-20,E09000024,Merton,anxiety,Anxiety,very-good,Very good
 ,x,,,2011-12,2011-12,E09000024,Merton,life-satisfaction,Life Satisfaction,poor,Poor
-20,,13.6,26.41,2020-21,2020-21,E09000024,Merton,life-satisfaction,Life Satisfaction,fair,Fair
+20.0,13.6,26.41,2020-21,2020-21,E09000024,Merton,life-satisfaction,Life Satisfaction,fair,Fair
 55.29,,47.6,62.97,2020-21,2020-21,E09000024,Merton,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2017-18,2017-18,E09000024,Merton,worthwhile,Worthwhile,poor,Poor
 ,x,,,2016-17,2016-17,E09000024,Merton,happiness,Happiness,poor,Poor
@@ -8459,7 +8459,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 10.92,,8.39,13.46,2019-20,2019-20,E06000005,Darlington,worthwhile,Worthwhile,fair,Fair
 28.24,,23.74,32.74,2020-21,2020-21,E06000005,Darlington,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2020-21,2020-21,E06000005,Darlington,worthwhile,Worthwhile,poor,Poor
-41,,37.29,44.72,2019-20,2019-20,E06000005,Darlington,anxiety,Anxiety,very-good,Very good
+41.0,37.29,44.72,2019-20,2019-20,E06000005,Darlington,anxiety,Anxiety,very-good,Very good
 22.64,,18.45,26.84,2020-21,2020-21,E06000005,Darlington,life-satisfaction,Life Satisfaction,very-good,Very good
 19.93,,15.95,23.91,2020-21,2020-21,E06000005,Darlington,happiness,Happiness,fair,Fair
 45.47,,40.8,50.13,2020-21,2020-21,E06000005,Darlington,happiness,Happiness,good,Good
@@ -9317,7 +9317,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,S12000039,West Dunbartonshire,worthwhile,Worthwhile,poor,Poor
 32.11,,28.39,35.82,2019-20,2019-20,S12000039,West Dunbartonshire,worthwhile,Worthwhile,very-good,Very good
 12.35,,9.82,14.87,2019-20,2019-20,S12000039,West Dunbartonshire,worthwhile,Worthwhile,fair,Fair
-29,,24.24,33.77,2020-21,2020-21,S12000039,West Dunbartonshire,happiness,Happiness,very-good,Very good
+29.0,24.24,33.77,2020-21,2020-21,S12000039,West Dunbartonshire,happiness,Happiness,very-good,Very good
 41.10,,35.84,46.37,2020-21,2020-21,S12000039,West Dunbartonshire,anxiety,Anxiety,very-good,Very good
 7.74,,7.6,7.88,2019-20,2019-20,S12000039,West Dunbartonshire,worthwhile,Worthwhile,average-mean,Average (mean)
 2.95,,2.72,3.18,2019-20,2019-20,S12000039,West Dunbartonshire,anxiety,Anxiety,average-mean,Average (mean)
@@ -9558,7 +9558,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 12.79,,10.17,15.42,2020-21,2020-21,E06000027,Torbay,worthwhile,Worthwhile,fair,Fair
 15.95,,13.16,18.75,2019-20,2019-20,E06000027,Torbay,happiness,Happiness,fair,Fair
 15.97,,13.27,18.67,2019-20,2019-20,E06000027,Torbay,anxiety,Anxiety,fair,Fair
-35,,30.63,39.38,2020-21,2020-21,E06000027,Torbay,anxiety,Anxiety,very-good,Very good
+35.0,30.63,39.38,2020-21,2020-21,E06000027,Torbay,anxiety,Anxiety,very-good,Very good
 18.50,,14.92,22.08,2020-21,2020-21,E06000027,Torbay,anxiety,Anxiety,fair,Fair
 3.06,,2.84,3.28,2019-20,2019-20,E06000027,Torbay,anxiety,Anxiety,average-mean,Average (mean)
 19.43,,16.73,22.13,2019-20,2019-20,E06000027,Torbay,anxiety,Anxiety,good,Good
@@ -9765,7 +9765,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2018-19,2018-19,E09000022,Lambeth,worthwhile,Worthwhile,poor,Poor
 ,x,,,2020-21,2020-21,E09000022,Lambeth,life-satisfaction,Life Satisfaction,poor,Poor
 56.66,,47.55,65.78,2020-21,2020-21,E09000022,Lambeth,life-satisfaction,Life Satisfaction,good,Good
-19,,12.59,25.42,2020-21,2020-21,E09000022,Lambeth,life-satisfaction,Life Satisfaction,very-good,Very good
+19.0,12.59,25.42,2020-21,2020-21,E09000022,Lambeth,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2014-15,2014-15,E09000022,Lambeth,worthwhile,Worthwhile,poor,Poor
 25.59,,20.01,31.17,2019-20,2019-20,E09000022,Lambeth,anxiety,Anxiety,poor,Poor
 26.31,,18.84,33.79,2020-21,2020-21,E09000022,Lambeth,anxiety,Anxiety,very-good,Very good
@@ -9864,7 +9864,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 11.34,,8.08,14.61,2019-20,2019-20,E06000044,Portsmouth,worthwhile,Worthwhile,fair,Fair
 21.25,,16.91,25.58,2020-21,2020-21,E06000044,Portsmouth,anxiety,Anxiety,good,Good
 37.24,,32.81,41.67,2019-20,2019-20,E06000044,Portsmouth,anxiety,Anxiety,very-good,Very good
-37,,31.92,42.07,2020-21,2020-21,E06000044,Portsmouth,anxiety,Anxiety,very-good,Very good
+37.0,31.92,42.07,2020-21,2020-21,E06000044,Portsmouth,anxiety,Anxiety,very-good,Very good
 20.39,,16.65,24.14,2020-21,2020-21,E06000044,Portsmouth,anxiety,Anxiety,poor,Poor
 20.26,,16.52,23.99,2019-20,2019-20,E06000044,Portsmouth,anxiety,Anxiety,poor,Poor
 34.67,,30.43,38.91,2019-20,2019-20,E06000044,Portsmouth,happiness,Happiness,very-good,Very good
@@ -9889,7 +9889,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.82,,7.66,7.98,2019-20,2019-20,E06000044,Portsmouth,worthwhile,Worthwhile,average-mean,Average (mean)
 27.08,,23.24,27.08,2014-15,2014-15,E06000044,Portsmouth,life-satisfaction,Life Satisfaction,very-good,Very good
 7.82,,5.38,10.25,2019-20,2019-20,E06000044,Portsmouth,happiness,Happiness,poor,Poor
-17,,13.84,20.16,2019-20,2019-20,E06000044,Portsmouth,happiness,Happiness,fair,Fair
+17.0,13.84,20.16,2019-20,2019-20,E06000044,Portsmouth,happiness,Happiness,fair,Fair
 32.65,,27.85,37.45,2020-21,2020-21,E06000044,Portsmouth,happiness,Happiness,very-good,Very good
 48.84,,44.23,53.45,2019-20,2019-20,E06000044,Portsmouth,worthwhile,Worthwhile,good,Good
 15.64,,11.83,19.44,2020-21,2020-21,E06000044,Portsmouth,worthwhile,Worthwhile,fair,Fair
@@ -9933,7 +9933,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 38.50,,32.73,44.27,2020-21,2020-21,S12000006,Dumfries and Galloway,happiness,Happiness,very-good,Very good
 7.69,,7.5,7.89,2019-20,2019-20,S12000006,Dumfries and Galloway,happiness,Happiness,average-mean,Average (mean)
 47.06,,51.38,63.5,2014-15,2014-15,S12000006,Dumfries and Galloway,life-satisfaction,Life Satisfaction,good,Good
-40,,35.8,44.19,2019-20,2019-20,S12000006,Dumfries and Galloway,life-satisfaction,Life Satisfaction,very-good,Very good
+40.0,35.8,44.19,2019-20,2019-20,S12000006,Dumfries and Galloway,life-satisfaction,Life Satisfaction,very-good,Very good
 30.45,,25.49,35.4,2020-21,2020-21,S12000006,Dumfries and Galloway,life-satisfaction,Life Satisfaction,very-good,Very good
 36.49,,31.24,41.75,2020-21,2020-21,S12000006,Dumfries and Galloway,happiness,Happiness,good,Good
 16.13,,12.49,19.77,2020-21,2020-21,S12000006,Dumfries and Galloway,anxiety,Anxiety,fair,Fair
@@ -10259,7 +10259,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2019-20,2019-20,S12000048,Perth and Kinross,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2018-19,2018-19,S12000048,Perth and Kinross,life-satisfaction,Life Satisfaction,poor,Poor
 31.52,,26.74422557279907,37.15552183025685,2020-21,2020-21,S12000048,Perth and Kinross,happiness,Happiness,very-good,Very good
-23,,18.69,27.32,2018-19,2018-19,S12000048,Perth and Kinross,anxiety,Anxiety,good,Good
+23.0,18.69,27.32,2018-19,2018-19,S12000048,Perth and Kinross,anxiety,Anxiety,good,Good
 12.15,,x,x,2013-14,2013-14,S12000048,Perth and Kinross,worthwhile,Worthwhile,fair,Fair
 ,x,,,2016-17,2016-17,S12000048,Perth and Kinross,worthwhile,Worthwhile,poor,Poor
 49.11,,44.53,53.7,2018-19,2018-19,S12000048,Perth and Kinross,worthwhile,Worthwhile,good,Good
@@ -10407,7 +10407,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,E07000117,Burnley,worthwhile,Worthwhile,fair,Fair
 ,x,,,2019-20,2019-20,E07000117,Burnley,worthwhile,Worthwhile,fair,Fair
 ,x,,,2020-21,2020-21,E07000117,Burnley,worthwhile,Worthwhile,fair,Fair
-50,,36.08,63.91,2020-21,2020-21,E07000117,Burnley,worthwhile,Worthwhile,good,Good
+50.0,36.08,63.91,2020-21,2020-21,E07000117,Burnley,worthwhile,Worthwhile,good,Good
 ,x,,,2017-18,2017-18,E07000117,Burnley,worthwhile,Worthwhile,fair,Fair
 57.75,,44.82,70.68,2019-20,2019-20,E07000117,Burnley,worthwhile,Worthwhile,good,Good
 30.53,,18.92,42.13,2019-20,2019-20,E07000117,Burnley,worthwhile,Worthwhile,very-good,Very good
@@ -10673,7 +10673,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2018-19,2018-19,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2018-19,2018-19,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,fair,Fair
-29,,20.41,37.6,2019-20,2019-20,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,very-good,Very good
+29.0,20.41,37.6,2019-20,2019-20,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2019-20,2019-20,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,fair,Fair
 51.44,,42.02,60.86,2020-21,2020-21,E07000137,East Lindsey,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2015-16,2015-16,E07000137,East Lindsey,anxiety,Anxiety,fair,Fair
@@ -11293,7 +11293,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2017-18,2017-18,E07000063,Lewes,worthwhile,Worthwhile,poor,Poor
 ,x,,,2018-19,2018-19,E07000063,Lewes,life-satisfaction,Life Satisfaction,poor,Poor
 33.34,,23.82,42.86,2019-20,2019-20,E07000063,Lewes,worthwhile,Worthwhile,very-good,Very good
-36,,26.42,45.59,2020-21,2020-21,E07000063,Lewes,worthwhile,Worthwhile,very-good,Very good
+36.0,26.42,45.59,2020-21,2020-21,E07000063,Lewes,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2017-18,2017-18,E07000063,Lewes,happiness,Happiness,poor,Poor
 ,x,,,2020-21,2020-21,E07000063,Lewes,happiness,Happiness,poor,Poor
 ,x,,,2012-13,2012-13,E07000063,Lewes,anxiety,Anxiety,good,Good
@@ -12358,7 +12358,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 23.37,,18.61,28.12,2019-20,2019-20,E06000049,Cheshire East,anxiety,Anxiety,good,Good
 ,x,,,2012-13,2012-13,E06000049,Cheshire East,happiness,Happiness,poor,Poor
 3.14,,2.79,3.49,2019-20,2019-20,E06000049,Cheshire East,anxiety,Anxiety,average-mean,Average (mean)
-16,,11.43,20.58,2020-21,2020-21,E06000049,Cheshire East,anxiety,Anxiety,fair,Fair
+16.0,11.43,20.58,2020-21,2020-21,E06000049,Cheshire East,anxiety,Anxiety,fair,Fair
 34.86,,28.63,41.1,2020-21,2020-21,E06000050,Cheshire West and Chester,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2013-14,2013-14,E06000050,Cheshire West and Chester,worthwhile,Worthwhile,poor,Poor
 ,x,,,2014-15,2014-15,E06000050,Cheshire West and Chester,worthwhile,Worthwhile,poor,Poor
@@ -12790,7 +12790,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.41,,7.03,7.8,2020-21,2020-21,E07000062,Hastings,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 ,x,,,2014-15,2014-15,E07000062,Hastings,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2017-18,2017-18,E07000062,Hastings,life-satisfaction,Life Satisfaction,fair,Fair
-35,,23.69,46.32,2019-20,2019-20,E07000062,Hastings,life-satisfaction,Life Satisfaction,very-good,Very good
+35.0,23.69,46.32,2019-20,2019-20,E07000062,Hastings,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2018-19,2018-19,E07000062,Hastings,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2018-19,2018-19,E07000062,Hastings,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2013-14,2013-14,E07000062,Hastings,life-satisfaction,Life Satisfaction,poor,Poor
@@ -12928,7 +12928,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2018-19,2018-19,E07000180,Vale of White Horse,anxiety,Anxiety,poor,Poor
 24.77,,16.09,33.45,2020-21,2020-21,E07000180,Vale of White Horse,anxiety,Anxiety,good,Good
 7.69,,7.38,8.0,2020-21,2020-21,E07000180,Vale of White Horse,worthwhile,Worthwhile,average-mean,Average (mean)
-31,,26.24,31.01,2014-15,2014-15,E09000020,Kensington and Chelsea,life-satisfaction,Life Satisfaction,very-good,Very good
+31.0,26.24,31.01,2014-15,2014-15,E09000020,Kensington and Chelsea,life-satisfaction,Life Satisfaction,very-good,Very good
 14.50,,10.77,18.23,2019-20,2019-20,E09000020,Kensington and Chelsea,life-satisfaction,Life Satisfaction,fair,Fair
 21.09,,15.17,27.01,2020-21,2020-21,E09000020,Kensington and Chelsea,life-satisfaction,Life Satisfaction,very-good,Very good
 57.12,,51.41,62.84,2019-20,2019-20,E09000020,Kensington and Chelsea,life-satisfaction,Life Satisfaction,good,Good
@@ -13023,7 +13023,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 32.36,,28.33,36.39,2019-20,2019-20,W06000016,Rhondda Cynon Taf,worthwhile,Worthwhile,very-good,Very good
 8.89,,5.54,12.24,2020-21,2020-21,W06000016,Rhondda Cynon Taf,worthwhile,Worthwhile,poor,Poor
 38.39,,34.12,42.66,2019-20,2019-20,W06000016,Rhondda Cynon Taf,anxiety,Anxiety,very-good,Very good
-31,,24.88,37.12,2020-21,2020-21,W06000016,Rhondda Cynon Taf,anxiety,Anxiety,very-good,Very good
+31.0,24.88,37.12,2020-21,2020-21,W06000016,Rhondda Cynon Taf,anxiety,Anxiety,very-good,Very good
 17.06,,14.01,20.1,2019-20,2019-20,E06000002,Middlesbrough,life-satisfaction,Life Satisfaction,fair,Fair
 30.57,,25.94,35.19,2020-21,2020-21,E06000002,Middlesbrough,worthwhile,Worthwhile,very-good,Very good
 14.15,,11.44,16.87,2019-20,2019-20,E06000002,Middlesbrough,worthwhile,Worthwhile,fair,Fair
@@ -13061,7 +13061,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.76,,7.6,7.93,2019-20,2019-20,E06000002,Middlesbrough,worthwhile,Worthwhile,average-mean,Average (mean)
 2.74,,2.51,2.98,2019-20,2019-20,E06000002,Middlesbrough,anxiety,Anxiety,average-mean,Average (mean)
 7.62,,7.44,7.81,2020-21,2020-21,E06000002,Middlesbrough,worthwhile,Worthwhile,average-mean,Average (mean)
-47,,42.24,51.76,2020-21,2020-21,E06000047,County Durham,life-satisfaction,Life Satisfaction,good,Good
+47.0,42.24,51.76,2020-21,2020-21,E06000047,County Durham,life-satisfaction,Life Satisfaction,good,Good
 12.87,,9.49,16.24,2020-21,2020-21,E06000047,County Durham,worthwhile,Worthwhile,fair,Fair
 7.40,,7.21,7.59,2020-21,2020-21,E06000047,County Durham,happiness,Happiness,average-mean,Average (mean)
 7.78,,7.6,7.96,2020-21,2020-21,E06000047,County Durham,worthwhile,Worthwhile,average-mean,Average (mean)
@@ -13975,7 +13975,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 3.27,,-0.29,4.32,2014-15,2014-15,E10000008,Devon,life-satisfaction,Life Satisfaction,poor,Poor
 46.48,,42.62,50.33,2019-20,2019-20,E10000008,Devon,worthwhile,Worthwhile,good,Good
 14.79,,11.95,17.64,2020-21,2020-21,E10000008,Devon,happiness,Happiness,fair,Fair
-41,,37.12,44.88,2019-20,2019-20,E10000008,Devon,worthwhile,Worthwhile,very-good,Very good
+41.0,37.12,44.88,2019-20,2019-20,E10000008,Devon,worthwhile,Worthwhile,very-good,Very good
 37.52,,33.73,41.31,2019-20,2019-20,E10000008,Devon,anxiety,Anxiety,very-good,Very good
 3.02,,2.79,3.25,2019-20,2019-20,E10000008,Devon,anxiety,Anxiety,average-mean,Average (mean)
 56.15,,51.99,60.32,2020-21,2020-21,E10000008,Devon,life-satisfaction,Life Satisfaction,good,Good
@@ -14651,7 +14651,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 48.18,,47.2398353733333,49.1127971466666,2013-14,2013-14,W92000004,Wales,worthwhile,Worthwhile,good,Good
 36.42,,35.42,37.41,2019-20,2019-20,W92000004,Wales,worthwhile,Worthwhile,very-good,Very good
 16.20,,15.46,16.95,2019-20,2019-20,W92000004,Wales,happiness,Happiness,fair,Fair
-30,,28.78,31.22,2020-21,2020-21,W92000004,Wales,happiness,Happiness,very-good,Very good
+30.0,28.78,31.22,2020-21,2020-21,W92000004,Wales,happiness,Happiness,very-good,Very good
 7.01,,6.35,7.66,2020-21,2020-21,W92000004,Wales,life-satisfaction,Life Satisfaction,poor,Poor
 4.26,,3.85,4.67,2019-20,2019-20,W92000004,Wales,worthwhile,Worthwhile,poor,Poor
 12.08,,11.37,12.79,2019-20,2019-20,W92000004,Wales,worthwhile,Worthwhile,fair,Fair
@@ -14888,7 +14888,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 8.93,,6.6,11.27,2019-20,2019-20,E06000007,Warrington,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2014-15,2014-15,E06000007,Warrington,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2018-19,2018-19,E06000007,Warrington,life-satisfaction,Life Satisfaction,poor,Poor
-55,,50.62,59.37,2019-20,2019-20,E06000007,Warrington,worthwhile,Worthwhile,good,Good
+55.0,50.62,59.37,2019-20,2019-20,E06000007,Warrington,worthwhile,Worthwhile,good,Good
 2.84,,2.59,3.09,2019-20,2019-20,E06000007,Warrington,anxiety,Anxiety,average-mean,Average (mean)
 ,x,,,2014-15,2014-15,E06000007,Warrington,worthwhile,Worthwhile,poor,Poor
 33.07,,28.92,37.21,2019-20,2019-20,E06000007,Warrington,worthwhile,Worthwhile,very-good,Very good
@@ -15476,7 +15476,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 48.26,,44.37,52.15,2019-20,2019-20,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,good,Good
 18.90,,15.0,22.79,2020-21,2020-21,W06000010,Carmarthenshire,anxiety,Anxiety,good,Good
 26.49,,21.88,31.09,2020-21,2020-21,W06000010,Carmarthenshire,anxiety,Anxiety,poor,Poor
-29,,24.48,33.51,2020-21,2020-21,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,very-good,Very good
+29.0,24.48,33.51,2020-21,2020-21,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,very-good,Very good
 47.51,,43.54,51.48,2019-20,2019-20,W06000010,Carmarthenshire,worthwhile,Worthwhile,good,Good
 17.25,,14.45,20.04,2019-20,2019-20,W06000010,Carmarthenshire,anxiety,Anxiety,good,Good
 14.95,,10.72,19.18,2020-21,2020-21,W06000010,Carmarthenshire,worthwhile,Worthwhile,fair,Fair
@@ -15484,7 +15484,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 18.40,,15.3,21.5,2019-20,2019-20,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,fair,Fair
 29.10,,25.51,32.69,2019-20,2019-20,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,very-good,Very good
 6.06,,3.45,6.38,2014-15,2014-15,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,poor,Poor
-47,,49.02,56.51,2014-15,2014-15,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,good,Good
+47.0,49.02,56.51,2014-15,2014-15,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,good,Good
 17.49,,13.06,21.92,2020-21,2020-21,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,fair,Fair
 28.62,,24.0,27.4,2014-15,2014-15,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,very-good,Very good
 48.32,,43.34,53.29,2020-21,2020-21,W06000010,Carmarthenshire,life-satisfaction,Life Satisfaction,good,Good
@@ -15528,7 +15528,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 14.49,,12.31,16.67,2019-20,2019-20,E06000058,"Bournemouth, Christchurch and Poole",happiness,Happiness,fair,Fair
 49.63,,46.59,52.67,2019-20,2019-20,E06000058,"Bournemouth, Christchurch and Poole",life-satisfaction,Life Satisfaction,good,Good
 13.67,,11.1,16.25,2020-21,2020-21,E06000058,"Bournemouth, Christchurch and Poole",worthwhile,Worthwhile,fair,Fair
-10,,7.8,12.2,2020-21,2020-21,E06000058,"Bournemouth, Christchurch and Poole",happiness,Happiness,poor,Poor
+10.0,7.8,12.2,2020-21,2020-21,E06000058,"Bournemouth, Christchurch and Poole",happiness,Happiness,poor,Poor
 7.49,,7.36,7.62,2019-20,2019-20,E06000058,"Bournemouth, Christchurch and Poole",happiness,Happiness,average-mean,Average (mean)
 26.02,,22.77,29.26,2020-21,2020-21,E06000058,"Bournemouth, Christchurch and Poole",life-satisfaction,Life Satisfaction,very-good,Very good
 49.08,,45.97,52.18,2019-20,2019-20,E06000058,"Bournemouth, Christchurch and Poole",worthwhile,Worthwhile,good,Good
@@ -15665,7 +15665,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 15.90,,14.8,17.0,2019-20,2019-20,E12000004,East Midlands,happiness,Happiness,fair,Fair
 32.09,,30.64,33.53,2019-20,2019-20,E12000004,East Midlands,life-satisfaction,Life Satisfaction,very-good,Very good
 12.51,,11.34,13.68,2020-21,2020-21,E12000004,East Midlands,worthwhile,Worthwhile,fair,Fair
-50,,48.15,51.85,2020-21,2020-21,E12000004,East Midlands,worthwhile,Worthwhile,good,Good
+50.0,48.15,51.85,2020-21,2020-21,E12000004,East Midlands,worthwhile,Worthwhile,good,Good
 33.82,,32.03,35.61,2020-21,2020-21,E12000004,East Midlands,worthwhile,Worthwhile,very-good,Very good
 52.26,,50.44,54.08,2020-21,2020-21,E12000004,East Midlands,life-satisfaction,Life Satisfaction,good,Good
 23.79,,22.24,25.34,2020-21,2020-21,E12000004,East Midlands,anxiety,Anxiety,good,Good
@@ -15793,7 +15793,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 39.29,,28.3,50.27,2017-18,2017-18,E07000005,Chiltern,happiness,Happiness,very-good,Very good
 ,x,,,2018-19,2018-19,E07000005,Chiltern,happiness,Happiness,poor,Poor
 ,x,,,2018-19,2018-19,E07000005,Chiltern,happiness,Happiness,fair,Fair
-46,,36.31,55.68,2018-19,2018-19,E07000005,Chiltern,happiness,Happiness,good,Good
+46.0,36.31,55.68,2018-19,2018-19,E07000005,Chiltern,happiness,Happiness,good,Good
 46.78,,37.82,55.75,2013-14,2013-14,E07000005,Chiltern,anxiety,Anxiety,very-good,Very good
 ,x,,,2015-16,2015-16,E07000005,Chiltern,anxiety,Anxiety,poor,Poor
 ,x,,,2020-21,2020-21,E07000005,Chiltern,anxiety,Anxiety,fair,Fair
@@ -15862,7 +15862,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2013-14,2013-14,E07000005,Chiltern,worthwhile,Worthwhile,fair,Fair
 ,x,,,2014-15,2014-15,E07000005,Chiltern,worthwhile,Worthwhile,poor,Poor
 ,x,,,2014-15,2014-15,E07000005,Chiltern,worthwhile,Worthwhile,fair,Fair
-48,,36.42,59.59,2019-20,2019-20,E07000005,Chiltern,worthwhile,Worthwhile,good,Good
+48.0,36.42,59.59,2019-20,2019-20,E07000005,Chiltern,worthwhile,Worthwhile,good,Good
 30.94,,23.3,38.59,2011-12,2011-12,E07000005,Chiltern,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2012-13,2012-13,E07000005,Chiltern,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2015-16,2015-16,E07000005,Chiltern,worthwhile,Worthwhile,poor,Poor
@@ -15933,10 +15933,10 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 14.20,,9.99,18.41,2019-20,2019-20,E09000029,Sutton,worthwhile,Worthwhile,fair,Fair
 43.90,,38.08,49.72,2019-20,2019-20,E09000029,Sutton,worthwhile,Worthwhile,good,Good
 44.16,,37.23,51.09,2020-21,2020-21,E09000029,Sutton,happiness,Happiness,good,Good
-17,,11.7,22.3,2020-21,2020-21,E09000029,Sutton,happiness,Happiness,fair,Fair
+17.0,11.7,22.3,2020-21,2020-21,E09000029,Sutton,happiness,Happiness,fair,Fair
 ,x,,,2011-12,2011-12,E09000029,Sutton,life-satisfaction,Life Satisfaction,poor,Poor
 30.15,,23.53,36.77,2020-21,2020-21,E09000029,Sutton,happiness,Happiness,very-good,Very good
-35,,27.79,42.21,2020-21,2020-21,E09000029,Sutton,anxiety,Anxiety,very-good,Very good
+35.0,27.79,42.21,2020-21,2020-21,E09000029,Sutton,anxiety,Anxiety,very-good,Very good
 40.34,,34.45,46.22,2019-20,2019-20,E09000029,Sutton,happiness,Happiness,good,Good
 11.53,,7.54,15.51,2019-20,2019-20,E09000029,Sutton,happiness,Happiness,poor,Poor
 ,x,,,2015-16,2015-16,E09000029,Sutton,life-satisfaction,Life Satisfaction,poor,Poor
@@ -16733,7 +16733,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2015-16,2015-16,E09000009,Ealing,worthwhile,Worthwhile,poor,Poor
 ,x,,,2018-19,2018-19,E09000009,Ealing,worthwhile,Worthwhile,fair,Fair
 14.75,,9.83,19.66,2019-20,2019-20,E09000009,Ealing,worthwhile,Worthwhile,fair,Fair
-49,,40.87,57.13,2020-21,2020-21,E09000009,Ealing,worthwhile,Worthwhile,good,Good
+49.0,40.87,57.13,2020-21,2020-21,E09000009,Ealing,worthwhile,Worthwhile,good,Good
 32.44,,26.13,38.74,2019-20,2019-20,E09000009,Ealing,worthwhile,Worthwhile,very-good,Very good
 30.01,,20.61,39.42,2020-21,2020-21,E09000009,Ealing,worthwhile,Worthwhile,very-good,Very good
 3.29,,2.81,3.77,2020-21,2020-21,E09000009,Ealing,anxiety,Anxiety,average-mean,Average (mean)
@@ -16952,7 +16952,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.60,,7.4,7.81,2019-20,2019-20,E09000026,Redbridge,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 17.66,,13.76,21.56,2020-21,2020-21,E06000035,Medway,happiness,Happiness,fair,Fair
 45.30,,40.76,49.84,2019-20,2019-20,E06000035,Medway,worthwhile,Worthwhile,good,Good
-37,,32.45,41.54,2019-20,2019-20,E06000035,Medway,worthwhile,Worthwhile,very-good,Very good
+37.0,32.45,41.54,2019-20,2019-20,E06000035,Medway,worthwhile,Worthwhile,very-good,Very good
 18.16,,14.71,21.61,2019-20,2019-20,E06000035,Medway,anxiety,Anxiety,fair,Fair
 23.69,,19.71,27.66,2019-20,2019-20,E06000035,Medway,anxiety,Anxiety,poor,Poor
 15.98,,12.4,19.57,2020-21,2020-21,E06000035,Medway,anxiety,Anxiety,fair,Fair
@@ -17258,7 +17258,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2011-12,2011-12,E07000093,Test Valley,happiness,Happiness,poor,Poor
 ,x,,,2012-13,2012-13,E07000093,Test Valley,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2014-15,2014-15,E07000093,Test Valley,life-satisfaction,Life Satisfaction,poor,Poor
-35,,24.71,34.99,2014-15,2014-15,E07000093,Test Valley,life-satisfaction,Life Satisfaction,very-good,Very good
+35.0,24.71,34.99,2014-15,2014-15,E07000093,Test Valley,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2015-16,2015-16,E07000093,Test Valley,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2016-17,2016-17,E07000093,Test Valley,life-satisfaction,Life Satisfaction,fair,Fair
 56.64,,44.92,68.37,2019-20,2019-20,E07000093,Test Valley,life-satisfaction,Life Satisfaction,good,Good
@@ -18206,7 +18206,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2017-18,2017-18,E07000095,Broxbourne,anxiety,Anxiety,poor,Poor
 7.59,,7.08,8.1,2019-20,2019-20,E07000095,Broxbourne,happiness,Happiness,average-mean,Average (mean)
 ,x,,,2018-19,2018-19,E07000095,Broxbourne,happiness,Happiness,fair,Fair
-40,,28.03,51.96,2020-21,2020-21,E07000095,Broxbourne,happiness,Happiness,good,Good
+40.0,28.03,51.96,2020-21,2020-21,E07000095,Broxbourne,happiness,Happiness,good,Good
 ,x,,,2017-18,2017-18,E07000095,Broxbourne,happiness,Happiness,fair,Fair
 2.72,,2.02,3.41,2019-20,2019-20,E07000095,Broxbourne,anxiety,Anxiety,average-mean,Average (mean)
 7.86,,7.45,8.26,2020-21,2020-21,E07000095,Broxbourne,worthwhile,Worthwhile,average-mean,Average (mean)
@@ -18513,7 +18513,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,E09000005,Brent,happiness,Happiness,poor,Poor
 ,x,,,2018-19,2018-19,E09000005,Brent,happiness,Happiness,poor,Poor
 ,x,,,2013-14,2013-14,E09000005,Brent,worthwhile,Worthwhile,poor,Poor
-20,,13.08,26.92,2020-21,2020-21,E09000005,Brent,anxiety,Anxiety,poor,Poor
+20.0,13.08,26.92,2020-21,2020-21,E09000005,Brent,anxiety,Anxiety,poor,Poor
 ,x,,,2019-20,2019-20,E09000005,Brent,worthwhile,Worthwhile,fair,Fair
 35.36,,28.0,42.72,2019-20,2019-20,E09000005,Brent,worthwhile,Worthwhile,very-good,Very good
 7.25,,6.95,7.55,2020-21,2020-21,E09000005,Brent,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
@@ -18766,7 +18766,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2013-14,2013-14,E07000043,North Devon,anxiety,Anxiety,poor,Poor
 ,x,,,2015-16,2015-16,E07000043,North Devon,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2017-18,2017-18,E07000043,North Devon,life-satisfaction,Life Satisfaction,fair,Fair
-37,,26.43,47.57,2019-20,2019-20,E07000043,North Devon,life-satisfaction,Life Satisfaction,very-good,Very good
+37.0,26.43,47.57,2019-20,2019-20,E07000043,North Devon,life-satisfaction,Life Satisfaction,very-good,Very good
 51.11,,39.47,60.09,2014-15,2014-15,E07000043,North Devon,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2013-14,2013-14,E07000043,North Devon,worthwhile,Worthwhile,poor,Poor
 ,x,,,2016-17,2016-17,E07000043,North Devon,worthwhile,Worthwhile,poor,Poor
@@ -19479,7 +19479,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 19.97,,13.34,26.6,2019-20,2019-20,E07000149,South Norfolk,anxiety,Anxiety,fair,Fair
 26.62,,17.35,35.89,2020-21,2020-21,E07000149,South Norfolk,anxiety,Anxiety,poor,Poor
 ,x,,,2012-13,2012-13,E07000149,South Norfolk,anxiety,Anxiety,fair,Fair
-26,,16.71,35.29,2019-20,2019-20,E07000149,South Norfolk,anxiety,Anxiety,good,Good
+26.0,16.71,35.29,2019-20,2019-20,E07000149,South Norfolk,anxiety,Anxiety,good,Good
 7.26,,6.93,7.6,2020-21,2020-21,E07000149,South Norfolk,happiness,Happiness,average-mean,Average (mean)
 3.27,,2.81,3.72,2019-20,2019-20,E07000149,South Norfolk,anxiety,Anxiety,average-mean,Average (mean)
 7.77,,7.46,8.08,2020-21,2020-21,E07000149,South Norfolk,worthwhile,Worthwhile,average-mean,Average (mean)
@@ -19529,7 +19529,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 21.37,,14.25,28.48,2020-21,2020-21,E07000149,South Norfolk,happiness,Happiness,fair,Fair
 44.89,,35.9,53.88,2020-21,2020-21,E07000149,South Norfolk,happiness,Happiness,good,Good
 ,x,,,2016-17,2016-17,E07000149,South Norfolk,anxiety,Anxiety,fair,Fair
-25,,17.54,32.46,2020-21,2020-21,E07000149,South Norfolk,anxiety,Anxiety,very-good,Very good
+25.0,17.54,32.46,2020-21,2020-21,E07000149,South Norfolk,anxiety,Anxiety,very-good,Very good
 21.53,,14.07,29.0,2020-21,2020-21,E07000149,South Norfolk,anxiety,Anxiety,fair,Fair
 ,x,,,2012-13,2012-13,E07000149,South Norfolk,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2012-13,2012-13,E07000149,South Norfolk,life-satisfaction,Life Satisfaction,fair,Fair
@@ -19844,7 +19844,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 21.60,,14.41,28.78,2019-20,2019-20,E07000086,Eastleigh,anxiety,Anxiety,good,Good
 36.09,,26.61,45.57,2019-20,2019-20,E07000086,Eastleigh,anxiety,Anxiety,very-good,Very good
 ,x,,,2012-13,2012-13,E07000086,Eastleigh,anxiety,Anxiety,poor,Poor
-27,,17.52,36.47,2019-20,2019-20,E07000086,Eastleigh,anxiety,Anxiety,poor,Poor
+27.0,17.52,36.47,2019-20,2019-20,E07000086,Eastleigh,anxiety,Anxiety,poor,Poor
 ,x,,,2015-16,2015-16,E07000086,Eastleigh,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2018-19,2018-19,E07000086,Eastleigh,life-satisfaction,Life Satisfaction,poor,Poor
 55.01,,40.84,69.18,2020-21,2020-21,E07000086,Eastleigh,life-satisfaction,Life Satisfaction,good,Good
@@ -19852,7 +19852,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,E07000086,Eastleigh,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2012-13,2012-13,E07000086,Eastleigh,worthwhile,Worthwhile,fair,Fair
 ,x,,,2016-17,2016-17,E07000086,Eastleigh,worthwhile,Worthwhile,fair,Fair
-50,,40.15,59.86,2019-20,2019-20,E07000086,Eastleigh,worthwhile,Worthwhile,good,Good
+50.0,40.15,59.86,2019-20,2019-20,E07000086,Eastleigh,worthwhile,Worthwhile,good,Good
 ,x,,,2015-16,2015-16,E07000086,Eastleigh,happiness,Happiness,fair,Fair
 25.47,,17.27,33.68,2019-20,2019-20,E07000086,Eastleigh,happiness,Happiness,very-good,Very good
 ,x,,,2020-21,2020-21,E07000086,Eastleigh,happiness,Happiness,poor,Poor
@@ -20252,7 +20252,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 18.48,,13.65,23.31,2015-16,2015-16,E07000154,Northampton,anxiety,Anxiety,fair,Fair
 22.12,,15.46,28.77,2017-18,2017-18,E07000154,Northampton,anxiety,Anxiety,fair,Fair
 33.54,,25.21,41.88,2020-21,2020-21,E07000154,Northampton,anxiety,Anxiety,very-good,Very good
-25,,16.68,33.32,2020-21,2020-21,E07000154,Northampton,anxiety,Anxiety,good,Good
+25.0,16.68,33.32,2020-21,2020-21,E07000154,Northampton,anxiety,Anxiety,good,Good
 7.86,,7.64,8.09,2012-13,2012-13,E07000154,Northampton,worthwhile,Worthwhile,average-mean,Average (mean)
 7.43,,7.13,7.73,2011-12,2011-12,E07000154,Northampton,happiness,Happiness,average-mean,Average (mean)
 3.04,,2.65,3.43,2011-12,2011-12,E07000154,Northampton,anxiety,Anxiety,average-mean,Average (mean)
@@ -20521,7 +20521,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 43.48,,34.15,52.81,2019-20,2019-20,E07000038,North East Derbyshire,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2019-20,2019-20,E07000038,North East Derbyshire,worthwhile,Worthwhile,fair,Fair
 ,x,,,2012-13,2012-13,E07000038,North East Derbyshire,life-satisfaction,Life Satisfaction,fair,Fair
-45,,33.13,56.86,2019-20,2019-20,E07000038,North East Derbyshire,life-satisfaction,Life Satisfaction,good,Good
+45.0,33.13,56.86,2019-20,2019-20,E07000038,North East Derbyshire,life-satisfaction,Life Satisfaction,good,Good
 45.19,,32.0,58.38,2019-20,2019-20,E07000038,North East Derbyshire,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2016-17,2016-17,E07000038,North East Derbyshire,happiness,Happiness,poor,Poor
 ,x,,,2019-20,2019-20,E07000038,North East Derbyshire,happiness,Happiness,fair,Fair
@@ -20621,7 +20621,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,E07000216,Waverley,worthwhile,Worthwhile,poor,Poor
 ,x,,,2012-13,2012-13,E07000216,Waverley,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2017-18,2017-18,E07000216,Waverley,life-satisfaction,Life Satisfaction,fair,Fair
-25,,15.81,34.18,2019-20,2019-20,E07000216,Waverley,life-satisfaction,Life Satisfaction,very-good,Very good
+25.0,15.81,34.18,2019-20,2019-20,E07000216,Waverley,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2011-12,2011-12,E07000216,Waverley,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2012-13,2012-13,E07000216,Waverley,worthwhile,Worthwhile,fair,Fair
 ,x,,,2012-13,2012-13,E07000216,Waverley,worthwhile,Worthwhile,very-good,Very good
@@ -21147,7 +21147,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 37.94,,33.85,42.02,2019-20,2019-20,W06000020,Torfaen,happiness,Happiness,good,Good
 10.31,,7.07,13.56,2020-21,2020-21,W06000020,Torfaen,happiness,Happiness,poor,Poor
 ,x,,,2020-21,2020-21,E08000006,Salford,life-satisfaction,Life Satisfaction,poor,Poor
-35,,30.72,39.29,2019-20,2019-20,E08000006,Salford,anxiety,Anxiety,very-good,Very good
+35.0,30.72,39.29,2019-20,2019-20,E08000006,Salford,anxiety,Anxiety,very-good,Very good
 25.14,,21.16,29.12,2019-20,2019-20,E08000006,Salford,anxiety,Anxiety,good,Good
 21.46,,17.54,25.37,2019-20,2019-20,E08000006,Salford,anxiety,Anxiety,poor,Poor
 3.57,,3.18,3.97,2020-21,2020-21,E08000006,Salford,anxiety,Anxiety,average-mean,Average (mean)
@@ -22028,7 +22028,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 9.41,,7.01,11.82,2019-20,2019-20,S12000020,Moray,life-satisfaction,Life Satisfaction,fair,Fair
 52.92,,48.63,57.22,2019-20,2019-20,S12000020,Moray,life-satisfaction,Life Satisfaction,good,Good
 26.83,,21.8,31.85,2020-21,2020-21,S12000020,Moray,life-satisfaction,Life Satisfaction,very-good,Very good
-37,,31.74,42.25,2020-21,2020-21,S12000020,Moray,anxiety,Anxiety,very-good,Very good
+37.0,31.74,42.25,2020-21,2020-21,S12000020,Moray,anxiety,Anxiety,very-good,Very good
 7.64,,7.45,7.82,2019-20,2019-20,S12000020,Moray,happiness,Happiness,average-mean,Average (mean)
 52.80,,47.19,58.42,2020-21,2020-21,S12000020,Moray,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2018-19,2018-19,S12000020,Moray,worthwhile,Worthwhile,poor,Poor
@@ -23715,9 +23715,9 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 13.11,,10.52,15.69,2015-16,2015-16,E10000002,Buckinghamshire,happiness,Happiness,fair,Fair
 36.96,,32.8,41.11,2017-18,2017-18,E10000002,Buckinghamshire,happiness,Happiness,very-good,Very good
 39.42,,35.8,43.04,2013-14,2013-14,E10000002,Buckinghamshire,anxiety,Anxiety,very-good,Very good
-39,,35.14,42.86,2015-16,2015-16,E10000002,Buckinghamshire,anxiety,Anxiety,very-good,Very good
+39.0,35.14,42.86,2015-16,2015-16,E10000002,Buckinghamshire,anxiety,Anxiety,very-good,Very good
 20.37,,17.24,23.51,2015-16,2015-16,E10000002,Buckinghamshire,anxiety,Anxiety,fair,Fair
-26,,22.18,29.83,2019-20,2019-20,E10000002,Buckinghamshire,anxiety,Anxiety,good,Good
+26.0,22.18,29.83,2019-20,2019-20,E10000002,Buckinghamshire,anxiety,Anxiety,good,Good
 7.89,,7.76,8.02,2018-19,2018-19,E10000002,Buckinghamshire,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 3.16,,2.95,3.37,2014-15,2014-15,E10000002,Buckinghamshire,anxiety,Anxiety,average-mean,Average (mean)
 2.89,,2.65,3.12,2018-19,2018-19,E10000002,Buckinghamshire,anxiety,Anxiety,average-mean,Average (mean)
@@ -24111,7 +24111,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 3.08,,2.77,6.87,2013-14,2013-14,E06000054,Wiltshire,worthwhile,Worthwhile,poor,Poor
 ,x,,,2020-21,2020-21,E06000054,Wiltshire,worthwhile,Worthwhile,poor,Poor
 11.83,,8.29,15.37,2020-21,2020-21,E06000054,Wiltshire,worthwhile,Worthwhile,fair,Fair
-54,,49.15,58.85,2020-21,2020-21,E06000054,Wiltshire,worthwhile,Worthwhile,good,Good
+54.0,49.15,58.85,2020-21,2020-21,E06000054,Wiltshire,worthwhile,Worthwhile,good,Good
 14.60,,11.53,17.68,2019-20,2019-20,E06000054,Wiltshire,happiness,Happiness,fair,Fair
 44.02,,39.84,48.2,2019-20,2019-20,E06000054,Wiltshire,happiness,Happiness,good,Good
 15.68,,12.6,18.76,2019-20,2019-20,E06000054,Wiltshire,anxiety,Anxiety,fair,Fair
@@ -24128,7 +24128,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 9.65,,7.19,12.12,2019-20,2019-20,E06000054,Wiltshire,worthwhile,Worthwhile,fair,Fair
 38.24,,34.21,42.27,2019-20,2019-20,E06000054,Wiltshire,worthwhile,Worthwhile,very-good,Very good
 49.19,,46.0,53.16,2013-14,2013-14,E06000054,Wiltshire,worthwhile,Worthwhile,good,Good
-25,,20.78,29.22,2020-21,2020-21,E06000054,Wiltshire,anxiety,Anxiety,good,Good
+25.0,20.78,29.22,2020-21,2020-21,E06000054,Wiltshire,anxiety,Anxiety,good,Good
 15.48,,11.95,19.02,2020-21,2020-21,E06000054,Wiltshire,anxiety,Anxiety,fair,Fair
 15.10,,11.41,18.78,2020-21,2020-21,E06000054,Wiltshire,life-satisfaction,Life Satisfaction,fair,Fair
 33.40,,29.34,37.47,2019-20,2019-20,E06000054,Wiltshire,happiness,Happiness,very-good,Very good
@@ -24595,7 +24595,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 39.28,,38.08,40.48,2019-20,2019-20,E12000003,Yorkshire and The Humber,happiness,Happiness,good,Good
 48.83,,47.26,50.39,2020-21,2020-21,E12000003,Yorkshire and The Humber,worthwhile,Worthwhile,good,Good
 31.62,,30.18,33.05,2020-21,2020-21,E12000003,Yorkshire and The Humber,worthwhile,Worthwhile,very-good,Very good
-19,,17.79,20.21,2020-21,2020-21,E12000003,Yorkshire and The Humber,anxiety,Anxiety,fair,Fair
+19.0,17.79,20.21,2020-21,2020-21,E12000003,Yorkshire and The Humber,anxiety,Anxiety,fair,Fair
 47.62,,46.37,48.87,2019-20,2019-20,E12000003,Yorkshire and The Humber,worthwhile,Worthwhile,good,Good
 12.65,,11.8,13.5,2019-20,2019-20,E12000003,Yorkshire and The Humber,worthwhile,Worthwhile,fair,Fair
 22.36,,21.31,23.41,2019-20,2019-20,E12000003,Yorkshire and The Humber,anxiety,Anxiety,good,Good
@@ -24890,7 +24890,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 47.80,,43.34,52.25,2019-20,2019-20,E08000030,Walsall,life-satisfaction,Life Satisfaction,good,Good
 15.84,,12.95,18.73,2019-20,2019-20,E08000030,Walsall,happiness,Happiness,fair,Fair
 37.23,,33.45,41.02,2019-20,2019-20,E08000030,Walsall,happiness,Happiness,good,Good
-21,,17.83,24.17,2019-20,2019-20,E08000030,Walsall,anxiety,Anxiety,good,Good
+21.0,17.83,24.17,2019-20,2019-20,E08000030,Walsall,anxiety,Anxiety,good,Good
 16.23,,11.95,20.5,2020-21,2020-21,E08000030,Walsall,life-satisfaction,Life Satisfaction,fair,Fair
 37.78,,33.75,41.81,2019-20,2019-20,E08000030,Walsall,anxiety,Anxiety,very-good,Very good
 29.20,,25.53,29.2,2014-15,2014-15,E08000030,Walsall,life-satisfaction,Life Satisfaction,very-good,Very good
@@ -25239,7 +25239,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 38.94,,34.61,43.28,2019-20,2019-20,E06000043,Brighton and Hove,happiness,Happiness,good,Good
 10.20,,7.0,13.39,2020-21,2020-21,E06000043,Brighton and Hove,happiness,Happiness,poor,Poor
 ,x,,,2016-17,2016-17,E06000043,Brighton and Hove,worthwhile,Worthwhile,poor,Poor
-31,,26.73,35.26,2019-20,2019-20,E06000043,Brighton and Hove,worthwhile,Worthwhile,very-good,Very good
+31.0,26.73,35.26,2019-20,2019-20,E06000043,Brighton and Hove,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2020-21,2020-21,E06000043,Brighton and Hove,worthwhile,Worthwhile,poor,Poor
 18.94,,14.58,23.3,2020-21,2020-21,E06000043,Brighton and Hove,happiness,Happiness,fair,Fair
 14.94,,11.06,18.82,2020-21,2020-21,E06000043,Brighton and Hove,life-satisfaction,Life Satisfaction,fair,Fair
@@ -25980,7 +25980,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2017-18,2017-18,E07000144,Broadland,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2019-20,2019-20,E07000144,Broadland,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2019-20,2019-20,E07000144,Broadland,worthwhile,Worthwhile,poor,Poor
-52,,39.58,64.41,2020-21,2020-21,E07000144,Broadland,worthwhile,Worthwhile,good,Good
+52.0,39.58,64.41,2020-21,2020-21,E07000144,Broadland,worthwhile,Worthwhile,good,Good
 7.86,,7.56,8.17,2020-21,2020-21,E07000144,Broadland,worthwhile,Worthwhile,average-mean,Average (mean)
 ,x,,,2013-14,2013-14,E07000144,Broadland,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2016-17,2016-17,E07000144,Broadland,life-satisfaction,Life Satisfaction,fair,Fair
@@ -26190,7 +26190,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2020-21,2020-21,E07000007,Wycombe,worthwhile,Worthwhile,fair,Fair
 46.67,,35.69,57.66,2020-21,2020-21,E07000007,Wycombe,worthwhile,Worthwhile,good,Good
 ,x,,,2015-16,2015-16,E07000007,Wycombe,happiness,Happiness,poor,Poor
-41,,34.38,47.61,2017-18,2017-18,E07000007,Wycombe,happiness,Happiness,good,Good
+41.0,34.38,47.61,2017-18,2017-18,E07000007,Wycombe,happiness,Happiness,good,Good
 32.39,,25.82,38.92,2015-16,2015-16,E07000007,Wycombe,happiness,Happiness,very-good,Very good
 34.64,,27.75,41.52,2018-19,2018-19,E07000007,Wycombe,happiness,Happiness,very-good,Very good
 ,x,,,2019-20,2019-20,E07000007,Wycombe,happiness,Happiness,poor,Poor
@@ -26343,7 +26343,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 27.36,,21.59,33.12,2012-13,2012-13,E07000007,Wycombe,anxiety,Anxiety,good,Good
 18.51,,13.19,23.82,2012-13,2012-13,E07000007,Wycombe,anxiety,Anxiety,poor,Poor
 30.09,,23.56,36.62,2014-15,2014-15,E07000007,Wycombe,anxiety,Anxiety,good,Good
-20,,14.47,25.53,2017-18,2017-18,E07000007,Wycombe,anxiety,Anxiety,poor,Poor
+20.0,14.47,25.53,2017-18,2017-18,E07000007,Wycombe,anxiety,Anxiety,poor,Poor
 15.54,,10.35,20.72,2018-19,2018-19,E07000007,Wycombe,anxiety,Anxiety,fair,Fair
 7.59,,7.4,7.79,2014-15,2014-15,E07000007,Wycombe,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 7.71,,7.36,8.07,2020-21,2020-21,E07000007,Wycombe,worthwhile,Worthwhile,average-mean,Average (mean)
@@ -26372,7 +26372,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 29.07,,26.18,29.66,2014-15,2014-15,W06000013,Bridgend,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2020-21,2020-21,W06000013,Bridgend,life-satisfaction,Life Satisfaction,poor,Poor
 17.54,,13.26,21.83,2020-21,2020-21,W06000013,Bridgend,happiness,Happiness,fair,Fair
-33,,27.83,38.17,2020-21,2020-21,W06000013,Bridgend,happiness,Happiness,very-good,Very good
+33.0,27.83,38.17,2020-21,2020-21,W06000013,Bridgend,happiness,Happiness,very-good,Very good
 9.84,,7.08,12.6,2019-20,2019-20,W06000013,Bridgend,happiness,Happiness,poor,Poor
 7.72,,7.54,7.89,2019-20,2019-20,W06000013,Bridgend,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 5.37,,4.55,8.14,2014-15,2014-15,W06000013,Bridgend,life-satisfaction,Life Satisfaction,poor,Poor
@@ -26613,7 +26613,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2013-14,2013-14,E07000004,Aylesbury Vale,happiness,Happiness,poor,Poor
 ,x,,,2019-20,2019-20,E07000004,Aylesbury Vale,happiness,Happiness,poor,Poor
 55.89,,49.21,62.56,2013-14,2013-14,E07000004,Aylesbury Vale,worthwhile,Worthwhile,good,Good
-35,,28.37,41.63,2018-19,2018-19,E07000004,Aylesbury Vale,worthwhile,Worthwhile,very-good,Very good
+35.0,28.37,41.63,2018-19,2018-19,E07000004,Aylesbury Vale,worthwhile,Worthwhile,very-good,Very good
 30.24,,23.75,36.73,2019-20,2019-20,E07000004,Aylesbury Vale,worthwhile,Worthwhile,very-good,Very good
 17.02,,12.24,21.8,2012-13,2012-13,E07000004,Aylesbury Vale,happiness,Happiness,fair,Fair
 30.82,,25.15,36.48,2012-13,2012-13,E07000004,Aylesbury Vale,happiness,Happiness,very-good,Very good
@@ -26660,7 +26660,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 9.09,,5.57,12.61,2012-13,2012-13,E07000004,Aylesbury Vale,happiness,Happiness,poor,Poor
 16.60,,12.23,20.97,2013-14,2013-14,E07000004,Aylesbury Vale,happiness,Happiness,fair,Fair
 17.75,,12.58,22.92,2014-15,2014-15,E07000004,Aylesbury Vale,happiness,Happiness,fair,Fair
-11,,6.79,15.21,2015-16,2015-16,E07000004,Aylesbury Vale,happiness,Happiness,fair,Fair
+11.0,6.79,15.21,2015-16,2015-16,E07000004,Aylesbury Vale,happiness,Happiness,fair,Fair
 ,x,,,2016-17,2016-17,E07000004,Aylesbury Vale,happiness,Happiness,poor,Poor
 49.19,,42.39,56.0,2016-17,2016-17,E07000004,Aylesbury Vale,happiness,Happiness,good,Good
 14.06,,10.05,18.06,2013-14,2013-14,E07000004,Aylesbury Vale,anxiety,Anxiety,poor,Poor
@@ -26865,7 +26865,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,E07000045,Teignbridge,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2018-19,2018-19,E07000045,Teignbridge,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2017-18,2017-18,E07000045,Teignbridge,anxiety,Anxiety,fair,Fair
-23,,15.36,30.65,2019-20,2019-20,E07000045,Teignbridge,anxiety,Anxiety,good,Good
+23.0,15.36,30.65,2019-20,2019-20,E07000045,Teignbridge,anxiety,Anxiety,good,Good
 20.72,,13.3,28.13,2020-21,2020-21,E07000045,Teignbridge,anxiety,Anxiety,poor,Poor
 7.88,,7.52,8.24,2019-20,2019-20,E07000045,Teignbridge,happiness,Happiness,average-mean,Average (mean)
 ,x,,,2014-15,2014-15,E07000045,Teignbridge,worthwhile,Worthwhile,very-good,Very good
@@ -26885,7 +26885,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2014-15,2014-15,E07000045,Teignbridge,anxiety,Anxiety,fair,Fair
 ,x,,,2020-21,2020-21,E07000045,Teignbridge,happiness,Happiness,poor,Poor
 ,x,,,2020-21,2020-21,E07000045,Teignbridge,happiness,Happiness,fair,Fair
-35,,26.65,43.35,2020-21,2020-21,E07000045,Teignbridge,happiness,Happiness,very-good,Very good
+35.0,26.65,43.35,2020-21,2020-21,E07000045,Teignbridge,happiness,Happiness,very-good,Very good
 ,x,,,2015-16,2015-16,E07000045,Teignbridge,happiness,Happiness,fair,Fair
 ,x,,,2011-12,2011-12,S12000023,Orkney Islands,worthwhile,Worthwhile,poor,Poor
 ,x,,,2012-13,2012-13,S12000023,Orkney Islands,worthwhile,Worthwhile,good,Good
@@ -27018,7 +27018,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 16.50,,14.03,18.98,2020-21,2020-21,E10000016,Kent,happiness,Happiness,fair,Fair
 13.94,,11.68,16.2,2019-20,2019-20,E10000016,Kent,life-satisfaction,Life Satisfaction,fair,Fair
 51.23,,48.08,54.39,2019-20,2019-20,E10000016,Kent,life-satisfaction,Life Satisfaction,good,Good
-18,,15.37,20.63,2020-21,2020-21,E10000016,Kent,life-satisfaction,Life Satisfaction,fair,Fair
+18.0,15.37,20.63,2020-21,2020-21,E10000016,Kent,life-satisfaction,Life Satisfaction,fair,Fair
 35.41,,32.24,38.57,2019-20,2019-20,E10000016,Kent,worthwhile,Worthwhile,very-good,Very good
 22.45,,19.69,25.21,2020-21,2020-21,E10000016,Kent,life-satisfaction,Life Satisfaction,very-good,Very good
 41.99,,38.7,45.28,2020-21,2020-21,E10000016,Kent,happiness,Happiness,good,Good
@@ -27184,7 +27184,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 57.45,,49.14,65.76,2019-20,2019-20,E07000012,South Cambridgeshire,worthwhile,Worthwhile,good,Good
 ,x,,,2020-21,2020-21,E07000012,South Cambridgeshire,happiness,Happiness,poor,Poor
 46.26,,37.4,55.12,2020-21,2020-21,E07000012,South Cambridgeshire,happiness,Happiness,good,Good
-22,,14.91,29.08,2018-19,2018-19,E07000012,South Cambridgeshire,happiness,Happiness,fair,Fair
+22.0,14.91,29.08,2018-19,2018-19,E07000012,South Cambridgeshire,happiness,Happiness,fair,Fair
 7.71,,7.44,7.98,2019-20,2019-20,E07000012,South Cambridgeshire,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 ,x,,,2015-16,2015-16,E07000012,South Cambridgeshire,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2018-19,2018-19,E07000012,South Cambridgeshire,life-satisfaction,Life Satisfaction,fair,Fair
@@ -27975,7 +27975,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2011-12,2011-12,N09000003,Belfast,anxiety,Anxiety,very-good,Very good
 ,x,,,2011-12,2011-12,N09000003,Belfast,anxiety,Anxiety,good,Good
 17.61,,13.75,21.48,2020-21,2020-21,N09000003,Belfast,anxiety,Anxiety,poor,Poor
-19,,14.7240132029561,23.2804039637252,2013-14,2013-14,N09000003,Belfast,anxiety,Anxiety,poor,Poor
+19.0,14.7240132029561,23.2804039637252,2013-14,2013-14,N09000003,Belfast,anxiety,Anxiety,poor,Poor
 16.40,,13.12,19.68,2019-20,2019-20,N09000003,Belfast,anxiety,Anxiety,fair,Fair
 34.71,,30.53,38.89,2019-20,2019-20,N09000003,Belfast,anxiety,Anxiety,very-good,Very good
 22.45,,17.52,27.38,2020-21,2020-21,N09000003,Belfast,anxiety,Anxiety,fair,Fair
@@ -28219,7 +28219,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 12.79,,9.2,16.38,2020-21,2020-21,E06000019,"Herefordshire, County of",worthwhile,Worthwhile,fair,Fair
 9.20,,6.81,11.6,2019-20,2019-20,E06000019,"Herefordshire, County of",happiness,Happiness,poor,Poor
 31.91,,27.47,36.35,2020-21,2020-21,E06000019,"Herefordshire, County of",happiness,Happiness,very-good,Very good
-16,,12.38,19.62,2020-21,2020-21,E06000019,"Herefordshire, County of",anxiety,Anxiety,fair,Fair
+16.0,12.38,19.62,2020-21,2020-21,E06000019,"Herefordshire, County of",anxiety,Anxiety,fair,Fair
 7.99,,7.86,8.11,2019-20,2019-20,E06000019,"Herefordshire, County of",worthwhile,Worthwhile,average-mean,Average (mean)
 3.34,,3.06,3.62,2020-21,2020-21,E06000019,"Herefordshire, County of",anxiety,Anxiety,average-mean,Average (mean)
 25.39,,21.16,29.61,2020-21,2020-21,E06000019,"Herefordshire, County of",life-satisfaction,Life Satisfaction,very-good,Very good
@@ -28994,7 +28994,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 39.56,,34.65,44.47,2019-20,2019-20,W06000019,Blaenau Gwent,happiness,Happiness,good,Good
 12.39,,8.45,16.34,2020-21,2020-21,W06000019,Blaenau Gwent,happiness,Happiness,poor,Poor
 9.32,,6.73,11.92,2019-20,2019-20,W06000019,Blaenau Gwent,happiness,Happiness,poor,Poor
-26,,20.23,31.77,2020-21,2020-21,W06000019,Blaenau Gwent,happiness,Happiness,very-good,Very good
+26.0,20.23,31.77,2020-21,2020-21,W06000019,Blaenau Gwent,happiness,Happiness,very-good,Very good
 33.10,,28.4,37.8,2019-20,2019-20,W06000019,Blaenau Gwent,happiness,Happiness,very-good,Very good
 25.20,,20.91,29.5,2019-20,2019-20,W06000019,Blaenau Gwent,anxiety,Anxiety,poor,Poor
 7.86,,7.68,8.03,2019-20,2019-20,W06000019,Blaenau Gwent,worthwhile,Worthwhile,average-mean,Average (mean)
@@ -29067,7 +29067,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 12.53,,10.25,14.8,2019-20,2019-20,E10000017,Lancashire,worthwhile,Worthwhile,fair,Fair
 35.31,,32.19,38.42,2019-20,2019-20,E10000017,Lancashire,happiness,Happiness,very-good,Very good
 45.90,,42.62,49.18,2019-20,2019-20,E10000017,Lancashire,anxiety,Anxiety,very-good,Very good
-15,,12.61,17.39,2019-20,2019-20,E10000017,Lancashire,anxiety,Anxiety,fair,Fair
+15.0,12.61,17.39,2019-20,2019-20,E10000017,Lancashire,anxiety,Anxiety,fair,Fair
 38.16,,34.11,42.21,2020-21,2020-21,E10000017,Lancashire,anxiety,Anxiety,very-good,Very good
 7.55,,7.42,7.69,2019-20,2019-20,E10000017,Lancashire,happiness,Happiness,average-mean,Average (mean)
 ,x,,,2013-14,2013-14,E07000222,Warwick,life-satisfaction,Life Satisfaction,poor,Poor
@@ -29274,7 +29274,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2015-16,2015-16,E07000225,Chichester,worthwhile,Worthwhile,poor,Poor
 ,x,,,2015-16,2015-16,E07000225,Chichester,worthwhile,Worthwhile,good,Good
 49.10,,37.31,60.89,2019-20,2019-20,E07000225,Chichester,worthwhile,Worthwhile,good,Good
-39,,27.48,50.51,2019-20,2019-20,E07000225,Chichester,anxiety,Anxiety,very-good,Very good
+39.0,27.48,50.51,2019-20,2019-20,E07000225,Chichester,anxiety,Anxiety,very-good,Very good
 ,x,,,2017-18,2017-18,E07000225,Chichester,anxiety,Anxiety,fair,Fair
 ,x,,,2020-21,2020-21,E07000225,Chichester,anxiety,Anxiety,fair,Fair
 7.54,,7.16,7.91,2019-20,2019-20,E07000225,Chichester,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
@@ -29527,7 +29527,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 38.64,,34.05,43.22,2020-21,2020-21,E06000001,Hartlepool,happiness,Happiness,good,Good
 37.05,,33.26,40.84,2019-20,2019-20,E06000001,Hartlepool,anxiety,Anxiety,very-good,Very good
 15.89,,13.24,18.55,2019-20,2019-20,E06000001,Hartlepool,anxiety,Anxiety,fair,Fair
-34,,29.0,39.0,2020-21,2020-21,E06000001,Hartlepool,anxiety,Anxiety,very-good,Very good
+34.0,29.0,39.0,2020-21,2020-21,E06000001,Hartlepool,anxiety,Anxiety,very-good,Very good
 ,x,,,2012-13,2012-13,S12000030,Stirling,worthwhile,Worthwhile,poor,Poor
 ,x,,,2016-17,2016-17,S12000030,Stirling,worthwhile,Worthwhile,poor,Poor
 36.08,,31.76,40.39,2019-20,2019-20,S12000030,Stirling,worthwhile,Worthwhile,very-good,Very good
@@ -29899,7 +29899,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2014-15,2014-15,E07000153,Kettering,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2019-20,2019-20,E07000153,Kettering,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2020-21,2020-21,E07000153,Kettering,life-satisfaction,Life Satisfaction,fair,Fair
-37,,27.14,46.86,2011-12,2011-12,E07000153,Kettering,anxiety,Anxiety,very-good,Very good
+37.0,27.14,46.86,2011-12,2011-12,E07000153,Kettering,anxiety,Anxiety,very-good,Very good
 19.39,,11.93,26.84,2013-14,2013-14,E07000153,Kettering,anxiety,Anxiety,poor,Poor
 29.24,,19.22,39.26,2019-20,2019-20,E07000153,Kettering,anxiety,Anxiety,good,Good
 ,x,,,2015-16,2015-16,E07000153,Kettering,anxiety,Anxiety,fair,Fair
@@ -30825,7 +30825,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,E07000033,Bolsover,anxiety,Anxiety,fair,Fair
 3.89,,3.0,4.77,2020-21,2020-21,E07000033,Bolsover,anxiety,Anxiety,average-mean,Average (mean)
 6.61,,4.34,8.87,2019-20,2019-20,E06000006,Halton,worthwhile,Worthwhile,poor,Poor
-35,,30.76,39.24,2019-20,2019-20,E06000006,Halton,happiness,Happiness,very-good,Very good
+35.0,30.76,39.24,2019-20,2019-20,E06000006,Halton,happiness,Happiness,very-good,Very good
 46.69,,42.47,50.9,2019-20,2019-20,E06000006,Halton,worthwhile,Worthwhile,good,Good
 6.27,,4.16,8.39,2019-20,2019-20,E06000006,Halton,life-satisfaction,Life Satisfaction,poor,Poor
 50.91,,46.88,54.94,2019-20,2019-20,E06000006,Halton,life-satisfaction,Life Satisfaction,good,Good
@@ -30849,7 +30849,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 27.28,,23.73,27.27,2014-15,2014-15,E06000006,Halton,life-satisfaction,Life Satisfaction,very-good,Very good
 12.43,,9.54,15.32,2019-20,2019-20,E06000006,Halton,anxiety,Anxiety,fair,Fair
 22.53,,18.31,26.75,2020-21,2020-21,E06000006,Halton,anxiety,Anxiety,good,Good
-33,,28.17,37.83,2020-21,2020-21,E06000006,Halton,happiness,Happiness,very-good,Very good
+33.0,28.17,37.83,2020-21,2020-21,E06000006,Halton,happiness,Happiness,very-good,Very good
 27.91,,24.2,31.61,2019-20,2019-20,E06000006,Halton,life-satisfaction,Life Satisfaction,very-good,Very good
 9.96,,6.91,13.01,2020-21,2020-21,E06000006,Halton,life-satisfaction,Life Satisfaction,poor,Poor
 43.19,,39.1,47.27,2019-20,2019-20,E06000006,Halton,anxiety,Anxiety,very-good,Very good
@@ -31041,7 +31041,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,W06000004,Denbighshire,worthwhile,Worthwhile,poor,Poor
 36.13,,31.29,40.98,2020-21,2020-21,W06000004,Denbighshire,worthwhile,Worthwhile,very-good,Very good
 50.64,,45.58,55.7,2020-21,2020-21,W06000004,Denbighshire,worthwhile,Worthwhile,good,Good
-47,,42.93,51.08,2019-20,2019-20,W06000004,Denbighshire,worthwhile,Worthwhile,good,Good
+47.0,42.93,51.08,2019-20,2019-20,W06000004,Denbighshire,worthwhile,Worthwhile,good,Good
 10.25,,6.93,13.58,2020-21,2020-21,W06000004,Denbighshire,worthwhile,Worthwhile,fair,Fair
 44.24,,39.26,49.22,2020-21,2020-21,W06000004,Denbighshire,happiness,Happiness,good,Good
 17.81,,14.68,20.95,2019-20,2019-20,W06000004,Denbighshire,anxiety,Anxiety,poor,Poor
@@ -31265,7 +31265,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 18.81,,15.12,22.5,2020-21,2020-21,E06000057,Northumberland,happiness,Happiness,fair,Fair
 9.34,,5.11,11.89,2014-15,2014-15,E06000057,Northumberland,happiness,Happiness,poor,Poor
 13.10,,10.46,15.73,2019-20,2019-20,E06000057,Northumberland,life-satisfaction,Life Satisfaction,fair,Fair
-20,,16.64,23.36,2019-20,2019-20,E06000057,Northumberland,anxiety,Anxiety,fair,Fair
+20.0,16.64,23.36,2019-20,2019-20,E06000057,Northumberland,anxiety,Anxiety,fair,Fair
 7.63,,7.39,7.89,2014-15,2014-15,E06000057,Northumberland,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 7.83,,7.68,7.99,2019-20,2019-20,E06000057,Northumberland,worthwhile,Worthwhile,average-mean,Average (mean)
 ,x,,,2011-12,2011-12,E06000057,Northumberland,worthwhile,Worthwhile,poor,Poor
@@ -31712,7 +31712,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 3.17,,2.93,3.41,2019-20,2019-20,E08000002,Bury,anxiety,Anxiety,average-mean,Average (mean)
 46.61,,42.38,50.84,2019-20,2019-20,E08000002,Bury,worthwhile,Worthwhile,good,Good
 35.83,,30.35,41.32,2020-21,2020-21,E08000002,Bury,worthwhile,Worthwhile,very-good,Very good
-49,,44.81,53.19,2019-20,2019-20,E08000002,Bury,life-satisfaction,Life Satisfaction,good,Good
+49.0,44.81,53.19,2019-20,2019-20,E08000002,Bury,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2017-18,2017-18,E08000002,Bury,worthwhile,Worthwhile,poor,Poor
 7.29,,5.15,9.43,2019-20,2019-20,E08000002,Bury,life-satisfaction,Life Satisfaction,poor,Poor
 20.80,,16.03,25.57,2020-21,2020-21,E08000002,Bury,life-satisfaction,Life Satisfaction,fair,Fair
@@ -31758,7 +31758,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2013-14,2013-14,E07000098,Hertsmere,happiness,Happiness,poor,Poor
 ,x,,,2016-17,2016-17,E07000098,Hertsmere,happiness,Happiness,fair,Fair
 ,x,,,2018-19,2018-19,E07000098,Hertsmere,anxiety,Anxiety,fair,Fair
-34,,21.64,46.37,2019-20,2019-20,E07000098,Hertsmere,anxiety,Anxiety,very-good,Very good
+34.0,21.64,46.37,2019-20,2019-20,E07000098,Hertsmere,anxiety,Anxiety,very-good,Very good
 ,x,,,2020-21,2020-21,E07000098,Hertsmere,anxiety,Anxiety,good,Good
 ,x,,,2016-17,2016-17,E07000098,Hertsmere,happiness,Happiness,poor,Poor
 ,x,,,2019-20,2019-20,E07000098,Hertsmere,happiness,Happiness,fair,Fair
@@ -32154,7 +32154,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 21.05,,17.59,24.51,2019-20,2019-20,W06000006,Wrexham,anxiety,Anxiety,good,Good
 28.65,,23.96,33.33,2020-21,2020-21,W06000006,Wrexham,anxiety,Anxiety,very-good,Very good
 19.01,,14.67,23.36,2020-21,2020-21,W06000006,Wrexham,happiness,Happiness,fair,Fair
-41,,35.42,46.58,2020-21,2020-21,W06000006,Wrexham,happiness,Happiness,good,Good
+41.0,35.42,46.58,2020-21,2020-21,W06000006,Wrexham,happiness,Happiness,good,Good
 19.85,,15.62,24.09,2020-21,2020-21,W06000006,Wrexham,life-satisfaction,Life Satisfaction,fair,Fair
 16.13,,13.12,19.13,2019-20,2019-20,W06000006,Wrexham,happiness,Happiness,fair,Fair
 27.45,,22.82,32.07,2020-21,2020-21,W06000006,Wrexham,happiness,Happiness,very-good,Very good
@@ -32173,7 +32173,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 11.53,,9.01,14.06,2019-20,2019-20,W06000006,Wrexham,worthwhile,Worthwhile,fair,Fair
 52.96,,47.41,58.52,2020-21,2020-21,W06000006,Wrexham,worthwhile,Worthwhile,good,Good
 12.54,,8.42,16.66,2020-21,2020-21,W06000006,Wrexham,happiness,Happiness,poor,Poor
-22,,17.3,26.69,2020-21,2020-21,W06000006,Wrexham,anxiety,Anxiety,good,Good
+22.0,17.3,26.69,2020-21,2020-21,W06000006,Wrexham,anxiety,Anxiety,good,Good
 21.53,,17.63,25.43,2019-20,2019-20,W06000006,Wrexham,anxiety,Anxiety,poor,Poor
 7.40,,7.21,7.58,2019-20,2019-20,W06000006,Wrexham,happiness,Happiness,average-mean,Average (mean)
 40.06,,35.72,44.4,2019-20,2019-20,W06000006,Wrexham,happiness,Happiness,good,Good
@@ -32223,7 +32223,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 18.59,,14.39,22.8,2020-21,2020-21,E08000021,Newcastle upon Tyne,happiness,Happiness,fair,Fair
 7.36,,7.2,7.53,2019-20,2019-20,E08000021,Newcastle upon Tyne,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 46.80,,42.34,51.27,2019-20,2019-20,E08000021,Newcastle upon Tyne,worthwhile,Worthwhile,good,Good
-30,,24.68,35.33,2020-21,2020-21,E08000021,Newcastle upon Tyne,happiness,Happiness,very-good,Very good
+30.0,24.68,35.33,2020-21,2020-21,E08000021,Newcastle upon Tyne,happiness,Happiness,very-good,Very good
 23.90,,20.04,27.77,2019-20,2019-20,E08000021,Newcastle upon Tyne,life-satisfaction,Life Satisfaction,very-good,Very good
 55.22,,49.73,60.7,2020-21,2020-21,E08000021,Newcastle upon Tyne,life-satisfaction,Life Satisfaction,good,Good
 21.32,,18.14,21.31,2014-15,2014-15,E08000021,Newcastle upon Tyne,life-satisfaction,Life Satisfaction,very-good,Very good
@@ -32349,7 +32349,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2017-18,2017-18,E09000003,Barnet,life-satisfaction,Life Satisfaction,poor,Poor
 27.23,,20.81,33.66,2019-20,2019-20,E09000003,Barnet,life-satisfaction,Life Satisfaction,very-good,Very good
 28.38,,22.54,34.23,2019-20,2019-20,E09000003,Barnet,happiness,Happiness,very-good,Very good
-27,,19.74,34.27,2020-21,2020-21,E09000003,Barnet,happiness,Happiness,very-good,Very good
+27.0,19.74,34.27,2020-21,2020-21,E09000003,Barnet,happiness,Happiness,very-good,Very good
 7.60,,7.39,7.81,2019-20,2019-20,E09000003,Barnet,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 ,x,,,2013-14,2013-14,E09000003,Barnet,worthwhile,Worthwhile,poor,Poor
 ,x,,,2012-13,2012-13,E09000003,Barnet,worthwhile,Worthwhile,poor,Poor
@@ -32767,7 +32767,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 28.30,,25.1,31.5,2011-12,2011-12,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,very-good,Very good
 27.34,,24.0,27.34,2014-15,2014-15,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,very-good,Very good
 52.26,,48.66,55.86,2015-16,2015-16,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,good,Good
-54,,50.05,57.95,2018-19,2018-19,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,good,Good
+54.0,50.05,57.95,2018-19,2018-19,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,good,Good
 13.59,,10.5,16.68,2018-19,2018-19,E10000021,Northamptonshire,worthwhile,Worthwhile,fair,Fair
 12.69,,10.19,15.18,2011-12,2011-12,E10000021,Northamptonshire,worthwhile,Worthwhile,fair,Fair
 32.72,,29.29,36.15,2011-12,2011-12,E10000021,Northamptonshire,worthwhile,Worthwhile,very-good,Very good
@@ -32840,7 +32840,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 29.32,,26.11,32.52,2013-14,2013-14,E10000021,Northamptonshire,worthwhile,Worthwhile,very-good,Very good
 50.14,,46.48,53.8,2015-16,2015-16,E10000021,Northamptonshire,worthwhile,Worthwhile,good,Good
 3.37,,2.18,4.56,2014-15,2014-15,E10000021,Northamptonshire,worthwhile,Worthwhile,poor,Poor
-11,,8.0,14.0,2020-21,2020-21,E10000021,Northamptonshire,worthwhile,Worthwhile,fair,Fair
+11.0,8.0,14.0,2020-21,2020-21,E10000021,Northamptonshire,worthwhile,Worthwhile,fair,Fair
 35.23,,31.82,38.54,2011-12,2011-12,E10000021,Northamptonshire,happiness,Happiness,very-good,Very good
 17.47,,14.55,20.38,2015-16,2015-16,E10000021,Northamptonshire,happiness,Happiness,fair,Fair
 6.15,,4.37,7.93,2016-17,2016-17,E10000021,Northamptonshire,happiness,Happiness,poor,Poor
@@ -32864,7 +32864,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.67,,7.54,7.81,2015-16,2015-16,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 24.32,,21.26,27.39,2011-12,2011-12,E10000021,Northamptonshire,anxiety,Anxiety,good,Good
 23.84,,20.44,27.24,2018-19,2018-19,E10000021,Northamptonshire,anxiety,Anxiety,good,Good
-41,,36.85,45.15,2019-20,2019-20,E10000021,Northamptonshire,anxiety,Anxiety,very-good,Very good
+41.0,36.85,45.15,2019-20,2019-20,E10000021,Northamptonshire,anxiety,Anxiety,very-good,Very good
 39.87,,35.2,44.55,2020-21,2020-21,E10000021,Northamptonshire,anxiety,Anxiety,very-good,Very good
 7.62,,7.49,7.74,2014-15,2014-15,E10000021,Northamptonshire,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 7.92,,7.8,8.03,2015-16,2015-16,E10000021,Northamptonshire,worthwhile,Worthwhile,average-mean,Average (mean)
@@ -32989,7 +32989,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2011-12,2011-12,E06000017,Rutland,worthwhile,Worthwhile,good,Good
 ,x,,,2015-16,2015-16,E06000017,Rutland,worthwhile,Worthwhile,poor,Poor
 ,x,,,2018-19,2018-19,E06000017,Rutland,worthwhile,Worthwhile,poor,Poor
-34,,25.51,42.5,2020-21,2020-21,E06000017,Rutland,worthwhile,Worthwhile,very-good,Very good
+34.0,25.51,42.5,2020-21,2020-21,E06000017,Rutland,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2020-21,2020-21,E06000017,Rutland,happiness,Happiness,poor,Poor
 18.23,,12.8,23.66,2019-20,2019-20,E06000017,Rutland,happiness,Happiness,fair,Fair
 ,x,,,2011-12,2011-12,E06000017,Rutland,life-satisfaction,Life Satisfaction,poor,Poor

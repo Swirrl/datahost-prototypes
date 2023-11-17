@@ -165,7 +165,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 39.09,,28.29,49.89,2019-20,2019-20,E07000206,Waveney,happiness,Happiness,very-good,Very good
 43.60,,30.5,56.69,2014-15,2014-15,E07000051,Purbeck,happiness,Happiness,good,Good
 ,x,,,2018-19,2018-19,E07000053,Weymouth and Portland,happiness,Happiness,fair,Fair
-40,,27.6,52.39,2017-18,2017-18,E07000051,Purbeck,worthwhile,Worthwhile,very-good,Very good
+40.0,27.6,52.39,2017-18,2017-18,E07000051,Purbeck,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2012-13,2012-13,E07000052,West Dorset,worthwhile,Worthwhile,poor,Poor
 12.11,,9.64,14.59,2012-13,2012-13,S12000024,Perth and Kinross,worthwhile,Worthwhile,fair,Fair
 5.72,,3.54,7.9,2015-16,2015-16,S12000015,Fife,worthwhile,Worthwhile,poor,Poor
@@ -184,7 +184,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2015-16,2015-16,E06000053,Isles of Scilly,happiness,Happiness,poor,Poor
 46.39,,41.53,51.25,2018-19,2018-19,S12000015,Fife,worthwhile,Worthwhile,good,Good
 ,x,,,2018-19,2018-19,E07000191,West Somerset,worthwhile,Worthwhile,poor,Poor
-47,,35.46,58.54,2017-18,2017-18,E07000048,Christchurch,worthwhile,Worthwhile,very-good,Very good
+47.0,35.46,58.54,2017-18,2017-18,E07000048,Christchurch,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2016-17,2016-17,E07000191,West Somerset,worthwhile,Worthwhile,fair,Fair
 51.04,,46.93,55.14,2018-19,2018-19,E10000009,Dorset,worthwhile,Worthwhile,good,Good
 ,x,,,2017-18,2017-18,E07000191,West Somerset,worthwhile,Worthwhile,very-good,Very good
@@ -761,13 +761,13 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2016-17,2016-17,E07000201,Forest Heath,life-satisfaction,Life Satisfaction,fair,Fair
 35.59,,31.73,39.44,2014-15,2014-15,S12000015,Fife,happiness,Happiness,good,Good
 ,x,,,2013-14,2013-14,E07000051,Purbeck,life-satisfaction,Life Satisfaction,very-good,Very good
-23,,19.54,26.4,2015-16,2015-16,E06000028,Bournemouth,life-satisfaction,Life Satisfaction,very-good,Very good
+23.0,19.54,26.4,2015-16,2015-16,E06000028,Bournemouth,life-satisfaction,Life Satisfaction,very-good,Very good
 15.88,,13.13,18.64,2012-13,2012-13,E06000028,Bournemouth,life-satisfaction,Life Satisfaction,fair,Fair
 ,x,,,2016-17,2016-17,E06000053,Isles of Scilly,life-satisfaction,Life Satisfaction,very-good,Very good
 ,x,,,2018-19,2018-19,E06000053,Isles of Scilly,life-satisfaction,Life Satisfaction,poor,Poor
 51.06,,47.06,55.84,2014-15,2014-15,S12000015,Fife,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2013-14,2013-14,E07000201,Forest Heath,life-satisfaction,Life Satisfaction,very-good,Very good
-22,,14.12,29.89,2011-12,2011-12,E07000204,St Edmundsbury,life-satisfaction,Life Satisfaction,fair,Fair
+22.0,14.12,29.89,2011-12,2011-12,E07000204,St Edmundsbury,life-satisfaction,Life Satisfaction,fair,Fair
 49.15,,45.57,52.72,2011-12,2011-12,S12000046,Glasgow City,life-satisfaction,Life Satisfaction,good,Good
 ,x,,,2019-20,2019-20,E07000049,East Dorset,life-satisfaction,Life Satisfaction,poor,Poor
 14.14,,9.47,18.79,2012-13,2012-13,E07000049,East Dorset,life-satisfaction,Life Satisfaction,fair,Fair
@@ -1036,7 +1036,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2017-18,2017-18,E06000053,Isles of Scilly,anxiety,Anxiety,fair,Fair
 19.08,,13.37,24.78,2015-16,2015-16,E07000205,Suffolk Coastal,anxiety,Anxiety,good,Good
 27.40,,23.88,30.92,2016-17,2016-17,E06000029,Poole,anxiety,Anxiety,good,Good
-16,,12.94,19.06,2016-17,2016-17,E06000029,Poole,anxiety,Anxiety,fair,Fair
+16.0,12.94,19.06,2016-17,2016-17,E06000029,Poole,anxiety,Anxiety,fair,Fair
 14.42,,11.87,16.97,2014-15,2014-15,E06000028,Bournemouth,anxiety,Anxiety,poor,Poor
 22.17,,16.6,27.75,2012-13,2012-13,E07000049,East Dorset,anxiety,Anxiety,poor,Poor
 40.44,,36.78,44.09,2014-15,2014-15,E06000029,Poole,anxiety,Anxiety,very-good,Very good
@@ -1177,7 +1177,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.70,,7.43,7.97,2013-14,2013-14,E07000205,Suffolk Coastal,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 7.39,,7.23,7.56,2016-17,2016-17,S12000046,Glasgow City,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
 ,x,,,2011-12,2011-12,E06000053,Isles of Scilly,anxiety,Anxiety,good,Good
-30,,22.39,37.61,2014-15,2014-15,E07000206,Waveney,anxiety,Anxiety,good,Good
+30.0,22.39,37.61,2014-15,2014-15,E07000206,Waveney,anxiety,Anxiety,good,Good
 7.61,,7.5,7.73,2011-12,2011-12,E06000028,Bournemouth,worthwhile,Worthwhile,average-mean,Average (mean)
 7.33,,7.16,7.49,2011-12,2011-12,E06000029,Poole,happiness,Happiness,average-mean,Average (mean)
 2.87,,2.38,3.36,2013-14,2013-14,E07000048,Christchurch,anxiety,Anxiety,average-mean,Average (mean)
@@ -1401,7 +1401,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 20.36,,12.97,27.74,2011-12,2011-12,E07000053,Weymouth and Portland,anxiety,Anxiety,poor,Poor
 40.21,,31.18,49.24,2016-17,2016-17,E07000190,Taunton Deane,anxiety,Anxiety,very-good,Very good
 47.54,,36.93,58.15,2017-18,2017-18,E07000053,Weymouth and Portland,anxiety,Anxiety,very-good,Very good
-17,,12.92,21.09,2019-20,2019-20,E06000028,Bournemouth,anxiety,Anxiety,fair,Fair
+17.0,12.92,21.09,2019-20,2019-20,E06000028,Bournemouth,anxiety,Anxiety,fair,Fair
 19.74,,13.04,26.45,2013-14,2013-14,E07000049,East Dorset,anxiety,Anxiety,poor,Poor
 18.90,,11.95,25.85,2015-16,2015-16,E07000206,Waveney,anxiety,Anxiety,poor,Poor
 8.05,,7.7,8.4,2016-17,2016-17,E07000190,Taunton Deane,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
@@ -1486,7 +1486,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 4.38,,2.74,5.94,2014-15,2014-15,E06000029,Poole,life-satisfaction,Life Satisfaction,poor,Poor
 ,x,,,2017-18,2017-18,E07000190,Taunton Deane,life-satisfaction,Life Satisfaction,poor,Poor
 33.58,,28.98,38.18,2018-19,2018-19,S12000024,Perth and Kinross,life-satisfaction,Life Satisfaction,very-good,Very good
-29,,20.69,37.31,2016-17,2016-17,E07000050,North Dorset,worthwhile,Worthwhile,very-good,Very good
+29.0,20.69,37.31,2016-17,2016-17,E07000050,North Dorset,worthwhile,Worthwhile,very-good,Very good
 28.58,,19.44,52.42,2013-14,2013-14,E07000190,Taunton Deane,worthwhile,Worthwhile,very-good,Very good
 46.50,,42.05,50.95,2017-18,2017-18,S12000024,Perth and Kinross,worthwhile,Worthwhile,good,Good
 ,x,,,2014-15,2014-15,E07000205,Suffolk Coastal,worthwhile,Worthwhile,poor,Poor
@@ -1562,7 +1562,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 21.49,,14.77,28.21,2013-14,2013-14,E07000206,Waveney,anxiety,Anxiety,poor,Poor
 ,x,,,2019-20,2019-20,E07000201,Forest Heath,anxiety,Anxiety,fair,Fair
 18.84,,15.81,21.88,2013-14,2013-14,S12000015,Fife,happiness,Happiness,fair,Fair
-38,,33.79,42.2,2016-17,2016-17,E06000029,Poole,happiness,Happiness,good,Good
+38.0,33.79,42.2,2016-17,2016-17,E06000029,Poole,happiness,Happiness,good,Good
 35.45,,30.47,40.43,2019-20,2019-20,E06000029,Poole,happiness,Happiness,very-good,Very good
 13.23,,10.47,15.99,2018-19,2018-19,E06000029,Poole,happiness,Happiness,fair,Fair
 26.70,,17.71,35.7,2018-19,2018-19,E07000048,Christchurch,anxiety,Anxiety,good,Good
@@ -1604,7 +1604,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 2.58,,2.36,2.79,2015-16,2015-16,E10000009,Dorset,anxiety,Anxiety,average-mean,Average (mean)
 7.76,,7.54,8.0,2017-18,2017-18,E07000205,Suffolk Coastal,happiness,Happiness,average-mean,Average (mean)
 7.65,,7.23,8.06,2017-18,2017-18,E07000204,St Edmundsbury,happiness,Happiness,average-mean,Average (mean)
-23,,18.69,27.32,2018-19,2018-19,S12000024,Perth and Kinross,anxiety,Anxiety,good,Good
+23.0,18.69,27.32,2018-19,2018-19,S12000024,Perth and Kinross,anxiety,Anxiety,good,Good
 ,x,,,2014-15,2014-15,E06000053,Isles of Scilly,anxiety,Anxiety,poor,Poor
 7.86,,7.26,8.45,2015-16,2015-16,E07000201,Forest Heath,worthwhile,Worthwhile,average-mean,Average (mean)
 7.47,,7.33,7.62,2014-15,2014-15,S12000044,North Lanarkshire,life-satisfaction,Life Satisfaction,average-mean,Average (mean)
@@ -2113,7 +2113,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 18.85,,15.85,21.85,2012-13,2012-13,S12000046,Glasgow City,happiness,Happiness,fair,Fair
 35.78,,32.29,39.27,2011-12,2011-12,S12000044,North Lanarkshire,happiness,Happiness,good,Good
 ,x,,,2015-16,2015-16,E07000191,West Somerset,happiness,Happiness,poor,Poor
-37,,33.22,40.77,2014-15,2014-15,S12000024,Perth and Kinross,happiness,Happiness,very-good,Very good
+37.0,33.22,40.77,2014-15,2014-15,S12000024,Perth and Kinross,happiness,Happiness,very-good,Very good
 28.91,,17.86,39.97,2019-20,2019-20,E07000050,North Dorset,happiness,Happiness,good,Good
 39.01,,35.17,42.85,2018-19,2018-19,E10000009,Dorset,happiness,Happiness,very-good,Very good
 19.11,,16.29,21.94,2011-12,2011-12,S12000046,Glasgow City,happiness,Happiness,fair,Fair
@@ -2302,7 +2302,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 ,x,,,2015-16,2015-16,E07000050,North Dorset,happiness,Happiness,poor,Poor
 ,x,,,2019-20,2019-20,E07000053,Weymouth and Portland,worthwhile,Worthwhile,poor,Poor
 13.82,,11.02,16.61,2015-16,2015-16,S12000044,North Lanarkshire,worthwhile,Worthwhile,fair,Fair
-48,,44.33,51.67,2014-15,2014-15,E10000009,Dorset,worthwhile,Worthwhile,good,Good
+48.0,44.33,51.67,2014-15,2014-15,E10000009,Dorset,worthwhile,Worthwhile,good,Good
 ,x,,,2011-12,2011-12,E07000191,West Somerset,worthwhile,Worthwhile,fair,Fair
 ,x,,,2016-17,2016-17,E07000048,Christchurch,worthwhile,Worthwhile,poor,Poor
 5.14,,3.46,6.83,2013-14,2013-14,E06000028,Bournemouth,worthwhile,Worthwhile,poor,Poor
@@ -2404,7 +2404,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 51.77,,41.37,62.16,2019-20,2019-20,E07000190,Taunton Deane,worthwhile,Worthwhile,good,Good
 10.96,,7.72,14.19,2018-19,2018-19,S12000024,Perth and Kinross,worthwhile,Worthwhile,fair,Fair
 11.49,,8.7,14.31,2015-16,2015-16,E06000028,Bournemouth,worthwhile,Worthwhile,fair,Fair
-44,,41.83,57.47,2013-14,2013-14,E07000048,Christchurch,worthwhile,Worthwhile,good,Good
+44.0,41.83,57.47,2013-14,2013-14,E07000048,Christchurch,worthwhile,Worthwhile,good,Good
 ,x,,,2013-14,2013-14,E07000051,Purbeck,worthwhile,Worthwhile,good,Good
 48.10,,39.58,56.62,2012-13,2012-13,E07000205,Suffolk Coastal,worthwhile,Worthwhile,good,Good
 26.35,,22.89,29.8,2013-14,2013-14,S12000015,Fife,life-satisfaction,Life Satisfaction,very-good,Very good
@@ -2682,7 +2682,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 8.99,,6.74,11.25,2013-14,2013-14,E06000029,Poole,happiness,Happiness,poor,Poor
 32.88,,29.46,36.3,2012-13,2012-13,E10000009,Dorset,happiness,Happiness,very-good,Very good
 15.87,,13.14,18.6,2018-19,2018-19,E10000009,Dorset,happiness,Happiness,fair,Fair
-34,,30.03,37.89,2016-17,2016-17,E06000028,Bournemouth,happiness,Happiness,very-good,Very good
+34.0,30.03,37.89,2016-17,2016-17,E06000028,Bournemouth,happiness,Happiness,very-good,Very good
 ,x,,,2016-17,2016-17,E07000190,Taunton Deane,happiness,Happiness,poor,Poor
 ,x,,,2016-17,2016-17,E07000050,North Dorset,happiness,Happiness,fair,Fair
 37.03,,26.81,47.25,2017-18,2017-18,E07000048,Christchurch,happiness,Happiness,good,Good
@@ -2735,7 +2735,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 41.84,,30.22,53.47,2018-19,2018-19,E07000048,Christchurch,anxiety,Anxiety,very-good,Very good
 18.21,,15.06,21.35,2013-14,2013-14,S12000046,Glasgow City,happiness,Happiness,fair,Fair
 ,x,,,2017-18,2017-18,E07000049,East Dorset,happiness,Happiness,poor,Poor
-20,,12.76,27.23,2012-13,2012-13,E07000053,Weymouth and Portland,happiness,Happiness,fair,Fair
+20.0,12.76,27.23,2012-13,2012-13,E07000053,Weymouth and Portland,happiness,Happiness,fair,Fair
 16.74,,14.02,19.46,2012-13,2012-13,S12000015,Fife,anxiety,Anxiety,fair,Fair
 ,x,,,2017-18,2017-18,E06000053,Isles of Scilly,anxiety,Anxiety,very-good,Very good
 19.43,,12.45,26.42,2016-17,2016-17,E07000049,East Dorset,anxiety,Anxiety,fair,Fair
@@ -3124,7 +3124,7 @@ V4_3,Data Marking,Lower limit,Upper limit,yyyy-yy,Time,administrative-geography,
 7.98,,7.63,8.33,2014-15,2014-15,E07000050,North Dorset,happiness,Happiness,average-mean,Average (mean)
 8.11,,7.63,8.6,2019-20,2019-20,E07000048,Christchurch,happiness,Happiness,average-mean,Average (mean)
 42.75,,39.18,46.33,2013-14,2013-14,E06000029,Poole,happiness,Happiness,good,Good
-14,,11.42,16.57,2014-15,2014-15,E06000029,Poole,happiness,Happiness,fair,Fair
+14.0,11.42,16.57,2014-15,2014-15,E06000029,Poole,happiness,Happiness,fair,Fair
 ,x,,,2015-16,2015-16,E07000201,Forest Heath,happiness,Happiness,fair,Fair
 ,x,,,2012-13,2012-13,E07000191,West Somerset,worthwhile,Worthwhile,very-good,Very good
 ,x,,,2014-15,2014-15,E07000050,North Dorset,worthwhile,Worthwhile,very-good,Very good
