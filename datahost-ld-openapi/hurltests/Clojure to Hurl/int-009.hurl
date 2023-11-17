@@ -1,3 +1,5 @@
+# Description: Basic integration tests, including expected 404 errors aroundn revisions.
+
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
@@ -11,7 +13,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -23,7 +25,7 @@ Authorization: {{auth_token}}
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -36,13 +38,13 @@ HTTP 201
 [Captures]
 revision1_url: header "Location"
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions/does-not-exist
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revision/does-not-exist
 
 HTTP 404
 [Asserts]
 body == "Not found"
 
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions/1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revision/1
 Accept: application/json
 HTTP 200

@@ -67,7 +67,7 @@ body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file,schema-qualifications-by-area.json;
+file,common/schema-qualifications-by-area.json;
 
 HTTP 201
 
@@ -77,7 +77,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,2019.csv;
+file,common/2019.csv;
 
 HTTP 201
 
@@ -133,7 +133,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: a second change for {{series}}
-file,qualifications-by-area2.csv;
+file,common/qualifications-by-area2.csv;
 
 HTTP 201
 [Asserts]
@@ -226,7 +226,7 @@ Content-Type: text/csv
 Authorization: {{auth_token}}
 [QueryStringParams]
 description: a third new change
-file,qualifications-by-area3.csv;
+file,common/qualifications-by-area3.csv;
 
 HTTP 201
 [Asserts]
@@ -375,7 +375,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes retractions
 description: change for {{series}}
-file,qualifications-by-area3-deletes.csv;
+file,common/qualifications-by-area3-deletes.csv;
 
 HTTP 201
 [Asserts]
@@ -412,7 +412,7 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes corrections
 description: change for {{series}}
-file,qualifications-by-area3-corrections.csv;
+file,common/qualifications-by-area3-corrections.csv;
 
 HTTP 201
 [Asserts]

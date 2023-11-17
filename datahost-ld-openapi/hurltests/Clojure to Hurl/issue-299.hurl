@@ -1,4 +1,5 @@
-#Create a series and make some changes
+# Description: Create a series+release+revision. The freshly created revision
+# should have no changes associated with it.
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
@@ -11,9 +12,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Captures]
-dataset: jsonpath "$['dh:baseEntity']"
 
-PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -25,14 +26,14 @@ Authorization: {{auth_token}}
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file,simple.json;
+file,common/schema-qualifications-by-area.json;
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -45,6 +46,14 @@ HTTP 201
 [Captures]
 revision1_url: header "Location"
 
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revision/1
+Accept: applicatin/json
+
+# this would fail on a "fresh" revision
+HTTP 200
+#[Asserts]
+#jsonpath "$.['dh:hasChange']" count == 0
+
 
 POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
 Content-Type: text/csv
@@ -52,11 +61,11 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,2019.csv;
+file,common/2019.csv;
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -75,10 +84,9 @@ Authorization: {{auth_token}}
 [QueryStringParams]
 title: changes appends
 description: change for {{series}}
-file,2020.csv;
+file,common/2020.csv;
 
 HTTP 201
-
 
 #create a different series with a revision and no appends
 
@@ -95,7 +103,7 @@ HTTP 201
 [Captures]
 dataset: jsonpath "$['dh:baseEntity']"
 
-PUT {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/different{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -106,15 +114,15 @@ Authorization: {{auth_token}}
 
 HTTP 201
 
-POST {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/different{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
-file,simple.json;
+file,common/simple.json;
 
 HTTP 201
 
 
-POST {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/different{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -131,8 +139,9 @@ HTTP 201
 #this only happens if the revision is empty. if you make the same request after adding
 #a change you will get the expected metadata.
 
-GET {{scheme}}://{{host_name}}/data/different{{series}}/releases/release-1/revisions/1
+GET {{scheme}}://{{host_name}}/data/different{{series}}/release/release-1/revision/1
 Accept: application/json
 
 HTTP 200
-
+[Asserts]
+jsonpath "$.['dh:hasChange']" count == 0
