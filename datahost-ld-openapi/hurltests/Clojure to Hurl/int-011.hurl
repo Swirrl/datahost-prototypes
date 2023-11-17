@@ -1,4 +1,5 @@
-#This test ensures appends deletes corrections and their associated metadata are added and retrieved correctly.
+# Description: This test ensures appends deletes corrections and their 
+# associated metadata are added and retrieved correctly.
 
 
 #Create series
@@ -12,12 +13,10 @@ Authorization: {{auth_token}}
 }
 
 HTTP 201
-[Captures]
-dataset: jsonpath "$['dh:baseEntity']"
 
 
 #Create release
-PUT {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -30,7 +29,7 @@ HTTP 201
 
 
 #add schema
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/schema
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
 Authorization: {{auth_token}}
 file,schema-qualifications-by-area.json;
@@ -39,7 +38,7 @@ HTTP 201
 
 
 #creates a revision with additional metadata
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json 
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -48,7 +47,7 @@ Authorization: {{auth_token}}
     "dcterms:description": "A test revision",
     "dh:publicationDate": "2023-09-01",
     "dcterms:license": "http://license-link",
-    "dh:reasonForChange": "Comment.."
+    "dh:reasonForChange": "Comment..."
 }
 
 HTTP 201
@@ -61,13 +60,13 @@ jsonpath "$.['dcterms:title']" == "a revision for release"
 jsonpath "$.['dcterms:description']" == "A test revision"
 jsonpath "$.['@type']" == "dh:Revision"
 
-#clojure test compares this to the rdf-base-uri which it defines as:
-#let [rdf-base-uri (th/sys->rdf-base-uri sys)
-jsonpath "$.['dh:appliesToRelease']" endsWith "{{series}}/releases/release-1"
+# clojure test compares this to the rdf-base-uri which it defines as:
+# `(th/sys->rdf-base-uri sys)`
+jsonpath "$.['dh:appliesToRelease']" endsWith "{{series}}/release/release-1"
 
 jsonpath "$.['dh:publicationDate']" == "2023-09-01"
 jsonpath "$.['dcterms:license']" == "http://license-link"
-jsonpath "$.['dh:reasonForChange']" == "Comment.."
+jsonpath "$.['dh:reasonForChange']" == "Comment..."
 #Created with the resource URI provided in the Location header
 header "Location" endsWith "{{id}}"
 
@@ -83,23 +82,21 @@ HTTP 200
 jsonpath "$.['dcterms:title']" == "a revision for release"
 jsonpath "$.['dcterms:description']" == "A test revision"
 jsonpath "$.['@type']" == "dh:Revision"
-jsonpath "$.['dh:appliesToRelease']" endsWith "{{series}}/releases/release-1"
+jsonpath "$.['dh:appliesToRelease']" endsWith "{{series}}/release/release-1"
 jsonpath "$.['dh:publicationDate']" == "2023-09-01"
 jsonpath "$.['dcterms:license']" == "http://license-link"
-jsonpath "$.['dh:reasonForChange']" == "Comment.."
+jsonpath "$.['dh:reasonForChange']" == "Comment..."
 
 
 #Associated Release gets the Revision inverse triple
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
 
 HTTP 200
-
 [Asserts]
 jsonpath "$.['dh:hasRevision']" endsWith "{{revision1_url}}"
-
 
 
 #appends to the revision
@@ -114,12 +111,12 @@ file,qualifications-by-area1.csv;
 HTTP 201
 [Asserts]
 jsonpath "$.['dh:changeKind']" == ":dh/ChangeKindAppend"
-jsonpath "$.['@id']" == "{{series}}/releases/release-1/revisions/1/changes/1"
+jsonpath "$.['@id']" == "{{series}}/release/release-1/revision/1/commit/1"
 jsonpath "$.['dcterms:title']" == "changes appends"
 jsonpath "$.['dcterms:description']" == "change for {{series}}"
 
 
-GET {{scheme}}://{{host_name}}{{revision1_url}}/changes/1
+GET {{scheme}}://{{host_name}}{{revision1_url}}/commit/1
 Accept: text/csv
 Content-Type: text/csv
 Authorization: {{auth_token}}
@@ -175,7 +172,7 @@ file,qualifications-by-area2.csv;
 HTTP 201
 [Asserts]
 jsonpath "$.['dh:changeKind']" == ":dh/ChangeKindAppend"
-header "Location" == "/data/{{series}}/releases/release-1/revisions/1/changes/2"
+header "Location" == "/data/{{series}}/release/release-1/revision/1/commit/2"
 
 #Get the second change and make sure the appends are concatenated
 GET {{scheme}}://{{host_name}}{{revision1_url}}
@@ -238,7 +235,7 @@ Aged 16 to 64 years level 3 or above qualifications,Stroud,2020,63.2,per cent,74
 ```
 
 #Create a new revision with description left blank intentionally
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json 
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -253,7 +250,7 @@ id2: jsonpath "$.['@id']"
 [Asserts]
 #checks that successful post returns normalised release data values
 jsonpath "$.['dcterms:title']" == "another revision for release"
-jsonpath "$.['@id']" endsWith "/revisions/2"
+jsonpath "$.['@id']" endsWith "/revision/2"
 variable "revision2_url" == "/data/{{id2}}"
 
 
@@ -268,12 +265,12 @@ file,qualifications-by-area3.csv;
 HTTP 201
 [Asserts]
 jsonpath "$.['dh:changeKind']" == ":dh/ChangeKindAppend"
-jsonpath "$.['@id']" endsWith "changes/1"
+jsonpath "$.['@id']" endsWith "commit/1"
 
 
 #ensure path header contains a URL when requesting the release
 #and redirects to revision 2
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 Authorization: {{auth_token}}
 HTTP 302
@@ -285,7 +282,7 @@ header "Location" == "{{revision2_url}}"
 
 
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1-metadata.json
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1-metadata.json
 Accept: application/json 
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -386,7 +383,7 @@ Aged 16 to 64 years level 3 or above qualifications,Hampshire,2021,60.6,per cent
 ```
 
 #create 3rd revision
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -399,10 +396,10 @@ HTTP 201
 [Captures]
 revision3_url: header "Location"
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/3"
+jsonpath "$.['@id']" endsWith "/revision/3"
 jsonpath "$.['dcterms:title']" == "Rev 3"
 jsonpath "$.['dcterms:description']" == "a 3rd test revision"
-jsonpath "$.['dh:appliesToRelease']" endsWith "data/{{series}}/releases/release-1"
+jsonpath "$.['dh:appliesToRelease']" endsWith "data/{{series}}/release/release-1"
 
 
 #Deletion
@@ -417,13 +414,13 @@ file,qualifications-by-area3-deletes.csv;
 HTTP 201
 [Asserts]
 jsonpath "$.['dh:changeKind']" == ":dh/ChangeKindRetract"
-jsonpath "$.['@id']" == "{{series}}/releases/release-1/revisions/3/changes/1"
+jsonpath "$.['@id']" == "{{series}}/release/release-1/revision/3/commit/1"
 jsonpath "$.['dcterms:title']" == "changes retractions"
 jsonpath "$.['dcterms:description']" == "change for {{series}}"
 
 
 #create 4th revision
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -436,10 +433,10 @@ HTTP 201
 [Captures]
 revision4_url: header "Location"
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/4"
+jsonpath "$.['@id']" endsWith "/revision/4"
 jsonpath "$.['dcterms:title']" == "Rev 4"
 jsonpath "$.['dcterms:description']" == "a 4th test revision"
-jsonpath "$.['dh:appliesToRelease']" endsWith "data/{{series}}/releases/release-1"
+jsonpath "$.['dh:appliesToRelease']" endsWith "data/{{series}}/release/release-1"
 
 
 #Correction
@@ -454,7 +451,7 @@ file,qualifications-by-area3-corrections.csv;
 HTTP 201
 [Asserts]
 jsonpath "$.['dh:changeKind']" == ":dh/ChangeKindCorrect"
-jsonpath "$.['@id']" == "{{series}}/releases/release-1/revisions/4/changes/1"
+jsonpath "$.['@id']" == "{{series}}/release/release-1/revision/4/commit/1"
 jsonpath "$.['dcterms:title']" == "changes corrections"
 jsonpath "$.['dcterms:description']" == "change for {{series}}"
 
@@ -541,7 +538,7 @@ Aged 16 to 64 years level 3 or above qualifications,West Northamptonshire,2021,9
 Aged 16 to 64 years level 3 or above qualifications,Cambridgeshire,2021,99.0,per cent,70.8,60.6,
 ```
 #adding another 10 revisions and ensuring autoincrement is correct
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -551,9 +548,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/5"
+jsonpath "$.['@id']" endsWith "/revision/5"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -563,9 +560,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/6"
+jsonpath "$.['@id']" endsWith "/revision/6"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -575,9 +572,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/7"
+jsonpath "$.['@id']" endsWith "/revision/7"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -587,9 +584,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/8"
+jsonpath "$.['@id']" endsWith "/revision/8"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -599,9 +596,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/9"
+jsonpath "$.['@id']" endsWith "/revision/9"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -611,9 +608,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/10"
+jsonpath "$.['@id']" endsWith "/revision/10"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -623,9 +620,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/11"
+jsonpath "$.['@id']" endsWith "/revision/11"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -635,9 +632,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/12"
+jsonpath "$.['@id']" endsWith "/revision/12"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -647,9 +644,9 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/13"
+jsonpath "$.['@id']" endsWith "/revision/13"
 
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -659,10 +656,10 @@ Authorization: {{auth_token}}
 
 HTTP 201
 [Asserts]
-jsonpath "$.['@id']" endsWith "/revisions/14"
+jsonpath "$.['@id']" endsWith "/revision/14"
 
 #Create revision with query params only
-POST {{scheme}}://{{host_name}}/data/{{series}}/releases/release-1/revisions
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
