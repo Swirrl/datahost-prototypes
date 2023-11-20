@@ -39,13 +39,17 @@
 
 (binding [pp/*print-right-margin* 200]
   (let [results (main *command-line-args*)]
-    (doseq [result results]
+    (doseq [{exit-status :exit :as result} results]
       (do
-        (println "🚀 running: " (:script result))
-        (pp/pprint (dissoc result :err :script))
-        (println "--- stderr ---")
-        (println (:err result))))
+        (print "🚀 script:" (:script result))
+        (if (zero? exit-status)
+          (println " ✅")
+          (do
+            (println "\n")
+            (pp/pprint (dissoc result :err :script))
+            (println "--- stderr ---")
+            (println (:err result))))))
     (when-not (success? results)
-      (println "🙅‍♂️ there were errors")
+      (println "\n🙅‍♂️ there were errors\n")
       (System/exit 2))
-    (println " 👍 all good")))
+    (println " 👍 all good\n")))
