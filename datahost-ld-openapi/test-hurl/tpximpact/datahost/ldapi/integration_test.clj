@@ -24,5 +24,6 @@
                      :auth_token "ignore"}
           result (hurl/run-directory "hurl-scripts"
                                      {:variables variables
-                                      :report-junit "test-results/hurl-regression-tests.xml"})]
+                                      :report-junit "test-results/hurl-regression-tests.xml"
+                                      :report-html "test-report"})]
       (is (hurl/success? result)))))

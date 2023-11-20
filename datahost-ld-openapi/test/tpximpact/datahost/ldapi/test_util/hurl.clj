@@ -101,7 +101,8 @@
         paths (fs/match dir-path "regex:(issue-.*|pr-.*|int-.*)"
                         {:max-depth 1 :recursive false})]
     (doall
-     (for [p ^Path paths]
+     (for [p ^Path paths
+           :when (not (clojure.string/ends-with? (str p) ".disabled"))]
        (let [options (-> (select-keys opts [:variables])
                          (update :variables instantiate-variables)
                          (assoc :file-root (str file-root)))]
