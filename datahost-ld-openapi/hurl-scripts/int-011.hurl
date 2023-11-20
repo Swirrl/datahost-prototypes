@@ -277,7 +277,7 @@ HTTP 302
 [Captures]
 path: header "Link"
 [Asserts]
-variable "path" matches /<http:\/\/(.+):\d+(\S+)>; rel="describedBy"; type="application\/csvm\+json"/
+variable "path" matches /<http:\/\/(.+)(:\d+){0,1}(\S+)>; rel="describedBy"; type="application\/csvm\+json"/
 header "Location" == "{{revision2_url}}"
 
 
