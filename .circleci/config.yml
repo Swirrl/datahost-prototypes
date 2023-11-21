@@ -278,6 +278,7 @@ workflows:
               only: main
           requires:
             - unit-test-ldapi
+            - integration-test-ldapi
       - deploy-service:
           service: graphql
           env: dev
@@ -289,6 +290,7 @@ workflows:
             branches:
               only: main
       - deploy-service:
+          service: ldapi
           context:
             - swirrl-ons-datahost-gcloud
           requires:
@@ -296,7 +298,6 @@ workflows:
             - ci-live-service-test
           name: deploy-service-ldapi-dev
           env: dev
-          service: ldapi
           filters:
             branches:
               only: main
@@ -305,7 +306,6 @@ workflows:
           project_dir: datahost-ld-openapi
           requires:
             - build-docker-image-ldapi
-            - integration-test-ldapi
           filters:
             branches:
               only: main
@@ -314,7 +314,6 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-            - build-docker-image-ldapi
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
