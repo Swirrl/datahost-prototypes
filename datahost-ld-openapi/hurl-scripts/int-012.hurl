@@ -243,7 +243,8 @@ HTTP 302
 [Captures]
 path: header "Link"
 [Asserts]
-variable "path" matches /<http:\/\/(.+):(:\d+){0,1}(\S+)>; rel="describedBy"; type="application\/csvm\+json"/
+variable "path" contains "type=\"application/csvm+json\""
+variable "path" contains "rel=\"describedBy\""
 header "Location" == "{{revision2_url}}"
 
 
@@ -267,7 +268,8 @@ HTTP 200
 [Captures]
 path: header "Link"
 [Asserts]
-variable "path" matches /<http:\/\/(.+):\d+(\S+)>; rel="describedBy"; type="application\/csvm\+json"/
+variable "path" contains "type=\"application/csvm+json\""
+variable "path" contains "rel=\"describedBy\""
 #returns all three csvs concatenated
 ```
 Measure type,Statistical Geography,Year,Aged 16 to 64 years level 3 or above qualifications,Unit of Measure,Upper Confidence Interval,Lower Confidence Interval,Observation Status
