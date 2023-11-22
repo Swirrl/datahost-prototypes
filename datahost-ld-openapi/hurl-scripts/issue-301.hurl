@@ -49,10 +49,9 @@ revision1_url: header "Location"
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revision/1
 Accept: applicatin/json
 
-# this would fail on a "fresh" revision
 HTTP 200
-#[Asserts]
-#jsonpath "$.['dh:hasChange']" count == 0
+[Asserts]
+jsonpath "$.['dh:hasChange']" not exists
 
 
 POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
@@ -144,4 +143,4 @@ Accept: application/json
 
 HTTP 200
 [Asserts]
-jsonpath "$.*" count == 6
+jsonpath "$.['dh:hasChange']" not exists
