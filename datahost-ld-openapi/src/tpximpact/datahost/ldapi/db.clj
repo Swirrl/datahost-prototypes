@@ -441,10 +441,14 @@
 
 (defn delete-series-releases-schemas-query [series-uri]
   {:prefixes (compact/as-flint-prefixes)
-   :delete [['?schema '?p '?o]
-            ['?release :dh/hasSchema '?schema]]
+   :delete [['?col '?pColumnData '?oColumnData]
+            ['?schema '?p '?o]
+            ['?release :dh/hasSchema '?schema]
+            ['?schema :dh/columns '?col]]
    :where [['?release :dcat/inSeries series-uri]
            ['?release :dh/hasSchema '?schema]
+           ['?schema :dh/columns '?col]
+           ['?col '?pColumnData '?oColumnData]
            ['?schema '?p '?o]]})
 
 (defn delete-series-releases-query [series-uri]
