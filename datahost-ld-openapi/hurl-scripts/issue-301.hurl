@@ -144,4 +144,4 @@ Accept: application/json
 
 HTTP 200
 [Asserts]
-jsonpath "$.['dh:hasChange']" count == 0
+jsonpath "$.*" count == 6

@@ -144,9 +144,8 @@
                               [revision-uri :dcterms/license '?license]
                               [revision-uri :dh/reasonForChange '?reasonForChange])
              :where (conj bgps
-                          [:optional [[revision-uri :dh/hasChange '?change]]]
+                          [:optional [[revision-uri :dh/hasChange '?change] ['?change :dh/revisionSnapshotCSV '?snapshot]]]
                           [:optional [[revision-uri :dcterms/description '?description]]]
-                          [:optional [['?change :dh/revisionSnapshotCSV '?snapshot]]]
                           [:optional [[revision-uri :dh/publicationDate '?publicationDate]]]
                           [:optional [[revision-uri :dcterms/license '?license]]]
                           [:optional [[revision-uri :dh/reasonForChange '?reasonForChange]]])})]
@@ -208,7 +207,8 @@
 
 (defn get-change
   "Returns a single Revision Change in triple form"
-  [triplestore change-uri]
+  [triplestore change-uri] 
+  
   (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
                                    [change-uri :dcterms/description '?description]
                                    [change-uri :dcterms/format '?format]
