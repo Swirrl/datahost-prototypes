@@ -152,23 +152,22 @@ The supplied document should conform to the Datahost TableSchema."
                            [:message :string]]}}
    :tags ["Publisher API"]})
 
-(defmacro ->pack
-  "(->pack a b c) -> {:a a :b b :c c}"
-  [& symbs]
-  (assert (every? symbol? symbs))
-  (into {} (map (fn [sym] [(keyword (name sym)) sym]) symbs)))
+;; (defmacro ->pack
+;;   "(->pack a b c) -> {:a a :b b :c c}"
+;;   [& symbs]
+;;   (assert (every? symbol? symbs))
+;;   (into {} (map (fn [sym] [(keyword (name sym)) sym]) symbs)))
 
-(defn delta-tool-route-config [triplestore file-store system-uris]
-  {:handler (partial handlers.delta/post-delta-files (->pack triplestore file-store system-uris))
+(defn post-release-delta-config [{:keys [system-uris triplestore] :as sys}]
+  {:handler (partial handlers.delta/post-delta-files sys)
    :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :release-uri]
-                [(partial middleware/resource-exist? system-uris :dh/Release) :release-exists?]]
-   :parameters {:multipart [:map
-                            [:csv ring.malli/temp-file-part]]}
-   :openapi {:security [{"basic" []}]}
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Release) :release-exists?]]
+   :parameters {}
+   :openapi {:security [{"basic" []}]
+             :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
    :responses {200 {:description "Differences between input files calculated"
-                    :content {"text/csv" any?}
-                    ;; headers is not currently supported
-                    :headers {"Location" string?}}
+                    ;;  application/x-datahost-tx-csv
+                    :content {"text/csv" any?}}
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]

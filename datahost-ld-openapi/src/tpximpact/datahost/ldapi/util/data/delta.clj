@@ -69,15 +69,13 @@
   where each correction is turned into a pair of append+retraction
   rows. The two rows will be linked via the value in \"datahost.row.id/ref\" column
   of the append row."
-  [diff {{measure-l :left measure-r :right} :measure}]
+  [diff {measure-l :left measure-r :right :as measure}]
   (let [correction? (fn [row] (= tag=modify (get row "dh/op")))
         corrections (tc/map-rows (tc/select-rows diff correction?)
                                  (fn [row] (assoc row "datahost.row.id/ref" (get row "datahost.row/id"))))]
     (tc/union (tc/map-rows corrections (fn [row]
                                          (assoc row "dh/op" 2 "datahost.row.id/ref" nil)))
-              (tc/map-rows corrections
-                           (fn [row]
-                             (assoc row "dh/op" 1 measure-l (get row measure-r)))))))
+              (tc/map-rows corrections (fn [row] (assoc row "dh/op" 1 measure-l (get row measure-r)))))))
 
 (defn delta-dataset
   "Returns a dataset with extra columns: TODO(finalise names)

@@ -2,18 +2,25 @@
   "Contains functionality for diffing datasets.
 
   TODO: proper explanation."
-  (:require [clojure.string :as str]
+  (:require [malli.error :as m.e]
+            [malli.core :as m]
+            [clojure.string :as str]
             [ring.util.io :as ring-io]
             [ring.util.response :as util.response]
             [reitit.ring.malli :as ring.malli]
             [tablecloth.api :as tc]
             [tpximpact.datahost.ldapi.db :as db]
             [tpximpact.datahost.ldapi.store :as store]
+            [tpximpact.datahost.ldapi.handlers :refer [->byte-array-input-stream]]
             [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
             [tpximpact.datahost.ldapi.util.data.compilation :as data.compilation]
-            [tpximpact.datahost.ldapi.util.data.delta :as data.delta]
-)
-  )
+            [tpximpact.datahost.ldapi.util.data.internal :as data.internal]
+            [tpximpact.datahost.ldapi.util.data.delta :as data.delta]))
+
+(defn write-dataset-to-outputstream [tc-dataset]
+  (ring-io/piped-input-stream
+   (fn [out-stream]
+     (tc/write! tc-dataset out-stream {:file-type :csv}))))
 
 (defn error-no-revisions
   []
@@ -23,33 +30,35 @@
 
 (defmulti -post-delta-files (fn [sys {{:strs [accept]} :headers}] accept))
 
-(defmethod -post-delta-files "application/x-datahost-tx-csv" [sys request]
-  ;; (let [{:keys [triplestore change-store]} sys
-  ;;       {{{:keys [csv]} :multipart} :parameters
-  ;;        {release-uri :dh/Release} :datahost.request/uris} request
+(defmethod -post-delta-files "text/csv";; "application/x-datahost-tx-csv"
+  [sys request]
+  (let [{:keys [triplestore change-store]} sys
+        {{{:keys [csv]} :multipart} :parameters
+         {release-uri :dh/Release} :datahost.request/uris} request
 
-  ;;       schema (db/get-release-schema triplestore release-uri)
+        schema (db/get-release-schema triplestore release-uri)
 
-  ;;       change-infos (db/get-changes-info triplestore release-uri)
-  ;;       _ (when (empty? change-infos)
-  ;;           (throw (ex-info "This release has no revisions"
-  ;;                           {:type :tpximpact.datahost.ldapi.errors/exception})))
+        change-infos (db/get-changes-info triplestore release-uri)
+        _ (when (empty? change-infos)
+            (throw (ex-info "This release has no revisions"
+                            {:type :tpximpact.datahost.ldapi.errors/exception})))
         
-  ;;       {snapshot-key :snapshotKey rev-uri :rev} (last change-infos)
-  ;;       _ (when (nil? snapshot-key)
-  ;;           (throw (ex-info (format "Missing :snapshotKey for '%s'" rev-uri)
-  ;;                           {:type :tpximpact.datahost.ldapi.errors/exception})))
+        {snapshot-key :snapshotKey rev-uri :rev} (last change-infos)
+        _ (when (nil? snapshot-key)
+            (throw (ex-info (format "Missing :snapshotKey for '%s'" rev-uri)
+                            {:type :tpximpact.datahost.ldapi.errors/exception})))
         
-  ;;       row-schema (data.validation/make-row-schema schema)
-  ;;       opts {:store change-store :file-type :csv :enforce-schema row-schema}
-  ;;       ds-release (data.validation/as-dataset snapshot-key opts)
-  ;;       ds-input (data.validation/as-dataset (:tempfile csv) opts)
-        
-  ;;       ctx (data.compilation/make-schema-context row-schema)
-  ;;       diff-results (derive-deltas ds-release ds-input ctx)]
-  ;;   {:status 200
-  ;;    :body (write-dataset-to-outputstream diff-results)})
-  )
+        row-schema (data.validation/make-row-schema schema)
+        opts {:store change-store :file-type :csv :enforce-schema row-schema}
+        _ (assert snapshot-key)
+        ds-release (data.validation/as-dataset snapshot-key opts)
+        ds-input (data.validation/as-dataset (->byte-array-input-stream (:body request)) opts)
+
+        ;; TODO: get rid of the the 'internal' reference
+        ctx (data.internal/make-schema-context row-schema)
+        diff-results (data.delta/delta-dataset ds-release ds-input ctx)]
+    {:status 200
+     :body (write-dataset-to-outputstream diff-results)}))
 
 (defn post-delta-files [sys request]    ;TODO: rename this fn
   ;; TODO: add basic validation for incoming dataset, (e.g.

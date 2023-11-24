@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.util.data.internal
   "Internal namespace: Do not use outside of *.ldapi.util.data.*"
+  (:refer-clojure :exclude [hash])
   (:require
    [malli.core :as m]
    [tablecloth.api :as tc]

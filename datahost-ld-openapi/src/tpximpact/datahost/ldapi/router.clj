@@ -334,7 +334,11 @@ specifications for each route.")
      ["/:series-slug/release"
       ["/:release-slug"
        {:get (routes.rel/get-release-route-config triplestore change-store system-uris)
-        :put (routes.rel/put-release-route-config clock triplestore system-uris)}]
+        :put (routes.rel/put-release-route-config clock triplestore system-uris)
+        :post (routes.rel/post-release-delta-config {:triplestore triplestore
+                                                     :change-store change-store
+                                                     :clock clock
+                                                     :system-uris system-uris})}]
 
       ["/:release-slug/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)

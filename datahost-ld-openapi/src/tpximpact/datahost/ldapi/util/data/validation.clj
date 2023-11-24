@@ -112,7 +112,6 @@
               (seq children))))]
      [:fn {:error/message "Properties of children schemas are invalid"}
       (fn props-pred [s]
-        ;;(tap> {:props-pred s})
         (validate-seq (map m/properties (m/children s))))]]))
 
 (def ^:private row-schema-valid?
@@ -206,7 +205,7 @@
   column-names. If column names were not specified, uses all columns
   from the JSON schema.
 
-  The input json is the one "
+  The input json should conform to `routes-shared/LdSchemaInput`"
   ([json]
    (make-row-schema-from-json json nil))
   ([json column-names]

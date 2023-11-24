@@ -303,10 +303,10 @@
              [resource-uri :dcterms/description '?description]
              [resource-uri :dcterms/modified '?modified]]}))
 
-(defn- submit-update [triplestore update-query]
-  (let [qs (f/format-update update-query :pretty? true)]
-    (with-open [conn (repo/->connection triplestore)]
-      (pr/update! conn qs))))
+;; (defn- submit-update [triplestore update-query]
+;;   (let [qs (f/format-update update-query :pretty? true)]
+;;     (with-open [conn (repo/->connection triplestore)]
+;;       (pr/update! conn qs))))
 
 (defn- submit-updates [triplestore update-queries]
   (let [qs (f/format-updates update-queries :pretty? true)]
