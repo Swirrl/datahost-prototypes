@@ -61,7 +61,7 @@
         in-schema (gensym "in-schema-")]
     `(fn extractor-fn# [~in-schema]
        (let [datatype# (~datatype ~in-schema)
-             schema# (get {"int" :innt
+             schema# (get {"int" :int
                            "integer" :int
                            "string" :string
                            "double" :double} datatype# datatype#)]

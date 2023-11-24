@@ -10,7 +10,7 @@
 
 (def hash-column-name
   "Name of the column holding the hash of the row (excluding the measurement itself.)"
-  "datahost.row/hash")
+  "datahost.row/coords")
 
 (def op-column-name
   "Operation: APPEND|RETRACT|CORRECT"
@@ -33,20 +33,28 @@
 
 (def ^:private hash-fn (LongHashFunction/xx128low))
 
+(defn make-hasher-input
+  "Returns a StringBuilder"
+  [^StringBuilder sb columns]
+  (.append sb "|")
+  (loop [columns columns]
+    (if-not (seq columns)
+      sb
+      (do
+        (.append sb (first columns))
+        (.append sb "|")
+        (recur (next columns))))))
+
+(defn hash [^StringBuilder sb]
+  (.hashChars ^LongHashFunction hash-fn sb))
+
 (defn make-columnwise-hasher
   "Returns a function seq -> long"
   []
   (fn hasher* [& columns]
     (let [^StringBuilder sb (StringBuilder.)
           h ^LongHashFunction hash-fn]
-      (.append sb "|")
-      (loop [columns columns]
-        (if-not (seq columns)
-          (.hashChars h sb)
-          (do
-            (.append sb (first columns))
-            (.append sb "|")
-            (recur (next columns))))))))
+      (.hashChars h (make-hasher-input sb columns)))))
 
 (def ^:private measure-type-uri (:measure uris/column-types))
 
