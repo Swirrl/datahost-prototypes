@@ -67,9 +67,9 @@
   where each correction is turned into a pair of append+retraction
   rows. The two rows will be linked via the value in \"datahost.row.id/ref\" column
   of the append row."
-  [diff {measure-l :left measure-r :right}]
+  [joined-ds {measure-l :left measure-r :right}]
   (let [correction? (fn [row] (= tag=modify (get row "dh/op")))
-        corrections (tc/map-rows (tc/select-rows diff correction?)
+        corrections (tc/map-rows (tc/select-rows joined-ds correction?)
                                  (fn [row] (assoc row "datahost.row.id/ref" (get row "datahost.row/id"))))]
     (tc/union (tc/map-rows corrections (fn [row]
                                          (assoc row "dh/op" 2 "datahost.row.id/ref" nil)))
