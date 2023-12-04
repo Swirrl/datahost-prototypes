@@ -51,7 +51,8 @@
                                             "datahost.row/coords"))))
 
 (defn- augment-append-row
-  "Copy values from the \"right\" dataset into the \"left\" one."
+  "Given a row of a joined dataset, copy values from the \"right\"
+  dataset into the \"left\" one."
   [new-ds-name col-names row]
   (let [append? (fn [row] (= 1 (get row "dh/op")))]
     (if-not (append? row)
