@@ -1,4 +1,4 @@
-PUT http://localhost:3000/data/{{series}}
+PUT http://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
 {
@@ -8,7 +8,7 @@ Content-Type: application/json
 
 HTTP 201
 
-PUT http://localhost:3000/data/{{series}}/release/rel-1
+PUT http://{{host_name}}/data/{{series}}/release/rel-1
 Accept: application/json
 Content-Type: application/json
 {
@@ -18,12 +18,12 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/release/rel-1/schema
+POST http://{{host_name}}/data/{{series}}/release/rel-1/schema
 Content-Type: application/json
 {
 	"@type": "dh:TableSchema",
 	"appropriate-csvw:modeling-of-dialect": "UTF-8,RFC4180",
-	"dh:appliesToRelease": "http://localhost:3000/data/test-032/releases/release-1",
+	"dh:appliesToRelease": "http://{{host_name}}/data/test-032/releases/release-1",
 	"dcterms:title": "Fun schema",
 	"dh:columns": [
 		{
@@ -43,7 +43,7 @@ Content-Type: application/json
 
 HTTP 201
 
-POST http://localhost:3000/data/{{series}}/release/rel-1/revisions
+POST http://{{host_name}}/data/{{series}}/release/rel-1/revisions
 Accept: application/json
 Content-Type: application/json
 {
@@ -55,7 +55,7 @@ HTTP 201
 [Captures]
 revision1_url: header "Location"
 
-POST http://localhost:3000{{revision1_url}}/appends
+POST http://{{host_name}}{{revision1_url}}/appends
 Content-Type: text/csv
 [QueryStringParams]
 title: A schema
@@ -72,7 +72,7 @@ HTTP 201
 
 # Requesting delta for 1
 
-POST http://localhost:3000/data/{{series}}/release/rel-1
+POST http://{{host_name}}/data/{{series}}/release/rel-1
 Content-Type: text/csv
 Accept: text/csv
 #Accept: application/x-datahost-tx-csv
