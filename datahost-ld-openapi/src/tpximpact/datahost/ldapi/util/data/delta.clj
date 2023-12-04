@@ -1,9 +1,6 @@
 (ns tpximpact.datahost.ldapi.util.data.delta
   (:require
-   [tpximpact.datahost.ldapi.util.data.internal :as data.internal]
-   [clojure.string :as str]
    [tablecloth.api :as tc]
-   [tpximpact.datahost.ldapi.util.data.compilation :as data.compilation]
    [tpximpact.datahost.ldapi.util.data.internal :as data.internal]
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]))
 
@@ -69,7 +66,7 @@
   where each correction is turned into a pair of append+retraction
   rows. The two rows will be linked via the value in \"datahost.row.id/ref\" column
   of the append row."
-  [diff {measure-l :left measure-r :right :as measure}]
+  [diff {measure-l :left measure-r :right}]
   (let [correction? (fn [row] (= tag=modify (get row "dh/op")))
         corrections (tc/map-rows (tc/select-rows diff correction?)
                                  (fn [row] (assoc row "datahost.row.id/ref" (get row "datahost.row/id"))))]
@@ -87,8 +84,10 @@
   Assumptions:
 
   - rows of both datasets conform to row-schema"
-  [base-ds new-ds {:keys [row-schema hashable-columns] measure-column-name :measure-column :as ctx}]
+  [base-ds new-ds {:keys [row-schema]}]
   (let [new-ds-name (tc/dataset-name new-ds)
+        {:keys [hashable-columns]
+         measure-column-name :measure-column :as ctx} (data.internal/make-schema-context row-schema)
         {{right-coord-column-names :right} :coords
          {right-measure-column-name :right} :measure
          :as col-names} (make-column-names new-ds-name

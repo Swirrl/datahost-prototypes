@@ -53,10 +53,7 @@
         _ (assert snapshot-key)
         ds-release (data.validation/as-dataset snapshot-key opts)
         ds-input (data.validation/as-dataset (->byte-array-input-stream (:body request)) opts)
-
-        ;; TODO: get rid of the the 'internal' reference
-        ctx (data.internal/make-schema-context row-schema)
-        diff-results (data.delta/delta-dataset ds-release ds-input ctx)]
+        diff-results (data.delta/delta-dataset ds-release ds-input {:row-schema row-schema})]
     {:status 200
      :body (write-dataset-to-outputstream diff-results)}))
 
