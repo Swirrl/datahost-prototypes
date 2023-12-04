@@ -117,4 +117,4 @@
           (let [ex (try (data.validation/as-dataset csv {:enforce-schema row-schema})
                         (catch clojure.lang.ExceptionInfo ex
                           ex))]
-            (is (= ["Double"] (:error-columns (ex-data ex))))))))))
+            (is (= {"Double" ["100"]} (:error-samples (ex-data ex))))))))))
