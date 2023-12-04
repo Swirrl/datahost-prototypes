@@ -18,7 +18,6 @@
   "dh/op")
 (def parent-column-name "dh/parent")
 (def tx-column-name "dh/tx")
-(def id-column-name hash-column-name)   ;TODO: remove?
 
 (defn r-joinable-name
   "Returns (right) column name suitable for use in joins.

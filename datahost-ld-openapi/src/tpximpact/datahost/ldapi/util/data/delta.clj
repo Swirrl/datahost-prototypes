@@ -16,7 +16,7 @@
 (defn- row-changed? [row] (some? (get row data.internal/op-column-name)))
 
 (defn- add-tx-columns
-  [{:keys [row-schema hashable-columns] measure-column-name :measure-column :as _ctx}
+  [{:keys [hashable-columns] measure-column-name :measure-column :as _ctx}
    row]
   (let [sb (data.internal/make-hasher-input (StringBuilder.) (map #(get row %) hashable-columns))
         coords (data.internal/hash sb)
@@ -106,12 +106,11 @@
                                    tag-change)
                    (tc/select-rows row-changed?))
         ;; we turn correctionsn into pairs of retraction+append rows
-        correction? (fn [row] (= tag=modify (get row "dh/op")))
         corrections (corrections->retractions+appends joined (:measure col-names))
-
-        diff (tc/map-rows (tc/select-rows joined (complement correction?))
-                          (partial augment-append-row new-ds-name col-names))]
-    (tc/select-columns (tc/concat diff corrections)
+        correction? (fn [row] (= tag=modify (get row "dh/op")))
+        appends+retractions (tc/map-rows (tc/select-rows joined (complement correction?))
+                                         (partial augment-append-row new-ds-name col-names))]
+    (tc/select-columns (tc/concat appends+retractions corrections)
                        (conj (vec hashable-columns)
                              measure-column-name
                              "dh/op"
