@@ -368,11 +368,7 @@ specifications for each route.")
         {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]
-
-    ;; ["/delta"
-    ;;  {:post (handlers.delta/delta-tool-route-config)}]
-    ]
+        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
