@@ -9,6 +9,7 @@
    [tech.v3.dataset :as ds]
    [tpximpact.datahost.uris :as uris]
    [tpximpact.datahost.ldapi.compact :as compact]
+   [tpximpact.datahost.ldapi.util.data.internal :as data.internal]
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.common :as s.common])
@@ -445,5 +446,16 @@
    (when-not (= (tc/row-count (tc/unique-by ds hash-col-name))
                 (tc/row-count ds))
      (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
-                     (cond-> {:hash-column-name hash-col-name}
+                     (cond-> {:type :dataset.validation/error
+                              :hash-column-name hash-col-name
+                              :dataset-name (tc/dataset-name ds)}
                        ex-data-payload (merge ex-data-payload)))))))
+
+(defn validate-row-coords-uniqueness
+  "Throws when number of dataset's unique coords != number of rows.
+
+  'coords' refers to the combination of attribute/dimension values of
+  a row. "
+  [ds row-schema]
+  (validate-row-uniqueness (data.internal/add-coords-column ds row-schema)
+                           data.internal/hash-column-name))

@@ -93,7 +93,7 @@
   (first (sort (sequence tuple-schema-measure-names-xform
                          (m/children row-schema)))))
 
-(defn add-id-column
+(defn add-coords-column
   "Adds a column column containing unique id of the measurment
   (based on component names from row-schema)."
   [dataset row-schema]
@@ -108,11 +108,11 @@
                         hasher)
         (vary-meta assoc ::hash-column hash-column-name))))
 
-(defn ensure-id-column
+(defn ensure-coords-column
   [dataset row-schema]
   (if (tc/has-column? dataset hash-column-name)
     dataset
-    (add-id-column dataset row-schema)))
+    (add-coords-column dataset row-schema)))
 
 ;;; ---- ROW SCHEMA UTILS
 

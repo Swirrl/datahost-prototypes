@@ -70,13 +70,13 @@
   (assert (has-hashed-column? base-ds))
   (let [{:keys [row-schema]} ctx]
     (-> base-ds
-        (tc/concat (internal/add-id-column change-ds row-schema))
+        (tc/concat (internal/add-coords-column change-ds row-schema))
         ;; it's an 'append', so we remove already existing entries
         (tc/unique-by [hash-column-name] {:strategy :first}))))
 
 (defmethod -apply-change :dh/ChangeKindRetract [{:keys [row-schema] :as _ctx} base-ds change-ds]
   (assert (has-hashed-column? base-ds))
-  (let [change-ds+id (internal/add-id-column change-ds row-schema)]
+  (let [change-ds+id (internal/add-coords-column change-ds row-schema)]
     (tc/difference base-ds change-ds+id)))
 
 (defmethod -apply-change :dh/ChangeKindCorrect [ctx base-ds change-ds]
@@ -86,7 +86,7 @@
         right-col-name (if (= "_unnamed" change-ds-name)
                          (str "right." measure-column)
                          (str change-ds-name "." measure-column))
-        change-ds+id (internal/add-id-column change-ds row-schema)
+        change-ds+id (internal/add-coords-column change-ds row-schema)
         corrections-ds (-> (tc/inner-join change-ds+id base-ds [hash-column-name])
                            (tc/select-columns (-> (tc/column-names base-ds)
                                                   set
@@ -113,7 +113,7 @@
                       :row-count (tc/row-count dataset) :kind kind}
                 :old {:dataset (tc/dataset-name ds)
                       :row-count (tc/row-count ds)}})
-    (apply-change ctx (internal/ensure-id-column ds row-schema) dataset)))
+    (apply-change ctx (internal/ensure-coords-column ds row-schema) dataset)))
 
 (defn- validate-compile-ds-opts
   [opts]
@@ -140,7 +140,7 @@
             (throw (ex-info (format "Base dataset already contains '%s' column"
                                     hash-column-name)
                             {:columns (vec (tc/column-names base-ds))})))
-        base-ds (internal/ensure-id-column base-ds (:row-schema opts))]
+        base-ds (internal/ensure-coords-column base-ds (:row-schema opts))]
     ;; let's ensure data issues in dev are immediately revealed
     (data.validation/validate-row-uniqueness base-ds hash-column-name {:opts opts})
     (-> (reduce (partial compile-reducer ds-opts)

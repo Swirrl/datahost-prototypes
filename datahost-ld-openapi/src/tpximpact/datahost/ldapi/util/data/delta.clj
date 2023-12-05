@@ -97,8 +97,9 @@
 
         [base-ds new-ds] (let [add-cols (partial add-tx-columns ctx)]
                            [(tc/map-rows base-ds add-cols)
-                            (tc/map-rows new-ds add-cols)])
-
+                            (let [ds (tc/map-rows new-ds add-cols)]
+                              (data.validation/validate-row-coords-uniqueness ds row-schema)
+                              ds)])
         ;; we do a full join and choose only appeds/retractions/corrections
         joined (-> (tc/full-join base-ds new-ds data.internal/hash-column-name
                                  {:operation-space :int64})

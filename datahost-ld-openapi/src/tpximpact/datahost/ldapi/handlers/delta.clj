@@ -57,7 +57,5 @@
      :body (write-dataset-to-outputstream diff-results)}))
 
 (defn post-delta-files [sys request]
-  ;; TODO: add basic validation for incoming dataset, (e.g.
-  ;; `data.compilation/validate-row-uniqueness`) after ns reorg
   (-post-csv sys request))
 
