@@ -351,7 +351,11 @@ specifications for each route.")
       ["/:release-slug/revision"
        ["/:revision-id"
         {:name ::revision
-         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
+         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)
+         :post (routes.rev/post-revision-delta-config {:triplestore triplestore
+                                                       :change-store change-store
+                                                       :clock clock
+                                                       :system-uris system-uris})}]
 
        ["/:revision-id/commit/:commit-id"
         {:name ::commit

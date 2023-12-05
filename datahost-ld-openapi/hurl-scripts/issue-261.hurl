@@ -70,13 +70,12 @@ max,33
 
 HTTP 201
 
-# Requesting delta for 1
+# Requesting delta for release 1
 
 POST http://{{host_name}}/data/{{series}}/release/rel-1
 Content-Type: text/csv
 Accept: text/csv
 #Accept: application/x-datahost-tx-csv
-#If-Match: <REVISION_ID>
 ```
 name,age,comment
 bob,25,   ::no change
@@ -95,3 +94,21 @@ HTTP 200
 #cindy,33,DELETE,<ID>,<TX>,
 #will,50,APPEND,<ID>,<TX>,
 #```
+
+
+# now let's verify the REVISION endpoint
+
+POST http://{{host_name}}{{revision1_url}}
+Content-Type: text/csv
+Accept: text/csv
+#Accept: application/x-datahost-tx-csv
+```
+name,age,comment
+bob,25,   ::no change
+max,44,   ::correction
+will,50,  ::append
+```
+
+HTTP 200
+
+

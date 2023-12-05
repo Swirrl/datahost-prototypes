@@ -4,6 +4,7 @@
    [reitit.coercion :as rc]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
@@ -159,3 +160,20 @@ that make up that revision.
                     {"text/csv" any?}}
                404 {:body routes-shared/NotFoundErrorBody}}
    :tags ["Consumer API"]})
+
+(defn post-revision-delta-config [{:keys [system-uris triplestore] :as sys}]
+  {:handler (partial handlers.delta/post-delta-files sys)
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision})
+                 :revision-uri]
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Revision)
+                 :revision-exists?]]
+   :parameters {}
+   :openapi {:security [{"basic" []}]
+             :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
+   :responses {200 {:description "Differences between latest revision and supplied dataset."
+                    ;;  application/x-datahost-tx-csv
+                    :content {"text/csv" any?}}
+               500 {:description "Internal server error"
+                    :body [:map
+                           [:status [:enum "error"]]
+                           [:message string?]]}}})

@@ -152,12 +152,6 @@ The supplied document should conform to the Datahost TableSchema."
                            [:message :string]]}}
    :tags ["Publisher API"]})
 
-;; (defmacro ->pack
-;;   "(->pack a b c) -> {:a a :b b :c c}"
-;;   [& symbs]
-;;   (assert (every? symbol? symbs))
-;;   (into {} (map (fn [sym] [(keyword (name sym)) sym]) symbs)))
-
 (defn post-release-delta-config [{:keys [system-uris triplestore] :as sys}]
   {:handler (partial handlers.delta/post-delta-files sys)
    :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :release-uri]
@@ -165,7 +159,7 @@ The supplied document should conform to the Datahost TableSchema."
    :parameters {}
    :openapi {:security [{"basic" []}]
              :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
-   :responses {200 {:description "Differences between input files calculated"
+   :responses {200 {:description "Differences between latest release and supplied dataset."
                     ;;  application/x-datahost-tx-csv
                     :content {"text/csv" any?}}
                500 {:description "Internal server error"
