@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>hurl-scripts/issue-282.hurl</title>
+    <style>
+        body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h4:target {
+    color: #ff0288;
+}
+
+table {
+    display: block;
+    font-size: 15px;
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+th, td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #ddd;
+}
+
+th {
+    padding: 6px 8px;
+    text-align: left;
+    background: #f5f5f5;
+}
+
+td {
+    padding: 6px 8px;
+    vertical-align: text-top;
+}
+
+.name {
+    width: 120px;
+    font-weight: bold;
+    background: #fbfafd;
+}
+
+.value {
+    width: 800px;
+    word-break: break-all
+}
+
+details {
+    margin-bottom: 20px;
+}
+
+summary {
+    font-size: 1.3rem;
+    line-height: 1.4;
+    font-weight: bold;
+}
+        .report-nav {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.report-nav-links {
+    display: flex;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.report-nav a {
+    color: royalblue;
+    margin-right: 20px;
+}
+
+.report-nav a[aria-selected="true"] {
+    color: #ff0288;
+}
+
+.report-nav-summary > div {
+    display: flex;
+}
+
+.report-nav-summary .item-name {
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-left: red 4px solid;
+}
+
+.error-desc {
+    background: #f5f5f5;
+}
+
+.error-desc pre {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin: 0.75rem;
+    padding: 0.8rem;
+    overflow-x: auto;
+}
+
+.error-desc pre code {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+
+.success, .success a {
+    color: green;
+}
+
+.failure, .failure a {
+    color: red;
+}
+    </style>
+<body>
+<div>
+    <div class="container">
+        <div class="report-nav">
+    <div class="report-nav-links">
+        <div><a href="../index.html">Report</a></div>
+        <div><a aria-selected="false" href="4e29a5de-98e8-430e-bc79-2594ef21ea57-timeline.html">Timeline</a></div>
+        <div><a aria-selected="true" href="4e29a5de-98e8-430e-bc79-2594ef21ea57-run.html">Run</a></div>
+        <div><a aria-selected="false" href="4e29a5de-98e8-430e-bc79-2594ef21ea57-source.html">Source</a></div>
+    </div>
+    <div class="report-nav-summary">
+        <div><div class="item-name">File:</div><div><a href="4e29a5de-98e8-430e-bc79-2594ef21ea57-source.html">hurl-scripts/issue-282.hurl</a></div></div>
+        <div><div class="item-name">Status:</div><div><span class="failure">Failure</span></div></div>
+        <div><div class="item-name">Duration:</div><div>10 ms</div></div>
+        <div><div class="item-name">Errors:</div><div>1</div></div>
+        <div></div>
+    </div>
+    <div class="errors"><div class="error"><div class="error-desc"><pre><code>Assert status code
+  --> <a href="4e29a5de-98e8-430e-bc79-2594ef21ea57-source.html#l9">hurl-scripts/issue-282.hurl:9:6</a>
+   |
+ 9 | HTTP 201
+   |      ^^^ actual value is <200>
+   |</code></pre></div></div></div>
+</div>
+
+        <details open><summary>Entry 1</summary><h4 id="e1:c1">Call 1</h3><table><thead><tr><th colspan="2">General</tr></th></thead><tbody><tr><td class="name">Request URL</td><td class="value"><a href="http://localhost:3000/data/piece123123">http://localhost:3000/data/piece123123</a></td></tr><tr><td class="name">Request Method</td><td class="value">PUT</td></tr><tr><td class="name">Version</td><td class="value">HTTP/1.1</td></tr><tr><td class="name">Status code</td><td class="value">200</td></tr><tr><td class="name">Source</td><td class="value"><a href="4e29a5de-98e8-430e-bc79-2594ef21ea57-source.html#l4">hurl-scripts/issue-282.hurl:4</a></td></tr></tbody></table><table><thead><tr><th colspan="2">Request Headers</tr></th></thead><tbody><tr><td class="name">Accept</td><td class="value">*/*</td></tr><tr><td class="name">Content-Length</td><td class="value">108</td></tr><tr><td class="name">Content-Type</td><td class="value">application/json</td></tr><tr><td class="name">Host</td><td class="value">localhost:3000</td></tr><tr><td class="name">User-Agent</td><td class="value">hurl/4.1.0</td></tr></tbody></table><table><thead><tr><th colspan="2">Response Headers</tr></th></thead><tbody><tr><td class="name">Content-Type</td><td class="value">application/ld+json</td></tr><tr><td class="name">Date</td><td class="value">Mon, 13 Nov 2023 12:20:21 GMT</td></tr><tr><td class="name">Server</td><td class="value">Jetty(9.4.38.v20210224)</td></tr><tr><td class="name">Transfer-Encoding</td><td class="value">chunked</td></tr></tbody></table></details>
+    </div>
+</div>
+</body>
+</html>

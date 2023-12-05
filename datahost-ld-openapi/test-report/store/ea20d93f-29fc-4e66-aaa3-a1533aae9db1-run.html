@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>hurl-automation/int-016.hurl</title>
+    <style>
+        body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h4:target {
+    color: #ff0288;
+}
+
+table {
+    display: block;
+    font-size: 15px;
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+th, td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #ddd;
+}
+
+th {
+    padding: 6px 8px;
+    text-align: left;
+    background: #f5f5f5;
+}
+
+td {
+    padding: 6px 8px;
+    vertical-align: text-top;
+}
+
+.name {
+    width: 120px;
+    font-weight: bold;
+    background: #fbfafd;
+}
+
+.value {
+    width: 800px;
+    word-break: break-all
+}
+
+details {
+    margin-bottom: 20px;
+}
+
+summary {
+    font-size: 1.3rem;
+    line-height: 1.4;
+    font-weight: bold;
+}
+        .report-nav {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.report-nav-links {
+    display: flex;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.report-nav a {
+    color: royalblue;
+    margin-right: 20px;
+}
+
+.report-nav a[aria-selected="true"] {
+    color: #ff0288;
+}
+
+.report-nav-summary > div {
+    display: flex;
+}
+
+.report-nav-summary .item-name {
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-left: red 4px solid;
+}
+
+.error-desc {
+    background: #f5f5f5;
+}
+
+.error-desc pre {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin: 0.75rem;
+    padding: 0.8rem;
+    overflow-x: auto;
+}
+
+.error-desc pre code {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+
+.success, .success a {
+    color: green;
+}
+
+.failure, .failure a {
+    color: red;
+}
+    </style>
+<body>
+<div>
+    <div class="container">
+        <div class="report-nav">
+    <div class="report-nav-links">
+        <div><a href="../index.html">Report</a></div>
+        <div><a aria-selected="false" href="ea20d93f-29fc-4e66-aaa3-a1533aae9db1-timeline.html">Timeline</a></div>
+        <div><a aria-selected="true" href="ea20d93f-29fc-4e66-aaa3-a1533aae9db1-run.html">Run</a></div>
+        <div><a aria-selected="false" href="ea20d93f-29fc-4e66-aaa3-a1533aae9db1-source.html">Source</a></div>
+    </div>
+    <div class="report-nav-summary">
+        <div><div class="item-name">File:</div><div><a href="ea20d93f-29fc-4e66-aaa3-a1533aae9db1-source.html">hurl-automation/int-016.hurl</a></div></div>
+        <div><div class="item-name">Status:</div><div><span class="failure">Failure</span></div></div>
+        <div><div class="item-name">Duration:</div><div>0 ms</div></div>
+        <div><div class="item-name">Errors:</div><div>1</div></div>
+        <div></div>
+    </div>
+    <div class="errors"><div class="error"><div class="error-desc"><pre><code>Undefined variable
+   --> <a href="ea20d93f-29fc-4e66-aaa3-a1533aae9db1-source.html#l6">hurl-automation/int-016.hurl:6:18</a>
+    |
+  6 | Authorization: {{auth_token}}
+    |                  ^^^^^^^^^^ you must set the variable auth_token
+    |</code></pre></div></div></div>
+</div>
+
+        <details open><summary>Entry 1</summary></details>
+    </div>
+</div>
+</body>
+</html>

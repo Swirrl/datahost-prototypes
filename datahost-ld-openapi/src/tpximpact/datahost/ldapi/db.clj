@@ -1,15 +1,15 @@
 (ns tpximpact.datahost.ldapi.db
-  (:require
-   [clojure.data.json :as json]
-   [clojure.tools.logging :as log]
-   [com.yetanalytics.flint :as f]
-   [grafter-2.rdf.protocols :as pr]
-   [grafter-2.rdf4j.repository :as repo]
-   [tpximpact.datahost.ldapi.compact :as compact]
-   [tpximpact.datahost.ldapi.native-datastore :as datastore]
-   [tpximpact.datahost.system-uris :as su]
-   [tpximpact.datahost.time :as time]
-   [tpximpact.datahost.ldapi.resource :as resource])
+  (:require [clojure.data.json :as json]
+            [clojure.tools.logging :as log]
+            [com.yetanalytics.flint :as f]
+            [grafter-2.rdf.protocols :as pr]
+            [grafter-2.rdf4j.repository :as repo]
+            [tpximpact.datahost.ldapi.compact :as compact]
+            [tpximpact.datahost.ldapi.metrics :as metrics]
+            [tpximpact.datahost.ldapi.native-datastore :as datastore]
+            [tpximpact.datahost.ldapi.resource :as resource]
+            [tpximpact.datahost.system-uris :as su]
+            [tpximpact.datahost.time :as time])
   (:import (java.net URI)
            (org.eclipse.rdf4j.common.transaction IsolationLevels)
            (org.eclipse.rdf4j.repository RepositoryConnection)))
@@ -46,33 +46,37 @@
 (defn get-release-by-uri
   "Loads a Release in triple form"
   [triplestore release-uri]
-  (let [q {:prefixes (compact/as-flint-prefixes)
-           :construct [[release-uri 'a :dh/Release]
+  (let [timer-id (metrics/start-db-query-timer)] (metrics/inc-counter)
+    (try
+      (let [q {:prefixes (compact/as-flint-prefixes)
+               :construct [[release-uri 'a :dh/Release]
+                           [release-uri :dcterms/title '?title]
+                           [release-uri :dcterms/description '?description]
+                           [release-uri :dcat/inSeries '?series]
+                           [release-uri :dh/hasRevision '?revision]
+                           [release-uri :dh/hasSchema '?schema]
+                           [release-uri :dcterms/modified '?modified]
+                           [release-uri :dcterms/issued '?issued]
+                           [release-uri :dcterms/license '?license]
+                           [release-uri :dh/coverage '?coverage]
+                           [release-uri :dh/geographyDefinition '?geoDefinition]
+                           [release-uri :dh/reasonForChange '?reasonForChange]]
+               :where [[release-uri 'a :dh/Release]
                        [release-uri :dcterms/title '?title]
-                       [release-uri :dcterms/description '?description]
                        [release-uri :dcat/inSeries '?series]
-                       [release-uri :dh/hasRevision '?revision]
-                       [release-uri :dh/hasSchema '?schema]
+                       [:optional [[release-uri :dh/hasRevision '?revision]]]
+                       [:optional [[release-uri :dh/hasSchema '?schema]]]
+                       [:optional [[release-uri :dcterms/description '?description]]]
+                       [:optional [[release-uri :dcterms/license '?license]]]
+                       [:optional [[release-uri :dh/coverage '?coverage]]]
+                       [:optional [[release-uri :dh/geographyDefinition '?geoDefinition]]]
+                       [:optional [[release-uri :dh/reasonForChange '?reasonForChange]]]
                        [release-uri :dcterms/modified '?modified]
-                       [release-uri :dcterms/issued '?issued]
-                       [release-uri :dcterms/license '?license]
-                       [release-uri :dh/coverage '?coverage]
-                       [release-uri :dh/geographyDefinition '?geoDefinition]
-                       [release-uri :dh/reasonForChange '?reasonForChange]]
-           :where [[release-uri 'a :dh/Release]
-                   [release-uri :dcterms/title '?title]
-                   [release-uri :dcat/inSeries '?series]
-                   [:optional [[release-uri :dh/hasRevision '?revision]]]
-                   [:optional [[release-uri :dh/hasSchema '?schema]]]
-                   [:optional [[release-uri :dcterms/description '?description]]]
-                   [:optional [[release-uri :dcterms/license '?license]]]
-                   [:optional [[release-uri :dh/coverage '?coverage]]]
-                   [:optional [[release-uri :dh/geographyDefinition '?geoDefinition]]]
-                   [:optional [[release-uri :dh/reasonForChange '?reasonForChange]]]
-                   [release-uri :dcterms/modified '?modified]
-                   [release-uri :dcterms/issued '?issued]]}]
-    (datastore/eager-query triplestore
-                           (f/format-query q :pretty? true))))
+                       [release-uri :dcterms/issued '?issued]]}]
+        (datastore/eager-query triplestore
+                               (f/format-query q :pretty? true)))
+      (finally
+        (metrics/stop-db-query-timer timer-id)))))
 
 (defn get-dataset-series [triplestore series-uri]
   (let [bgps [[series-uri 'a :dh/DatasetSeries]

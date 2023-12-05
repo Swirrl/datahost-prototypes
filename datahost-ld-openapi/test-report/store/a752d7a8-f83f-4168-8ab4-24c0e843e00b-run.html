@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>hurl-scripts/int-002.hurl</title>
+    <style>
+        body {
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h4:target {
+    color: #ff0288;
+}
+
+table {
+    display: block;
+    font-size: 15px;
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+    border-collapse: collapse;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+th, td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: #ddd;
+}
+
+th {
+    padding: 6px 8px;
+    text-align: left;
+    background: #f5f5f5;
+}
+
+td {
+    padding: 6px 8px;
+    vertical-align: text-top;
+}
+
+.name {
+    width: 120px;
+    font-weight: bold;
+    background: #fbfafd;
+}
+
+.value {
+    width: 800px;
+    word-break: break-all
+}
+
+details {
+    margin-bottom: 20px;
+}
+
+summary {
+    font-size: 1.3rem;
+    line-height: 1.4;
+    font-weight: bold;
+}
+        .report-nav {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.report-nav-links {
+    display: flex;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.report-nav a {
+    color: royalblue;
+    margin-right: 20px;
+}
+
+.report-nav a[aria-selected="true"] {
+    color: #ff0288;
+}
+
+.report-nav-summary > div {
+    display: flex;
+}
+
+.report-nav-summary .item-name {
+    min-width: 100px;
+    font-weight: bold;
+}
+
+.error {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-left: red 4px solid;
+}
+
+.error-desc {
+    background: #f5f5f5;
+}
+
+.error-desc pre {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin: 0.75rem;
+    padding: 0.8rem;
+    overflow-x: auto;
+}
+
+.error-desc pre code {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+
+.success, .success a {
+    color: green;
+}
+
+.failure, .failure a {
+    color: red;
+}
+    </style>
+<body>
+<div>
+    <div class="container">
+        <div class="report-nav">
+    <div class="report-nav-links">
+        <div><a href="../index.html">Report</a></div>
+        <div><a aria-selected="false" href="a752d7a8-f83f-4168-8ab4-24c0e843e00b-timeline.html">Timeline</a></div>
+        <div><a aria-selected="true" href="a752d7a8-f83f-4168-8ab4-24c0e843e00b-run.html">Run</a></div>
+        <div><a aria-selected="false" href="a752d7a8-f83f-4168-8ab4-24c0e843e00b-source.html">Source</a></div>
+    </div>
+    <div class="report-nav-summary">
+        <div><div class="item-name">File:</div><div><a href="a752d7a8-f83f-4168-8ab4-24c0e843e00b-source.html">hurl-scripts/int-002.hurl</a></div></div>
+        <div><div class="item-name">Status:</div><div><span class="failure">Failure</span></div></div>
+        <div><div class="item-name">Duration:</div><div>2 ms</div></div>
+        <div><div class="item-name">Errors:</div><div>1</div></div>
+        <div></div>
+    </div>
+    <div class="errors"><div class="error"><div class="error-desc"><pre><code>HTTP connection
+   --> <a href="a752d7a8-f83f-4168-8ab4-24c0e843e00b-source.html#l4">hurl-scripts/int-002.hurl:4:5</a>
+    |
+  4 | PUT {{scheme}}://{{host_name}}/data/{{series}}
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ (7) Failed to connect to localhost port 3000 after 2 ms: Couldn't connect to server
+    |</code></pre></div></div></div>
+</div>
+
+        <details open><summary>Entry 1</summary></details>
+    </div>
+</div>
+</body>
+</html>
