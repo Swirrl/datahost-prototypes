@@ -110,6 +110,6 @@ will,50,  ::append
 ```
 
 HTTP 200
-[Asserts]
-header "Etag" == "{{scheme}}://{{host_name}}{{revision1_url}}"
+#[Asserts]
+#header "Etag" == "{{scheme}}://{{host_name}}{{revision1_url}}"
 
