@@ -37,12 +37,12 @@
 
         schema (db/get-release-schema triplestore release-uri)
 
-        change-infos (db/get-changes-info triplestore release-uri)
-        _ (when (empty? change-infos)
+        change-info (db/get-latest-change-info triplestore release-uri)
+        _ (when (empty? change-info)
             (throw (ex-info "This release has no revisions"
                             {:type :tpximpact.datahost.ldapi.errors/exception})))
         
-        {snapshot-key :snapshotKey rev-uri :rev} (last change-infos)
+        {snapshot-key :snapshotKey rev-uri :rev} change-info
         _ (when (nil? snapshot-key)
             (throw (ex-info (format "Missing :snapshotKey for '%s'" rev-uri)
                             {:type :tpximpact.datahost.ldapi.errors/exception})))
@@ -53,9 +53,9 @@
         ds-release (data.validation/as-dataset snapshot-key opts)
         ds-input (data.validation/as-dataset (->byte-array-input-stream (:body request)) opts)
         diff-results (data.delta/delta-dataset ds-release ds-input {:row-schema row-schema})]
-    {:status 200
-     :body (write-dataset-to-outputstream diff-results)}))
+    (util.response/header {:status 200
+                           :body (write-dataset-to-outputstream diff-results)}
+                          "etag" (str rev-uri))))
 
 (defn post-delta-files [sys request]
   (-post-csv sys request))
-
