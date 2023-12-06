@@ -3,3 +3,4 @@ test.hurl
 tmp
 .clj-kondo
 .lsp
+test-report
