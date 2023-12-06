@@ -46,7 +46,7 @@
 
 (defn get-release-by-uri
   "Loads a Release in triple form"
-  [triplestore release-uri] 
+  [triplestore release-uri]
   (let [q {:prefixes (compact/as-flint-prefixes)
            :construct [[release-uri 'a :dh/Release]
                        [release-uri :dcterms/title '?title]
@@ -211,8 +211,7 @@
 
 (defn get-change
   "Returns a single Revision Change in triple form"
-  [triplestore change-uri] 
-  
+  [triplestore change-uri]
   (->> (f/format-query (let [bgps [[change-uri 'a :dh/Change]
                                    [change-uri :dcterms/description '?description]
                                    [change-uri :dcterms/format '?format]
@@ -226,20 +225,21 @@
        (datastore/eager-query triplestore)))
 
 (defn- get-changes-info-query
-  [release-uri max-rev]
-  {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh :dcterms]))
-   :select ['?rev '?updates '?rev_number '?change_number '?kind '?format '?snapshotKey]
-   :where (cond-> [['?rev :dh/appliesToRelease release-uri]
-                   ['?rev :dh/hasChange '?change]
-                   ['?change :dh/updates '?updates]
-                   ['?change :dh/changeKind '?kind]
-                   ['?change :dcterms/format '?format]
-                   ['?change :dh/revisionSnapshotCSV '?snapshotKey]
-                   [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]
-                   [:bind ['(:xsd/integer (replace (str ?change) "^.*/([^/]*)$" "$1")) '?change_number]]]
-            (some? max-rev) (conj [:filter (list '<= '?rev_number max-rev)]))
-   :order-by ['(asc ?rev_number)
-              '(asc ?change_number)]})
+  [release-uri max-rev {:keys [order limit] :or {order 'asc}}]
+  (cond-> {:prefixes (into {} (map (fn [k] [k (str "<" (get default-prefixes k) ">")]) [:xsd :dh :dcterms]))
+           :select ['?rev '?updates '?rev_number '?change_number '?kind '?format '?snapshotKey]
+           :where (cond-> [['?rev :dh/appliesToRelease release-uri]
+                           ['?rev :dh/hasChange '?change]
+                           ['?change :dh/updates '?updates]
+                           ['?change :dh/changeKind '?kind]
+                           ['?change :dcterms/format '?format]
+                           ['?change :dh/revisionSnapshotCSV '?snapshotKey]
+                           [:bind ['(:xsd/integer (replace (str ?rev) "^.*/([^/]*)$" "$1")) '?rev_number]]
+                           [:bind ['(:xsd/integer (replace (str ?change) "^.*/([^/]*)$" "$1")) '?change_number]]]
+                    (some? max-rev) (conj [:filter (list '<= '?rev_number max-rev)]))
+           :order-by [(list order '?rev_number)
+                      (list order '?change_number)]}
+    limit (assoc :limit limit)))
 
 (defn get-changes-info
   "Returns records for all changes, optionally up to `?max-rev` (int)
@@ -252,7 +252,19 @@
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
    (time!
     metrics/get-changes-info
-    (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev))))))
+    (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev {}))))))
+
+(defn get-latest-change-info
+  "Returns record for the latest change, or nil.
+
+  The returned map is of shape:
+       {:rev_num Number :rev URI :updates FILE-KEY :kind change-kind}"
+  ([triplestore release-uri]
+   {:pre [(some? release-uri)]}
+   (-> triplestore
+       (datastore/eager-query (f/format-query (get-changes-info-query release-uri Integer/MAX_VALUE
+                                                                      {:order 'desc :limit 1})))
+       first)))
 
 (defn- input-context [ld-root]
   (assoc (update-vals @compact/default-context str)
@@ -560,7 +572,7 @@
         pred-fn (fn [q] (= pred (:p q)))
         data-key (:o (first (filter pred-fn revision)))]
     (when revision
-      {:n rev-id :data-key data-key})))
+      {:revision-id rev-id :data-key data-key})))
 
 (defn fetch-next-child-resource-number [triplestore parent-uri child-pred]
   (let [q (select-auto-increment-query parent-uri child-pred)

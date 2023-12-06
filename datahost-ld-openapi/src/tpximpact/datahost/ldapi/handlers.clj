@@ -93,12 +93,12 @@
                         (matcha/index-triples)
                         (triples->ld-resource))]
     (if (= accept "text/csv")
-      (let [change-infos (db/get-changes-info triplestore release-uri Integer/MAX_VALUE)]
+      (let [change-info (db/get-latest-change-info triplestore release-uri)]
         (cond
-          (empty? change-infos) (-> (util.response/response "This release has no revisions yet")
-                                    (util.response/status 422)
-                                    (util.response/header "content-type" "text/plain"))
-          :else (let [rev-uri ^URI (-> change-infos last :rev)]
+          (nil? change-info) (-> (util.response/response "This release has no revisions yet")
+                                 (util.response/status 422)
+                                 (util.response/header "content-type" "text/plain"))
+          :else (let [rev-uri ^URI (:rev change-info)]
                   (-> (.getPath rev-uri)
                       (util.response/redirect)
                       (shared/set-csvm-header request)))))
