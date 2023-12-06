@@ -4,6 +4,7 @@
             [com.yetanalytics.flint :as f]
             [grafter-2.rdf.protocols :as pr]
             [grafter-2.rdf4j.repository :as repo]
+            [metrics.timers :refer [time-fn!]]
             [tpximpact.datahost.ldapi.compact :as compact]
             [tpximpact.datahost.ldapi.metrics :as metrics]
             [tpximpact.datahost.ldapi.native-datastore :as datastore]
@@ -45,9 +46,8 @@
 
 (defn get-release-by-uri
   "Loads a Release in triple form"
-  [triplestore release-uri]
-  (let [timer-id (metrics/start-db-query-timer)] (metrics/inc-counter)
-    (try
+  [triplestore release-uri] 
+  (time-fn! metrics/get-release-by-uri (fn[]
       (let [q {:prefixes (compact/as-flint-prefixes)
                :construct [[release-uri 'a :dh/Release]
                            [release-uri :dcterms/title '?title]
@@ -75,8 +75,8 @@
                        [release-uri :dcterms/issued '?issued]]}]
         (datastore/eager-query triplestore
                                (f/format-query q :pretty? true)))
-      (finally
-        (metrics/stop-db-query-timer timer-id)))))
+                               ))
+                               )
 
 (defn get-dataset-series [triplestore series-uri]
   (let [bgps [[series-uri 'a :dh/DatasetSeries]

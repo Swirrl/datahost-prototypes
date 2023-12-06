@@ -1,32 +1,19 @@
-(ns tpximpact.datahost.ldapi.metrics)
-(require '[metrics.core :refer [new-registry]])
-(require '[metrics.timers :refer [timer]])
-(require '[metrics.timers :as tmr])
-(require '[metrics.reporters.console :as console])
-(require '[metrics.counters :refer [counter inc!]])
+(ns tpximpact.datahost.ldapi.metrics
+  (:require [metrics.core :refer [new-registry]]
+            [metrics.counters :refer [counter inc!]]
+            [metrics.reporters.console :as console]
+            [metrics.timers :refer [time! timer]]))
 
-;;test by running from hurlscripts dir: hurl int-030.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token= "string" --variable series="$date(.+)"
+;;test by running from hurlscripts dir: hurl int-030.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" --variable series="$date(.+)"
 
 (def reg (new-registry))
-(def db-query-timer
-  (timer reg ["db" "read" "execution-time"]))
+(def get-release-by-uri
+  (timer reg ["db" "read" "get-release-by-uri-time"]))
 
 
-(defn start-db-query-timer []
-  (tmr/start db-query-timer))
-(defn stop-db-query-timer [timer-id]
-  (tmr/stop timer-id))
+;; (defn get-release-by-uri-time [function]
+;;   (time! get-release-by-uri function))
 
-
-(def db-execution-counter (counter reg ["db" "read" "times-called"]))
-
-
-(defn inc-counter []
-(inc! db-execution-counter))
-
-
-(def CR (console/reporter reg {}))
-(console/start CR 30)
 
 ;; 46 get-release-by-uri - read
 ;; 77 get-dataset-series - read
