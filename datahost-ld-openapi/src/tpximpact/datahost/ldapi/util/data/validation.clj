@@ -447,7 +447,7 @@
                 (tc/row-count ds))
      (throw (ex-info "Possible data issue: are combinations of all non-measure values unique?"
                      (cond-> {:type :dataset.validation/error
-                              :hash-column-name hash-col-name
+                              :coords-column-name hash-col-name
                               :dataset-name (tc/dataset-name ds)}
                        ex-data-payload (merge ex-data-payload)))))))
 
@@ -458,4 +458,4 @@
   a row. "
   [ds row-schema]
   (validate-row-uniqueness (data.internal/add-coords-column ds row-schema)
-                           data.internal/hash-column-name))
+                           data.internal/coords-column-name))

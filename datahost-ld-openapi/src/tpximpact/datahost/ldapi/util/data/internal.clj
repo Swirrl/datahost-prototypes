@@ -9,7 +9,7 @@
    (net.openhft.hashing LongHashFunction)))
 
 
-(def hash-column-name
+(def coords-column-name
   "Name of the column holding the hash of the row (excluding the measurement itself.)"
   "datahost.row/coords")
 
@@ -102,15 +102,15 @@
         hasher (make-columnwise-hasher)]
     (check-dataset-has-columns dataset col-names)
     (-> dataset
-        (tc/map-columns hash-column-name
+        (tc/map-columns coords-column-name
                         :long
                         col-names
                         hasher)
-        (vary-meta assoc ::hash-column hash-column-name))))
+        (vary-meta assoc ::hash-column coords-column-name))))
 
 (defn ensure-coords-column
   [dataset row-schema]
-  (if (tc/has-column? dataset hash-column-name)
+  (if (tc/has-column? dataset coords-column-name)
     dataset
     (add-coords-column dataset row-schema)))
 

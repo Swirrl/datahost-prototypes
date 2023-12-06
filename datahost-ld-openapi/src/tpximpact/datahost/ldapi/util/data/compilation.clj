@@ -13,7 +13,7 @@
     :refer [-as-dataset as-dataset]
     :as data.validation]
    [tpximpact.datahost.ldapi.util.data.internal
-    :refer [hash-column-name]
+    :refer [coords-column-name]
     :as internal]))
 
 (defmethod -as-dataset tech.v3.dataset.impl.dataset.Dataset [v _opts]
@@ -55,14 +55,14 @@
     [:row-schema data.validation/DatasetRow]]))
 
 (defn- has-hashed-column? [ds]
-  (tc/has-column? ds hash-column-name))
+  (tc/has-column? ds coords-column-name))
 
 (defmulti -apply-change
   "Returns a dataset.
 
   Assumptions:
   
-  - the base dataset already has column with hashed (named in `hash-column-name`)
+  - the base dataset already has column with hashed (named in `coords-column-name`)
   - the input and result datasets fit in memory."
   (fn dispatch [ctx base-ds change-ds] (:datahost.change/kind ctx)))
 
@@ -72,7 +72,7 @@
     (-> base-ds
         (tc/concat (internal/add-coords-column change-ds row-schema))
         ;; it's an 'append', so we remove already existing entries
-        (tc/unique-by [hash-column-name] {:strategy :first}))))
+        (tc/unique-by [coords-column-name] {:strategy :first}))))
 
 (defmethod -apply-change :dh/ChangeKindRetract [{:keys [row-schema] :as _ctx} base-ds change-ds]
   (assert (has-hashed-column? base-ds))
@@ -87,13 +87,13 @@
                          (str "right." measure-column)
                          (str change-ds-name "." measure-column))
         change-ds+id (internal/add-coords-column change-ds row-schema)
-        corrections-ds (-> (tc/inner-join change-ds+id base-ds [hash-column-name])
+        corrections-ds (-> (tc/inner-join change-ds+id base-ds [coords-column-name])
                            (tc/select-columns (-> (tc/column-names base-ds)
                                                   set
                                                   (disj right-col-name))))]
     (-> base-ds
         (tc/concat corrections-ds)
-        (tc/unique-by [hash-column-name] {:strategy :last}))))
+        (tc/unique-by [coords-column-name] {:strategy :last}))))
 
 (defn apply-change
   [context base-ds change-ds]
@@ -136,16 +136,16 @@
                  change)
         ds-opts opts
         base-ds (-> change :datahost.change.data/ref (as-dataset ds-opts))
-        _ (when (tc/has-column? base-ds hash-column-name)
+        _ (when (tc/has-column? base-ds coords-column-name)
             (throw (ex-info (format "Base dataset already contains '%s' column"
-                                    hash-column-name)
+                                    coords-column-name)
                             {:columns (vec (tc/column-names base-ds))})))
         base-ds (internal/ensure-coords-column base-ds (:row-schema opts))]
     ;; let's ensure data issues in dev are immediately revealed
-    (data.validation/validate-row-uniqueness base-ds hash-column-name {:opts opts})
+    (data.validation/validate-row-uniqueness base-ds coords-column-name {:opts opts})
     (-> (reduce (partial compile-reducer ds-opts)
                 base-ds
                 (next changes))
         ;; only return columns that teh caller passed in
         (tc/select-columns (disj (set (tc/column-names base-ds))
-                                 hash-column-name)))))
+                                 coords-column-name)))))

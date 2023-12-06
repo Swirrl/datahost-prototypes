@@ -16,12 +16,13 @@
 (defn- row-changed? [row] (some? (get row data.internal/op-column-name)))
 
 (defn- add-tx-columns
+  "Adds \"datahost.row/id\" and  `data.interna./coords-column-name`"
   [{:keys [coords-columns] measure-column-name :measure-column :as _ctx}
    row]
   (let [sb (data.internal/make-hasher-input (StringBuilder.) (map #(get row %) coords-columns))
         coords (data.internal/hash sb)
         id (data.internal/hash (.append sb (get row measure-column-name)))]
-    (assoc row "datahost.row/id" id data.internal/hash-column-name coords)))
+    (assoc row "datahost.row/id" id data.internal/coords-column-name coords)))
 
 (defn- make-column-names
   "Returns TODO"
@@ -100,7 +101,7 @@
                               (data.validation/validate-row-coords-uniqueness ds row-schema)
                               ds)])
         ;; we do a full join and choose only appeds/retractions/corrections
-        joined (-> (tc/full-join base-ds new-ds data.internal/hash-column-name
+        joined (-> (tc/full-join base-ds new-ds data.internal/coords-column-name
                                  {:operation-space :int64})
                    (tc/map-columns data.internal/op-column-name
                                    [measure-column-name right-measure-column-name]
