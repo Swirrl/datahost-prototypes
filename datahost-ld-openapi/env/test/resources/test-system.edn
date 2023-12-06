@@ -3,7 +3,7 @@
 
  ;; test rdf-base-uri intentionally uses a weird value that doesn't include `data`
  ;; in order to prove that RDF URIs are not necessarily tied to routing.
- :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "http://localhost:3000/data/"}
+ :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "http://localhost:3400/data/"}
 
  :tpximpact.datahost.ldapi.test/http-client
  {:port #ig/ref :tpximpact.datahost.ldapi.jetty/http-port}
