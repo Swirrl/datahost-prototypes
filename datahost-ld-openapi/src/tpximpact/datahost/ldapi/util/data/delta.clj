@@ -89,8 +89,7 @@
   (let [new-ds-name (tc/dataset-name new-ds)
         {:keys [hashable-columns]
          measure-column-name :measure-column :as ctx} (data.internal/make-schema-context row-schema)
-        {{right-coord-column-names :right} :coords
-         {right-measure-column-name :right} :measure
+        {{right-measure-column-name :right} :measure
          :as col-names} (make-column-names new-ds-name
                                            measure-column-name
                                            hashable-columns)
