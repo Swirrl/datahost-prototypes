@@ -36,6 +36,9 @@ jsonpath "$['dh:relatedLinks'].[1]" == "http://related-2"
 jsonpath "$['dh:contactName']" == "Rob Chambers"
 jsonpath "$['dh:contactEmail']" == "heyrob@example.com"
 jsonpath "$['dh:contactPhone']" == "123234234234"
+[Captures]
+base_url: jsonpath "$['@context'].['@base']"
+
 
 
 GET {{scheme}}://{{host_name}}/data/{{series}}
@@ -168,7 +171,7 @@ jsonpath "$['@context'].['rdfs']" == "http://www.w3.org/2000/01/rdf-schema#"
 jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
 jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{scheme}}://{{host_name}}/data/"
+jsonpath "$['@context'].['@base']" == "{{base_url}}"
 
 #And can be retrived
 GET {{scheme}}://{{host_name}}/data/{{series}}4
@@ -189,7 +192,7 @@ jsonpath "$['@context'].['rdfs']" == "http://www.w3.org/2000/01/rdf-schema#"
 jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
 jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{scheme}}://{{host_name}}/data/"
+jsonpath "$['@context'].['@base']" == "{{base_url}}"
 
 
 #Multiple releases can be can be retrieved via the API

@@ -10,6 +10,9 @@ Authorization: {{auth_token}}
 }
 
 HTTP 201
+[Captures]
+base_url: jsonpath "$['@context'].['@base']"
+
 
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
@@ -35,10 +38,10 @@ jsonpath "$['@context'].['dh']" == "https://publishmydata.com/def/datahost/"
 jsonpath "$['@context'].['dcterms']" == "http://purl.org/dc/terms/"
 jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{scheme}}://{{host_name}}/data/"
+jsonpath "$['@context'].['@base']" == "{{base_url}}"
 
 jsonpath "$['@id']" == "{{series}}/release/release-1/schema"
-jsonpath "$['dh:appliesToRelease']" == "https://example.org/data/{{series}}/release/release-1"
+jsonpath "$['dh:appliesToRelease']" == "{{base_url}}{{series}}/release/release-1"
 jsonpath "$['appropriate-csvw:modeling-of-dialect']" == "UTF-8,RFC4180"
 jsonpath "$['dh:columns'].[0].['@type']" == "dh:DimensionColumn"
 jsonpath "$['dh:columns'].[0].['csvw:datatype']" == "string"
@@ -115,10 +118,10 @@ jsonpath "$['@context'].['dh']" == "https://publishmydata.com/def/datahost/"
 jsonpath "$['@context'].['dcterms']" == "http://purl.org/dc/terms/"
 jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{scheme}}://{{host_name}}/data/"
+jsonpath "$['@context'].['@base']" == "{{base_url}}"
 
 jsonpath "$['@id']" == "{{series}}/release/release-1/schema"
-jsonpath "$['dh:appliesToRelease']" == "https://example.org/data/{{series}}/release/release-1"
+jsonpath "$['dh:appliesToRelease']" == "{{base_url}}{{series}}/release/release-1"
 jsonpath "$['appropriate-csvw:modeling-of-dialect']" == "UTF-8,RFC4180"
 jsonpath "$['dh:columns'].[0].['@type']" == "dh:DimensionColumn"
 jsonpath "$['dh:columns'].[0].['csvw:datatype']" == "string"

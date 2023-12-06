@@ -13,8 +13,8 @@ Authorization: {{auth_token}}
 }
 
 HTTP 201
-
-
+[Captures]
+base_url: jsonpath "$['@context'].['@base']"
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
@@ -134,7 +134,7 @@ jsonpath "$['dcterms:description']" == "Description"
 jsonpath "$['@id']" == "{{series}}2/release/release-1"
 jsonpath "$['@type']" == "dh:Release"
 jsonpath "$['dcterms:license']" == "http://license-link"
-jsonpath "$['dcat:inSeries']" == "{{scheme}}://{{host_name}}/data/{{series}}2"
+jsonpath "$['dcat:inSeries']" == "{{base_url}}{{series}}2"
 jsonpath "$['dh:coverage']" == "http://some-geo-reference"
 jsonpath "$['dh:geographyDefinition']" == "http://geo-definition"
 jsonpath "$['dh:reasonForChange']" == "Comment about change"
@@ -145,7 +145,7 @@ jsonpath "$['@context'].['rdfs']" == "http://www.w3.org/2000/01/rdf-schema#"
 jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
 jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{scheme}}://{{host_name}}/data/"
+jsonpath "$['@context'].['@base']" == "{{base_url}}"
 
 #Fetching a release that does exist works
 GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-1
@@ -159,7 +159,7 @@ jsonpath "$['dcterms:description']" == "Description"
 jsonpath "$['@id']" == "{{series}}2/release/release-1"
 jsonpath "$['@type']" == "dh:Release"
 jsonpath "$['dcterms:license']" == "http://license-link"
-jsonpath "$['dcat:inSeries']" == "{{scheme}}://{{host_name}}/data/{{series}}2"
+jsonpath "$['dcat:inSeries']" == "{{base_url}}{{series}}2"
 jsonpath "$['dh:coverage']" == "http://some-geo-reference"
 jsonpath "$['dh:geographyDefinition']" == "http://geo-definition"
 jsonpath "$['dh:reasonForChange']" == "Comment about change"
@@ -170,7 +170,7 @@ jsonpath "$['@context'].['rdfs']" == "http://www.w3.org/2000/01/rdf-schema#"
 jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
 jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{scheme}}://{{host_name}}/data/"
+jsonpath "$['@context'].['@base']" == "{{base_url}}"
 
 #Multiple releases can be can be retrieved via the API
 PUT {{scheme}}://{{host_name}}/data/{{series}}2/release/release-2
