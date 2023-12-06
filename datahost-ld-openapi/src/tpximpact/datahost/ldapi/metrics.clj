@@ -2,20 +2,20 @@
   (:require [metrics.core :refer [new-registry]]
             [metrics.counters :refer [counter inc!]]
             [metrics.reporters.console :as console]
-            [metrics.timers :refer [time! timer]]))
+            [metrics.timers :refer [timer]]))
 
 ;;test by running from hurlscripts dir: hurl int-030.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" --variable series="$date(.+)"
 
+;; 46 get-release-by-uri - read
 (def reg (new-registry))
 (def get-release-by-uri
   (timer reg ["db" "read" "get-release-by-uri-time"]))
 
 
-;; (defn get-release-by-uri-time [function]
-;;   (time! get-release-by-uri function))
+;; (def CR (console/reporter reg {}))
+;; (console/start CR 30)
 
 
-;; 46 get-release-by-uri - read
 ;; 77 get-dataset-series - read
 ;; 112 get-release-schema-statements - read
 ;; 133 get-revision - read
