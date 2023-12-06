@@ -77,15 +77,18 @@
               (tc/map-rows corrections (fn [row] (assoc row "dh/op" 1 measure-l (get row measure-r)))))))
 
 (defn delta-dataset
-  "Returns a dataset with extra columns: TODO(finalise names)
+  "Returns a dataset with extra columns:
 
-  Value of the operation column can be 1=append | 2=retract.
+  - \"dh/op\" - (1 = append | 2 = retraction)
+  - \"datahost.row/id\" - hash of coords+measure value
+  - \"datahost.row.id/ref\" - see \"datahost.row/id\"
 
   Unchanged rows are not present in the returned delta dataset.
 
   Assumptions:
 
-  - rows of both datasets conform to row-schema"
+  - rows of both datasets conform to row-schema
+  - coords uniqueness (but validation of new-ds still performed)."
   [base-ds new-ds {:keys [row-schema]}]
   (let [new-ds-name (tc/dataset-name new-ds)
         {:keys [coords-columns]
