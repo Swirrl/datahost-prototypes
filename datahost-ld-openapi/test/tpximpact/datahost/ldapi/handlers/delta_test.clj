@@ -31,7 +31,7 @@
                                                    {"measure" 4.5 "attr1" "d"}] {})
         result (data.delta/delta-dataset ds1 ds2 {:row-schema row-schema
                                                       :measure-column "measure"
-                                                      :hashable-columns ["attr1"]})]
+                                                      :coords-columns ["attr1"]})]
     (is (= 4 (tc/row-count result)))
     (is (= 3 (count (set (tc/->array result "datahost.row/id")))))))
 

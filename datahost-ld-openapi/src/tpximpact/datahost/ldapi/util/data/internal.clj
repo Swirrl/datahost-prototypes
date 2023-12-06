@@ -117,18 +117,18 @@
 ;;; ---- ROW SCHEMA UTILS
 
 (defn make-schema-context
-  "Returns {:hashable-columns seq<COL-NAME> :measure-column COL-NAME}.
+  "Returns {:coords-columns seq<COL-NAME> :measure-column COL-NAME}.
 
   Motivation: get metadata necessary do diff two datasets (like name
   of the measure column or attribute, and dimension columns)."
   [row-schema]
   {:row-schema row-schema
-   :hashable-columns (row-schema--extract-component-column-names row-schema)
+   :coords-columns (row-schema--extract-component-column-names row-schema)
    :measure-column (row-schema--extract-measure-column-name row-schema)})
 
 (defn make-change-context
   [change-kind row-schema]
   {:row-schema row-schema
    :datahost.change/kind change-kind
-   :hashable-columns (row-schema--extract-component-column-names row-schema)
+   :coords-columns (row-schema--extract-component-column-names row-schema)
    :measure-column (row-schema--extract-measure-column-name row-schema)})

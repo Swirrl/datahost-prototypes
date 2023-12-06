@@ -16,9 +16,9 @@
 (defn- row-changed? [row] (some? (get row data.internal/op-column-name)))
 
 (defn- add-tx-columns
-  [{:keys [hashable-columns] measure-column-name :measure-column :as _ctx}
+  [{:keys [coords-columns] measure-column-name :measure-column :as _ctx}
    row]
-  (let [sb (data.internal/make-hasher-input (StringBuilder.) (map #(get row %) hashable-columns))
+  (let [sb (data.internal/make-hasher-input (StringBuilder.) (map #(get row %) coords-columns))
         coords (data.internal/hash sb)
         id (data.internal/hash (.append sb (get row measure-column-name)))]
     (assoc row "datahost.row/id" id data.internal/hash-column-name coords)))
@@ -87,12 +87,12 @@
   - rows of both datasets conform to row-schema"
   [base-ds new-ds {:keys [row-schema]}]
   (let [new-ds-name (tc/dataset-name new-ds)
-        {:keys [hashable-columns]
+        {:keys [coords-columns]
          measure-column-name :measure-column :as ctx} (data.internal/make-schema-context row-schema)
         {{right-measure-column-name :right} :measure
          :as col-names} (make-column-names new-ds-name
                                            measure-column-name
-                                           hashable-columns)
+                                           coords-columns)
 
         [base-ds new-ds] (let [add-cols (partial add-tx-columns ctx)]
                            [(tc/map-rows base-ds add-cols)
@@ -112,7 +112,7 @@
         appends+retractions (tc/map-rows (tc/select-rows joined (complement correction?))
                                          (partial augment-append-row new-ds-name col-names))]
     (tc/select-columns (tc/concat appends+retractions corrections)
-                       (conj (vec hashable-columns)
+                       (conj (vec coords-columns)
                              measure-column-name
                              "dh/op"
                              "datahost.row/id"
