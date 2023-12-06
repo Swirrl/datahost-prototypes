@@ -16,7 +16,13 @@
 
 (defn hurl
   [{:keys [script variables report-junit report-html file-root]}]
-  (let [variables (merge {"scheme" "http"} variables)
+  (let [variables (merge {"scheme" "http" 
+                          "expected_scheme" (or (get variables :scheme) 
+                                                (get variables "scheme")
+                                                "http") 
+                          "expected_uri_root" (or (get variables :host_name)
+                                                  (get variables "host_name"))} 
+                         variables)
         hurl-variables (mapcat (fn [v] ["--variable" v])
                                (variables->args variables))
         args (cond-> ["--test"]

@@ -46,5 +46,10 @@ All scripts receive the following variables:
 - `release` random
 - auth_token (most likely passed via `HURL_auth_token` environment variable)
 
+Additionally, it's possible to pass the below to ensure a service we want to deploy has the correct settings.
+
+- `expected_uri_root` as host[:port]
+- `expected_scheme`
+
 
 [hurl]:https://hurl.dev

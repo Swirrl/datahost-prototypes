@@ -192,6 +192,8 @@ jobs:
             bb bin/hurl-runner.bb --dir hurl-scripts \
               --variable scheme=http \
               --variable "host_name=localhost" \
+              --variable "expected_scheme=https" \
+              --variable "expected_uri_root=ldapi-prototype.gss-data.org.uk" \
               --variable "auth_token=ignore" \
               --variable "series=hurl.variable.named/series" \
               --variable "release=hurl.variable.named/release" \
