@@ -168,8 +168,9 @@
              :construct (conj bgps ['?series :dcterms/description '?description])
              :where (conj bgps [:optional [['?series :dcterms/description '?description]]])
              :order-by '[(asc ?issued)]})]
-    (datastore/eager-query triplestore
-                           (f/format-query q :pretty? true))))
+    (time! metrics
+     (datastore/eager-query triplestore
+                            (f/format-query q :pretty? true)))))
 
 (defn get-revisions
   "Returns all Revisions for a Release in triple form"
@@ -249,7 +250,9 @@
   ([triplestore release-uri] (get-changes-info triplestore release-uri nil))
   ([triplestore release-uri ?max-rev]
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
-   (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev)))))
+   (time!
+    metrics/get-changes-info
+    (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev))))))
 
 (defn- input-context [ld-root]
   (assoc (update-vals @compact/default-context str)
@@ -495,7 +498,8 @@
                  (delete-series-revisions-query series-uri)
                  (delete-series-releases-query series-uri)
                  (delete-series-query series-uri)]]
-    (submit-updates triplestore queries)
+    (time! metrics/delete-series!
+           (submit-updates triplestore queries))
     orphaned-changes))
 
 (defn upsert-release!
