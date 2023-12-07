@@ -1,20 +1,40 @@
 (ns tpximpact.datahost.ldapi.metrics
-  (:require [metrics.core :refer [new-registry]]
-            [metrics.counters :refer [counter inc!]]
-            [metrics.reporters.console :as console]
-            [metrics.timers :refer [timer]]))
+  (:require
+   [integrant.core :as ig]
+   [metrics.core :as metrics :refer [new-registry]]
+   [metrics.timers :refer [deftimer]]))
 
-;;test by running from hurlscripts dir: hurl int-030.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" --variable series="$date(.+)"
-
-;; 46 get-release-by-uri - read
 (def reg (new-registry))
-(def get-release-by-uri
-  (timer reg ["db" "read" "get-release-by-uri-time"]))
 
 
-;; (def CR (console/reporter reg {}))
-;; (console/start CR 30)
+(defn- make-reporter
+  []
+  (.. (com.codahale.metrics.Slf4jReporter/forRegistry reg)
+      (outputTo (org.slf4j.LoggerFactory/getLogger "datahost.ldapi.metrics"))
+      (convertRatesTo java.util.concurrent.TimeUnit/SECONDS)
+      (convertDurationsTo java.util.concurrent.TimeUnit/MILLISECONDS)
+      (build)))
 
+(defn- as-time-unit
+  [time-unit]
+  (case time-unit
+    :seconds java.util.concurrent.TimeUnit/SECONDS
+    :minutes java.util.concurrent.TimeUnit/MINUTES))
+
+(defmethod ig/init-key ::reporter [_ {:keys [enabled? period time-unit]
+                                      :or {period 30 time-unit :seconds} :as _opts}]
+  (let [reporter (make-reporter)]
+    (when enabled?
+      (.start reporter period (as-time-unit time-unit)))
+    reporter))
+
+(defmethod ig/halt-key! ::reporter [_ reporter]
+  (.stop reporter))
+
+(deftimer reg ["db" "read" "get-release-by-uri"])
+(deftimer reg ["db" "read" "get-dataset-series"])
+(deftimer reg ["db" "write" "insert-series"])
+(deftimer reg ["db" "write" "insert-change!"])
 
 ;; 77 get-dataset-series - read
 ;; 112 get-release-schema-statements - read

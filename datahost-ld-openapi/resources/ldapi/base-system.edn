@@ -28,4 +28,7 @@
   :base-path #ig/ref :tpximpact.datahost.ldapi/base-path}
 
  :tpximpact.datahost.time/system-clock {}
+
+ :tpximpact.datahost.ldapi.metrics/reporter {:enabled? false
+                                             :period 20 :time-unit :seconds}
  }

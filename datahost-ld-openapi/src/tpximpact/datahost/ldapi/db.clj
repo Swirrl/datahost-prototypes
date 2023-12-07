@@ -4,7 +4,7 @@
             [com.yetanalytics.flint :as f]
             [grafter-2.rdf.protocols :as pr]
             [grafter-2.rdf4j.repository :as repo]
-            [metrics.timers :refer [time-fn!]]
+            [metrics.timers :refer [time!]]
             [tpximpact.datahost.ldapi.compact :as compact]
             [tpximpact.datahost.ldapi.metrics :as metrics]
             [tpximpact.datahost.ldapi.native-datastore :as datastore]
@@ -47,36 +47,34 @@
 (defn get-release-by-uri
   "Loads a Release in triple form"
   [triplestore release-uri] 
-  (time-fn! metrics/get-release-by-uri (fn[]
-      (let [q {:prefixes (compact/as-flint-prefixes)
-               :construct [[release-uri 'a :dh/Release]
-                           [release-uri :dcterms/title '?title]
-                           [release-uri :dcterms/description '?description]
-                           [release-uri :dcat/inSeries '?series]
-                           [release-uri :dh/hasRevision '?revision]
-                           [release-uri :dh/hasSchema '?schema]
-                           [release-uri :dcterms/modified '?modified]
-                           [release-uri :dcterms/issued '?issued]
-                           [release-uri :dcterms/license '?license]
-                           [release-uri :dh/coverage '?coverage]
-                           [release-uri :dh/geographyDefinition '?geoDefinition]
-                           [release-uri :dh/reasonForChange '?reasonForChange]]
-               :where [[release-uri 'a :dh/Release]
+  (let [q {:prefixes (compact/as-flint-prefixes)
+           :construct [[release-uri 'a :dh/Release]
                        [release-uri :dcterms/title '?title]
+                       [release-uri :dcterms/description '?description]
                        [release-uri :dcat/inSeries '?series]
-                       [:optional [[release-uri :dh/hasRevision '?revision]]]
-                       [:optional [[release-uri :dh/hasSchema '?schema]]]
-                       [:optional [[release-uri :dcterms/description '?description]]]
-                       [:optional [[release-uri :dcterms/license '?license]]]
-                       [:optional [[release-uri :dh/coverage '?coverage]]]
-                       [:optional [[release-uri :dh/geographyDefinition '?geoDefinition]]]
-                       [:optional [[release-uri :dh/reasonForChange '?reasonForChange]]]
+                       [release-uri :dh/hasRevision '?revision]
+                       [release-uri :dh/hasSchema '?schema]
                        [release-uri :dcterms/modified '?modified]
-                       [release-uri :dcterms/issued '?issued]]}]
-        (datastore/eager-query triplestore
-                               (f/format-query q :pretty? true)))
-                               ))
-                               )
+                       [release-uri :dcterms/issued '?issued]
+                       [release-uri :dcterms/license '?license]
+                       [release-uri :dh/coverage '?coverage]
+                       [release-uri :dh/geographyDefinition '?geoDefinition]
+                       [release-uri :dh/reasonForChange '?reasonForChange]]
+           :where [[release-uri 'a :dh/Release]
+                   [release-uri :dcterms/title '?title]
+                   [release-uri :dcat/inSeries '?series]
+                   [:optional [[release-uri :dh/hasRevision '?revision]]]
+                   [:optional [[release-uri :dh/hasSchema '?schema]]]
+                   [:optional [[release-uri :dcterms/description '?description]]]
+                   [:optional [[release-uri :dcterms/license '?license]]]
+                   [:optional [[release-uri :dh/coverage '?coverage]]]
+                   [:optional [[release-uri :dh/geographyDefinition '?geoDefinition]]]
+                   [:optional [[release-uri :dh/reasonForChange '?reasonForChange]]]
+                   [release-uri :dcterms/modified '?modified]
+                   [release-uri :dcterms/issued '?issued]]}]
+    (time! metrics/get-release-by-uri
+           (datastore/eager-query triplestore
+                                  (f/format-query q :pretty? true)))))
 
 (defn get-dataset-series [triplestore series-uri]
   (let [bgps [[series-uri 'a :dh/DatasetSeries]
@@ -110,8 +108,9 @@
                                    [:optional [[series-uri :dh/contactEmail '?contactEmail]]]
                                    [:optional [[series-uri :dh/contactPhone '?contactPhone]]])}]
 
-    (datastore/eager-query triplestore
-                           (f/format-query series-query :pretty? true))))
+    (time! metrics/get-dataset-series
+           (datastore/eager-query triplestore
+                                  (f/format-query series-query :pretty? true)))))
 
 (defn get-release-schema-statements
   [triplestore release-uri]
@@ -361,7 +360,7 @@
 (defn- insert-series [clock triplestore series]
   ;; TODO: move setting default properties outside?
   (let [series (->> series (set-timestamps clock) set-base-entity)]
-    (insert-resource triplestore series)
+    (time! metrics/insert-series (insert-resource triplestore series))
     series))
 
 (defn- insert-release [clock triplestore release]
@@ -686,23 +685,25 @@
    {:keys [api-params ld-root store-key datahost.change/kind]
     {rev-uri :dh/Revision} :datahost.request/uris}]
   {:pre [(some? kind) (some? store-key) (some? rev-uri)]}
-  (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
-    (let [prev-change-id (last-change-num conn rev-uri)
-          change-id (inc prev-change-id)
-          change-uri (su/commit-uri* system-uris (assoc api-params :commit-id change-id))
-          _ (log/debug (format "will insert-change for '%s', new change id = %s"
-                               (.getPath ^URI rev-uri) change-id))
-          change (request->change kind api-params ld-root rev-uri change-uri)
-          change (resource/set-property1 change (compact/expand :dh/updates) store-key)
-          {:keys [before after]} (do
-                                   (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
-                                   (maybe-insert-change conn rev-uri change-uri change))]
-      (log/debug "insert-change: " {:change-id change-id :before before :after after})
-      (if (and (= prev-change-id before) (= change-id after))
-        {:change-id change-id
-         :change-uri change-uri
-         :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
-        {:message "Change already exists."}))))
+  (time!
+   metrics/insert-change!
+   (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
+     (let [prev-change-id (last-change-num conn rev-uri)
+           change-id (inc prev-change-id)
+           change-uri (su/commit-uri* system-uris (assoc api-params :commit-id change-id))
+           _ (log/debug (format "will insert-change for '%s', new change id = %s"
+                                (.getPath ^URI rev-uri) change-id))
+           change (request->change kind api-params ld-root rev-uri change-uri)
+           change (resource/set-property1 change (compact/expand :dh/updates) store-key)
+           {:keys [before after]} (do
+                                    (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
+                                    (maybe-insert-change conn rev-uri change-uri change))]
+       (log/debug "insert-change: " {:change-id change-id :before before :after after})
+       (if (and (= prev-change-id before) (= change-id after))
+         {:change-id change-id
+          :change-uri change-uri
+          :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
+         {:message "Change already exists."})))))
 
 (defn- previous-change-coords
   "Given revision and change id, tries to find the preceding change's
