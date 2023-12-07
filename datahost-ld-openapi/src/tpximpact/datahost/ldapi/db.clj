@@ -168,7 +168,7 @@
              :construct (conj bgps ['?series :dcterms/description '?description])
              :where (conj bgps [:optional [['?series :dcterms/description '?description]]])
              :order-by '[(asc ?issued)]})]
-    (time! metrics
+    (time! metrics/get-all-series
      (datastore/eager-query triplestore
                             (f/format-query q :pretty? true)))))
 
