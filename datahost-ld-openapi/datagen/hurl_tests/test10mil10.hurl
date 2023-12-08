@@ -1,4 +1,4 @@
-#hurl test10x1mil.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" --variable series="dummy$(date +%s)"
+#hurl test10mil10.hurl --variable scheme=http --variable host_name=localhost:3000 --variable auth_token="string" --variable series="dummy$(date +%s)"
 
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
