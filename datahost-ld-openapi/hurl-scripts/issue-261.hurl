@@ -1,3 +1,6 @@
+# Description: We create and upload a dataset, then try to obtain a diff in the datahost-tx format, by uploading
+# a modified version of the dataset.
+
 PUT http://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
