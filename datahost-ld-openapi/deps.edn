@@ -24,7 +24,8 @@
 
         com.google.cloud/google-cloud-secretmanager {:mvn/version  "2.23.0"}
 
-        net.openhft/zero-allocation-hashing {:mvn/version "0.16"}}
+        net.openhft/zero-allocation-hashing {:mvn/version "0.16"}
+        metrics-clojure/metrics-clojure {:mvn/version "2.10.0"}}
 
  :aliases
  {:run {:main-opts ["-m" "tpximpact.datahost.ldapi"]}

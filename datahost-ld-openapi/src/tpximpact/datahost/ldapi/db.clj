@@ -1,15 +1,16 @@
 (ns tpximpact.datahost.ldapi.db
-  (:require
-   [clojure.data.json :as json]
-   [clojure.tools.logging :as log]
-   [com.yetanalytics.flint :as f]
-   [grafter-2.rdf.protocols :as pr]
-   [grafter-2.rdf4j.repository :as repo]
-   [tpximpact.datahost.ldapi.compact :as compact]
-   [tpximpact.datahost.ldapi.native-datastore :as datastore]
-   [tpximpact.datahost.system-uris :as su]
-   [tpximpact.datahost.time :as time]
-   [tpximpact.datahost.ldapi.resource :as resource])
+  (:require [clojure.data.json :as json]
+            [clojure.tools.logging :as log]
+            [com.yetanalytics.flint :as f]
+            [grafter-2.rdf.protocols :as pr]
+            [grafter-2.rdf4j.repository :as repo]
+            [metrics.timers :refer [time!]]
+            [tpximpact.datahost.ldapi.compact :as compact]
+            [tpximpact.datahost.ldapi.metrics :as metrics]
+            [tpximpact.datahost.ldapi.native-datastore :as datastore]
+            [tpximpact.datahost.ldapi.resource :as resource]
+            [tpximpact.datahost.system-uris :as su]
+            [tpximpact.datahost.time :as time])
   (:import (java.net URI)
            (org.eclipse.rdf4j.common.transaction IsolationLevels)
            (org.eclipse.rdf4j.repository RepositoryConnection)))
@@ -45,7 +46,7 @@
 
 (defn get-release-by-uri
   "Loads a Release in triple form"
-  [triplestore release-uri]
+  [triplestore release-uri] 
   (let [q {:prefixes (compact/as-flint-prefixes)
            :construct [[release-uri 'a :dh/Release]
                        [release-uri :dcterms/title '?title]
@@ -71,8 +72,9 @@
                    [:optional [[release-uri :dh/reasonForChange '?reasonForChange]]]
                    [release-uri :dcterms/modified '?modified]
                    [release-uri :dcterms/issued '?issued]]}]
-    (datastore/eager-query triplestore
-                           (f/format-query q :pretty? true))))
+    (time! metrics/get-release-by-uri
+           (datastore/eager-query triplestore
+                                  (f/format-query q :pretty? true)))))
 
 (defn get-dataset-series [triplestore series-uri]
   (let [bgps [[series-uri 'a :dh/DatasetSeries]
@@ -106,8 +108,9 @@
                                    [:optional [[series-uri :dh/contactEmail '?contactEmail]]]
                                    [:optional [[series-uri :dh/contactPhone '?contactPhone]]])}]
 
-    (datastore/eager-query triplestore
-                           (f/format-query series-query :pretty? true))))
+    (time! metrics/get-dataset-series
+           (datastore/eager-query triplestore
+                                  (f/format-query series-query :pretty? true)))))
 
 (defn get-release-schema-statements
   [triplestore release-uri]
@@ -164,8 +167,9 @@
              :construct (conj bgps ['?series :dcterms/description '?description])
              :where (conj bgps [:optional [['?series :dcterms/description '?description]]])
              :order-by '[(asc ?issued)]})]
-    (datastore/eager-query triplestore
-                           (f/format-query q :pretty? true))))
+    (time! metrics/get-all-series
+     (datastore/eager-query triplestore
+                            (f/format-query q :pretty? true)))))
 
 (defn get-revisions
   "Returns all Revisions for a Release in triple form"
@@ -246,7 +250,9 @@
   ([triplestore release-uri] (get-changes-info triplestore release-uri nil))
   ([triplestore release-uri ?max-rev]
    {:pre [(some? release-uri) (or (nil? ?max-rev) (pos? ?max-rev))]}
-   (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev)))))
+   (time!
+    metrics/get-changes-info
+    (datastore/eager-query triplestore (f/format-query (get-changes-info-query release-uri ?max-rev))))))
 
 (defn- input-context [ld-root]
   (assoc (update-vals @compact/default-context str)
@@ -357,7 +363,7 @@
 (defn- insert-series [clock triplestore series]
   ;; TODO: move setting default properties outside?
   (let [series (->> series (set-timestamps clock) set-base-entity)]
-    (insert-resource triplestore series)
+    (time! metrics/insert-series (insert-resource triplestore series))
     series))
 
 (defn- insert-release [clock triplestore release]
@@ -496,7 +502,8 @@
                  (delete-series-revisions-query series-uri)
                  (delete-series-releases-query series-uri)
                  (delete-series-query series-uri)]]
-    (submit-updates triplestore queries)
+    (time! metrics/delete-series!
+           (submit-updates triplestore queries))
     orphaned-changes))
 
 (defn upsert-release!
@@ -686,23 +693,25 @@
    {:keys [api-params ld-root store-key datahost.change/kind]
     {rev-uri :dh/Revision} :datahost.request/uris}]
   {:pre [(some? kind) (some? store-key) (some? rev-uri)]}
-  (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
-    (let [prev-change-id (last-change-num conn rev-uri)
-          change-id (inc prev-change-id)
-          change-uri (su/commit-uri* system-uris (assoc api-params :commit-id change-id))
-          _ (log/debug (format "will insert-change for '%s', new change id = %s"
-                               (.getPath ^URI rev-uri) change-id))
-          change (request->change kind api-params ld-root rev-uri change-uri)
-          change (resource/set-property1 change (compact/expand :dh/updates) store-key)
-          {:keys [before after]} (do
-                                   (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
-                                   (maybe-insert-change conn rev-uri change-uri change))]
-      (log/debug "insert-change: " {:change-id change-id :before before :after after})
-      (if (and (= prev-change-id before) (= change-id after))
-        {:change-id change-id
-         :change-uri change-uri
-         :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
-        {:message "Change already exists."}))))
+  (time!
+   metrics/insert-change!
+   (with-open [conn ^RepositoryConnection (repo/->connection triplestore)]
+     (let [prev-change-id (last-change-num conn rev-uri)
+           change-id (inc prev-change-id)
+           change-uri (su/commit-uri* system-uris (assoc api-params :commit-id change-id))
+           _ (log/debug (format "will insert-change for '%s', new change id = %s"
+                                (.getPath ^URI rev-uri) change-id))
+           change (request->change kind api-params ld-root rev-uri change-uri)
+           change (resource/set-property1 change (compact/expand :dh/updates) store-key)
+           {:keys [before after]} (do
+                                    (.setIsolationLevel conn IsolationLevels/SERIALIZABLE)
+                                    (maybe-insert-change conn rev-uri change-uri change))]
+       (log/debug "insert-change: " {:change-id change-id :before before :after after})
+       (if (and (= prev-change-id before) (= change-id after))
+         {:change-id change-id
+          :change-uri change-uri
+          :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
+         {:message "Change already exists."})))))
 
 (defn- previous-change-coords
   "Given revision and change id, tries to find the preceding change's
