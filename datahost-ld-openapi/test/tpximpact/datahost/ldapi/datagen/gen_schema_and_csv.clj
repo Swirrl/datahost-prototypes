@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.datagen.get_schema_and_csv
+(ns tpximpact.datahost.ldapi.datagen.gen-schema-and-csv
   (:require [clojure.java.io :as io]
             [clojure.data.csv :as csv]
             [clojure.data.json :as json]
@@ -104,3 +104,12 @@
     (dotimes [i dividedby]
       (let [csv-output-name (str output-name i)]
         (with-rand-seed seed (get-csv generated-schema path-name csv-output-name (/ y dividedby)))))))
+
+(defn get-split-data-seeded [x y path-name output-name dividedby seed]
+  (let [generated-schema (get-rand-schema path-name output-name x seed)]
+    (dotimes [i dividedby]
+      (let [csv-output-name (str output-name i)] 
+        (get-csv generated-schema path-name csv-output-name (/ y dividedby))))))
+
+(defn get-split-data [x y path-name output-name dividedby seed]
+       (with-rand-seed seed (get-split-data-seeded x y path-name output-name dividedby seed)))
