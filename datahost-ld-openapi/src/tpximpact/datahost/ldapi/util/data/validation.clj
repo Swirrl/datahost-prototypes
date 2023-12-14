@@ -119,7 +119,7 @@
   "This validator is meant to be used in dev environment as assertion
   condition."
   (let [validator (m/validator DatasetRow)]
-    (fn row-schema-valildator [schema]
+    (fn row-schema-validator [schema]
       (or (validator schema)
           (throw (java.lang.AssertionError.
                   "Invalid DatasetRow schema"

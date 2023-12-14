@@ -95,7 +95,7 @@
   
   Parameters:
 
-  - dir-path - path to a direcotry (string | File| Path)
+  - dir-path - path to a directory (string | File| Path)
   - options
     - variables - map in which values can be strings or
       keywords for which `-instantiate-value` implementation
@@ -133,7 +133,7 @@
                                     p)))))))))
 
 (defn success?
-  "Did all scripts execute succesfully?
+  "Did all scripts execute successfully?
 
   Expects a seq of values returned by [[shell/sh]]"
   [results]

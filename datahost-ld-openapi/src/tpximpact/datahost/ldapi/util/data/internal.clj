@@ -94,7 +94,7 @@
                          (m/children row-schema)))))
 
 (defn add-coords-column
-  "Adds a column column containing unique id of the measurment
+  "Adds a column column containing unique id of the measurement
   (based on component names from row-schema)."
   [dataset row-schema]
   (assert row-schema)

@@ -254,7 +254,7 @@ some datahost terminology:
     consumers, and provides a method to safely stay up to date.
 
   - Corrections - Are a special composite form of a retraction and an
-    append that represent an ammended figure in the data. In addition
+    append that represent an amended figure in the data. In addition
     corrections contain a backlink to the previous figure, allowing
     users and publishers an easy way to explore figure changes.
 

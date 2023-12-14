@@ -77,7 +77,7 @@
                    (data.validation/row-schema->column-names)))))
 
       (testing "Data validation using a row-schema"
-        ;; NOTE: we're not enforcing the schema on creationi of the dataset
+        ;; NOTE: we're not enforcing the schema on creation of the dataset
         (let [ds (data.validation/as-dataset (io/resource "test-inputs/revision/one-row-invalid-double.csv") {})
               row-schema (data.validation/make-row-schema schema)]
           (is (contains? (data.validation/validate-dataset ds row-schema

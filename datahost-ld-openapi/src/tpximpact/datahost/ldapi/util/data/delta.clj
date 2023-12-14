@@ -16,7 +16,7 @@
 (defn- row-changed? [row] (some? (get row data.internal/op-column-name)))
 
 (defn- add-tx-columns
-  "Adds \"datahost.row/id\" and  `data.interna./coords-column-name`"
+  "Adds \"datahost.row/id\" and  `data.internal./coords-column-name`"
   [{:keys [coords-columns] measure-column-name :measure-column :as _ctx}
    row]
   (let [sb (data.internal/make-hasher-input (StringBuilder.) (map #(get row %) coords-columns))
@@ -103,14 +103,14 @@
                             (let [ds (tc/map-rows new-ds add-cols)]
                               (data.validation/validate-row-coords-uniqueness ds row-schema)
                               ds)])
-        ;; we do a full join and choose only appeds/retractions/corrections
+        ;; we do a full join and choose only appends/retractions/corrections
         joined (-> (tc/full-join base-ds new-ds data.internal/coords-column-name
                                  {:operation-space :int64})
                    (tc/map-columns data.internal/op-column-name
                                    [measure-column-name right-measure-column-name]
                                    tag-change)
                    (tc/select-rows row-changed?))
-        ;; we turn correctionsn into pairs of retraction+append rows
+        ;; we turn corrections into pairs of retraction+append rows
         corrections (corrections->retractions+appends joined (:measure col-names))
         correction? (fn [row] (= tag=modify (get row "dh/op")))
         appends+retractions (tc/map-rows (tc/select-rows joined (complement correction?))
