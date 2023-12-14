@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Watch config file for changes every 5 seconds -->
+<Configuration status="info" monitorInterval="5">
+    <Appenders>
+      <Console name="console" target="SYSTEM_OUT">
+        <!-- <JsonTemplateLayout eventTemplateUri="classpath:GcpLayout.json"/> -->
+        <PatternLayout pattern="%-5p %20.20c{1} :: %m%n"/>
+      </Console>
+      <Null name="null" />
+    </Appenders>
+    <Loggers>
+      <Root level="info" additivity="false">
+        <appender-ref ref="console" level="info"/> <!-- only log warnings and worse to REPL -->
+      </Root>
+    </Loggers>
+</Configuration>

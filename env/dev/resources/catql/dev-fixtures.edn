@@ -1,0 +1,2 @@
+{:dev/fixture-repo {} ;; use a static sparql repository of fixture data
+ :tpximpact.catql/schema {:repo-constructor #ig/ref :dev/fixture-repo}}

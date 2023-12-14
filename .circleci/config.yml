@@ -1,0 +1,338 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@3.1.5
+  gcp-cli: circleci/gcp-cli@3.1.0
+  terraform: circleci/terraform@3.2.1
+
+commands:
+  await:
+    description: "Wait for a service to start by polling it"
+    parameters:
+      service:
+        type: string
+    steps:
+      - run:
+          name: await service
+          command: wget -nv -O - --retry-connrefused --tries 30 --waitretry=2 << parameters.service >>
+
+executors:
+  clojure-executor:
+    docker:
+      - image: rosado/ci-clojure-hurl:1.11.1.1
+        auth:
+          username: $DOCKERHUB_USERNAME # can specify string literal values
+          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+  hurl-executor:
+    docker:
+      - image: ghcr.io/orange-opensource/hurl:latest
+
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  unit-test:
+    parameters:
+      project_dir:
+        description: Project directory
+        type: string
+    executor: clojure-executor
+    steps:
+      - checkout
+      - run:
+          name: Run unit tests
+          command: |
+            cd << parameters.project_dir >>
+            clojure -X:test
+      - store_test_results:
+          path: << parameters.project_dir >>/test-results
+
+  build-docker-image:
+    executor: clojure-executor
+    parameters:
+      service:
+        description: Service to deploy
+        type: enum
+        enum: ["graphql", "ldapi"]
+      project_dir:
+        type: enum
+        enum: ["datahost-graphql", "datahost-ld-openapi"]
+    steps:
+      - checkout
+      - run:
+          working_directory: << parameters.project_dir >>
+          command: |
+            [ "ldapi" == "<< parameters.service >>" ] \
+              && clojure -T:build docker :image-type :registry :to :remote > << parameters.service >>_container_digest \
+              || true
+      - run:
+          working_directory: << parameters.project_dir >>
+          command: |
+            [ "graphql" == "<< parameters.service >>" ] \
+              && clojure -T:build docker :image-type :registry > << parameters.service >>_container_digest \
+              || true
+      - persist_to_workspace:
+          root: << parameters.project_dir >>
+          paths:
+            - << parameters.service >>_container_digest
+
+  deploy-service:
+    parameters:
+      service:
+        description: Service to deploy
+        type: enum
+        enum: ["graphql", "ldapi"]
+      env:
+        type: string
+        description: Terraform environment to deploy
+    docker:
+      - image: cimg/base:2023.05
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - checkout
+      - terraform/install:
+          terraform_version:  1.4.6
+      - aws-cli/setup:
+          role-arn: 'arn:aws:iam::557197822758:role/circleci-datahost'
+          session-duration: '900'
+      - gcp-cli/setup:
+          version: latest
+          use_oidc: true
+      - run:
+          command: gcloud version
+      - run:
+          command: terraform init
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
+      - run:
+          command: terraform get
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
+      - run:
+          command: terraform plan -out update.tfplan -var digest=$(cat /tmp/workspace/<< parameters.service >>_container_digest)
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
+      - run:
+          command: terraform apply update.tfplan
+          working_directory: deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>
+
+  live-service-test:
+    # this job is intended to run against a running instance
+    # of the service.
+    #
+    # Requiremens: 
+    # - 'HURL_auth_token' environment variable is set
+    parameters:
+      env:
+        type: string
+        description: Terraform environment the service was deployed to.
+      service:
+        description: Service to test
+        type: enum
+        enum: ["graphql", "ldapi"]
+      project_dir:
+        description: Project directory
+        type: string
+    executor: hurl-executor
+    steps:
+      - checkout
+      - run:
+          name: "Get hostname from terraform config for the passed 'env' param"
+          command: |
+            echo "Extracting host name for << parameters.env >>"
+            TF_FILE=deploy/terraform/<< parameters.service >>/environments/<< parameters.env >>/main.tf
+            grep -e "\shost =" -e "\szone =" $TF_FILE | \
+             sed 's/ //g' | \
+             sed 's/"//g' | \
+             awk -F"=" '/^host=/{host=$2} /^zone=/{zone=$2} END{print host "." zone}' > HOSTNAME
+      - run:
+          name: "Run the hurl scripts"
+          working_directory: << parameters.project_dir >>
+          command: |
+            echo "running hurl against host: $(cat ../HOSTNAME)"
+            mkdir test-results
+            bb bin/hurl-runner.bb --dir hurl-scripts \
+              --variable scheme=https \
+              --variable "host_name=$(cat ../HOSTNAME)" \
+              --variable "series=hurl.variable.named/series" \
+              --variable "release=hurl.variable.named/release" \
+              --report-junit test-results/live.xml \
+              --report-html test-report
+      - store_artifacts:
+          path: << parameters.project_dir >>/test-report
+
+  ci-live-service-test:
+    # runs ldapi service container + container with hurl
+    parameters:
+      commit_sha:
+        type: string
+        description: SHA of the git commit used as docker image tag.
+      project_dir:
+        description: Project directory
+        type: string
+    docker:
+      - image: rosado/ci-clojure-hurl:1.11.1.1
+      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:<< parameters.commit_sha >>
+        environment:
+          LD_API_DATA_DIR: ./DATA
+          LD_API_FILE_DIR: ./FILES
+          CI: true
+          GCLOUD_PROJECT: none
+          BASIC_AUTH_PASSWORD_SECRET_NAME: none
+    steps:
+      - checkout
+      - await:
+          service: http://localhost
+      - run:
+          name: "Run the hurl scripts"
+          working_directory: << parameters.project_dir >>
+          command: |
+            echo "running hurl against host: localahost"
+            mkdir test-results
+            bb bin/hurl-runner.bb --dir hurl-scripts \
+              --variable scheme=http \
+              --variable "host_name=localhost" \
+              --variable "expected_scheme=https" \
+              --variable "expected_uri_root=ldapi-prototype.gss-data.org.uk" \
+              --variable "auth_token=ignore" \
+              --variable "series=hurl.variable.named/series" \
+              --variable "release=hurl.variable.named/release" \
+              --report-junit test-results/ci-live.xml \
+              --report-html test-report
+      - store_test_results:
+          path: << parameters.project_dir >>/test-results
+      - store_artifacts:
+          path: << parameters.project_dir >>/test-report
+
+  integration-test:
+    # Runs hurl scripts via unit test in the project.
+    #
+    # Requirements:
+    # - `:test-hurl` alias in projet's deps.edn, configured 
+    #    to run hurl  scripts
+    parameters:
+      project_dir:
+        description: Project directory
+        type: string
+    executor: clojure-executor
+    steps:
+      - checkout
+      - run:
+          name: Run integration tests
+          working_directory: << parameters.project_dir >>
+          command: |
+            clojure -X:test:test-hurl
+      - store_test_results:
+          path: << parameters.project_dir >>/test-results
+      - store_artifacts:
+          path: << parameters.project_dir >>/test-report
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  build-workflow:
+    jobs:
+      - unit-test:
+          project_dir: datahost-graphql
+          name: unit-test-graphql
+          context:
+            - swirrl-s3-jars-consumer
+            - swirrl-dockerhub-consumer
+          filters:  # required since `deploy` has tag filters AND requires `test`
+            tags:
+              only: /.*/
+      - unit-test:
+          project_dir: datahost-ld-openapi
+          name: unit-test-ldapi
+          context:
+            - swirrl-s3-jars-consumer
+            - swirrl-dockerhub-consumer
+          filters: # required since `deploy` has tag filters AND requires `test`
+            tags:
+              only: /.*/
+      - build-docker-image:
+          service: graphql
+          project_dir: datahost-graphql
+          name: build-docker-image-graphql
+          context:
+            - swirrl-s3-jars-consumer
+            - swirrl-dockerhub-consumer
+            - gcp-artifact-registry
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+          requires:
+            - unit-test-graphql
+      - build-docker-image:
+          service: ldapi
+          project_dir: datahost-ld-openapi
+          name: build-docker-image-ldapi
+          context:
+            - swirrl-s3-jars-consumer
+            - swirrl-dockerhub-consumer
+            - gcp-artifact-registry
+          filters:
+            # tags:
+            #   only: /^v.*/
+            branches:
+              only: main
+          requires:
+            - unit-test-ldapi
+            - integration-test-ldapi
+      - deploy-service:
+          service: graphql
+          env: dev
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - build-docker-image-graphql
+          filters:
+            branches:
+              only: main
+      - deploy-service:
+          service: ldapi
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - build-docker-image-ldapi
+            - ci-live-service-test
+          name: deploy-service-ldapi-dev
+          env: dev
+          filters:
+            branches:
+              only: main
+      - ci-live-service-test:
+          commit_sha: << pipeline.git.revision >>
+          project_dir: datahost-ld-openapi
+          requires:
+            - build-docker-image-ldapi
+          filters:
+            branches:
+              only: main
+      - integration-test:
+          project_dir: datahost-ld-openapi
+          name: integration-test-ldapi
+          requires:
+            - unit-test-ldapi
+      - deploy-service:
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - build-docker-image-graphql
+          env: ons
+          service: graphql
+          filters:
+            branches:
+              only: ons
+      - deploy-service:
+          service: ldapi
+          env: ons
+          context:
+            - swirrl-ons-datahost-gcloud
+          requires:
+            - build-docker-image-ldapi
+          filters:
+            branches:
+              only: ons

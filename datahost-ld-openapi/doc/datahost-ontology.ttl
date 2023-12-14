@@ -1,0 +1,53 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dh: <https://publishmydata.com/def/datahost/> .
+
+
+# TODO add comments and make into a proper ontology
+
+dh:baseEntity
+    a rdf:Property ;
+    rdfs:comment "Establishes a base URI string to be used for items logically beneath this resource in the data model." ;
+    rdfs:range xsd:string ;
+    rdfs:domain dh:DatasetSeries .
+
+dh:DatasetSeries a rdfs:Class .
+dh:Release a rdfs:Class .
+dh:Revision a rdfs:Class .
+dh:TableSchema a rdfs:Class .
+
+dh:DimensionColumn rdfs:subClassOf csvw:Column .
+dh:MeasureColumn rdfs:subClassOf csvw:Column .
+dh:AttributeColumn rdfs:subClassOf csvw:Column .
+
+dh:ChangeSet a rdfs:Class .
+dh:Commit a rdfs:Class .
+
+dh:Append rdfs:subClassOf dh:Commit .
+dh:Delete rdfs:subClassOf dh:Commit .
+dh:Correction rdfs:subClassOf dh:Append, dh:Delete .
+
+dh:commitId
+    a rdf:Property ;
+    rdfs:range xsd:integer ;
+    rdfs:domain dh:Commit .
+
+
+dh:previousCommit a rdf:Property ;
+    rdfs:range dh:Commit ;
+    rdfs:domain dh:Commit .
+
+
+dh:append
+    a rdf:Property ;
+    rdfs:domain dh:Commit ;
+    rdfs:range dh:AppendData .
+
+dh:delete
+    a rdf:Property ;
+    rdfs:domain dh:Commit ;
+    rdfs:range dh:DeleteData .
+
+dh:AppendData a rdfs:Class .
+dh:DeleteData a rdfs:Class .

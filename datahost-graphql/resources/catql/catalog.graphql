@@ -1,0 +1,155 @@
+scalar ID
+scalar URL
+scalar LangTag
+scalar DateTime
+#scalar CURI
+
+interface Labelled {
+  """
+  This RDF resources label.
+  """
+  label: String
+}
+
+interface Described {
+  """
+  This resources rdfs:description.
+  """
+  description: String
+}
+
+interface Literal {
+  datatype_id : ID!
+  value : String!
+}
+
+type DataLiteral implements Literal {
+  datatype_id : ID!
+  value : String!
+}
+
+type LangString implements Literal {
+  datatype_id: ID!
+  lang_tag: LangTag!
+  value: String!
+}
+
+input PrefixDef {
+  prefix: String!
+  base_uri: URL!
+}
+
+
+# An object with a Globally Unique ID
+interface Node {
+  """
+  The identifier of this RDF resource (a URI).
+  """
+  id: ID!
+}
+
+
+"""
+A Linked Data Cube
+"""
+type Dataset implements Node & Labelled & Described {
+  id: ID!
+  label: String
+  title: String
+  description: String
+  comment: String
+  modified: DateTime
+  issued: DateTime
+  publisher: String!
+  theme: String!
+  creator: String!
+}
+
+interface Endpoint {
+  endpoint_id: String!
+  # ... various other drafter/endpoint style properties e.g.
+  # modified_at, created_at, version etc...
+}
+
+interface Facet {
+  id: ID
+  label: String
+  """
+  Should the facet be enabled for user interaction?
+  """
+  enabled: Boolean
+}
+
+type CreatorFacet implements Facet {
+  id: ID
+  label: String
+  enabled: Boolean
+}
+
+type ThemeFacet implements Facet {
+  id: ID
+  label: String
+  enabled: Boolean
+}
+
+type PublisherFacet implements Facet {
+  id: ID
+  label: String
+  enabled: Boolean
+}
+
+type SearchFacets {
+  publishers: [PublisherFacet]
+  themes: [ThemeFacet]
+  creators: [CreatorFacet]
+  # TODO: wireframe indicates an updated facet; presumably this is a
+  #  "recently updated" badge
+  # updated: Facet
+}
+
+type CatalogSearchResult {
+  facets: SearchFacets
+  datasets: [Dataset]
+}
+
+type Catalog implements Node & Labelled {
+  id: ID!
+  label: String
+  description: String
+
+  catalog_query(search_string:String,
+    themes:[ID!],
+    creators:[ID!],
+    publishers:[ID!]
+ ): CatalogSearchResult
+
+}
+
+type DataEndpoint implements Endpoint {
+  endpoint_id: String!
+  """
+  Find a catalog by its ID
+  """
+  catalog(id: ID): Catalog
+}
+
+
+# Root type
+"""
+Cubiql 2 root query
+"""
+type Query {
+  """
+  NOTE: This is Not yet implemented.
+
+  But this is here to support the [global object identification](https://graphql.org/learn/global-object-identification/) pattern.
+  """
+  node(id: ID!): Node
+
+  """
+  Queries within this field occur against the specified endpoint, by default that endpoint is the configured public/live site.
+
+  Though not yet supported the plan is if a Drafter `draftset_id` argument is passed that draftset will be used and otherwise the public/live endpoint.
+  """
+  endpoint(draftset_id: String prefixes:[PrefixDef]): DataEndpoint
+}

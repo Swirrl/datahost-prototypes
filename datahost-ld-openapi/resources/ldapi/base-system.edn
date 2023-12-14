@@ -1,0 +1,34 @@
+{:tpximpact.datahost.ldapi/default-catalog-id "http://gss-data.org.uk/catalog/datasets"
+ :tpximpact.datahost.ldapi/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
+ :tpximpact.datahost.ldapi.jetty/http-port 3000
+
+ ;; Base URI should end in a trailing slash
+ :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "https://example.org/data/"}
+
+ ;; Associate a context and path-info with the ring request. The request URI must
+ ;; be a subpath of the supplied context. NOT to be confused with the RDF Base URI
+ ;; (although it may need to work closely with that for dereffing)
+ :tpximpact.datahost.ldapi/base-path ""
+
+ :tpximpact.datahost.ldapi.jetty/runnable-service
+ {:host "localhost"
+  :port #ig/ref :tpximpact.datahost.ldapi.jetty/http-port
+  :handler #ig/ref :tpximpact.datahost.ldapi.router/handler
+  :ide-path "/ld-api"
+  :default-subscriptions-path "/ws"}
+
+ :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "./tmp/ld-dev-db"}
+ :tpximpact.datahost.ldapi.store.file/store {:directory "./tmp/file-store"}
+
+ :tpximpact.datahost.ldapi.router/handler
+ {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
+  :clock #ig/ref :tpximpact.datahost.time/system-clock
+  :change-store #ig/ref :tpximpact.datahost.ldapi.store.file/store
+  :system-uris #ig/ref :tpximpact.datahost.system-uris/uris
+  :base-path #ig/ref :tpximpact.datahost.ldapi/base-path}
+
+ :tpximpact.datahost.time/system-clock {}
+
+ :tpximpact.datahost.ldapi.metrics/reporter {:enabled? false
+                                             :period 20 :time-unit :seconds}
+ }
