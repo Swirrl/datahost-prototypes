@@ -26,6 +26,10 @@
        (with-redefs [rand rand-1 rand-int rand-2]
          ~@body))))
 
+(defn create-directory-if-not-exists [directory-path]
+  (let [dir (io/file directory-path)]
+    (when-not (.exists dir)
+      (.mkdirs dir))))
 
 ;;SCHEMA
 (defn random-column-name []
@@ -96,14 +100,9 @@
   (generate-csv schema (str path-name output-name ".csv") y))
 
 (defn get-data [x y path-name output-name seed]
+  (create-directory-if-not-exists path-name)
   (let [generated-schema (with-rand-seed seed (get-rand-schema path-name output-name x seed))]
     (with-rand-seed seed (get-csv generated-schema path-name (str output-name) y))))
-
-(defn get-split-data [x y path-name output-name dividedby seed]
-  (let [generated-schema (with-rand-seed seed (get-rand-schema path-name output-name x seed))]
-    (dotimes [i dividedby]
-      (let [csv-output-name (str output-name i)]
-        (with-rand-seed seed (get-csv generated-schema path-name csv-output-name (/ y dividedby)))))))
 
 (defn get-split-data-seeded [x y path-name output-name dividedby seed]
   (let [generated-schema (get-rand-schema path-name output-name x seed)]
@@ -112,4 +111,5 @@
         (get-csv generated-schema path-name csv-output-name (/ y dividedby))))))
 
 (defn get-split-data [x y path-name output-name dividedby seed]
-       (with-rand-seed seed (get-split-data-seeded x y path-name output-name dividedby seed)))
+  (create-directory-if-not-exists path-name)
+  (with-rand-seed seed (get-split-data-seeded x y path-name output-name dividedby seed)))
