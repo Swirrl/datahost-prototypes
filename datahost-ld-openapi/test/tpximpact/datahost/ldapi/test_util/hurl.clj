@@ -4,10 +4,10 @@
   Hurl: https://hurl.dev"
   (:require
    [clojure.java.shell :as shell]
-   [clojure.java.io :as io]
+   [clojure.string :as str]
    [babashka.fs :as fs])
   (:import
-   [java.nio.file Path Files]))
+   [java.nio.file Path]))
 
 (defn- variables->args
   [m]
@@ -16,12 +16,12 @@
 
 (defn hurl
   [{:keys [script variables report-junit report-html file-root]}]
-  (let [variables (merge {"scheme" "http" 
-                          "expected_scheme" (or (get variables :scheme) 
+  (let [variables (merge {"scheme" "http"
+                          "expected_scheme" (or (get variables :scheme)
                                                 (get variables "scheme")
-                                                "http") 
+                                                "http")
                           "expected_uri_root" (or (get variables :host_name)
-                                                  (get variables "host_name"))} 
+                                                  (get variables "host_name"))}
                          variables)
         hurl-variables (mapcat (fn [v] ["--variable" v])
                                (variables->args variables))
@@ -73,7 +73,7 @@
       (do
         (println "\tsetup:" (str setup-script))
         (hurl (assoc options :script (str setup-script))))
-      
+
       (fs/exists? setup-ref)
       (let [path (fs/path file-root (-> setup-ref fs/file slurp (.trim)))]
         (println "\tsetup:" (str setup-ref) "-->" (str path))
@@ -88,11 +88,11 @@
   When each scripts requires different values for the same
   variable, use keyword values (see [[-instantiate-value]]).
   For example:
-  
+
   ```
   {:release :hurl.variable.named/release, ...}
   ```
-  
+
   Parameters:
 
   - dir-path - path to a direcotry (string | File| Path)
@@ -105,15 +105,15 @@
   [dir-path opts]
   (let [file-root (fs/path dir-path)
         paths (fs/match dir-path "regex:(issue-.*|pr-.*|int-.*)"
-                        {:max-depth 1 :recursive false})]
+                {:max-depth 1 :recursive false})]
+    (println)
     (doall
      (for [p ^Path paths
-           :when (not (clojure.string/ends-with? (str p) ".disabled"))]
+           :when (not (str/ends-with? (str p) ".disabled"))]
        (let [options (-> (select-keys opts [:variables])
                          (update :variables instantiate-variables)
                          (assoc :file-root (str file-root)))]
          (when (fs/directory? p)
-           (println "executing:" (str p))
            (let [{:keys [exit err]} (run-test-setup file-root p options)]
              (when (and (some? exit) (not= 0 exit))
                (throw (ex-info (format "Test setup for '%s' failed." p)
@@ -126,11 +126,13 @@
            (throw (ex-info (format "No test script in '%s'" p)
                            {:file-root file-root
                             :test-location p})))
-         (hurl (-> options
-                   (merge (select-keys opts [:report-junit :report-html]))
-                   (assoc :script (if (fs/directory? p)
-                                    (fs/path p (str (fs/file-name p) ".hurl"))
-                                    p)))))))))
+         (let [{:keys [err] :as ret} (hurl (-> options
+                                               (merge (select-keys opts [:report-junit :report-html]))
+                                               (assoc :script (if (fs/directory? p)
+                                                                (fs/path p (str (fs/file-name p) ".hurl"))
+                                                                p))))]
+           (println err)
+           ret))))))
 
 (defn success?
   "Did all scripts execute succesfully?
