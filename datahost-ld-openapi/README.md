@@ -83,6 +83,12 @@ This means that the latest `main` version can be found at:
 
 `europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:main`
 
+
+# Prerequisites
+
+- JDK 17+
+- [hurl](https://hurl.dev/) for HTTP tests
+
 # Dev
 
 Start a REPL and from the user namespace first run:
@@ -98,7 +104,7 @@ Then use `(start)` and `(reset)` to start and restart the service from the REPL.
 To run tests, from this directory run:
 
 ```
-$ clojure -X:dev:test
+$ ./bin/kaocha
 ```
 
 ## Basic Auth
