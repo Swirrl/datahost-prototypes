@@ -153,7 +153,7 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
-  ci-live-service-test:
+  ci-docker-hurl-test:
     # runs ldapi service container + container with hurl
     parameters:
       commit_sha:
@@ -278,13 +278,13 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - build-docker-image-ldapi
-            - ci-live-service-test
+            - ci-docker-hurl-test
           name: deploy-service-ldapi-dev
           env: dev
           filters:
             branches:
               only: main
-      - ci-live-service-test:
+      - ci-docker-hurl-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
           requires:
