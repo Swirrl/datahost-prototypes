@@ -16,12 +16,12 @@
 
 (defn hurl
   [{:keys [script variables report-junit report-html file-root]}]
-  (let [variables (merge {"scheme" "http" 
-                          "expected_scheme" (or (get variables :scheme) 
+  (let [variables (merge {"scheme" "http"
+                          "expected_scheme" (or (get variables :scheme)
                                                 (get variables "scheme")
-                                                "http") 
+                                                "http")
                           "expected_uri_root" (or (get variables :host_name)
-                                                  (get variables "host_name"))} 
+                                                  (get variables "host_name"))}
                          variables)
         hurl-variables (mapcat (fn [v] ["--variable" v])
                                (variables->args variables))
@@ -73,7 +73,7 @@
       (do
         (println "\tsetup:" (str setup-script))
         (hurl (assoc options :script (str setup-script))))
-      
+
       (fs/exists? setup-ref)
       (let [path (fs/path file-root (-> setup-ref fs/file slurp (.trim)))]
         (println "\tsetup:" (str setup-ref) "-->" (str path))
@@ -88,11 +88,11 @@
   When each scripts requires different values for the same
   variable, use keyword values (see [[-instantiate-value]]).
   For example:
-  
+
   ```
   {:release :hurl.variable.named/release, ...}
   ```
-  
+
   Parameters:
 
   - dir-path - path to a direcotry (string | File| Path)
