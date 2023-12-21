@@ -105,7 +105,8 @@
   [dir-path opts]
   (let [file-root (fs/path dir-path)
         paths (fs/match dir-path "regex:(issue-.*|pr-.*|int-.*)"
-                        {:max-depth 1 :recursive false})]
+                {:max-depth 1 :recursive false})]
+    (println)
     (doall
      (for [p ^Path paths
            :when (not (str/ends-with? (str p) ".disabled"))]
@@ -113,7 +114,6 @@
                          (update :variables instantiate-variables)
                          (assoc :file-root (str file-root)))]
          (when (fs/directory? p)
-           (println "executing:" (str p))
            (let [{:keys [exit err]} (run-test-setup file-root p options)]
              (when (and (some? exit) (not= 0 exit))
                (throw (ex-info (format "Test setup for '%s' failed." p)
@@ -126,11 +126,13 @@
            (throw (ex-info (format "No test script in '%s'" p)
                            {:file-root file-root
                             :test-location p})))
-         (hurl (-> options
-                   (merge (select-keys opts [:report-junit :report-html]))
-                   (assoc :script (if (fs/directory? p)
-                                    (fs/path p (str (fs/file-name p) ".hurl"))
-                                    p)))))))))
+         (let [{:keys [err] :as ret} (hurl (-> options
+                                               (merge (select-keys opts [:report-junit :report-html]))
+                                               (assoc :script (if (fs/directory? p)
+                                                                (fs/path p (str (fs/file-name p) ".hurl"))
+                                                                p))))]
+           (println err)
+           ret))))))
 
 (defn success?
   "Did all scripts execute succesfully?
