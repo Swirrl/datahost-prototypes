@@ -1,5 +1,0 @@
-ID,Measure type,Statistical Geography,Year,Aged 16 to 64 years level 3 or above qualifications,Unit of Measure,Upper Confidence Interval,Lower Confidence Interval,Observation Status
-http://ldapi-prototype.gss-data.org.uk/dataset-1/releases/1-1/de1215ddfd90a0474404bd46f44f7e7f9b023f8d,Aged 16 to 64 years level 3 or above qualifications,City of London,2019,,per cent,,,https://purl.org/csv-cubed/resources/attributes/af-obs-marker#x
-http://ldapi-prototype.gss-data.org.uk/dataset-1/releases/1-1/4c0dd761c6c3a8028d28bcd5ca069629a5eff6d5,Aged 16 to 64 years level 3 or above qualifications,Portsmouth,2019,75.6,per cent,81.7,69.5,
-http://ldapi-prototype.gss-data.org.uk/dataset-1/releases/1-1/31d7399e598fbf496bc8607ad4564b076520e069,Aged 16 to 64 years level 3 or above qualifications,North Lanarkshire,2019,52.0,per cent,58.2,46.8,
-http://ldapi-prototype.gss-data.org.uk/dataset-1/releases/1-1/f082605bdf3e7723a4f27622cbd5458639028113,Aged 16 to 64 years level 3 or above qualifications,Chester,2019,52.5,per cent,58.2,46.8,

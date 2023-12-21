@@ -1,4 +1,4 @@
-.DS_Store
-*node_modules
-test.js
-*/data/user.json
+_site
+node_modules
+.hintrc
+**/.DS_Store
