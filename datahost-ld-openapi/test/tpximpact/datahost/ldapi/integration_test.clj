@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.integration-test
+(ns ^:hurl tpximpact.datahost.ldapi.integration-test
   (:require
    [clojure.test :refer [deftest is testing]]
    [clojure.java.shell :as shell]
@@ -17,13 +17,14 @@
           (is (= 0 (:exit result))))))))
 
 (deftest integration-tests
-  (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
-    (let [variables {:host_name (str "localhost:" http-port)
-                     :series :hurl.variable.named/series
-                     :release :hurl.variable.named/release
-                     :auth_token "ignore"}
-          result (hurl/run-directory "hurl-scripts"
-                                     {:variables variables
-                                      :report-junit "test-results/hurl-regression-tests.xml"
-                                      :report-html "test-report"})]
-      (is (hurl/success? result)))))
+  (testing "all ./hurl-scripts"
+    (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
+      (let [variables {:host_name (str "localhost:" http-port)
+                       :series :hurl.variable.named/series
+                       :release :hurl.variable.named/release
+                       :auth_token "ignore"}
+            result (hurl/run-directory "hurl-scripts"
+                                       {:variables variables
+                                        :report-junit "test-results/hurl-regression-tests.xml"
+                                        :report-html "test-report"})]
+        (is (hurl/success? result))))))

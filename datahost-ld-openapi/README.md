@@ -101,11 +101,18 @@ Then use `(start)` and `(reset)` to start and restart the service from the REPL.
 
 `reset` will also reload changed namespaces.
 
-To run tests, from this directory run:
+To run all the tests, from this directory run:
 
 ```
 $ ./bin/kaocha
 ```
+
+To exclude the hurl integration tests you can run:
+
+```
+$ ./bin/kaocha --skip-meta hurl
+```
+
 
 ## Basic Auth
 
