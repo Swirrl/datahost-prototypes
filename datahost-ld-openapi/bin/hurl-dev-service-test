@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    HOSTNAME="localhost:3000" # default for dev env
+else
+    HOSTNAME="$1" # for overriding e.g. in ci when it tests locally
+fi
+
+mkdir -p test-results
+
+echo running hurl against host: $HOSTNAME
+
+bb bin/hurl-runner.bb --dir hurl-scripts \
+   --variable scheme=http \
+   --variable "host_name=$HOSTNAME" \
+   --variable "expected_scheme=https" \
+   --variable "expected_uri_root=example.org" \
+   --variable "auth_token=ignore" \
+   --variable "series=hurl.variable.named/series" \
+   --variable "release=hurl.variable.named/release" \
+   --report-junit test-results/ci-live.xml \
+   --report-html test-report
