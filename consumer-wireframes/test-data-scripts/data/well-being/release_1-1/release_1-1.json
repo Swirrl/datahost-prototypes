@@ -1,0 +1,100 @@
+{
+    "dh:columns": [
+      {
+        "csvw:name": "V4_3",
+        "csvw:titles": [
+          "V4_3"
+        ],
+        "csvw:datatype": "double",
+        "@type": "dh:MeasureColumn"
+      },
+      {
+        "csvw:name": "Data Marking",
+        "csvw:titles": [
+          "Data Marking"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:AttributeColumn"
+      },
+      {
+        "csvw:name": "Lower limit",
+        "csvw:titles": [
+          "Lower limit"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:AttributeColumn"
+      },
+      {
+        "csvw:name": "Upper limit",
+        "csvw:titles": [
+          "Upper limit"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:AttributeColumn"
+      },
+      {
+        "csvw:name": "yyyy-yy",
+        "csvw:titles": [
+          "yyyy-yy"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "Time",
+        "csvw:titles": [
+          "Time"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "administrative-geography",
+        "csvw:titles": [
+          "administrative-geography"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "Geography",
+        "csvw:titles": [
+          "Geography"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "measure-of-wellbeing",
+        "csvw:titles": [
+          "measure-of-wellbeing"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "MeasureOfWellbeing",
+        "csvw:titles": [
+          "MeasureOfWellbeing"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "wellbeing-estimate",
+        "csvw:titles": [
+          "wellbeing-estimate"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      },
+      {
+        "csvw:name": "Estimate",
+        "csvw:titles": [
+          "Estimate"
+        ],
+        "csvw:datatype": "string",
+        "@type": "dh:DimensionColumn"
+      }
+    ]
+  }

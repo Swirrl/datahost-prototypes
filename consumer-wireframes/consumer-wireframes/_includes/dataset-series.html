@@ -1,0 +1,154 @@
+---
+layout: basic
+---
+
+<main role="main" id="content" tabindex="-1">
+    <div class="container pt-3 ">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/datasets">Data catalogue</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><span id="titleBreadcrumb"></span></li>
+            </ol>
+        </nav>
+    </div>
+    <div class="jumbotron pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="font-weight-bold pr-5"><span id="title"></span>
+                    </h1>
+                    <p class="lead"><strong>Last modified:</strong> <span id="modified"></span> | <strong> Next
+                            update:</strong></p>
+                    <p><span id="description"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="pt-5">Data</h2>
+                <p>Datasets can be split into multiple releases over time where there are changes to the structure,
+                    methodology or reference data.</p>
+                <div id="releases" class="col-lg-8">
+                </div>
+                <div class="collapse" id="2011explain">
+                </div>
+            </div>
+
+            <div class="col-lg-4 pt-5 pb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Did you know you can automate access to this data by using the API</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>View this resource in the API</p>
+
+                        <h3 class="h5">
+                            <a class="btn btn-secondary" id="apiLink" href="{{example}}"" role=" button"
+                                target=”_blank”>
+                                Try it out
+                            </a>
+                        </h3>
+                        <p class="pt-2">Read the <a href "#">developer guidelines</a> for more information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8">
+                <h2 class="pt-5">About this dataset</h2>
+                <p><strong>Description:</strong> <span id="descriptionMetadata"></span></p>
+                <p><strong>Publisher:</strong> <a href="#"></a></p>
+                <p><strong>Topic:</strong> <a href="#"></a></p>
+                <p><strong>Licence:</strong> <a href=""></a></p>
+                <p><strong>Keywords:</strong> </p>
+                <p><strong>Identifier:</strong><span id='id'></span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 pb-5">
+                <h2 class="pt-5">Related datasets</h2>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    let url = window.location.href
+    uri = domain + url.split('?')[1]
+    document.getElementById('apiLink').href = uri
+
+    const settings = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    };
+
+    fetch(uri, settings)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            populatePage(data)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+
+    populatePage = data => {
+        document.getElementById('title').innerHTML = data["dcterms:title"]
+        document.getElementById('titleBreadcrumb').innerHTML = data["dcterms:title"]
+        document.getElementById('modified').innerHTML = data["dcterms:modified"]
+        document.getElementById('description').innerHTML = data["dcterms:description"]
+        document.getElementById('descriptionMetadata').innerHTML = data["dcterms:description"]
+        
+    }
+
+    fetch(`${uri}/releases`, settings)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            populateReleases(data)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+
+    populateReleases = data => {
+        let contents = data.contents
+        let list = document.getElementById("releases")
+        if (contents.length == 0) {
+            releases.innerHTML = "<p class='h3'>No releases created yet</p>"
+        } else {
+            for (i = 0; i < contents.length; i++) {
+                let releases = document.createElement("div")
+                if (i == contents.length-1) {
+                    releases.innerHTML =
+                        `<h3><a href="./dataset-release?/data/${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a></h3><hr>`
+                } else {
+                    releases.innerHTML =
+                        `<h3>
+                            <a href="./dataset-release?/data/${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a>
+                        </h3>
+                        <p>
+                            <a class="" data-bs-toggle="collapse" href="#${contents[i]["@id"]}explain" role="button" aria-expanded="false"
+                                aria-controls="collapseExample">
+                                Why is there a series break here?
+                            </a>
+                        </p>
+                        <div class="collapse" id="${contents[i]["@id"]}explain">
+                            <p>${contents[i]["dcterms:description"]}</p>
+                        </div>
+                        <hr>`
+                }
+                list.appendChild(releases);
+            }
+        }
+    }
+</script>

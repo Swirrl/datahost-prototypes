@@ -1,0 +1,701 @@
+v4_2,CV,CI+/-,calendar-years,Time,uk-only,Geography,age-groups,AgeGroups,sex,Sex,sexual-orientation,SexualOrientation,unit-of-measure,UnitOfMeasure
+1.9,b,0.3,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.2,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+0.3,c,0.1,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+0.9,c,0.2,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+2.6,b,0.3,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.4,a,0.2,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+94.7,a,0.4,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.2,c,0.1,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+0.2,c,0.1,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+0.3,c,0.1,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+0.9,c,0.3,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+96.4,a,0.3,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.6,b,0.4,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+93.5,a,0.8,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.1,d,0.1,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.1,c,0.6,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,d,0.3,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+2.4,b,0.2,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+93.2,a,1,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.3,c,0.1,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+2.5,a,0.2,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+95.8,a,0.3,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.5,c,0.1,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+3.3,a,0.3,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+5603,a,47,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+15,d,10,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+188,b,19,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+3352,a,30,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+122,b,23,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+113,b,15,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+0.2,c,0.1,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+3.4,b,0.6,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.6,a,0.2,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+95.8,a,0.3,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.3,d,0.1,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+3,b,0.3,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.4,d,0.2,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+0.3,d,0.1,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage
+32,c,10,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+14,c,5,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+9,d,4,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+41,c,9,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+15,d,6,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+12,d,5,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+19,c,7,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+79,c,21,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+128,c,26,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+35,c,7,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+95.8,a,0.3,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+96.3,a,0.3,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.8,b,0.1,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3450,a,37,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+29,d,13,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+18,c,6,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+4153,a,21,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+17,c,5,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+2.1,b,0.4,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1.2,b,0.2,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+95.1,a,0.5,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,c,0.1,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1.8,c,0.4,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+4059,a,25,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+114,b,17,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+117,b,16,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+47,c,10,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+28,c,7,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+53,b,9,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+15,d,8,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+18,c,5,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+30,c,7,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+25,c,6,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+199,a,16,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+5982,a,49,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+73,b,11,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+4842,a,17,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+91,b,16,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+139,b,15,2014,2014,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+126,a,12,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+11,c,4,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+15,c,5,2014,2014,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+5774,a,42,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+5741,a,19,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+21,c,6,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+6265,a,44,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+37,c,8,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+168,a,16,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+16,c,5,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+141,a,13,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+16,c,4,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+65,c,16,2014,2014,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+94.5,a,0.6,2014,2014,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.8,d,0.3,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+0.3,c,0.1,2014,2014,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+0.2,c,0.1,2014,2014,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+0.3,c,0.1,2014,2014,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+0.6,c,0.1,2014,2014,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3.5,c,0.7,2014,2014,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.1,c,0.2,2014,2014,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+199,b,21,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+187,b,32,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+5315,a,18,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+41,c,11,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+44,c,11,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+141,b,22,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+35,d,15,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+1.7,b,0.3,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+4158,a,39,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+5799,a,56,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+33,d,15,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+35,c,8,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+185,b,22,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+2979,a,48,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+6193,a,48,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+47,c,12,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+29,c,8,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+0.5,c,0.1,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+88.2,a,1.4,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.8,b,0.3,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.9,d,0.4,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+0.6,c,0.1,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+3.2,b,0.3,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+93.4,a,0.5,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.7,c,0.2,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+3,b,0.4,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.3,b,0.2,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1,d,0.4,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+0.7,c,0.2,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+0.6,c,0.1,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+94.2,a,0.4,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.6,c,0.8,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+0.6,c,0.1,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+3.1,b,0.5,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.4,c,0.3,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+5.5,b,0.9,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+3.3,c,0.8,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+142,c,31,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+93,c,27,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+6055,a,50,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+76,b,12,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+76,b,13,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+113,c,26,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+106,b,16,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+4168,a,26,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+61,b,12,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+31,c,8,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+32,c,7,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+184,a,17,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+5959,a,53,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+149,b,21,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+35,c,7,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+34,c,7,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+151,c,37,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+88.9,a,1.5,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+92.4,a,0.9,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+93.4,a,0.6,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+3.3,c,0.9,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.1,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+95,a,0.4,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.9,c,0.6,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1.2,b,0.2,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3,b,0.3,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.9,b,0.2,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+0.7,c,0.2,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage
+21,d,9,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+32,c,9,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+39,c,8,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+193,b,19,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+115,c,30,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+37,c,9,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+125,b,13,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+6151,a,22,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+63,c,22,2019,2019,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+62,c,13,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+55,b,10,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+181,b,19,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+96.1,a,0.3,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.4,b,0.3,2019,2019,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.8,b,0.4,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.9,c,0.2,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+0.5,d,0.2,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+4.3,c,1,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.7,b,0.3,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+0.6,c,0.1,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+22,c,6,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+3137,a,54,2019,2019,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+22,c,6,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+36,c,8,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+123,b,18,2019,2019,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+3.2,c,0.7,2019,2019,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.3,c,0.1,2019,2019,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+94.4,a,0.4,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.5,c,0.1,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,c,0.1,2019,2019,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+95.6,a,0.3,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.9,b,0.2,2019,2019,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+0.5,c,0.1,2019,2019,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+2.9,a,0.3,2019,2019,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+23,c,6,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+108,b,13,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+3159,a,39,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+50,b,10,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+28,c,7,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+60,c,19,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+33,c,10,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+6187,a,47,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+0.6,c,0.2,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+95.3,a,0.5,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.7,b,0.3,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.6,c,0.1,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,c,0.1,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+96.1,a,0.3,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.2,c,0.2,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+2.1,b,0.2,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.6,c,0.1,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+0.6,c,0.1,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+2.2,b,0.2,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+91.1,a,1.1,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+52,c,10,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+42,c,15,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+23,c,7,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+1.9,b,0.3,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1.5,b,0.2,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.7,c,0.2,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+2,b,0.2,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.3,c,0.1,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+0.4,c,0.1,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+3.5,c,0.8,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.8,b,0.4,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.7,a,0.2,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.6,c,0.1,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+122,b,18,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+30,c,6,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+127,c,29,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+6084,a,46,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+78,b,14,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+3,b,0.5,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1.1,b,0.2,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.3,c,0.1,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+0.5,c,0.2,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage
+2.9,c,0.6,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+107,c,23,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+133,b,14,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+25,c,8,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+78,c,22,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+131,b,23,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+168,a,15,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+27,d,12,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+82,b,16,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+54,c,11,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+19,c,6,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+5964,a,53,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+5830,a,51,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+93,b,14,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+31,c,7,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+4240,a,21,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+18,c,5,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+96.6,a,0.3,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+95.8,a,0.3,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.5,c,0.1,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+139,b,18,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+6021,a,19,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+38,c,8,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+31,c,8,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+94.9,a,0.4,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+95.3,a,0.4,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.2,c,0.6,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3326,a,42,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+4158,a,30,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+39,c,9,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+68,b,11,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+35,c,8,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+23,c,7,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+60,c,20,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+5145,a,18,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+14,c,5,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+37,c,8,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+134,b,15,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+32,c,7,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+101,c,22,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+131,b,15,2017,2017,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+93.9,a,0.7,2017,2017,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.6,c,0.5,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+1.7,c,0.6,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1.2,c,0.4,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+91.9,a,1.1,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.4,c,0.1,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+0.3,c,0.1,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+0.7,d,0.3,2017,2017,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+2.2,b,0.3,2017,2017,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2,b,0.2,2017,2017,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+96.3,a,0.3,2017,2017,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.2,c,0.2,2017,2017,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2017,2017,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+0.8,b,0.1,2017,2017,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3.1,c,0.7,2017,2017,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+86.2,a,1.9,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+93.1,a,0.8,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+194,b,33,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+36,d,21,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+6323,a,54,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+255,b,48,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+33,c,9,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+38,c,12,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+40,c,11,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+178,b,26,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+109,b,13,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+72,d,29,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+93,a,0.6,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.9,b,0.4,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+3,b,0.3,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.5,c,0.8,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+115,c,37,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+136,b,22,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+27,c,8,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+6040,a,57,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+53,c,11,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+34,c,11,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+2.9,b,0.4,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,c,0.2,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+2.1,b,0.3,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,d,0.2,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+1.6,d,0.7,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+4.3,b,0.7,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.5,b,0.5,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.6,b,0.3,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+6298,a,19,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+21,c,6,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+91,c,18,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+94,a,0.5,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+96.6,a,0.3,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+27,c,7,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+83,c,27,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+111,b,21,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+142,b,16,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+5763,a,65,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+6007,a,61,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+39,c,14,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+71,c,17,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+3094,a,74,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+5429,a,17,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+45,c,15,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+4123,a,43,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+32,c,10,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+16,c,5,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+31,c,8,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+191,b,22,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+2889,a,65,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+91.6,a,1,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1,c,0.3,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+1,c,0.2,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+3.3,c,1.1,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.3,c,0.1,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+148,c,54,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+4130,a,34,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+78,b,15,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+113,c,24,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+177,b,25,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+0.5,c,0.2,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+2.5,c,0.5,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.2,d,0.9,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.2,b,0.2,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.6,c,0.1,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+35,c,7,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+108,c,39,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+53,d,25,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+29,c,8,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+25,d,10,2020,2020,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+69,c,14,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+95.6,a,0.4,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.6,c,0.4,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2,c,0.4,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+24,c,6,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+167,b,22,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+159,b,19,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+4.2,c,1.6,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.2,b,0.2,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,c,0.2,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+2.4,b,0.3,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+94.7,a,0.5,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,c,0.2,2020,2020,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+96.7,a,0.3,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.4,c,0.1,2020,2020,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2020,2020,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+0.8,c,0.3,2020,2020,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage
+0.6,c,0.1,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+0.3,c,0.1,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.8,c,0.2,2020,2020,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2020,2020,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+88.4,a,2.1,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+3.1,c,1.1,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+1,d,0.6,2020,2020,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+1.9,b,0.2,2020,2020,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+7.6,b,1.4,2020,2020,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+98,b,17,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+13,c,4,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+5963,a,45,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+39,c,8,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+101,c,27,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+92,a,1.2,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.3,c,0.6,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.2,b,0.4,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+3.3,a,0.3,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+91.9,a,1.1,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.9,b,0.2,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.3,b,0.2,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.8,b,0.3,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.3,c,0.1,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+94.9,a,0.5,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+95.8,a,0.3,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+96.3,a,0.3,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+95.7,a,0.3,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,c,0.1,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.2,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+0.5,c,0.1,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+2.3,b,0.3,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.3,c,0.1,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+2.1,c,0.8,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+0.6,c,0.1,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+57,b,10,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+20,c,5,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+18,c,6,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+111,c,24,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+2.8,b,0.5,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.2,b,0.2,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.2,c,0.1,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.1,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage
+0.5,c,0.1,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+2.2,b,0.3,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+125,b,21,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+30,c,7,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+29,c,7,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+145,b,17,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+4200,a,22,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+4135,a,29,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+113,b,12,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+26,c,10,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+26,c,7,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+34,c,8,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+3241,a,40,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+12,c,4,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+117,b,17,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+205,a,17,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+0.5,c,0.1,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+3,c,0.7,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.1,c,0.4,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+86,b,13,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+109,c,25,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+138,b,15,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+36,c,8,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+97,b,14,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+142,b,15,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+1.3,c,0.3,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+5053,a,17,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+28,c,6,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+38,c,14,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+57,c,12,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+34,c,13,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+3372,a,43,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+5747,a,50,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+85,c,21,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+22,d,10,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+53,c,11,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+147,b,15,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+6237,a,47,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+5909,a,20,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+27,c,6,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+29,c,7,2016,2016,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+22,c,8,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+5987,a,52,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+76,c,28,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+21,c,6,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+31,c,7,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+26,c,7,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+94.9,a,0.4,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+96.5,a,0.3,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.4,b,0.2,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.1,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+2.3,b,0.3,2016,2016,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.2,c,0.3,2016,2016,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+95.4,a,0.4,2016,2016,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,c,0.1,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,c,0.2,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+0.5,c,0.1,2016,2016,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+2.9,c,0.8,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+93.8,a,0.7,2016,2016,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,d,0.3,2016,2016,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+1,c,0.4,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+0.5,c,0.1,2016,2016,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+0.4,c,0.1,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+3.2,c,0.7,2016,2016,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.3,b,0.2,2016,2016,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.6,b,0.4,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+93.2,a,0.9,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1,c,0.2,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+95.6,a,0.3,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.2,c,0.1,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+0.5,c,0.2,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+1.4,b,0.2,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.1,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+93.6,a,0.9,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.5,b,0.4,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,d,0.3,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+0.4,c,0.1,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+2.7,b,0.3,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.3,b,0.2,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.8,b,0.1,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,d,0.2,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage
+1.8,b,0.3,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+96.5,a,0.3,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2,c,0.5,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.2,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+95.6,a,0.3,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.1,c,0.2,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.2,c,0.1,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.1,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+19,c,5,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+38,c,12,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+210,a,17,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+0.8,c,0.2,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+96.1,a,0.3,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+2.5,c,0.5,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+2.2,b,0.2,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+94.7,a,0.4,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.2,c,0.1,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+4954,a,17,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+6297,a,44,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+30,c,6,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+50,c,11,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+55,b,10,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+38,c,8,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+21,c,6,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+73,c,18,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+93.7,a,0.7,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,c,0.1,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.3,b,0.2,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.6,c,0.1,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,c,0.1,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+116,b,17,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+15,c,6,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+19,c,7,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+120,b,12,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+39,c,8,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+17,d,8,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+102,b,14,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+2.7,c,0.6,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+96.3,a,0.3,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.1,c,0.3,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.4,c,0.1,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+2.3,b,0.3,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.1,b,0.2,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+34,c,11,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+30,c,7,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+6029,a,51,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+4184,a,22,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+9,c,3,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+42,c,9,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+5618,a,48,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+12,d,7,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+130,b,13,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+107,b,19,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+45,c,16,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+25,c,6,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+115,b,18,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+18,c,5,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+3453,a,34,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+18,d,9,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+134,b,14,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+5819,a,20,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+103,c,23,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+32,c,10,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+174,b,19,2015,2015,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+3327,a,32,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+24,c,6,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+4067,a,29,2015,2015,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+84,b,12,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+13,c,5,2015,2015,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+9,c,3,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+101,c,24,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+5841,a,43,2015,2015,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+89,c,20,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+24,c,6,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+141,b,14,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+1.2,c,0.4,2015,2015,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+0.2,c,0.1,2015,2015,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+95.2,a,0.5,2015,2015,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.3,d,0.2,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+0.3,c,0.1,2015,2015,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+2.9,c,0.6,2015,2015,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+3.5,a,0.3,2015,2015,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+29,c,6,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+65,c,22,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,number,Number
+5242,a,18,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+134,b,25,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+25,c,7,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,number,Number
+6144,a,49,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+6148,a,47,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+126,b,21,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+49,c,10,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+131,c,26,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,number,Number
+44,c,16,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,number,Number
+111,b,17,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+2.2,c,0.7,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+1,c,0.4,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,percentage,Percentage
+3,b,0.6,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+164,a,16,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+3256,a,48,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+134,b,21,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+29,c,6,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,other,Other,number,Number
+150,c,35,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+56,b,10,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+32,c,7,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,number,Number
+94.4,a,0.5,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+96.5,a,0.3,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.5,c,0.1,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+2.5,b,0.3,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.9,b,0.2,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.6,d,0.3,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,percentage,Percentage
+0.8,b,0.1,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,percentage,Percentage
+90.6,a,1.2,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+94.3,a,0.5,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+96,a,0.3,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.3,c,0.5,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,other,Other,percentage,Percentage
+91.1,a,1.4,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.8,c,0.6,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,bisexual,Bisexual,percentage,Percentage
+0.3,c,0.1,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,percentage,Percentage
+2.1,b,0.3,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.6,c,0.1,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,percentage,Percentage
+96.3,a,0.3,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.3,c,0.1,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3.3,c,0.8,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.6,a,0.2,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+107,b,16,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+4200,a,24,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+27,c,8,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,number,Number
+113,c,28,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+21,c,6,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+5921,a,53,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+22,d,11,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,other,Other,number,Number
+3098,a,41,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+6111,a,19,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,heterosexual-or-straight,Heterosexual or straight,number,Number
+30,c,9,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,number,Number
+25,c,7,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,number,Number
+31,c,7,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,bisexual,Bisexual,number,Number
+40,c,9,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,number,Number
+144,b,16,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+2.1,b,0.2,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+2.5,b,0.4,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.1,c,0.2,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+79,c,26,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,gay-or-lesbian,Gay or lesbian,number,Number
+25,d,10,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,number,Number
+80,b,13,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+156,b,19,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+34,c,13,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,gay-or-lesbian,Gay or lesbian,number,Number
+68,b,12,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,number,Number
+49,b,9,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,bisexual,Bisexual,number,Number
+19,c,5,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,number,Number
+29,c,7,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,other,Other,number,Number
+93,a,0.8,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+95.3,a,0.4,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+1.7,b,0.3,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.7,c,0.2,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,bisexual,Bisexual,percentage,Percentage
+0.6,d,0.2,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,other,Other,percentage,Percentage
+1.2,b,0.2,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+3.8,c,0.8,2018,2018,K02000001,United Kingdom,16-24,16-24,female,Female,bisexual,Bisexual,percentage,Percentage
+0.3,c,0.1,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,bisexual,Bisexual,percentage,Percentage
+0.5,c,0.1,2018,2018,K02000001,United Kingdom,65+,65+,female,Female,other,Other,percentage,Percentage
+4158,a,35,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+138,b,15,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,number,Number
+4.2,c,1,2018,2018,K02000001,United Kingdom,16-24,16-24,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+0.5,c,0.1,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,other,Other,percentage,Percentage
+2.2,b,0.3,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+35,c,9,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,other,Other,number,Number
+132,b,16,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+2.2,b,0.2,2018,2018,K02000001,United Kingdom,50-64,50-64,female,Female,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+14,c,4,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,bisexual,Bisexual,number,Number
+5903,a,56,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,heterosexual-or-straight,Heterosexual or straight,number,Number
+30,c,7,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,number,Number
+116,b,13,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,dont-know-or-refuse,Don't know or refuse,number,Number
+2.1,b,0.3,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,gay-or-lesbian,Gay or lesbian,percentage,Percentage
+0.5,c,0.1,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,other,Other,percentage,Percentage
+0.4,c,0.1,2018,2018,K02000001,United Kingdom,35-49,35-49,male,Male,bisexual,Bisexual,percentage,Percentage
+0.4,c,0.1,2018,2018,K02000001,United Kingdom,50-64,50-64,male,Male,bisexual,Bisexual,percentage,Percentage
+0.5,c,0.1,2018,2018,K02000001,United Kingdom,65+,65+,male,Male,other,Other,percentage,Percentage
+95.2,a,0.4,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,heterosexual-or-straight,Heterosexual or straight,percentage,Percentage
+0.6,c,0.1,2018,2018,K02000001,United Kingdom,35-49,35-49,female,Female,other,Other,percentage,Percentage
+2.8,b,0.5,2018,2018,K02000001,United Kingdom,25-34,25-34,male,Male,dont-know-or-refuse,Don't know or refuse,percentage,Percentage
+1.5,b,0.3,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,bisexual,Bisexual,percentage,Percentage
+0.6,c,0.2,2018,2018,K02000001,United Kingdom,25-34,25-34,female,Female,other,Other,percentage,Percentage

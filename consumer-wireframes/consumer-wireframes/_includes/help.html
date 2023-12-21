@@ -1,0 +1,46 @@
+---
+layout: basic
+---
+
+<main role="main" id="content" tabindex="-1">
+    <div class="jumbotron pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="font-weight-bold pr-5">Guide to terms and other helpful info</h1>
+                    <p class="lead"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <h2 class="pt-5 pb-3">Update model</h2>
+            <div class="col-lg-7">
+                <h3>Dataset Series</h3>
+                <p>Top level wrapper to give a consistent name and base URI (location) to a set of data. </p>
+                <hr>
+                <h3>Release</h3>
+                <p>A coherent set of data which follows a consistent structure/schema and methodology. A breaking change
+                    leads to a new release within the dataset series.</p>
+                <hr>
+                <h3>Revision</h3>
+                <p>A named, ordered set of compatible change-sets, representing the 3 operations (append, delete and
+                    correction).</p>
+                <h4>Operations</h4>
+                <h5>Append </h5>
+                <p>The new observations/rows to 'logically add' to the next revision</p>
+                <h5>Delete </h5>
+                <p>The rows which should 'logically be removed' from the next revision</p>
+                <h5>Correct/Revise</h5>
+                <p>The set of rows which have been revised, corrected or amended. This is a special case of
+                    append/delete; where a new URI is automatically coined for the new row with a reference to the old
+                    observation which this change replaces. </p>
+                <hr>
+            </div>
+            <div class="col-lg-5">
+                <img alt="" class="img-fluid" src="/assets/model.png">
+            </div>
+        </div>
+    </div>
+</main>

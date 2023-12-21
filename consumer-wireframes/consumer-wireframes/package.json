@@ -1,0 +1,15 @@
+{
+  "name": "api-demonstrator",
+  "version": "1.0.0",
+  "description": "Uses:  - Static site generator https://www.11ty.io/ - Framework https://getbootstrap.com/docs/4.3/getting-started/introduction/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@11ty/eleventy": "^1.0.2"
+  }
+}
