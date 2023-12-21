@@ -4,10 +4,10 @@
   Hurl: https://hurl.dev"
   (:require
    [clojure.java.shell :as shell]
-   [clojure.java.io :as io]
+   [clojure.string :as str]
    [babashka.fs :as fs])
   (:import
-   [java.nio.file Path Files]))
+   [java.nio.file Path]))
 
 (defn- variables->args
   [m]
@@ -108,7 +108,7 @@
                         {:max-depth 1 :recursive false})]
     (doall
      (for [p ^Path paths
-           :when (not (clojure.string/ends-with? (str p) ".disabled"))]
+           :when (not (str/ends-with? (str p) ".disabled"))]
        (let [options (-> (select-keys opts [:variables])
                          (update :variables instantiate-variables)
                          (assoc :file-root (str file-root)))]
