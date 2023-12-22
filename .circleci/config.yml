@@ -179,7 +179,7 @@ jobs:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
           command: |
-            ./bin/hurl-dev-service-test localhost
+            ./bin/hurl-live-service-test localhost
       - store_test_results:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
