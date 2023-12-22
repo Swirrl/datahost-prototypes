@@ -43,11 +43,9 @@
                               :source-paths ["src"]}]
                      :plugins [:kaocha.plugin/profiling :kaocha.plugin/junit-xml]
                      :kaocha.plugin.junit-xml/target-file "test-results/kaocha/results.xml"
-                     :reporter kaocha.report/documentation
-
-                     }
-
-         }
+                     :reporter kaocha.report/documentation}}
+  :test/integration {}
+  :test/unit {}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}

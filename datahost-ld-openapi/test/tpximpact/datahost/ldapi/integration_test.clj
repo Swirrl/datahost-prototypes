@@ -5,7 +5,7 @@
    [tpximpact.test-helpers :as th]
    [tpximpact.datahost.ldapi.test-util.hurl :as hurl :refer [hurl]]))
 
-(deftest minimal-tests
+(deftest ^:hurl minimal-tests
   (testing "verify we plain `hurl` call works"
     (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
       (let [variables {:host_name (str "localhost:" http-port)
@@ -16,7 +16,7 @@
                             :report-junit "test-results/hurl.xml"})]
           (is (= 0 (:exit result))))))))
 
-(deftest integration-tests
+(deftest ^:hurl integration-tests
   (testing "all ./hurl-scripts"
     (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
       (let [variables {:host_name (str "localhost:" http-port)

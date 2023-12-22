@@ -1,7 +1,11 @@
 #kaocha/v1
-{:tests [{:id          :tests
+{:tests [{:id          :unit
           :test-paths  ["test"]
-          :ns-patterns [".*-test"]}]
+          :ns-patterns [".*-test"]
+          :skip-meta   [:hurl]}
+         {:id          :integration
+          :ns-patterns [".*-test"]
+          :focus-meta  [:hurl]}]
  :capture-output? false
  :reporter [kaocha.report/documentation]
 ; :plugins [:kaocha.plugin/junit-xml]

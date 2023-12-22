@@ -67,16 +67,14 @@
   :test-watch {:extra-deps {lambdaisland/kaocha {:mvn/version "1.85.1342"}}
                :exec-fn kaocha.runner/exec-fn
                :exec-args {:watch? true
-	                       :skip-meta :pending
-	                       :fail-fast? true}}
-  :test-hurl {:extra-paths ["test-hurl"]
-              :exec-fn kaocha.runner/exec-fn
-              :exec-args {:tests [{:id :integration
-                                   :test-paths ["test-hurl"]
-                                   :source-paths ["src"]}]
-                          ;; don't generate junit report when used with :test alias
-                          :plugins []
-                          :reporter kaocha.report/documentation}}
+	                          :skip-meta [:pending]
+	                          :fail-fast? true}}
+  :test/unit {:exec-args {:tests [{:id :unit 
+  	                                :skip-meta [:hurl]}]}}
+  :test/integration {:exec-args {:tests [{:id :integration
+              																			:focus-meta [:hurl]}]
+              							:plugins []
+                     :reporter kaocha.report/documentation}}
 
   :dev {:extra-paths ["env/dev/src" "env/test/resources" "test"]
         :extra-deps {integrant/repl {:mvn/version "0.3.2"}

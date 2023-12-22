@@ -45,7 +45,7 @@ jobs:
           name: Run unit tests
           command: |
             cd << parameters.project_dir >>
-            clojure -X:test
+            clojure -X:test:test/unit
       - store_test_results:
           path: << parameters.project_dir >>/test-results
 
@@ -202,7 +202,7 @@ jobs:
           name: Run integration tests
           working_directory: << parameters.project_dir >>
           command: |
-            clojure -X:test:test-hurl
+            clojure -X:test:test/integration
       - store_test_results:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
