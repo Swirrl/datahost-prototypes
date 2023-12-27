@@ -91,11 +91,11 @@ HTTP 200
 #[Capture]
 #etag: header "Etag"
 #```
-#name,age,dh/kind,dh/id,dh/tx,dh/parent
-#max,33,DELETE,<ID>,<TX>,
-#max,44,APPEND,<ID>,<TX>,<ID>
-#cindy,33,DELETE,<ID>,<TX>,
-#will,50,APPEND,<ID>,<TX>,
+#name,age,dh/op,datahost.row/id,datahost.row.id/previous
+#max,33,retract,<ID>,<ID>,
+#max,44,append,<ID>,<ID>,<ID>
+#cindy,33,retract,<ID>,<ID>,
+#will,50,append,<ID>,<ID>,
 #```
 
 
