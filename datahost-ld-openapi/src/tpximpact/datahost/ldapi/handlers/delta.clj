@@ -18,9 +18,15 @@
             [tpximpact.datahost.ldapi.util.data.delta :as data.delta]))
 
 (defn write-dataset-to-outputstream [tc-dataset]
-  (ring-io/piped-input-stream
-   (fn [out-stream]
-     (tc/write! tc-dataset out-stream {:file-type :csv}))))
+  (let [fmt ^java.util.HexFormat (java.util.HexFormat/of)
+        hex #(.toHexDigits fmt %)]
+   (ring-io/piped-input-stream
+    (fn [out-stream]
+      (tc/write! (tc/map-rows tc-dataset (fn [row]
+                                           (-> row
+                                               (update "datahost.row/id" hex)
+                                               (update "datahost.row.id/previous" #(some-> % hex)))))
+                 out-stream {:file-type :csv})))))
 
 (defn error-no-revisions
   []
