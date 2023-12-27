@@ -4,19 +4,19 @@
    [tpximpact.datahost.ldapi.util.data.internal :as data.internal]
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]))
 
-(def ^:private tag=modify 3)
+(def ^:private tag=modify "correct")
 
 (defn- tag-change
   [old-measure-val new-measure-val]
   (cond
-    (nil? old-measure-val) 1
-    (nil? new-measure-val) 2
+    (nil? old-measure-val) "append"
+    (nil? new-measure-val) "retract"
     (not= old-measure-val new-measure-val) tag=modify))
 
 (defn- row-changed? [row] (some? (get row data.internal/op-column-name)))
 
 (defn- add-tx-columns
-  "Adds \"datahost.row/id\" and  `data.internal./coords-column-name`"
+  "Adds \"datahost.row/id\" and  `data.internal/coords-column-name`"
   [{:keys [coords-columns] measure-column-name :measure-column :as _ctx}
    row]
   (let [sb (data.internal/make-hasher-input (StringBuilder.) (map #(get row %) coords-columns))
@@ -56,7 +56,7 @@
   "Given a row of a joined dataset, copy values from the \"right\"
   dataset into the \"left\" one."
   [new-ds-name col-names row]
-  (let [append? (fn [row] (= 1 (get row "dh/op")))]
+  (let [append? (fn [row] (= "append" (get row "dh/op")))]
     (if-not (append? row)
       row
       (reduce (fn [row [l-col r-col]]
@@ -74,16 +74,16 @@
   [joined-ds {{measure-l :left measure-r :right} :measure right-id :id}]
   (let [corrections (tc/map-rows (tc/select-rows joined-ds correction-row?)
                                  (fn [row] (assoc row "datahost.row.id/previous" (get row "datahost.row/id"))))]
-    (tc/union (tc/map-rows corrections (fn [row] (assoc row data.internal/op-column-name 2 "datahost.row.id/previous" nil)))
+    (tc/union (tc/map-rows corrections (fn [row] (assoc row data.internal/op-column-name "retract" "datahost.row.id/previous" nil)))
               (tc/map-rows corrections (fn [row] (assoc row
-                                                        data.internal/op-column-name 1
+                                                        data.internal/op-column-name "append"
                                                         measure-l (get row measure-r)
                                                         "datahost.row/id" (get row right-id)))))))
 
 (defn delta-dataset
   "Returns a dataset with extra columns:
 
-  - \"dh/op\" - (1 = append | 2 = retraction)
+  - \"dh/op\" - append | retract
   - \"datahost.row/id\" - hash of coords+measure value
   - \"datahost.row.id/previous\" - see \"datahost.row/id\"
 
