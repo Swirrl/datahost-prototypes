@@ -9,8 +9,6 @@
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]))
 
 (deftest diffing-datasets
-  ;; (th/with-system-and-clean-up {http-port :tpximpact.datahost.ldapi.jetty/http-port :as sys}
-  ;;   (is false))
   (let [row-schema (data.validation/make-row-schema-from-json
                     {"dh:columns" [{"@type" "dh:DimensionColumn"
                                     "csvw:name" "attr1"
@@ -30,8 +28,9 @@
                                                    {"measure" 3.0 "attr1" "c"}
                                                    {"measure" 4.5 "attr1" "d"}] {})
         result (data.delta/delta-dataset ds1 ds2 {:row-schema row-schema
-                                                      :measure-column "measure"
-                                                      :coords-columns ["attr1"]})]
+                                                  :measure-column "measure"
+                                                  :coords-columns ["attr1"]})]
     (is (= 4 (tc/row-count result)))
-    (is (= 3 (count (set (tc/->array result "datahost.row/id")))))))
+    (is (= 4 (count (set (tc/->array result "datahost.row/id")))))
+    (is (= 1 (count (disj (set (tc/->array result "datahost.row.id/previous")) Long/MIN_VALUE))))))
 

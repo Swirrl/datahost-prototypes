@@ -25,12 +25,13 @@
     (assoc row "datahost.row/id" id data.internal/coords-column-name coords)))
 
 (defn- make-column-names
-  "Returns TODO"
+  "Returns a map of {:coords {:left ... :right ...} :measure {:left ... right ...} :id RIGHT-ID-COL-NAME}"
   [right-ds-name measure-column-name coord-column-names]
   (let [right-measure-column-name (data.internal/r-joinable-name right-ds-name measure-column-name)
         right-coord-column-names (map #(data.internal/r-joinable-name right-ds-name %)
                                       coord-column-names)]
-    {:coords {:left coord-column-names
+    {:id (data.internal/r-joinable-name right-ds-name "datahost.row/id")
+     :coords {:left coord-column-names
               :right right-coord-column-names}
      :measure {:left measure-column-name
                :right right-measure-column-name}}))
@@ -63,25 +64,28 @@
               row
               (make-diff-column-pairs new-ds-name col-names)))))
 
+(defn- correction-row? [row] (= tag=modify (get row data.internal/op-column-name)))
+
 (defn- corrections->retractions+appends
   "Takes dataset joined & tagged with \"dh/op\" and returns a dataset
   where each correction is turned into a pair of append+retraction
-  rows. The two rows will be linked via the value in \"datahost.row.id/ref\" column
+  rows. The two rows will be linked via the value in \"datahost.row.id/previous\" column
   of the append row."
-  [joined-ds {measure-l :left measure-r :right}]
-  (let [correction? (fn [row] (= tag=modify (get row "dh/op")))
-        corrections (tc/map-rows (tc/select-rows joined-ds correction?)
-                                 (fn [row] (assoc row "datahost.row.id/ref" (get row "datahost.row/id"))))]
-    (tc/union (tc/map-rows corrections (fn [row]
-                                         (assoc row "dh/op" 2 "datahost.row.id/ref" nil)))
-              (tc/map-rows corrections (fn [row] (assoc row "dh/op" 1 measure-l (get row measure-r)))))))
+  [joined-ds {{measure-l :left measure-r :right} :measure right-id :id}]
+  (let [corrections (tc/map-rows (tc/select-rows joined-ds correction-row?)
+                                 (fn [row] (assoc row "datahost.row.id/previous" (get row "datahost.row/id"))))]
+    (tc/union (tc/map-rows corrections (fn [row] (assoc row data.internal/op-column-name 2 "datahost.row.id/previous" nil)))
+              (tc/map-rows corrections (fn [row] (assoc row
+                                                        data.internal/op-column-name 1
+                                                        measure-l (get row measure-r)
+                                                        "datahost.row/id" (get row right-id)))))))
 
 (defn delta-dataset
   "Returns a dataset with extra columns:
 
   - \"dh/op\" - (1 = append | 2 = retraction)
   - \"datahost.row/id\" - hash of coords+measure value
-  - \"datahost.row.id/ref\" - see \"datahost.row/id\"
+  - \"datahost.row.id/previous\" - see \"datahost.row/id\"
 
   Unchanged rows are not present in the returned delta dataset.
 
@@ -100,9 +104,8 @@
 
         [base-ds new-ds] (let [add-cols (partial add-tx-columns ctx)]
                            [(tc/map-rows base-ds add-cols)
-                            (let [ds (tc/map-rows new-ds add-cols)]
-                              (data.validation/validate-row-coords-uniqueness ds row-schema)
-                              ds)])
+                            (tc/map-rows new-ds add-cols)])
+        _ (data.validation/validate-row-coords-uniqueness new-ds row-schema)
         ;; we do a full join and choose only appends/retractions/corrections
         joined (-> (tc/full-join base-ds new-ds data.internal/coords-column-name
                                  {:operation-space :int64})
@@ -111,13 +114,12 @@
                                    tag-change)
                    (tc/select-rows row-changed?))
         ;; we turn corrections into pairs of retraction+append rows
-        corrections (corrections->retractions+appends joined (:measure col-names))
-        correction? (fn [row] (= tag=modify (get row "dh/op")))
-        appends+retractions (tc/map-rows (tc/select-rows joined (complement correction?))
+        corrections (corrections->retractions+appends joined col-names)
+        appends+retractions (tc/map-rows (tc/select-rows joined (complement correction-row?))
                                          (partial augment-append-row new-ds-name col-names))]
     (tc/select-columns (tc/concat appends+retractions corrections)
                        (conj (vec coords-columns)
                              measure-column-name
-                             "dh/op"
+                             data.internal/op-column-name
                              "datahost.row/id"
-                             "datahost.row.id/ref"))))
+                             "datahost.row.id/previous"))))
