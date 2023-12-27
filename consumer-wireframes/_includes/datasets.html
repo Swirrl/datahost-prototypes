@@ -1,0 +1,84 @@
+---
+layout: basic
+---
+
+<main role="main" id="content" tabindex="-1">
+    <div class="container pt-3 ">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Data catalogue</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="jumbotron pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="font-weight-bold pr-5">Data catalogue</h1>
+                    <p class="lead"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div id="datasets" class="col-lg-8">
+                <p class="pt-4 pb-4 h4"><span id="count"></span> Results</p>
+            </div>
+            <div class="col-lg-4 pt-5 pb-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Did you know you can automate access to this data by using the API</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Get a list of datasets and filter by themes and topics using the Catalogue API</p>
+            
+                        <h3 class="h5">
+                            <a class="btn btn-secondary" id = "apiLink" href="{{example}}"" role="button" target=”_blank”>
+                                Try it out
+                            </a>
+                        </h3>
+                        <p class="pt-2">Read the <a href "#">developer guidelines</a> for more information.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script>
+    // let url = window.location.href
+    let uri = domain + '/data'
+
+    const settings = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    };
+
+    fetch(uri, settings)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            populatePage(data)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+
+    populatePage = data => {
+        let contents = data.contents
+        let list = document.getElementById("datasets")
+        document.getElementById("count").innerHTML=contents.length
+        document.getElementById('apiLink').href = uri
+        for (i = 0; i < contents.length; i++) {
+            let dataset = document.createElement("div")
+            dataset.innerHTML =
+                `<h3><a href="./dataset-series/?/data/${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a></h3><p>${contents[i]["dcterms:description"]}</p><hr>`
+            list.appendChild(dataset);
+        }
+    }
+</script>

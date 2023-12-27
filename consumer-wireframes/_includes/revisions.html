@@ -1,0 +1,152 @@
+---
+layout: basic
+---
+
+<main role="main" id="content" tabindex="-1">
+    <div class="container pt-3 ">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/datasets">Datasets</a></li>
+                <li class="breadcrumb-item"><a id="seriesBreadcrumbID" href="/datasets/dataset-series"><span
+                            id="seriesBreadcrumb"></span></a></li>
+                <li class="breadcrumb-item" aria-current="page"><a id="releaseBreadcrumbID"
+                        href="/datasets/dataset-series"><span id="titleBreadcrumb"></span></a></li>
+                <li class="breadcrumb-item active" aria-current="page">All revisions</li>
+            </ol>
+        </nav>
+    </div>
+    <div class="jumbotron pt-5 pb-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="font-weight-bold h3 pr-5"><span id="subTitle"></span>: <span id="title"></span></h1>
+                    <h1 class="font-weight-bold pr-5">
+                    </h1>
+                    <h1 class="font-weight-bold pr-5">
+                        List of all revisions</h1>
+                    <p class="lead"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+
+        <div class="row pt-4">
+            <div class="col-lg-10">
+                <!-- <h2>List of all revisions</h2> -->
+                <table class="table table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="fixed" scope="col">Revision</th>
+                            <th scope="col">Description</th>
+                            <th class="fixed" scope="col">Link</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tbody id="table"></tbody>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    let url = window.location.href
+    let uri = domain + url.split('?')[1]
+
+    const tableStructure = [{
+        "name": "dcterms:title"
+    }, {
+        "name": "dcterms:description"
+    }, {
+        "name": "@id"
+    }]
+    const tableRef = document.getElementById("table");
+    const tr = tableRef.getElementsByTagName("tr");
+
+    const settings = {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    };
+
+    fetch(uri, settings)
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+            fetchSeries(data)
+        })
+        .catch(error => {
+            console.log(error)
+        });
+
+    fetchSeries = release => {
+        fetch(release["dcat:inSeries"], settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                populatePage(release, data)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+    populatePage = (release, series) => {
+        document.getElementById('title').innerHTML = release["dcterms:title"]
+        document.getElementById('subTitle').innerHTML = series["dcterms:title"]
+        document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
+        document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('releaseBreadcrumbID').href =
+            `/datasets/dataset-series/dataset-release/?/data/${release["@id"]}`
+
+        getRevision(release)
+    }
+
+    getRevision = (release) => {
+        fetch(`${uri}/revisions`, settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                populateRevision(data, release)
+            })
+            .catch(error => {
+                console.log(error)
+            });
+    }
+
+
+    populateRevision = data => {
+            revision = data.contents
+            for (i = 0; i < revision.length; i++) {
+                let newRow = tableRef.insertRow(-1);
+                for (j = 0; j < tableStructure.length; j++) {
+                    if (tableStructure[j].name == "@id") {
+                            let cellValue = `View ${revision[i]["dcterms:title"]}`
+                            let cell = newRow.insertCell(j);
+                            let text = document.createTextNode(cellValue);
+                            let a = document.createElement('a');
+                            a.href = `/datasets/dataset-series/dataset-release/dataset-revision?/data/${revision[i]["@id"]}`;
+                            a.appendChild(text);
+                            cell.appendChild(a);
+                        } else {
+                            let cellValue = revision[i][tableStructure[j].name]
+                            let cell = newRow.insertCell(j);
+                            let text = document.createTextNode(cellValue);
+                            cell.appendChild(text);
+                        }
+
+                    }
+                }
+            }
+</script>

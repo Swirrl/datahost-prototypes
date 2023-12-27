@@ -45,7 +45,7 @@ jobs:
           name: Run unit tests
           command: |
             cd << parameters.project_dir >>
-            clojure -X:test
+            clojure -X:test:test/unit
       - store_test_results:
           path: << parameters.project_dir >>/test-results
 
@@ -120,7 +120,7 @@ jobs:
     # this job is intended to run against a running instance
     # of the service.
     #
-    # Requiremens: 
+    # Requiremens:
     # - 'HURL_auth_token' environment variable is set
     parameters:
       env:
@@ -149,19 +149,11 @@ jobs:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
           command: |
-            echo "running hurl against host: $(cat ../HOSTNAME)"
-            mkdir test-results
-            bb bin/hurl-runner.bb --dir hurl-scripts \
-              --variable scheme=https \
-              --variable "host_name=$(cat ../HOSTNAME)" \
-              --variable "series=hurl.variable.named/series" \
-              --variable "release=hurl.variable.named/release" \
-              --report-junit test-results/live.xml \
-              --report-html test-report
+            ./bin/hurl-live-service-test $(cat ../HOSTNAME)
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
-  ci-live-service-test:
+  ci-docker-hurl-test:
     # runs ldapi service container + container with hurl
     parameters:
       commit_sha:
@@ -187,18 +179,7 @@ jobs:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
           command: |
-            echo "running hurl against host: localahost"
-            mkdir test-results
-            bb bin/hurl-runner.bb --dir hurl-scripts \
-              --variable scheme=http \
-              --variable "host_name=localhost" \
-              --variable "expected_scheme=https" \
-              --variable "expected_uri_root=ldapi-prototype.gss-data.org.uk" \
-              --variable "auth_token=ignore" \
-              --variable "series=hurl.variable.named/series" \
-              --variable "release=hurl.variable.named/release" \
-              --report-junit test-results/ci-live.xml \
-              --report-html test-report
+            ./bin/hurl-live-service-test localhost
       - store_test_results:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
@@ -208,7 +189,7 @@ jobs:
     # Runs hurl scripts via unit test in the project.
     #
     # Requirements:
-    # - `:test-hurl` alias in projet's deps.edn, configured 
+    # - `:test-hurl` alias in projet's deps.edn, configured
     #    to run hurl  scripts
     parameters:
       project_dir:
@@ -221,7 +202,7 @@ jobs:
           name: Run integration tests
           working_directory: << parameters.project_dir >>
           command: |
-            clojure -X:test:test-hurl
+            clojure -X:test:test/integration
       - store_test_results:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
@@ -297,13 +278,13 @@ workflows:
             - swirrl-ons-datahost-gcloud
           requires:
             - build-docker-image-ldapi
-            - ci-live-service-test
+            - ci-docker-hurl-test
           name: deploy-service-ldapi-dev
           env: dev
           filters:
             branches:
               only: main
-      - ci-live-service-test:
+      - ci-docker-hurl-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
           requires:
