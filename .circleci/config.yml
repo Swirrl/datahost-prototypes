@@ -224,7 +224,7 @@ jobs:
       - run:
           name: Run Eleventy.js
           working_directory: << parameters.project_dir >>
-          command: npx @11ty/eleventy --serve
+          command: npx @11ty/eleventy
 
  
 
