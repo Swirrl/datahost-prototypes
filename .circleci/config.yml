@@ -209,14 +209,20 @@ jobs:
           path: << parameters.project_dir >>/test-report
 
   uiWireframe:
-      steps:
-        - checkout
-        - run:
-            name: Install Dependencies
-            command: npm install
-        - run:
-            name: Run Eleventy.js
-            command: npx @11ty/eleventy --serve
+    parameters:
+      project_dir:
+        description: Wireframes directory
+        type: string
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          working_directory: << parameters.project_dir >>
+          command: npm install
+      - run:
+          name: Run Eleventy.js
+          working_directory: << parameters.project_dir >>
+          command: npx @11ty/eleventy --serve
 
  
 
