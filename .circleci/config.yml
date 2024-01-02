@@ -209,6 +209,8 @@ jobs:
           path: << parameters.project_dir >>/test-report
 
   uiWireframe:
+    docker:
+      - image: node:14
     parameters:
       project_dir:
         description: Wireframes directory
