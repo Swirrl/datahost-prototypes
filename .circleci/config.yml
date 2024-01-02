@@ -209,9 +209,6 @@ jobs:
           path: << parameters.project_dir >>/test-report
 
   uiWireframe:
-    # Runs the ui wireframe
-      docker
-        - image: node:14
       steps:
         - checkout
         - run:
@@ -312,14 +309,12 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-
       - uiWireframe:  
           name: uiWireframe
           project_dir: consumer-wireframes
           filters:
             branches:
               only: tr/issue-313
-
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
