@@ -220,7 +220,7 @@ jobs:
       - checkout
       - restore_cache:
            keys:
-              - npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
+              - npm-packagess-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
       - run:
           name: Install Dependencies
           working_directory: << parameters.project_dir >>
@@ -235,7 +235,7 @@ jobs:
           working_directory: << parameters.project_dir >>
           command: npx @11ty/eleventy
       - save_cache:
-          key: npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
+          key: npm-packagess-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
           paths:
             - << parameters.project_dir >>/node_modules
 
