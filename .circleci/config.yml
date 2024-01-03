@@ -333,9 +333,6 @@ workflows:
       - uiWireframe:  
           name: uiWireframe
           project_dir: consumer-wireframes
-          filters:
-            branches:
-              only: tr/issue-313
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
