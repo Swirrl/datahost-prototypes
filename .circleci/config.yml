@@ -208,6 +208,39 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
+  uiWireframe:
+    #Builds UI wireframe and caches deps
+    docker:
+      - image: node:14
+    parameters:
+      project_dir:
+        description: Wireframes directory
+        type: string
+    steps:
+      - checkout
+      - restore_cache:
+           keys:
+              - npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
+      - run:
+          name: Install Dependencies
+          working_directory: << parameters.project_dir >>
+          command: |
+              if [ ! -d node_modules ]; then
+                npm ci
+              else
+                echo "Dependencies unchanged. Using cache"
+              fi
+      - run:
+          name: Run Eleventy.js
+          working_directory: << parameters.project_dir >>
+          command: npx @11ty/eleventy
+      - save_cache:
+          key: npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
+          paths:
+            - << parameters.project_dir >>/node_modules
+
+ 
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -297,6 +330,9 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
+      - uiWireframe:  
+          name: uiWireframe
+          project_dir: consumer-wireframes
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
