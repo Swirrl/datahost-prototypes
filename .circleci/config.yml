@@ -215,23 +215,23 @@ jobs:
       project_dir:
         description: Wireframes directory
         type: string
-steps:
-    - checkout
-    - restore_cache:
-        keys:
-          - npm-packages-{{ checksum "package-lock.json" }}
-    - run:
-        name: Install Dependencies
-        working_directory: << parameters.project_dir >>
-        command: npm ci
-    - run:
-        name: Run Eleventy.js
-        working_directory: << parameters.project_dir >>
-        command: npx @11ty/eleventy
-    - save_cache:
-        key: npm-packages-{{ checksum "package-lock.json" }}
-        paths:
-          - << parameters.project_dir >>/node_modules
+    steps:
+      - checkout
+      - restore_cache:
+           keys:
+              - npm-packages-{{ checksum "package-lock.json" }}
+      - run:
+          name: Install Dependencies
+          working_directory: << parameters.project_dir >>
+          command: npm ci
+      - run:
+          name: Run Eleventy.js
+          working_directory: << parameters.project_dir >>
+          command: npx @11ty/eleventy
+      - save_cache:
+          key: npm-packages-{{ checksum "package-lock.json" }}
+          paths:
+            - << parameters.project_dir >>/node_modules
 
  
 
