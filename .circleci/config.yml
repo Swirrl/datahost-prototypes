@@ -209,6 +209,7 @@ jobs:
           path: << parameters.project_dir >>/test-report
 
   uiWireframe:
+    #Builds UI wireframe and caches deps
     docker:
       - image: node:14
     parameters:
