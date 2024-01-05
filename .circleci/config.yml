@@ -227,6 +227,26 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
+  pushfrontendapp:
+    executor: docker-builder-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Login to GCP
+          command: echo $GCLOUD_SERVICE_KEY | docker login europe-west2-docker.pkg.dev  -u _json_key --password-stdin
+      - run:
+          name: Build application Docker image
+          command: |
+            cd consumer-wireframes
+            TAG=0.1.$CIRCLE_BUILD_NUM
+            docker build -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG .
+      - run:
+          name: Push application Docker image
+          command: |
+            TAG=0.1.$CIRCLE_BUILD_NUM
+            docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
+
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -320,6 +340,12 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
+      - pushfrontendapp:
+          context:
+            - swirrl-dockerhub-publisher
+            - gcp-artifact-registry
+            - swirrl-ons-datahost-gcloud
+          name: frontendapp
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
