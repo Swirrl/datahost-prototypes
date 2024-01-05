@@ -251,12 +251,14 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Build and Push application Docker image
+          name: Build application Docker image
           command: |
             cd consumer-wireframes
             TAG=0.1.$CIRCLE_BUILD_NUM
             docker build -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG .
-            echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      - run:
+          name: Push application Docker image
+          command: |
             docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
 
 
