@@ -28,6 +28,12 @@ executors:
   hurl-executor:
     docker:
       - image: ghcr.io/orange-opensource/hurl:latest
+  docker-builder-executor:
+    docker:
+      - image: cimg/base:2022.09
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
 
 
 # Define a job to be invoked later in a workflow.
@@ -239,7 +245,19 @@ jobs:
           paths:
             - << parameters.project_dir >>/node_modules
 
- 
+  frontendapp:
+    executor: docker-builder-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+        name: Build and Push application Docker image
+        command: |
+          cd consumer-wireframes
+          TAG=0.1.$CIRCLE_BUILD_NUM
+          docker build -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG .
+          echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+          docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -333,6 +351,8 @@ workflows:
       - uiWireframe:  
           name: uiWireframe
           project_dir: consumer-wireframes
+      - frontendapp:
+          name: frontendapp
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
