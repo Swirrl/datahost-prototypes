@@ -55,8 +55,10 @@ layout: basic
 </main>
 
 <script>
+    const envDomain = document.getElementById("getDomain").innerHTML;
+
     let url = window.location.href
-    let uri = domain + url.split('?')[1]
+    let uri = envDomain + url.split('?')[1]
 
     const tableStructure = [{
         "name": "dcterms:title"
