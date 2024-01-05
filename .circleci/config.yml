@@ -32,8 +32,8 @@ executors:
     docker:
       - image: cimg/base:2022.09
         auth:
-          username: $DOCKERHUB_USERNAME
-          password: $DOCKERHUB_PASSWORD
+          username: _json_key
+          password: ${GCLOUD_SERVICE_KEY}
 
 
 # Define a job to be invoked later in a workflow.
@@ -352,10 +352,9 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      - uiWireframe:  
-          name: uiWireframe
-          project_dir: consumer-wireframes
       - frontendapp:
+          context:
+            - gcp-artifact-registry
           name: frontendapp
       - deploy-service:
           context:
