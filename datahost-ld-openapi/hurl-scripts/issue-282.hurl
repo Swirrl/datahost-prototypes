@@ -17,7 +17,7 @@ Content-Type: application/json
 {"dcterms:description": "Release: {{release}}",
 "dcterms:title": "{{release}}"}
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}.json
 
 HTTP 200
 

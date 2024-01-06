@@ -68,7 +68,8 @@ has been succeeded by another.
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
-                       routes-shared/release-slug-param-spec]}
+                       routes-shared/release-slug-param-spec
+                       routes-shared/extension-param-spec]}
    :responses {200 {:content
                     {"text/csv" any?
                      "application/ld+json" string?}}

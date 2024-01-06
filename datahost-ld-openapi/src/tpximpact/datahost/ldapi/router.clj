@@ -9,6 +9,7 @@
    [integrant.core :as ig]
    [malli.util :as mu]
    [muuntaja.core :as m]
+   [reitit.core :as r]
    [reitit.coercion.malli :as rcm]
    [reitit.dev.pretty :as pretty]
    [reitit.interceptor.sieppari :as sieppari]
@@ -305,19 +306,21 @@ specifications for each route.")
       {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
 
      ["/:series-slug/release"
-      ["/:release-slug"
-       {:get (routes.rel/get-release-route-config triplestore change-store system-uris)
-        :put (routes.rel/put-release-route-config clock triplestore system-uris)
+      ["/{release-slug}.{extension}"
+       {:get (routes.rel/get-release-route-config triplestore change-store system-uris)}]
+
+      ["/{release-slug}"
+       {:put (routes.rel/put-release-route-config clock triplestore system-uris)
         :post (routes.rel/post-release-delta-config {:triplestore triplestore
                                                      :change-store change-store
                                                      :clock clock
                                                      :system-uris system-uris})}]
 
-      ["/:release-slug/schema"
+      ["/{release-slug}/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)
         :post (routes.rel/post-release-ld-schema-config clock triplestore system-uris)}]
 
-      ["/:release-slug/revisions"
+      ["/{release-slug}/revisions"
        {:post (routes.rev/post-revision-route-config triplestore system-uris)
         :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
 
@@ -346,6 +349,7 @@ specifications for each route.")
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
     ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
+    :router r/linear-router
     :exception pretty/exception
     :data {:coercion (rcm/create
                       {;; set of keys to include in error messages

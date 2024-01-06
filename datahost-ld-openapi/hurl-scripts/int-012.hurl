@@ -236,8 +236,7 @@ jsonpath "$.['@id']" endsWith "commit/1"
 
 #ensure path header contains a URL when requesting the release
 #and redirects to revision 2
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: text/csv
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.csv
 Authorization: {{auth_token}}
 HTTP 302
 [Captures]
