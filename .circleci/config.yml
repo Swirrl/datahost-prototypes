@@ -263,9 +263,6 @@ jobs:
           name: Get GCP auth
           command: gcloud auth configure-docker europe-west2-docker.pkg.dev
       - run:
-          name: make sure logged in
-          command: gcloud auth login
-      - run:
           name: see what's going on in the container
           command: ls home
       # - run:
