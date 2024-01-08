@@ -261,7 +261,10 @@ jobs:
           command: gcloud version
       - run:
           name: Get GCP auth
-          command: gcloud auth configure-docker europe-west2-docker.pkg.dev
+          command: gcloud auth configure-docker europe-west2-docker.pkg.dev   
+      - run:
+          name: Check set project
+          command: gcloud config configurations list
       - run:
           name: Build application Docker image
           command: |
