@@ -253,6 +253,9 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Get GCP auth
+          command: gcloud auth configure-docker europe-west2-docker.pkg.dev
+      - run:
           name: Build application Docker image
           command: |
             cd consumer-wireframes
@@ -356,7 +359,8 @@ workflows:
             - unit-test-ldapi
       - frontendapp:
           context:
-            - gcp-artifact-registry
+            # - gcp-artifact-registry
+            - swirrl-dockerhub-consumer
           name: frontendapp
       - deploy-service:
           context:
