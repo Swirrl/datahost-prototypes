@@ -264,7 +264,7 @@ jobs:
           command: gcloud auth configure-docker europe-west2-docker.pkg.dev
       - run:
           name: see what's going on in the container
-          command: ls home
+          command: ls
       # - run:
       #     name: Set project
       #     command: gcloud config set project swirrl-devops-infrastructure-1
