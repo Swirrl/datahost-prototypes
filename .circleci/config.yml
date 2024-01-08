@@ -32,8 +32,10 @@ executors:
     docker:
       - image: cimg/base:2022.09
         auth:
-          username: _json_key
-          password: $GCLOUD_SERVICE_KEY
+          username: $DOCKERHUB_USERNAME # can specify string literal values
+          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+          # username: _json_key
+          # password: $GCLOUD_SERVICE_KEY
 
 
 # Define a job to be invoked later in a workflow.
