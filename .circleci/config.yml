@@ -260,6 +260,8 @@ jobs:
       - run:
           command: gcloud version
       - run:
+          command: gcloud auth list
+      - run:
           name: Get GCP auth
           command: gcloud auth configure-docker europe-west2-docker.pkg.dev
       - run:
