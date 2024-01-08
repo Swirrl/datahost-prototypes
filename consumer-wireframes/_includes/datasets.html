@@ -15,7 +15,7 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold pr-5">Data catalogue</h1>
+                    <h1 id = "setDomain" class="font-weight-bold pr-5">Data catalogue  asd {{ consumerWireframes.environment }} </h1>
                     <p class="lead"></p>
                 </div>
             </div>
@@ -57,6 +57,9 @@ layout: basic
             'Content-Type': 'application/json',
         }
     };
+    const newDomain = document.getElementById("getDomain").dataset.domainVar;
+    console.log(newDomain);
+    document.getElementById("setDomain").innerHTML = process.env.LDAPI_BASE_URL;
 
     fetch(uri, settings)
         .then((response) => {
