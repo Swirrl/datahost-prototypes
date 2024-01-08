@@ -257,6 +257,7 @@ jobs:
       - gcp-cli/setup:
           version: latest
           use_oidc: true
+          gcloud_service_key: GCLOUD_SERVICE_KEY
       - run:
           command: gcloud version
       - run:
@@ -367,7 +368,7 @@ workflows:
       - frontendapp:
           context:
             - swirrl-dockerhub-consumer
-            # - gcp-artifact-registry
+            - gcp-artifact-registry
           name: frontendapp
       - deploy-service:
           context:
