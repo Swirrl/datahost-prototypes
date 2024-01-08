@@ -254,29 +254,37 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      - gcp-cli/setup:
-          version: latest
-          use_oidc: true
+      # - gcp-cli/setup:
+      #     version: latest
+      #     use_oidc: true
+      #     gcloud_service_key: GCLOUD_SERVICE_KEY
+      #     gcp_cred_config_file_path: /home/circleci/.docker/config.json
+      #     google_compute_region: europe-west2
+
+
+      # - run:
+      #     command: gcloud version
+      # - run:
+      #     command: gcloud auth list
+      # - run:
+      #     name: Get GCP auth
+      #     command: gcloud auth configure-docker europe-west2-docker.pkg.dev
+      # - run:
+      #     name: see what's going on in the container
+      #     command: |
+      #       ls /home/circleci/.docker
+      # - run:
+      #     name: Set project
+      #     command: gcloud config set project swirrl-devops-infrastructure-1
+      # - run:
+      #     name: Make sure auth is available
+      #     command: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin europe-west2-docker.pkg.dev
+      # - run:
+      #     name: Check set project
+      #     command: gcloud config configurations list
       - run:
-          command: gcloud version
-      - run:
-          command: gcloud auth list
-      - run:
-          name: Get GCP auth
-          command: gcloud auth configure-docker europe-west2-docker.pkg.dev
-      - run:
-          name: see what's going on in the container
-          command: |
-            ls /home/circleci/.docker
-      - run:
-          name: Set project
-          command: gcloud config set project swirrl-devops-infrastructure-1
-      - run:
-          name: Make sure auth is available
-          command: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin europe-west2-docker.pkg.dev
-      - run:
-          name: Check set project
-          command: gcloud config configurations list
+          name: Login to GCP
+          command: echo $GCLOUD_SERVICE_KEY | docker login europe-west2-docker.pkg.dev  -u _json_key --password-stdin
       - run:
           name: Build application Docker image
           command: |
