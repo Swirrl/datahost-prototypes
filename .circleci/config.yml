@@ -261,7 +261,13 @@ jobs:
           command: gcloud version
       - run:
           name: Get GCP auth
-          command: gcloud auth configure-docker europe-west2-docker.pkg.dev   
+          command: gcloud auth configure-docker europe-west2-docker.pkg.dev
+      # - run:
+      #     name: Set project
+      #     command: gcloud config set project swirrl-devops-infrastructure-1
+      - run:
+          name: Make sure auth is available
+          command: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin europe-west2-docker.pkg.dev
       - run:
           name: Check set project
           command: gcloud config configurations list
