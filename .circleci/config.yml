@@ -247,14 +247,18 @@ jobs:
           paths:
             - << parameters.project_dir >>/node_modules
 
+
+
   frontendapp:
     executor: docker-builder-executor
     steps:
       - checkout
+      - setup_remote_docker
       - gcp-cli/setup:
           version: latest
           use_oidc: true
-      - setup_remote_docker
+      - run:
+          command: gcloud version
       - run:
           name: Get GCP auth
           command: gcloud auth configure-docker europe-west2-docker.pkg.dev
@@ -362,8 +366,8 @@ workflows:
             - unit-test-ldapi
       - frontendapp:
           context:
-            # - gcp-artifact-registry
             - swirrl-dockerhub-consumer
+            # - gcp-artifact-registry
           name: frontendapp
       - deploy-service:
           context:
