@@ -4,7 +4,7 @@ version: 2.1
 
 orbs:
   aws-cli: circleci/aws-cli@3.1.5
-  gcp-cli: circleci/gcp-cli@3.1.0
+  gcp-cli: circleci/gcp-cli@3.1.1
   terraform: circleci/terraform@3.2.1
 
 commands:
@@ -257,7 +257,6 @@ jobs:
       - gcp-cli/setup:
           version: latest
           use_oidc: true
-          gcloud_service_key: GCLOUD_SERVICE_KEY
       - run:
           command: gcloud version
       - run:
@@ -369,6 +368,7 @@ workflows:
           context:
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
+            - swirrl-ons-datahost-gcloud
           name: frontendapp
       - deploy-service:
           context:
