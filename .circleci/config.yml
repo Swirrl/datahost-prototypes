@@ -381,7 +381,7 @@ workflows:
             - unit-test-ldapi
       - frontendapp:
           context:
-            - swirrl-dockerhub-consumer
+            - swirrl-dockerhub-publisher
             - gcp-artifact-registry
             - swirrl-ons-datahost-gcloud
           name: frontendapp
