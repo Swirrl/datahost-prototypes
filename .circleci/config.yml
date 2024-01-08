@@ -251,6 +251,9 @@ jobs:
     executor: docker-builder-executor
     steps:
       - checkout
+      - gcp-cli/setup:
+          version: latest
+          use_oidc: true
       - setup_remote_docker
       - run:
           name: Get GCP auth
