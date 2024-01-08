@@ -266,9 +266,9 @@ jobs:
           name: see what's going on in the container
           command: |
             ls /home/circleci/.docker
-      # - run:
-      #     name: Set project
-      #     command: gcloud config set project swirrl-devops-infrastructure-1
+      - run:
+          name: Set project
+          command: gcloud config set project swirrl-devops-infrastructure-1
       - run:
           name: Make sure auth is available
           command: gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin europe-west2-docker.pkg.dev
