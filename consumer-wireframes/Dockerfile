@@ -14,4 +14,4 @@ ENV PORT=8080
 
 EXPOSE 8080
 
-CMD ["npx", "@11ty/eleventy"]
+CMD ["npx", "@11ty/eleventy" "--serve"]
