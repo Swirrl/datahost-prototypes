@@ -248,8 +248,8 @@ jobs:
             - << parameters.project_dir >>/node_modules
 
 
-
   frontendapp:
+#for pushing a container to GCP
     executor: docker-builder-executor
     steps:
       - checkout
@@ -268,6 +268,8 @@ jobs:
           command: |
             TAG=0.1.$CIRCLE_BUILD_NUM
             docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
+
+
 
 
 # Invoke jobs via workflows
@@ -359,12 +361,12 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      - frontendapp:
-          context:
-            - swirrl-dockerhub-publisher
-            - gcp-artifact-registry
-            - swirrl-ons-datahost-gcloud
-          name: frontendapp
+      # - frontendapp:
+      #     context:
+      #       - swirrl-dockerhub-publisher
+      #       - gcp-artifact-registry
+      #       - swirrl-ons-datahost-gcloud
+      #     name: frontendapp
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
