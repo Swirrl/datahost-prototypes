@@ -79,7 +79,7 @@ _Note: Setting this parameter will override the value of `dcterms:description` i
 
 (defn delete-series-route-config [triplestore change-store system-uris]
   {:summary "Delete a series and all its child resources"
-   :description "Delete's the given dataset-series and all of its child resources, i.e. releases, schemas, revisions, and commits.
+   :description "Deletes the given dataset-series and all of its child resources, i.e. releases, schemas, revisions, and commits.
 
 **WARNING: This route is highly destructive and should not be used as part of a standard workflow, as it will break commitments to dataset consumers.**"
    :handler (partial handlers/delete-dataset-series triplestore change-store system-uris)

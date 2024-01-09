@@ -29,7 +29,8 @@
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
    [muuntaja.format.json :as json-format]
    [clojure.data.json :as json]
-   [clojure.java.io :as io])
+   [clojure.java.io :as io]
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta])
   (:import
    (java.io InputStream InputStreamReader OutputStream)))
 
@@ -253,7 +254,7 @@ some datahost terminology:
     consumers, and provides a method to safely stay up to date.
 
   - Corrections - Are a special composite form of a retraction and an
-    append that represent an ammended figure in the data. In addition
+    append that represent an amended figure in the data. In addition
     corrections contain a backlink to the previous figure, allowing
     users and publishers an easy way to explore figure changes.
 
@@ -303,6 +304,7 @@ specifications for each route.")
                              {:name "Publisher API"
                               :description "Operations for data publishers"}]}
             :handler (openapi/create-openapi-handler)}}]
+
     ["/.well-known"
      ["/csvm" {:no-doc true
                :get {:handler (constantly
@@ -332,7 +334,11 @@ specifications for each route.")
      ["/:series-slug/release"
       ["/:release-slug"
        {:get (routes.rel/get-release-route-config triplestore change-store system-uris)
-        :put (routes.rel/put-release-route-config clock triplestore system-uris)}]
+        :put (routes.rel/put-release-route-config clock triplestore system-uris)
+        :post (routes.rel/post-release-delta-config {:triplestore triplestore
+                                                     :change-store change-store
+                                                     :clock clock
+                                                     :system-uris system-uris})}]
 
       ["/:release-slug/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)
@@ -345,20 +351,24 @@ specifications for each route.")
       ["/:release-slug/revision"
        ["/:revision-id"
         {:name ::revision
-         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)}]
+         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)
+         :post (routes.rev/post-revision-delta-config {:triplestore triplestore
+                                                       :change-store change-store
+                                                       :clock clock
+                                                       :system-uris system-uris})}]
 
        ["/:revision-id/commit/:commit-id"
-        {:name ::change
-         :get (routes.rev/get-revision-changes-route-config triplestore change-store system-uris)}]
+        {:name ::commit
+         :get (routes.rev/get-revision-commit-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/appends"
-        {:post (routes.rev/post-revision-appends-changes-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-appends-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/retractions"
-        {:post (routes.rev/post-revision-retractions-changes-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-changes-route-config triplestore change-store system-uris)}]]]]]
+        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data

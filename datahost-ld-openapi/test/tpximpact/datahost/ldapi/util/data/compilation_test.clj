@@ -1,13 +1,13 @@
-(ns tpximpact.datahost.ldapi.util.data-compilation-test
+(ns tpximpact.datahost.ldapi.util.data.compilation-test
   (:require
    [clojure.test :refer [deftest is testing]]
    [malli.core :as m]
    [malli.error :as me]
    [tablecloth.api :as tc]
-   [tpximpact.datahost.ldapi.util.data-compilation :as dc]
-   [tpximpact.datahost.ldapi.util.data-validation
+   [tpximpact.datahost.ldapi.util.data.compilation :as dc]
+   [tpximpact.datahost.ldapi.util.data.validation
     :refer [-as-dataset]
-    :as data-validation]
+    :as data.validation]
    [tpximpact.datahost.system-uris :as system-uris]
    [tpximpact.datahost.uris :as uris])
   (:import (java.net URI)))
@@ -43,7 +43,7 @@
                               [:int {:dataset.column/name "dim"
                                      :dataset.column/type (:dimension uris/column-types)
                                      :dataset.column/datatype :int}]])]
-    (assert (#'data-validation/row-schema-valid? row-schema))
+    (assert (#'data.validation/row-schema-valid? row-schema))
 
     (testing "We can create result from appends"
       (let [result (dc/compile-dataset {:changes [(get data 1)

@@ -1,8 +1,9 @@
 (ns tpximpact.datahost.ldapi.routes.release
   (:require
-   [reitit.ring.malli]
+   [reitit.ring.malli :as ring.malli]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]
    [tpximpact.datahost.ldapi.schemas.release :as schema]))
@@ -150,3 +151,18 @@ The supplied document should conform to the Datahost TableSchema."
                            [:status [:enum "error"]]
                            [:message :string]]}}
    :tags ["Publisher API"]})
+
+(defn post-release-delta-config [{:keys [system-uris triplestore] :as sys}]
+  {:handler (partial handlers.delta/post-delta-files sys)
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :release-uri]
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Release) :release-exists?]]
+   :parameters {}
+   :openapi {:security [{"basic" []}]
+             :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
+   :responses {200 {:description "Differences between latest release and supplied dataset."
+                    ;;  application/x-datahost-tx-csv
+                    :content {"text/csv" any?}}
+               500 {:description "Internal server error"
+                    :body [:map
+                           [:status [:enum "error"]]
+                           [:message string?]]}}})

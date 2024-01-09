@@ -4,6 +4,7 @@
    [reitit.coercion :as rc]
    [reitit.coercion.malli :as rcm]
    [tpximpact.datahost.ldapi.handlers :as handlers]
+   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta]
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
@@ -91,7 +92,7 @@ that make up that revision.
                            [:message string?]]}}
    :tags ["Publisher API"]})
 
-(defn changes-route-base [triplestore change-store system-uris change-kind]
+(defn commit-route-base [triplestore change-store system-uris change-kind]
   {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
    :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
                 [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]
@@ -123,20 +124,20 @@ that make up that revision.
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-appends-changes-route-config [triplestore change-store system-uris]
-  (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindAppend)
+(defn post-revision-appends-route-config [triplestore change-store system-uris]
+  (merge (commit-route-base triplestore change-store system-uris :dh/ChangeKindAppend)
          {:summary "Add appends changes to a Revision via a CSV file."
           :description "Upload a delta of rows to append to a dataset as a CSV file."
           :tags ["Publisher API"]}))
 
-(defn post-revision-retractions-changes-route-config [triplestore change-store system-uris]
-  (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
+(defn post-revision-retractions-route-config [triplestore change-store system-uris]
+  (merge (commit-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
          {:summary "Add retractions changes to a Revision via a CSV file."
           :description "Upload a delta of rows to retract from a dataset as a CSV file."
           :tags ["Publisher API"]}))
 
-(defn post-revision-corrections-changes-route-config [triplestore change-store system-uris]
-  (merge (changes-route-base triplestore change-store system-uris :dh/ChangeKindCorrect)
+(defn post-revision-corrections-route-config [triplestore change-store system-uris]
+  (merge (commit-route-base triplestore change-store system-uris :dh/ChangeKindCorrect)
          {:summary "Add corrections to a Revision via a CSV file."
           :description "Upload a file of rows containing corrected
  'measures' as a CSV file. Datahost will attempt to detect which
@@ -145,9 +146,9 @@ that make up that revision.
 
           :tags ["Publisher API"]}))
 
-(defn get-revision-changes-route-config [triplestore change-store system-uris]
-  {:summary "Retrieve CSV contents for an existing change"
-   :description "Return the data as a CSV file for the specified change.  This returns individual deltas."
+(defn get-revision-commit-route-config [triplestore change-store system-uris]
+  {:summary "Retrieve CSV contents for an existing commit"
+   :description "Return the data as a CSV file for the specified commit. This returns individual deltas."
    :coercion (rcm/create {:transformers {}, :validate false})
    :handler (partial handlers/get-change triplestore change-store system-uris)
    :parameters {:path [:map
@@ -159,3 +160,20 @@ that make up that revision.
                     {"text/csv" any?}}
                404 {:body routes-shared/NotFoundErrorBody}}
    :tags ["Consumer API"]})
+
+(defn post-revision-delta-config [{:keys [system-uris triplestore] :as sys}]
+  {:handler (partial handlers.delta/post-delta-files sys)
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision})
+                 :revision-uri]
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Revision)
+                 :revision-exists?]]
+   :parameters {}
+   :openapi {:security [{"basic" []}]
+             :requestBody {:content {"text/csv" {:schema {:type "string" :format "binary"}}}}}
+   :responses {200 {:description "Differences between latest revision and supplied dataset."
+                    ;;  application/x-datahost-tx-csv
+                    :content {"text/csv" any?}}
+               500 {:description "Internal server error"
+                    :body [:map
+                           [:status [:enum "error"]]
+                           [:message string?]]}}})

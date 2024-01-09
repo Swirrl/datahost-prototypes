@@ -10,7 +10,7 @@
    [tpximpact.datahost.ldapi.compact :as cmp]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]
    [tpximpact.datahost.ldapi.store :as store]
-   [tpximpact.datahost.ldapi.util.data-compilation :as data-compilation]
+   [tpximpact.datahost.ldapi.util.data.compilation :as data-compilation]
    [tpximpact.datahost.ldapi.util.triples
     :refer [triples->ld-resource]])
   (:import
