@@ -112,8 +112,9 @@ layout: basic
     </div>
 </main>
 <script>
+    const envDomain = document.getElementById("getDomain").innerHTML;
     let url = window.location.href
-    let uri = domain + url.split('?')[1]
+    uri = envDomain + url.split('?')[1]
     document.getElementById('apiLink').href = uri
 
     const tableStructure = [{
