@@ -13,10 +13,13 @@ commands:
     parameters:
       service:
         type: string
+      tries:
+        type: integer
+        default: 30
     steps:
       - run:
           name: await service
-          command: wget -nv -O - --retry-connrefused --tries 30 --waitretry=2 << parameters.service >>
+          command: wget -nv -O - --retry-connrefused --tries << parameters.tries >> --waitretry=2 << parameters.service >>
 
 executors:
   clojure-executor:
@@ -193,6 +196,7 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
+
   integration-test:
     # Runs hurl scripts via unit test in the project.
     #
@@ -248,8 +252,8 @@ jobs:
             - << parameters.project_dir >>/node_modules
 
 
-
   frontendapp:
+#for pushing a container to GCP
     executor: docker-builder-executor
     steps:
       - checkout
@@ -268,6 +272,55 @@ jobs:
           command: |
             TAG=0.1.$CIRCLE_BUILD_NUM
             docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
+
+  deploy-frontendapp:
+    executor: docker-builder-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Deploy frontendapp
+          command: docker compose up
+
+
+  test-frontendapp:
+    # runs ldapi graphql and fontendapp
+    docker: 
+      - image: rosado/ci-clojure-hurl:1.11.1.1
+      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/catql:main"
+      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:66a4fd4"
+        environment:
+          LD_API_DATA_DIR: ./DATA
+          LD_API_FILE_DIR: ./FILES
+          CI: true
+          GCLOUD_PROJECT: none
+          BASIC_AUTH_PASSWORD_SECRET_NAME: none
+      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
+    steps:
+      - checkout
+      # - run: 
+      #     name : start FE
+      #     command: docker run -d -p 8887:8080 europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
+      # - run:
+      #     name: Install Docker Compose
+      #     environment:
+      #       COMPOSE_VERSION: '1.29.2'
+      #     command: |
+      #       curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o ~/docker-compose
+      #       chmod +x ~/docker-compose
+      #       sudo mv ~/docker-compose /usr/local/bin/docker-compose
+
+      # - setup_remote_docker
+      # - run:
+      #     name: Deploy frontendapp
+      #     command: consumer-wireframes/tests/hurl-smoke-test
+      - await:
+          service: http://localhost:8080
+      - run:
+          name: "Run the hurl script"
+          command: hurl consumer-wireframes/tests/feSmoketest.hurl
+
+
 
 
 # Invoke jobs via workflows
@@ -320,7 +373,9 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: main
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -346,6 +401,16 @@ workflows:
           filters:
             branches:
               only: main
+      # - deploy-frontendapp:
+      #     name: deploy frontendapp
+      
+      - test-frontendapp:
+          filters:
+            branches:
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
+
       - ci-docker-hurl-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
@@ -353,18 +418,20 @@ workflows:
             - build-docker-image-ldapi
           filters:
             branches:
-              only: main
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      - frontendapp:
-          context:
-            - swirrl-dockerhub-publisher
-            - gcp-artifact-registry
-            - swirrl-ons-datahost-gcloud
-          name: frontendapp
+      # - frontendapp:
+      #     context:
+      #       - swirrl-dockerhub-publisher
+      #       - gcp-artifact-registry
+      #       - swirrl-ons-datahost-gcloud
+      #     name: frontendapp
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
