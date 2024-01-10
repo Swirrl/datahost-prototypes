@@ -276,7 +276,7 @@ jobs:
       - checkout
       - run:
           name: Deploy frontendapp
-          command: docker compose up
+          command: docker-compose up
 
 
 
