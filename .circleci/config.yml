@@ -270,10 +270,12 @@ jobs:
             docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
 
   deploy-frontendapp:
-    docker:
-      - image: cimg/base:2022.09
+    executor: docker-builder-executor
     steps:
       - checkout
+      - run:
+          name: check service is running
+          command: sudo service docker status
       - run:
           name: Deploy frontendapp
           command: docker compose up
