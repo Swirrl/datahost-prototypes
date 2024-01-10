@@ -271,13 +271,12 @@ jobs:
 
   deploy-frontendapp:
     docker:
-      - image: docker:20.10.5
+      - image: cimg/base:2022.09
     steps:
       - checkout
       - run:
           name: Deploy frontendapp
           command: docker compose up
-
 
 
 
