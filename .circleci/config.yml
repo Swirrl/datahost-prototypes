@@ -401,7 +401,7 @@ workflows:
       # - deploy-frontendapp:
       #     name: deploy frontendapp
       
-      - test-frontendapp
+      - test-frontendapp:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
           requires:
