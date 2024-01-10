@@ -273,6 +273,7 @@ jobs:
     executor: docker-builder-executor
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: check service is running
           command: sudo service docker status
