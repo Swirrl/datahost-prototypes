@@ -275,9 +275,6 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: check service is running
-          command: sudo service docker status
-      - run:
           name: Deploy frontendapp
           command: docker compose up
 
