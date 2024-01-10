@@ -179,9 +179,6 @@ jobs:
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
-      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
-        environment:
-          LDAPI_BASE_URL: "http://localhost:3400"
     steps:
       - checkout
       - await:
@@ -283,6 +280,45 @@ jobs:
           command: docker compose up
 
 
+  test-frontendapp:
+    # runs ldapi service container + container with hurl
+    parameters:
+      commit_sha:
+        type: string
+        description: SHA of the git commit used as docker image tag.
+      project_dir:
+        description: Project directory
+        type: string
+    docker:
+      - image: rosado/ci-clojure-hurl:1.11.1.1
+      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:<< parameters.commit_sha >>
+        environment:
+          LD_API_DATA_DIR: ./DATA
+          LD_API_FILE_DIR: ./FILES
+          CI: true
+          GCLOUD_PROJECT: none
+          BASIC_AUTH_PASSWORD_SECRET_NAME: none
+    executor: docker-builder-executor
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Deploy frontendapp
+          command: docker compose up
+      - await:
+          service: http://localhost
+      - run:
+          name: "Run the hurl scripts"
+          working_directory: << parameters.project_dir >>
+          command: |
+            ./bin/hurl-live-service-test localhost
+      - store_test_results:
+          path: << parameters.project_dir >>/test-results
+      - store_artifacts:
+          path: << parameters.project_dir >>/test-report
+
+
+
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -334,7 +370,9 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: tr/deploy-ui
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -362,6 +400,18 @@ workflows:
               only: main
       # - deploy-frontendapp:
       #     name: deploy frontendapp
+      
+      - test-frontendapp
+          commit_sha: << pipeline.git.revision >>
+          project_dir: datahost-ld-openapi
+          requires:
+            - build-docker-image-ldapi
+          filters:
+            branches:
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
+
       - ci-docker-hurl-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
@@ -369,7 +419,9 @@ workflows:
             - build-docker-image-ldapi
           filters:
             branches:
-              only: tr/deploy-ui
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
