@@ -334,7 +334,9 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: main
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
