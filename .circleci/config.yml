@@ -334,9 +334,7 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only:
-                - main
-                - tr/deploy-ui
+              only: tr/deploy-ui
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -371,9 +369,7 @@ workflows:
             - build-docker-image-ldapi
           filters:
             branches:
-              only:
-                - main
-                - tr/deploy-ui
+              only: tr/deploy-ui
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
