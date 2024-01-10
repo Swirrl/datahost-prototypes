@@ -271,13 +271,12 @@ jobs:
 
   deploy-frontendapp:
     docker:
-      # - image: docker/compose:1.29.2
-      - image: cimg/base:stable
+      - image: docker/compose:1.29.2
     steps:
       - checkout
       - run:
           name: Deploy frontendapp
-          command: docker-compose -f docker-compose.yml up
+          command: docker-compose up
 
 
 
