@@ -271,12 +271,13 @@ jobs:
 
   deploy-frontendapp:
     docker:
-      - image: docker/compose:1.29.2
+      - image: docker:20.10.5
     steps:
       - checkout
       - run:
           name: Deploy frontendapp
-          command: docker-compose up
+          command: docker compose up
+
 
 
 
