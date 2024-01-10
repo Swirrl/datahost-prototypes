@@ -335,8 +335,8 @@ workflows:
             #   only: /^v.*/
             branches:
               only:
-                - /^main$/
-                - /^tr\/deploy-ui$/
+                - main
+                - tr/deploy-ui
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -372,8 +372,8 @@ workflows:
           filters:
             branches:
               only:
-                - /^main$/
-                - /^tr\/deploy-ui$/
+                - main
+                - tr/deploy-ui
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
