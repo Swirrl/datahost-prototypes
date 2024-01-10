@@ -196,6 +196,7 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
+
   integration-test:
     # Runs hurl scripts via unit test in the project.
     #
@@ -368,7 +369,9 @@ workflows:
             - build-docker-image-ldapi
           filters:
             branches:
-              only: main
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
