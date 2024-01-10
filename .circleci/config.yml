@@ -179,6 +179,9 @@ jobs:
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
+      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
+        environment:
+          LDAPI_BASE_URL: "http://localhost:3400"
     steps:
       - checkout
       - await:
@@ -356,8 +359,8 @@ workflows:
           filters:
             branches:
               only: main
-      - deploy-frontendapp:
-          name: deploy frontendapp
+      # - deploy-frontendapp:
+      #     name: deploy frontendapp
       - ci-docker-hurl-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
