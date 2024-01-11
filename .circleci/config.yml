@@ -304,7 +304,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: Deploy frontendapp
-          command: consumer-wireframes/hurl-smoke-test
+          command: consumer-wireframes/tests/hurl-smoke-test
       - await:
           service: http://localhost
       - run:
