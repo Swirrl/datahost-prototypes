@@ -292,14 +292,13 @@ jobs:
       project_dir:
         description: Project directory
         type: string
-    docker:
-      - image: docker/compose:1.29.2
+    executor: docker-builder-executor
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Deploy frontendapp
-          command: docker compose up
+          command: docker compose up -d
       - await:
           service: http://localhost
       - run:
