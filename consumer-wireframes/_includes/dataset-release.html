@@ -160,6 +160,7 @@ layout: basic
     }
 
     populatePage = (release, series) => {
+        
         document.getElementById('title').innerHTML = release["dcterms:title"]
         document.getElementById('subTitle').innerHTML = series["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
