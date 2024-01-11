@@ -182,10 +182,16 @@ jobs:
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
+      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
     steps:
       - checkout
       - await:
           service: http://localhost
+      - await:
+          service: http://localhost:8080
+      - run:
+          name: "Run the hurl smoke test for the frontend"
+          command: hurl consumer-wireframes/int-016.hurl --variable scheme=http --variable host-name=localhost:8080
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
@@ -219,109 +225,6 @@ jobs:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
-
-  uiWireframe:
-    #Builds UI wireframe and caches deps
-    docker:
-      - image: node:14
-    parameters:
-      project_dir:
-        description: Wireframes directory
-        type: string
-    steps:
-      - checkout
-      - restore_cache:
-           keys:
-              - npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
-      - run:
-          name: Install Dependencies
-          working_directory: << parameters.project_dir >>
-          command: |
-              if [ ! -d node_modules ]; then
-                npm ci
-              else
-                echo "Dependencies unchanged. Using cache"
-              fi
-      - run:
-          name: Run Eleventy.js
-          working_directory: << parameters.project_dir >>
-          command: npx @11ty/eleventy
-      - save_cache:
-          key: npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
-          paths:
-            - << parameters.project_dir >>/node_modules
-
-
-  frontendapp:
-#for pushing a container to GCP
-    executor: docker-builder-executor
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Login to GCP
-          command: echo $GCLOUD_SERVICE_KEY | docker login europe-west2-docker.pkg.dev  -u _json_key --password-stdin
-      - run:
-          name: Build application Docker image
-          command: |
-            cd consumer-wireframes
-            TAG=0.1.$CIRCLE_BUILD_NUM
-            docker build -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG .
-      - run:
-          name: Push application Docker image
-          command: |
-            TAG=0.1.$CIRCLE_BUILD_NUM
-            docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
-
-  deploy-frontendapp:
-    executor: docker-builder-executor
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Deploy frontendapp
-          command: docker compose up
-
-
-  test-frontendapp:
-    # runs ldapi graphql and fontendapp
-    docker: 
-      - image: rosado/ci-clojure-hurl:1.11.1.1
-      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/catql:main"
-      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:66a4fd4"
-        environment:
-          LD_API_DATA_DIR: ./DATA
-          LD_API_FILE_DIR: ./FILES
-          CI: true
-          GCLOUD_PROJECT: none
-          BASIC_AUTH_PASSWORD_SECRET_NAME: none
-      - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
-    steps:
-      - checkout
-      # - run: 
-      #     name : start FE
-      #     command: docker run -d -p 8887:8080 europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
-      # - run:
-      #     name: Install Docker Compose
-      #     environment:
-      #       COMPOSE_VERSION: '1.29.2'
-      #     command: |
-      #       curl -L "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o ~/docker-compose
-      #       chmod +x ~/docker-compose
-      #       sudo mv ~/docker-compose /usr/local/bin/docker-compose
-
-      # - setup_remote_docker
-      # - run:
-      #     name: Deploy frontendapp
-      #     command: consumer-wireframes/tests/hurl-smoke-test
-      - await:
-          service: http://localhost:8080
-      - run:
-          name: "Run the hurl script"
-          command: hurl consumer-wireframes/tests/feSmoketest.hurl
-
-
-
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -375,7 +278,7 @@ workflows:
             branches:
               only:
                 - /^main$/
-                - /^tr\/deploy-ui$/
+                - /^tr\/deploy-ui$/  #remove
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -401,16 +304,6 @@ workflows:
           filters:
             branches:
               only: main
-      # - deploy-frontendapp:
-      #     name: deploy frontendapp
-      
-      - test-frontendapp:
-          filters:
-            branches:
-              only:
-                - /^main$/
-                - /^tr\/deploy-ui$/
-
       - ci-docker-hurl-test:
           commit_sha: << pipeline.git.revision >>
           project_dir: datahost-ld-openapi
@@ -420,18 +313,12 @@ workflows:
             branches:
               only:
                 - /^main$/
-                - /^tr\/deploy-ui$/
+                - /^tr\/deploy-ui$/  #remove
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      # - frontendapp:
-      #     context:
-      #       - swirrl-dockerhub-publisher
-      #       - gcp-artifact-registry
-      #       - swirrl-ons-datahost-gcloud
-      #     name: frontendapp
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
