@@ -303,10 +303,7 @@ jobs:
           name: Deploy frontendapp
           command: consumer-wireframes/tests/hurl-smoke-test
       - await:
-          service: http://localhost:8887
-      - run:
-          name: "Run the hurl scripts"
-          command: hurl consumer-wireframes/tests/feSmoketest.hurl
+          service: http://localhost
       - run:
           name: "Run the hurl scripts"
           command: hurl consumer-wireframes/tests/feSmoketest.hurl
