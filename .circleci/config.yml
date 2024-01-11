@@ -286,6 +286,7 @@ jobs:
   test-frontendapp:
     # runs ldapi graphql and fontendapp
     docker: 
+      - image: rosado/ci-clojure-hurl:1.11.1.1
       - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/catql:main"
       - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:66a4fd4"
         environment:
