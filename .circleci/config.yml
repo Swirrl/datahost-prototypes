@@ -190,6 +190,9 @@ jobs:
       - await:
           service: http://localhost:8080
       - run:
+          name: "Run the hurl script for the frontend"
+          command: hurl consumer-wireframes/int-016.hurl --variable scheme=http --variable host-name=localhost:8080
+      - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
           command: |

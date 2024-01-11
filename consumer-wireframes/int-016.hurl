@@ -3,14 +3,14 @@
 
 #Check page is up.
 
-GET {{scheme}}://localhost:8080/
+GET {{scheme}}://{{host-name}}/
 Accept: application/json
 Content-Type: application/json
 HTTP 200
 
 #Check that it is not an error page.
 
-GET {{scheme}}://localhost:8080/datasets/
+GET {{scheme}}://{{host-name}}/datasets/
 HTTP 200
 [Asserts]
 xpath "string(/html/body/main/div[3]/div/div/p)" contains "Results"
