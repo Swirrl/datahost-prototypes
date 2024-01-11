@@ -4,8 +4,22 @@
 
 docker compose up -d
 
-sleep 300
 
-hurl feSmoketest.hurl
+max_attempts=60
+current_attempt=0
 
-docker compose down
+while [ $current_attempt -lt $max_attempts ]; do
+    if curl -sSf http://localhost:8887 -o /dev/null; then
+        echo "Service is running. Running the test..."
+        break
+    else
+        echo "Service is not yet running. Waiting 5 seconds..."
+        sleep 5
+        current_attempt=$((current_attempt + 1))
+    fi
+done
+
+# If the loop completes without success, print a message
+if [ $current_attempt -eq $max_attempts ]; then
+    echo "Timed out waiting for the service to start."
+fi
