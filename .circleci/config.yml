@@ -292,15 +292,8 @@ jobs:
       project_dir:
         description: Project directory
         type: string
-    docker:
-      - image: rosado/ci-clojure-hurl:1.11.1.1
-      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:<< parameters.commit_sha >>
-        environment:
-          LD_API_DATA_DIR: ./DATA
-          LD_API_FILE_DIR: ./FILES
-          CI: true
-          GCLOUD_PROJECT: none
-          BASIC_AUTH_PASSWORD_SECRET_NAME: none
+
+    executor: docker-builder-executor
     steps:
       - checkout
       - setup_remote_docker
