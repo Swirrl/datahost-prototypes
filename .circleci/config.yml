@@ -315,7 +315,7 @@ jobs:
       #     name: Deploy frontendapp
       #     command: consumer-wireframes/tests/hurl-smoke-test
       - await:
-          service: http://localhost
+          service: http://localhost:8080
       - run:
           name: "Run the hurl script"
           command: hurl consumer-wireframes/tests/feSmoketest.hurl
