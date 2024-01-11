@@ -300,6 +300,7 @@ jobs:
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Deploy frontendapp
           command: consumer-wireframes/tests/hurl-smoke-test
