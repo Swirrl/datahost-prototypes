@@ -307,12 +307,6 @@ jobs:
       - run:
           name: Deploy frontendapp
           command: consumer-wireframes/tests/hurl-smoke-test
-      - await:
-          service: http://localhost:8887
-          tries: 1000
-      - run:
-          name: test frontendapp
-          command: consumer-wireframes/tests/hurl-smoke-test-end
 
 
 

@@ -3,3 +3,9 @@
 
 
 docker compose up -d
+
+sleep 300
+
+hurl feSmoketest.hurl
+
+docker compose down
