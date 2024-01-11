@@ -16,6 +16,7 @@
 (derive ::failure ::exception)
 (derive ::validation-failure ::exception)
 (derive ::not-found ::exception)
+(derive ::input-data-error ::exception)
 
 (defn error-body-base [exception request]
   {:exception (.getClass exception)

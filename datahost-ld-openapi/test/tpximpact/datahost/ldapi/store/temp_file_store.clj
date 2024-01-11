@@ -7,8 +7,6 @@
 
 (defrecord TempFileStore [file-store]
   store/ChangeStore
-  (-insert-data [_this file]
-    (store/insert-data file-store file))
   (-insert-data-with-request [_this request]
     (store/-insert-data-with-request file-store request))
   (-get-data [_this data-key]

@@ -25,7 +25,7 @@
     (let [is ^java.io.InputStream input]
       (.reset is))))
 
-(defn- file->digest
+(defn file->digest
   "Computes a file digest as a string for input with the named digest
    algorithm.
 
@@ -67,9 +67,6 @@
           (.renameTo store-temp location)
           (log/debug  "-insert-data-with-request" {:type (type data) :key digest})))
       digest))
-
-  (-insert-data [this {:keys [tempfile]}]
-    (store/-insert-data-with-request this (store/make-insert-request! this tempfile)))
 
   (-get-data [_this data-key]
     (let [location (file-location root-dir (.toString data-key))]

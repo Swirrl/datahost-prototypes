@@ -1,5 +1,9 @@
 {:tpximpact.datahost.ldapi.jetty/http-port #int #or [#env "LD_API_HTTP_PORT" "3400"]
  :tpximpact.datahost.ldapi.native-datastore.repo/data-directory #or [#env "LD_API_TEST_DATA_DIR" "./tmp/ld-test-db"]
+ :tpximpact.datahost.ldapi.store.sql/db-config {;;:spec "jdbc:sqlite:./tmp/sqlite.test.observationdb"
+                                                :spec "jdbc:sqlite::memory:"
+                                                :user "SA"
+                                                :password ""}
 
  ;; test rdf-base-uri intentionally uses a weird value that doesn't include `data`
  ;; in order to prove that RDF URIs are not necessarily tied to routing.
@@ -14,4 +18,22 @@
  :tpximpact.datahost.ldapi.store.temp-file-store/store {}
 
  :tpximpact.datahost.ldapi.router/handler
- {:change-store #ig/ref :tpximpact.datahost.ldapi.store.temp-file-store/store}}
+ {:change-store #ig/ref :tpximpact.datahost.ldapi.store.temp-file-store/store}
+
+ :tpximpact.datahost.ldapi.test/sqlite-connection
+ {:db-config #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config}
+
+ :tpximpact.datahost.ldapi.store.sql/store-factory
+ {:db-config #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config
+  :connection #ig/ref :tpximpact.datahost.ldapi.test/sqlite-connection}
+ 
+ ;; this key will return a map with 
+ :tpximpact.datahost.ldapi.test/sql-db
+ {:db-config #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config
+  :store-factory #ig/ref :tpximpact.datahost.ldapi.store.sql/store-factory
+  :connection #ig/ref :tpximpact.datahost.ldapi.test/sqlite-connection}
+
+ ;; method for this key will create the necessary tables
+ ;; and make them available for test
+ :tpximpact.datahost.ldapi.models.release/common-tables
+ {:db #ig/ref :tpximpact.datahost.ldapi.test/sql-db}}

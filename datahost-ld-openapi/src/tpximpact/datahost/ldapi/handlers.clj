@@ -5,6 +5,7 @@
    [ring.util.io :as ring-io]
    [tablecloth.api :as tc]
    [reitit.core :as rc]
+   [next.jdbc :as jdbc]
    [ring.util.request :as util.request]
    [ring.util.response :as util.response]
    [tpximpact.datahost.system-uris :as su]
@@ -17,9 +18,11 @@
    [tpximpact.datahost.ldapi.resource :as resource]
    [tpximpact.datahost.ldapi.routes.shared :as shared]
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
+   [tpximpact.datahost.ldapi.store.sql :as store.sql]
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
    [tpximpact.datahost.ldapi.util.triples
     :refer [triples->ld-resource triples->ld-resource-collection]]
+   [tpximpact.datahost.ldapi.models.release :as m.release]
    [clojure.java.io :as io])
   (:import
    (java.net URI)
@@ -120,15 +123,23 @@
      :body "Series for this release does not exist"}))
 
 (defn post-release-schema
-  [clock triplestore system-uris {path-params :path-params
-                                  {schema-file :body} :parameters :as request}]
+  [{:keys [clock triplestore system-uris db-config]}
+   {path-params :path-params
+    {schema-file :body} :parameters :as request}]
   {:pre [schema-file]}
   (if (db/resource-exists? triplestore (su/dataset-series-uri* system-uris path-params))
     (let [incoming-jsonld-doc schema-file
-          api-params (get-api-params request)]
-      (as-> (db/upsert-release-schema! clock triplestore system-uris incoming-jsonld-doc api-params) insert-result
-            (as-json-ld {:status (op->response-code (:op insert-result))
-                         :body (:jsonld-doc insert-result)})))
+          api-params (get-api-params request)
+          insert-result (db/upsert-release-schema! clock triplestore system-uris incoming-jsonld-doc api-params)]
+      ;; EXPERIMENT (create tables)
+      (with-open [conn (java.sql.DriverManager/getConnection (:spec db-config) (:user db-config) (:password db-config))]
+        (jdbc/with-transaction [tx conn]
+          (m.release/create-release-tables tx {:release-uri (su/dataset-release-uri* system-uris path-params)
+                                               :row-schema (data.validation/make-row-schema-from-json
+                                                            incoming-jsonld-doc)})))
+      ;; END EXPERIMENT
+      (as-json-ld {:status (op->response-code (:op insert-result))
+                   :body (:jsonld-doc insert-result)}))
     (errors/not-found-response request)))
 
 (defn- get-schema-id [matcha-db]
@@ -256,110 +267,82 @@
       {:status 422
        :body "Release for this revision does not exist"})))
 
-(defn- validate-incoming-change-data
-  "Returns a map {:dataset ?DATASET (optional-key :error-response) ..., row-schema MALLI-SCHEMA},
-  containing :error-response entry when validation failed."
-  [release-schema appends]
-  (let [row-schema (data.validation/make-row-schema release-schema)
-        {:keys [explanation dataset]}
-        (try
-          (->(data.validation/as-dataset appends {:enforce-schema row-schema})
-             (data.validation/validate-dataset row-schema {:fail-fast? true}))
-          (catch clojure.lang.ExceptionInfo ex
-            (if (= ::data.validation/dataset-creation (-> ex ex-data :type))
-              {:explanation (ex-message ex)}
-              (throw ex))))]
-    (cond-> {:row-schema row-schema}
-      (some? dataset) (assoc :dataset dataset)
-      (some? explanation) (assoc :error-response
-                                 {:status 400
-                                  :body {:message "Invalid data"
-                                         :explanation explanation
-                                         :column-names (data.validation/row-schema->column-names row-schema)}}))))
-
 (defn ->byte-array-input-stream [input-stream]
   (with-open [intermediate (ByteArrayOutputStream.)]
     (io/copy input-stream intermediate)
     (ByteArrayInputStream. (.toByteArray intermediate))))
 
+(defn ->tmp-file
+  [^InputStream input-stream]
+  (let [tmp (java.io.File/createTempFile "inputcsv" ".tmp")]
+    (with-open [out (java.io.FileOutputStream. tmp)]
+      (io/copy input-stream out))
+    tmp))
+
 (defn post-change
-  [triplestore
-   change-store
-   system-uris
+  [{:keys [triplestore change-store system-uris] :as sys}
    change-kind
    {router :reitit.core/router
     {:keys [series-slug release-slug revision-id] :as path-params} :path-params
     query-params :query-params
     appends :body
+    {:keys [release-schema]} :datahost.request/entities
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
-  (let [;; validate incoming data
-        release-schema (db/get-release-schema triplestore release-uri)
-        ;; If there's no release-schema, then no validation happens, and db/insert
-        ;; is a NOOP. This fails further down in the `let` body in
-        ;; #'internal/post-change--generate-csv-snapshot
-        ;; We don't need to proceed further if there's no release-schema!
-        _ (when (nil? release-schema)
-            (throw (ex-info (str "No release schema found for: " release-uri)
-                            {:release-uri release-uri})))
-        appends ^InputStream (->byte-array-input-stream appends)
-        insert-req (store/make-insert-request! change-store appends)
-        {validation-err :error-response
-         row-schema :row-schema
-         change-ds :dataset} (some-> release-schema (validate-incoming-change-data appends))
-        _ (.reset appends)
+  (let [appends-file (with-open [a appends]
+                       (->tmp-file a))
+        insert-req (store.sql/make-observation-insert-request! release-uri
+                                                               appends-file
+                                                               (case change-kind ;TODO move the kw->int mapping further down
+                                                                 :dh/ChangeKindAppend (int 1)
+                                                                 :dh/ChangeKindRetract (int 2)
+                                                                 :dh/ChangeKindCorrect (int 3)))
+        row-schema (data.validation/make-row-schema release-schema)
         content-type (util.request/content-type request)
         ;; insert relevant triples
         {:keys [inserted-jsonld-doc
                 change-id
                 change-uri
-                message]} (when-not validation-err
-                            (db/insert-change! triplestore
-                                               system-uris
-                                               {:api-params (assoc (get-api-params request)
-                                                                   :format content-type)
-                                                :ld-root (su/rdf-base-uri system-uris)
-                                                :store-key (:key insert-req)
-                                                :datahost.change/kind change-kind
-                                                :datahost.request/uris request-uris}))]
-    (log/info (format "post-change: '%s' validation: found-schema? = %s, change-valid? = %s, insert-ok? = %s"
-                      change-uri (some? release-schema) (nil? validation-err) (nil? message)))
+                message]} (db/insert-change! triplestore
+                                             system-uris
+                                             {:api-params (assoc (get-api-params request)
+                                                                 :format content-type)
+                                              :ld-root (su/rdf-base-uri system-uris)
+                                              :store-key (:key insert-req)
+                                              :datahost.change/kind change-kind
+                                              :datahost.request/uris request-uris})]
+    (log/info (format "post-change: '%s'  insert-ok? = %s" change-uri  (nil? message)))
     (cond
-      (some? validation-err) validation-err
-
       (some? message) {:status 422 :body message}
 
       :else
       (do
         ;; store the change
-        (store/request-data-insert change-store insert-req)
         (log/debug (format "post-change: '%s' stored-change: '%s'" (.getPath change-uri) (:key insert-req)))
-
-        ;; generate and store the dataset snapshot
-        (let [{:keys [new-snapshot-key] :as snapshot-result}
-              (internal/post-change--generate-csv-snapshot
-               {:triplestore triplestore
-                :change-store change-store
-                :system-uris system-uris}
-               {:path-params path-params
-                :change-kind change-kind
-                :change-id change-id
-                :dataset change-ds
-                :row-schema row-schema
-                "dcterms:format" content-type})]
-          (log/debug (format "post-change: '%s' stored snapshot" (.getPath change-uri))
-                     {:new-snapshot-key new-snapshot-key})
-          (db/tag-with-snapshot triplestore change-uri snapshot-result))
-
-        (as-json-ld {:status 201
-                     :headers {"Location" (-> (rc/match-by-name router
-                                                                :tpximpact.datahost.ldapi.router/commit
-                                                                {:series-slug series-slug
-                                                                 :release-slug release-slug
-                                                                 :revision-id revision-id
-                                                                 :commit-id change-id})
-                                              (rc/match->path))}
-                     :body inserted-jsonld-doc})))))
+        (let [factory (:store-factory sys)
+              obs-store (factory release-uri row-schema)
+              import-result (try 
+                              (jdbc/with-transaction [tx (:db obs-store)]
+                                (let [tx-store (assoc obs-store :db tx)]
+                                  (store/request-data-insert tx-store insert-req)
+                                  ;; (store.sql/complete-import tx-store insert-req)
+                                  ))
+                              (catch Exception ex
+                                ;; TODO(rosado): handle error, tag the change entity as failed/error (or delete it)
+                                (throw ex)))]
+          (store/request-data-insert obs-store insert-req)
+          ;; NOTE(rosado): when generating csv snapshot we would call the below
+          ;; - `internal/post-change--generate-csv-snapshot`
+          ;; - `db/tag-with-snapshot`
+          (as-json-ld {:status 201
+                       :headers {"Location" (-> (rc/match-by-name router
+                                                                  :tpximpact.datahost.ldapi.router/commit
+                                                                  {:series-slug series-slug
+                                                                   :release-slug release-slug
+                                                                   :revision-id revision-id
+                                                                   :commit-id change-id})
+                                                (rc/match->path))}
+                       :body inserted-jsonld-doc}))))))
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/updates))]

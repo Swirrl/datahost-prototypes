@@ -33,6 +33,8 @@
 
 (derive :tpximpact.datahost.ldapi.native-datastore.repo/data-directory ::const)
 
+(derive :tpximpact.datahost.ldapi.store.sql/db-config ::const)
+
 (def system nil)
 
 (defn stop-system! []

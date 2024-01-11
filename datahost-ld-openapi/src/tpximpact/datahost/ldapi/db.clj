@@ -631,7 +631,7 @@
   [uri snapshot-key]
   [(pr/->Triple uri (compact/expand :dh/revisionSnapshotCSV) snapshot-key)])
 
-(defn tag-with-snapshot
+(defn tag-with-snapshot                 ;TODO(rosado): think whether this is still needed.
   "Updates the entity under uri with dataset snapshot information.
 
   Assumes m contains keys:
