@@ -3,6 +3,8 @@
 
 cd ..
 
+cd ..
+
 docker compose up
 
 sleep 200
