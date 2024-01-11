@@ -297,9 +297,9 @@ jobs:
       - image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
     steps:
       - checkout
-      - run: 
-          name : start FE
-          command: docker run -d -p 8887:8080 europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
+      # - run: 
+      #     name : start FE
+      #     command: docker run -d -p 8887:8080 europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
       # - run:
       #     name: Install Docker Compose
       #     environment:
