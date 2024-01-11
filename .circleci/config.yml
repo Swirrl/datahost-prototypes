@@ -298,25 +298,16 @@ jobs:
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
-    executor: docker-builder-executor
     steps:
       - checkout
-      - setup_remote_docker
       - run:
           name: Deploy frontendapp
           command: consumer-wireframes/tests/hurl-smoke-test
       - await:
-          service: http://localhost
+          service: http://localhost:8887
       - run:
-          name: "Run the hurl scripts"
-          working_directory: << parameters.project_dir >>
-          command: |
-            ./bin/hurl-live-service-test localhost
-      - store_test_results:
-          path: << parameters.project_dir >>/test-results
-      - store_artifacts:
-          path: << parameters.project_dir >>/test-report
-
+          name: test frontendapp
+          command: consumer-wireframes/tests/hurl-smoke-test-end
 
 
 

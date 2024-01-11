@@ -3,9 +3,3 @@
 
 
 docker compose up
-
-sleep 200
-
-hurl feSmoketest.hurl
-
-docker compose down

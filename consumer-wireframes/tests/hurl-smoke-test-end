@@ -1,0 +1,6 @@
+#!/bin/sh
+
+
+hurl feSmoketest.hurl
+
+docker compose down
