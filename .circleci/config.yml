@@ -285,13 +285,6 @@ jobs:
 
   test-frontendapp:
     # runs ldapi graphql and fontendapp
-    parameters:
-      commit_sha:
-        type: string
-        description: SHA of the git commit used as docker image tag.
-      project_dir:
-        description: Project directory
-        type: string
     executor: docker-builder-executor
     steps:
       - checkout
@@ -300,7 +293,7 @@ jobs:
           name: Deploy frontendapp
           command: docker compose up -d
       - await:
-          service: http://localhost
+          service: http://localhost:8887
       - run:
           name: "Run the hurl scripts"
           command: hurl consumer-wireframes/tests/feSmoketest.hurl
@@ -393,10 +386,6 @@ workflows:
       #     name: deploy frontendapp
       
       - test-frontendapp:
-          commit_sha: << pipeline.git.revision >>
-          project_dir: datahost-ld-openapi
-          requires:
-            - build-docker-image-ldapi
           filters:
             branches:
               only:
