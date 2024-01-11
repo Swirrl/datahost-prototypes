@@ -1,18 +1,11 @@
 #!/bin/sh
 
 
-cd ..
-
-cd ..
 
 docker compose up
 
 sleep 200
 
-cd consumer-wireframes
-
 hurl feSmoketest.hurl
-
-cd ..
 
 docker compose down
