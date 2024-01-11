@@ -13,10 +13,13 @@ commands:
     parameters:
       service:
         type: string
+      tries:
+        type: integer
+        default: 30
     steps:
       - run:
           name: await service
-          command: wget -nv -O - --retry-connrefused --tries 30 --waitretry=2 << parameters.service >>
+          command: wget -nv -O - --retry-connrefused --tries << parameters.tries >> --waitretry=2 << parameters.service >>
 
 executors:
   clojure-executor:
@@ -305,7 +308,7 @@ jobs:
           name: Deploy frontendapp
           command: consumer-wireframes/tests/hurl-smoke-test
       - await:
-          service: http://localhost:8887
+          service: http://localhost:8887 1000
       - run:
           name: test frontendapp
           command: consumer-wireframes/tests/hurl-smoke-test-end
