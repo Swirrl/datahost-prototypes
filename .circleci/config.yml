@@ -284,7 +284,7 @@ jobs:
 
 
   test-frontendapp:
-    # runs ldapi service container + container with hurl
+    # runs ldapi graphql and fontendapp
     parameters:
       commit_sha:
         type: string
@@ -292,7 +292,6 @@ jobs:
       project_dir:
         description: Project directory
         type: string
-
     executor: docker-builder-executor
     steps:
       - checkout
