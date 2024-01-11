@@ -292,24 +292,22 @@ jobs:
       project_dir:
         description: Project directory
         type: string
-    executor: docker-builder-executor
+    docker:
+      - image: docker/compose:1.29.2
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Deploy frontendapp
-          command: consumer-wireframes/tests/hurl-smoke-test
+          command: docker compose up
       - await:
           service: http://localhost
       - run:
           name: "Run the hurl scripts"
-          working_directory: << parameters.project_dir >>
-          command: |
-            ./bin/hurl-live-service-test localhost
-      - store_test_results:
-          path: << parameters.project_dir >>/test-results
-      - store_artifacts:
-          path: << parameters.project_dir >>/test-report
+          command: hurl consumer-wireframes/tests/feSmoketest.hurl
+      - run:
+          name: "Run the hurl scripts"
+          command: hurl consumer-wireframes/tests/feSmoketest.hurl
 
 
 
