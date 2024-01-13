@@ -18,7 +18,7 @@
   [:release-slug [:string {:description "A URI safe identifier which is unique within its URI namespace/prefix, used to identify a release within a dataset-series."}]])
 
 (def extension-param-spec
-  [:extension [:string {:description "A file format extension e.g. csv, json"}]])
+  [:extension {:optional true} [:string {:description "A file format extension e.g. csv, json"}]])
 
 (def revision-id-param-spec
   [:revision-id [:int {:description "The revision identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])

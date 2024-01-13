@@ -314,7 +314,8 @@ specifications for each route.")
         :post (routes.rel/post-release-delta-config {:triplestore triplestore
                                                      :change-store change-store
                                                      :clock clock
-                                                     :system-uris system-uris})}]
+                                                     :system-uris system-uris})
+        :get (routes.rel/get-accept-release-route-config)}]
 
       ["/{release-slug}/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)

@@ -116,8 +116,6 @@
 
       (testing "Fetching a release that does not exist returns 'not found'"
         (let [resp (GET (str release-1-path ".json"))
-              foo 1
-              _ (println foo)
               {:keys [status body]} resp]
           (is (= 404 status))
           (is (= "Not found" body))))

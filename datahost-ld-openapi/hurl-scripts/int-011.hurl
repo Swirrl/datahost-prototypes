@@ -96,6 +96,22 @@ HTTP 200
 [Asserts]
 jsonpath "$.['dh:hasRevision']" endsWith "{{revision1_url}}"
 
+# Release requested as JSON via ACCEPTS header gets redirected to correct route
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: application/json
+Authorization: {{auth_token}}
+
+HTTP 308
+Location: /data/{{series}}/release/release-1.json
+
+# Release requested as CSV via ACCEPTS header gets redirected to correct route
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: text/csv
+Authorization: {{auth_token}}
+
+HTTP 308
+Location: /data/{{series}}/release/release-1.csv
+
 
 #appends to the revision
 POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
