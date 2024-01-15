@@ -130,7 +130,6 @@ jobs:
   live-service-test:
     # this job is intended to run against a running instance
     # of the service.
-    #
     # Requiremens:
     # - 'HURL_auth_token' environment variable is set
     parameters:
@@ -179,6 +178,7 @@ jobs:
         environment:
           LD_API_DATA_DIR: ./DATA
           LD_API_FILE_DIR: ./FILES
+          LD_API_RDF_BASE_URI: "https://dluhc-pmd5-prototype.publishmydata.com"
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
@@ -191,7 +191,7 @@ jobs:
           service: http://localhost:8080
       - run:
           name: "Run the hurl smoke test for the frontend"
-          command: hurl consumer-wireframes/int-016.hurl --variable scheme=http --variable host-name=localhost:8080
+          command: hurl consumer-wireframes/hurl-scripts/issue-318.hurl --variable scheme=http --variable host-name=localhost:8080
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
