@@ -191,7 +191,7 @@ jobs:
           service: http://localhost:8080
       - run:
           name: "Run the hurl smoke test for the frontend"
-          command: hurl consumer-wireframes/int-016.hurl --variable scheme=http --variable host-name=localhost:8080
+          command: hurl consumer-wireframes/hurl-scripts/issue-318.hurl --variable scheme=http --variable host-name=localhost:8080
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
