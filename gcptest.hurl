@@ -1,0 +1,121 @@
+# Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions, 
+# 3rd rev + corrections). We check the CSV contents of the release at the end.
+
+PUT {{scheme}}://{{host_name}}/data/{{series}}
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "A dataset with a license",
+	"dcterms:description": "The fifth dataset",
+    "dcterms:license": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+    "dcterms:creator": "https://www.gov.uk/government/organisations/ofcom",
+    "dcterms:theme": "https://www.ons.gov.uk/businessindustryandtrade/itandinternetindustry"
+}
+
+HTTP 201
+[Captures]
+dataset: jsonpath "$['dh:baseEntity']"
+
+PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "Test Release",
+	"dcterms:description": "A very simple Release"
+}
+
+HTTP 201
+
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
+Content-Type: application/json
+file,datahost-ld-openapi/hurl-scripts/common/schema-qualifications-by-area.json;
+
+HTTP 201
+
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "Rev 1",
+	"dcterms:description": "A test revision 1"
+}
+
+HTTP 201
+[Captures]
+revision1_url: header "Location"
+
+POST {{scheme}}://{{host_name}}{{revision1_url}}/appends
+Content-Type: text/csv
+[QueryStringParams]
+title: changes (appends)
+description: change for {{series}}
+format: text/csv
+file,datahost-ld-openapi/hurl-scripts/common/qualifications-by-area3.csv;
+
+HTTP 201
+
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: text/csv
+
+HTTP 302
+
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "Rev 2",
+	"dcterms:description": "A test revision 2 (with retraction)"
+}
+
+HTTP 201
+[Captures]
+revision2_url: header "Location"
+
+POST {{scheme}}://{{host_name}}{{revision2_url}}/retractions
+Content-Type: text/csv
+[QueryStringParams]
+title: A retraction
+description: retraction for the release
+format: text/csv
+file,datahost-ld-openapi/hurl-scripts/common/qualifications-by-area3-deletes.csv;
+
+HTTP 201
+
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: text/csv
+
+HTTP 302
+
+POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
+Accept: application/json
+Content-Type: application/json
+{
+	"dcterms:title": "Rev 3",
+	"dcterms:description": "A test revision 3 (with corrections)"
+}
+
+HTTP 201
+[Captures]
+revision3_url: header "Location"
+
+POST {{scheme}}://{{host_name}}{{revision3_url}}/corrections
+Content-Type: text/csv
+[QueryStringParams]
+title: A correction
+description: correction for the release
+format: text/csv
+file,datahost-ld-openapi/hurl-scripts/common/qualifications-by-area3-corrections.csv;
+
+HTTP 201
+
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: text/csv
+
+HTTP 302
+[Captures]
+final_location: header "Location"
+
+GET {{scheme}}://{{host_name}}{{final_location}}
+Accept: text/csv
+
+HTTP 200
