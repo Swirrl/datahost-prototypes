@@ -9,7 +9,7 @@
    [integrant.core :as ig]
    [malli.util :as mu]
    [muuntaja.core :as m]
-   [muuntaja.format.core :as fc]
+   [reitit.core :as r]
    [reitit.coercion.malli :as rcm]
    [reitit.dev.pretty :as pretty]
    [reitit.interceptor.sieppari :as sieppari]
@@ -29,33 +29,7 @@
    [tpximpact.datahost.ldapi.routes.series :as routes.s]
    [muuntaja.format.json :as json-format]
    [clojure.data.json :as json]
-   [clojure.java.io :as io]
-   [tpximpact.datahost.ldapi.handlers.delta :as handlers.delta])
-  (:import
-   (java.io InputStream InputStreamReader OutputStream)))
-
-(defn decode-str [_options]
-  (reify
-    fc/Decode
-    (decode [_ data charset]
-      (slurp (InputStreamReader. ^InputStream data ^String charset)))))
-
-(defn encode-str [_options]
-  (reify
-    fc/EncodeToBytes
-    (encode-to-bytes [_ data charset]
-      (.getBytes data ^String charset))
-    fc/EncodeToOutputStream
-    (encode-to-output-stream [_ data charset]
-      (fn [^OutputStream output-stream]
-        (.write output-stream
-                (.getBytes data ^String charset))))))
-
-(def csv-format
-  (fc/map->Format
-    {:name "text/csv"
-     :decoder [decode-str]
-     :encoder [encode-str]}))
+   [clojure.java.io :as io]))
 
 (defn jsonld-options [options]
   (assoc-in options
@@ -332,19 +306,22 @@ specifications for each route.")
       {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
 
      ["/:series-slug/release"
-      ["/:release-slug"
-       {:get (routes.rel/get-release-route-config triplestore change-store system-uris)
-        :put (routes.rel/put-release-route-config clock triplestore system-uris)
+      ["/{release-slug}.{extension}"
+       {:get (routes.rel/get-release-route-config triplestore change-store system-uris)}]
+
+      ["/{release-slug}"
+       {:put (routes.rel/put-release-route-config clock triplestore system-uris)
         :post (routes.rel/post-release-delta-config {:triplestore triplestore
                                                      :change-store change-store
                                                      :clock clock
-                                                     :system-uris system-uris})}]
+                                                     :system-uris system-uris})
+        :get (routes.rel/get-accept-release-route-config)}]
 
-      ["/:release-slug/schema"
+      ["/{release-slug}/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)
         :post (routes.rel/post-release-ld-schema-config clock triplestore system-uris)}]
 
-      ["/:release-slug/revisions"
+      ["/{release-slug}/revisions"
        {:post (routes.rev/post-revision-route-config triplestore system-uris)
         :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
 
@@ -373,6 +350,7 @@ specifications for each route.")
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
     ;;:reitit.spec/wrap spell/closed ;; strict top-level validation
+    :router r/linear-router
     :exception pretty/exception
     :data {:coercion (rcm/create
                       {;; set of keys to include in error messages

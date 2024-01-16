@@ -84,15 +84,14 @@
 
 (defn get-release
   [triplestore _change-store system-uris
-   {path-params :path-params
-    {:strs [accept]} :headers
+   {{:keys [extension] :as path-params} :path-params
     {release-uri :dh/Release} :datahost.request/uris
     :as request}]
   (if-let [release (->> release-uri
                         (db/get-release-by-uri triplestore)
                         (matcha/index-triples)
                         (triples->ld-resource))]
-    (if (= accept "text/csv")
+    (if (= extension "csv")
       (let [change-info (db/get-latest-change-info triplestore release-uri)]
         (cond
           (nil? change-info) (-> (util.response/response "This release has no revisions yet")

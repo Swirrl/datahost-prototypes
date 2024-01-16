@@ -105,7 +105,7 @@
   [dir-path opts]
   (let [file-root (fs/path dir-path)
         paths (fs/match dir-path "regex:(issue-.*|pr-.*|int-.*)"
-                {:max-depth 1 :recursive false})]
+                        {:max-depth 1 :recursive false})]
     (println)
     (doall
      (for [p ^Path paths

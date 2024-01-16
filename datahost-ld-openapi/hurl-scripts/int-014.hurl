@@ -305,9 +305,7 @@ Authorization: {{auth_token}}
 
 HTTP 404
 
-GET {{scheme}}://{{host_name}}/data/{{series}}5/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}5/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 404
@@ -358,9 +356,7 @@ Authorization: {{auth_token}}
 
 HTTP 404
 
-GET {{scheme}}://{{host_name}}/data/{{series}}6/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}6/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 404
@@ -432,9 +428,7 @@ Authorization: {{auth_token}}
 
 HTTP 404
 
-GET {{scheme}}://{{host_name}}/data/{{series}}7/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}7/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 404
@@ -522,9 +516,7 @@ Authorization: {{auth_token}}
 
 HTTP 404
 
-GET {{scheme}}://{{host_name}}/data/{{series}}8/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}8/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 404
@@ -673,9 +665,7 @@ Authorization: {{auth_token}}
 
 HTTP 404
 
-GET {{scheme}}://{{host_name}}/data/{{series}}9/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}9/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 404

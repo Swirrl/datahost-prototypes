@@ -113,13 +113,10 @@
           new-series-path (str "/data/" new-series-slug)
           release-1-id (str "release-" (UUID/randomUUID))
           release-1-path (str new-series-path "/release/" release-1-id)]
-      (testing "Fetching a release for a series that does not exist returns 'not found'"
-        (let [{:keys [status body]} (GET release-1-path)]
-          (is (= 404 status))
-          (is (= "Not found" body))))
 
       (testing "Fetching a release that does not exist returns 'not found'"
-        (let [{:keys [status body]} (GET release-1-path)]
+        (let [resp (GET (str release-1-path ".json"))
+              {:keys [status body]} resp]
           (is (= 404 status))
           (is (= "Not found" body))))
 
@@ -177,7 +174,7 @@
                    (get body "dcterms:modified")))))
 
         (testing "Fetching a release that does exist works"
-          (let [response (GET release-1-path)
+          (let [response (GET (str release-1-path ".json"))
                 body (json/read-str (:body response))]
             (is (= 200 (:status response)))
             (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
@@ -200,7 +197,7 @@
             (t/is (= nil missing2))))
 
         (testing "A release can be updated, query params take precedence"
-          (let [{body-str-before :body} (GET release-1-path)
+          (let [{body-str-before :body} (GET (str release-1-path ".json"))
                 {:keys [body] :as response} (PUT (str release-1-path "?title=A%20new%20title")
                                               {:content-type :json
                                                :body (json/write-str request-ednld)})
@@ -250,5 +247,5 @@
                                    "dcterms:description" "Description"})})
 
       (testing "Fetching existing release with no revisions"
-        (let [response (GET release-1-path {:headers {"accept" "text/csv"}})]
+        (let [response (GET (str release-1-path ".csv"))]
           (is (= 422 (:status response))))))))

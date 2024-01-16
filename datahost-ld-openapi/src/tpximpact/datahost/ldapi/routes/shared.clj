@@ -17,6 +17,9 @@
 (def release-slug-param-spec
   [:release-slug [:string {:description "A URI safe identifier which is unique within its URI namespace/prefix, used to identify a release within a dataset-series."}]])
 
+(def extension-param-spec
+  [:extension {:optional true} [:string {:description "A file format extension e.g. csv, json"}]])
+
 (def revision-id-param-spec
   [:revision-id [:int {:description "The revision identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])
 
@@ -159,10 +162,11 @@
    :body "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"})
 
 (def metadata-re-pattern #"-metadata.json$")
+(def metadata-strip-re-pattern #"-metadata$")
 
 (defn strip-metadata-uris [path-params]
   (->> path-params
-       (map (fn [[k v]] [k (string/replace v metadata-re-pattern "")]))
+       (map (fn [[k v]] [k (string/replace v metadata-strip-re-pattern "")]))
        (into {})))
 
 (defn csvm-request? [{:keys [request-method uri] :as request}]
@@ -171,8 +175,8 @@
 (defn csvm-request
   [{:keys [triplestore system-uris]
     {:keys [request-method uri path-params] :as request} :request :as _context}]
-  (let [path-params (strip-metadata-uris path-params)
-        uri (su/dataset-release-uri* system-uris path-params)]
+  (let [stripped-path-params (strip-metadata-uris path-params)
+        uri (su/dataset-release-uri* system-uris stripped-path-params)]
     ;; TODO: this should pull the resource metadata, not just check the
     ;; resource exists
     (if (db/resource-exists? triplestore uri)
