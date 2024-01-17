@@ -55,6 +55,18 @@ layout: basic
                         <p><a href="#">Deletions.csv</a> (1 row)</p> -->
                     </div>
                 </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2 class="pt-5">About this revision</h2>
+                        <p><strong>Description:</strong> <span id="descriptionMetadata"></span></p>
+                        <p><strong>Publication Date:</strong> <span id="pubdate"></span></p>
+                        <p><strong>Licence:</strong> <a href="" id="license"></a></p>
+                        <p><strong>Reason for Change:</strong> <span id="reason"></span></p>
+                        <p><strong>Identifier:</strong> <span id='id'></span>
+                    </div>
+                </div>
+
                 <!-- <h3 class="h5 pt-3">
                     <a class="" data-bs-toggle="collapse" href="#citation" role="button" aria-expanded="false"
                         aria-controls="collapseExample">
@@ -142,6 +154,19 @@ layout: basic
         document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
         document.getElementById('description').innerHTML = revision["dcterms:description"]
         document.getElementById('revisionReason').innerHTML = revision["dcterms:description"]
+        document.getElementById('descriptionMetadata').innerHTML = revision["dcterms:description"]
+        if (revision["dh:publicationDate"]) {
+            document.getElementById('pubdate').innerHTML = revision["dh:publicationDate"]
+        }
+        if (revision["dcterms:license"]) {
+            document.getElementById('license').innerHTML = revision["dcterms:license"]
+        }
+        if (revision["dh:reasonForChange"]) {
+            document.getElementById('reason').innerHTML = revision["dh:reasonForChange"]
+        }
+        document.getElementById('id').innerHTML = revision["@id"]
+        
+
         let changes = ""
         let changeURI = ""
         if (typeof revision["dh:hasChange"] != "string") {

@@ -22,8 +22,7 @@ layout: basic
                     </h1>
                     <h1 class="font-weight-bold pr-5">
                         <span id="title"></span></h1>
-                    <p class="lead"><strong>Last update:</strong> <span id="modified"></span> | <strong> Next
-                            update:</strong> </p>
+                        <p class="lead"><strong>Last modified:</strong> <span id="modified"></span></p>
                     <p><span id="description"></span></p>
                 </div>
             </div>
@@ -83,6 +82,18 @@ layout: basic
                     <tbody id="table">
                     </tbody>
                 </table>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h2 class="pt-5">About this release</h2>
+                        <p><strong>Description:</strong> <span id="descriptionMetadata"></span></p>
+                        <p><strong>Licence:</strong> <a href="" id="license"></a></p>
+                        <p><strong>Coverage:</strong> <a href="" id="coverage"></a></p>
+                        <p><strong>Geography Definition:</strong> <span id="geodef"></span></p>
+                        <p><strong>Reason for Change:</strong> <span id="reason"></span></p>
+                        <p><strong>Identifier:</strong> <span id='id'></span>
+                    </div>
+                </div>
+        
             </div>
             <div class="col-lg-4 pt-4 pb-5">
                 <div class="card">
@@ -116,8 +127,10 @@ layout: basic
     let url = window.location.href
     let uri = envDomain + url.split('?')[1];
     let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
+    let releaseUri = (uri + "/").match(/^((?:[^\/]*\/){6}[^\/]*)\//)[1];
+    console.log('release uri ' + releaseUri)
+    let schemaUri = releaseUri + '/schema'
     document.getElementById('apiLink').href = uri
-    console.log(seriesUri)
 
     const tableStructure = [{
         "name": "csvw:titles"
@@ -165,8 +178,11 @@ layout: basic
         const humanReadableDate = new Date(release["dcterms:modified"]).toLocaleString('en-GB', {
             day: 'numeric',
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
         })
+
         document.getElementById('title').innerHTML = release["dcterms:title"]
         document.getElementById('subTitle').innerHTML = series["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
@@ -174,10 +190,30 @@ layout: basic
         document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
         document.getElementById('modified').innerHTML = humanReadableDate + " <i class='text-muted font-weight-light'>(" + release["dcterms:modified"] + ")</i>"
         document.getElementById('description').innerHTML = series["dcterms:description"]
-        document.getElementById('revisions').href = `./revisions?/data/${release["@id"]}`
+        document.getElementById('descriptionMetadata').innerHTML = release["dcterms:description"]
+        if (release["dcterms:license"]){ 
+            document.getElementById('license').innerHTML = release["dcterms:license"]
+        }
+        if (release["dh:coverage"]){
+            document.getElementById('coverage').innerHTML = release["dh:coverage"]
+        }
+        if (release["dh:geographicalCoverageDefinition"]){
+            document.getElementById('geodef').innerHTML = release["dh:geographyDefinition"]
+        }
+        if (release["dh:reasonForChange"]){
+            document.getElementById('reason').innerHTML = release["dh:reasonForChange"]
+        }
+        document.getElementById('id').innerHTML = release["@id"]
+        
+       
 
-        let latestRevision = release["dh:hasRevision"][0]
-        getRevision(latestRevision, release)
+        document.getElementById('revisions').href = `./revisions?/data/${release["@id"]}`
+        
+
+        const latestRevision = release["dh:hasRevision"].length
+        const latestRevisionUri = `${releaseUri}/revision/${latestRevision}`
+        console.log('latest revision uri: ' + latestRevisionUri);
+        getRevision(latestRevisionUri, release)
     }
 
     getRevision = (latestRevision, release) => {
@@ -212,8 +248,7 @@ layout: basic
             changes.innerHTML = `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
         }
 
-        let schema = release["dh:hasSchema"]
-        getSchema(schema)
+        getSchema(schemaUri)
     }
 
     getSchema = schema => {

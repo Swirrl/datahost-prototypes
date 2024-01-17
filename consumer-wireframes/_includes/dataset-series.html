@@ -18,8 +18,8 @@ layout: basic
                 <div class="col-lg-8">
                     <h1 class="font-weight-bold pr-5"><span id="title"></span>
                     </h1>
-                    <p class="lead"><strong>Last modified:</strong> <span id="modified"></span> | <strong> Next
-                            update:</strong></p>
+                    <p class="lead"><strong>Last modified:</strong> <span id="modified"></span> </br><strong> Next
+                            update: </strong><span id="nextupdate"> </span></p>
                     <p><span id="description"></span></p>
                 </div>
             </div>
@@ -60,11 +60,11 @@ layout: basic
             <div class="col-lg-8">
                 <h2 class="pt-5">About this dataset</h2>
                 <p><strong>Description:</strong> <span id="descriptionMetadata"></span></p>
-                <p><strong>Publisher:</strong> <a href="#"></a></p>
-                <p><strong>Topic:</strong> <a href="#"></a></p>
-                <p><strong>Licence:</strong> <a href=""></a></p>
-                <p><strong>Keywords:</strong> </p>
-                <p><strong>Identifier:</strong><span id='id'></span>
+                <p><strong>Publisher:</strong> <a href="#" id="publisher"></a></p>
+                <p><strong>Theme:</strong> <a href="#" id="theme" ></a></p>
+                <p><strong>Licence:</strong> <a href="" id="license"></a></p>
+                <p><strong>Keywords:</strong> <span id="keywords"></span></p>
+                <p><strong>Identifier:</strong> <span id='id'></span>
             </div>
         </div>
         <div class="row">
@@ -105,13 +105,29 @@ layout: basic
         const humanReadableDate = new Date(data["dcterms:modified"]).toLocaleString('en-GB', {
             day: 'numeric',
             month: 'long',
-            year: 'numeric'
+            year: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
         })
         document.getElementById('title').innerHTML = data["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = data["dcterms:title"]
         document.getElementById('modified').innerHTML = humanReadableDate + " <i class='text-muted font-weight-light'>(" + data["dcterms:modified"] + ")</i>"
+        document.getElementById('nextupdate').innerHTML = data["dh:nextUpdate"]
         document.getElementById('description').innerHTML = data["dcterms:description"]
         document.getElementById('descriptionMetadata').innerHTML = data["dcterms:description"]
+        if (data["dcterms:publisher"] != null) {
+            document.getElementById('publisher').innerHTML = data["dcterms:publisher"]
+        }
+        if (data["dcat:theme"] != null) {
+            document.getElementById('theme').innerHTML = data["dcat:theme"]
+        }
+        if (data["dcterms:license"] != null) {
+            document.getElementById('license').innerHTML = data["dcterms:license"]
+        }
+        if (data["dcat:keywords"] != null) {
+            document.getElementById('keywords').innerHTML = data["dcat:keywords"]
+        }
+            document.getElementById('id').innerHTML = data["@id"]
         
     }
 
