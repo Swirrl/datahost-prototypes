@@ -21,8 +21,7 @@ layout: basic
             <div class="row">
                 <div class="col-lg-8">
                     <h1 class="font-weight-bold h3 pr-5"><span id="seriesTitle"></span>: <span id="releaseTitle"></span></h1>
-                    <h1 class="font-weight-bold pr-5">
-                        <span id="title"></span></h1>
+                    <h1 class="font-weight-bold pr-5"><span id="title"></span></h1>
                     <!-- <p class="lead"><strong>Last update:</strong> <span id="modified"></span> | <strong> Next
                             update:</strong> </p> -->
                     <p><span id="description"></span></p>
@@ -95,8 +94,12 @@ layout: basic
     const envDomain = document.getElementById("getDomain").innerHTML;
     let url = window.location.href
     uri = envDomain + url.split('?')[1]
+    let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
+    let releaseUri = uri.match(/^((?:[^\/]*\/){6}[^\/]*)\//)[1];
     document.getElementById('apiLink').href = uri
-
+    console.log(releaseUri)
+    console.log(seriesUri)
+    console.log(uri);
     const settings = {
         method: 'GET',
         headers: {
@@ -106,28 +109,45 @@ layout: basic
     };
 
     fetch(uri, settings)
-        .then((response) => {
-            return response.json();
-        })
-        .then((data) => {
-            populatePage(data)
-        })
-        .catch(error => {
-            console.log(error)
-        });
+    .then((revisionResponse) => {
+        return fetch(releaseUri, settings)
+            .then((releaseResponse) => {
+                return { release: releaseResponse.json(), revision: revisionResponse.json() };
+            });
+    })
+    .then(({ release, revision }) => {
+        return fetch(seriesUri, settings)
+            .then((seriesResponse) => {
+                return { series: seriesResponse.json(), release, revision };
+            });
+    })
+    .then(({ series, release, revision }) => {
+        return Promise.all([series, release, revision]);
+    })
+    .then(([series, release, revision]) => {
+        populatePage(series, release, revision);
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
 
 
-    populatePage = (data) => {
-        document.getElementById('title').innerHTML = data["dcterms:title"]
-        document.getElementById('titleBreadcrumb').innerHTML = data["dcterms:title"]
-        document.getElementById('description').innerHTML = data["dcterms:description"]
-        document.getElementById('revisionReason').innerHTML = data["dcterms:description"]
+    populatePage = (series, release, revision) => {
+        console.log(revision)
+        console.log(release)
+        console.log(series)
+        document.getElementById('title').innerHTML = revision["dcterms:title"]
+        document.getElementById('titleBreadcrumb').innerHTML = revision["dcterms:title"]
+        document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('description').innerHTML = revision["dcterms:description"]
+        document.getElementById('revisionReason').innerHTML = revision["dcterms:description"]
         let changes = ""
         let changeURI = ""
-        if (typeof data["dh:hasChange"] != "string") {
+        if (typeof revision["dh:hasChange"] != "string") {
             html = ""
-            for (i = 0; i < data["dh:hasChange"].length; i++) {
-                changeURI = data["dh:hasChange"][i]
+            for (i = 0; i < revision["dh:hasChange"].length; i++) {
+                changeURI = revision["dh:hasChange"][i]
                 changes = document.getElementById("changes")
                 html +=
                     `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
@@ -135,14 +155,22 @@ layout: basic
             }
             changes.innerHTML = html
         } else {
-            changeURI = data["dh:hasChange"]
+            changeURI = revision["dh:hasChange"]
             changes = document.getElementById("changes")
             changes.innerHTML =
                 `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
         }
 
-        let release = data["dh:appliesToRelease"]
-        fetchRelease (release)
+        document.getElementById('releaseBreadcrumb').innerHTML = release["dcterms:title"]
+        document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?/data/${release["@id"]}`
+        document.getElementById('releaseTitle').innerHTML = release["dcterms:title"]
+
+        document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('seriesTitle').innerHTML = series["dcterms:title"]
+
+
+
     }
 
     fetchRelease = release => {
@@ -163,8 +191,8 @@ layout: basic
         document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?/data/${data["@id"]}`
         document.getElementById('releaseTitle').innerHTML = data["dcterms:title"]
         series = data["dcat:inSeries"]
-        console.log(series)
-        fetchSeries(series)
+        console.log("series" + series)
+        fetchSeries(seriesUri)
     }
 
 

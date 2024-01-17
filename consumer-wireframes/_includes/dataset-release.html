@@ -114,8 +114,10 @@ layout: basic
 <script>
     const envDomain = document.getElementById("getDomain").innerHTML;
     let url = window.location.href
-    uri = envDomain + url.split('?')[1]
+    let uri = envDomain + url.split('?')[1];
+    let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
     document.getElementById('apiLink').href = uri
+    console.log(seriesUri)
 
     const tableStructure = [{
         "name": "csvw:titles"
@@ -147,7 +149,7 @@ layout: basic
         });
 
     fetchSeries = release => {
-        fetch(release["dcat:inSeries"], settings)
+        fetch(seriesUri, settings)
             .then((response) => {
                 return response.json();
             })
@@ -160,13 +162,17 @@ layout: basic
     }
 
     populatePage = (release, series) => {
-        
+        const humanReadableDate = new Date(release["dcterms:modified"]).toLocaleString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        })
         document.getElementById('title').innerHTML = release["dcterms:title"]
         document.getElementById('subTitle').innerHTML = series["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
         document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
         document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
-        document.getElementById('modified').innerHTML = release["dcterms:modified"]
+        document.getElementById('modified').innerHTML = humanReadableDate + " <i class='text-muted font-weight-light'>(" + release["dcterms:modified"] + ")</i>"
         document.getElementById('description').innerHTML = series["dcterms:description"]
         document.getElementById('revisions').href = `./revisions?/data/${release["@id"]}`
 

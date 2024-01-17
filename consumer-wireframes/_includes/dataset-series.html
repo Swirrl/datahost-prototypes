@@ -102,9 +102,14 @@ layout: basic
         });
 
     populatePage = data => {
+        const humanReadableDate = new Date(data["dcterms:modified"]).toLocaleString('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        })
         document.getElementById('title').innerHTML = data["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = data["dcterms:title"]
-        document.getElementById('modified').innerHTML = data["dcterms:modified"]
+        document.getElementById('modified').innerHTML = humanReadableDate + " <i class='text-muted font-weight-light'>(" + data["dcterms:modified"] + ")</i>"
         document.getElementById('description').innerHTML = data["dcterms:description"]
         document.getElementById('descriptionMetadata').innerHTML = data["dcterms:description"]
         

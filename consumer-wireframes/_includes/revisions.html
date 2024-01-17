@@ -59,6 +59,7 @@ layout: basic
 
     let url = window.location.href
     let uri = envDomain + url.split('?')[1]
+    let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
 
     const tableStructure = [{
         "name": "dcterms:title"
@@ -90,7 +91,7 @@ layout: basic
         });
 
     fetchSeries = release => {
-        fetch(release["dcat:inSeries"], settings)
+        fetch(seriesUri, settings)
             .then((response) => {
                 return response.json();
             })
