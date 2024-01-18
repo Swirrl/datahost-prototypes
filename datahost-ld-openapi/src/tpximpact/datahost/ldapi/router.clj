@@ -345,7 +345,12 @@ specifications for each route.")
         {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]]
+        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]
+
+    ["/doc" {:muuntaja leave-keys-alone-muuntaja-coercer}
+     ["/:series-slug/release"
+      ["/{release-slug}.{extension}"
+       {:get (routes.rel/get-release-route-config triplestore change-store system-uris)}]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data

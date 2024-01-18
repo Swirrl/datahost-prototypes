@@ -100,7 +100,7 @@
           :else (let [rev-uri ^URI (:rev change-info)]
                   (-> (.getPath rev-uri)
                       (util.response/redirect)
-                      (shared/set-csvm-header request)))))
+                      (shared/set-csvm-link-header request)))))
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
                              (.toString))}))
@@ -185,7 +185,7 @@
                       (when (nil? key)
                         (throw (ex-info "No snapshot reference for revision" {:revision revision})))
                       (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key)))))}
-          (shared/set-csvm-header request))
+          (shared/set-csvm-link-header request))
 
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))

@@ -22,7 +22,7 @@
   {:summary (str "Retrieve data or metadata for an existing release via ACCEPT header."
                  "Redirects to correct file route with file extension when allowed ACCEPT"
                  "header is provided. e.g. text/csv")
-   :middleware [[(partial middleware/accepts->extension-redirect-middleware) :accepts-redirect]]
+   :middleware [[(partial middleware/accepts->file-doc-middleware) :accepts-redirect]]
    :handler identity
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec

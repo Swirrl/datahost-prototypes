@@ -150,7 +150,7 @@
 (defn base-url [request]
   (request/request-url (select-keys request [:scheme :headers :uri])))
 
-(defn set-csvm-header [response request]
+(defn set-csvm-link-header [response request]
   (let [csvm-url (-> request (update :uri str "-metadata.json") base-url)]
     (update response :headers assoc "link" (str "<" csvm-url ">; "
                                                 "rel=\"describedBy\"; "

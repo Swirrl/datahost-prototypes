@@ -218,11 +218,11 @@
              (#(str/split % #";"))
              (first))))
 
-(defn accepts->extension-redirect-middleware
+(defn accepts->file-doc-middleware
   "When a route using this middleware receives an allowed Accept: text/csv header, for
   example, instead of serving the content from its route it redirects users to the same
-  route but with the corresponding .csv file extension. Same for application/json
-  (redirects with .json extension)"
+  route but with the corresponding doc route with a .csv file extension. Same for
+  application/json (redirects with .json extension)"
   [handler _id]
   (fn [{{:strs [accept]} :headers
         {:keys [path path-params]} :reitit.core/match
@@ -231,7 +231,8 @@
       (if (and (nil? (:extension path-params))
                (contains? accepts->extension first-accept))
         {:status 302
-         :headers {"Location" (str path "." (get accepts->extension first-accept))}}
+         :headers {"Location" (-> (str path "." (get accepts->extension first-accept))
+                                  (str/replace #"^\/data" "/doc"))}}
         (handler request))
       (handler request))))
 
