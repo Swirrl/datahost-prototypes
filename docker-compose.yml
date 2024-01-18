@@ -18,9 +18,10 @@ services:
       - "8889:80"
     
   frontendapp:
-    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.4347"
     # platform: linux/amd64
     environment:
-      LDAPI_BASE_URL: "http://localhost:8889"
+      # LDAPI_BASE_URL: "http://localhost:8889"
+      LDAPI_BASE_URL: "https://dluhc-pmd5-prototype.publishmydata.com"
     ports:
       - "8887:8080"
