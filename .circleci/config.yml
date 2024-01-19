@@ -163,6 +163,7 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
+
   ci-docker-hurl-test:
     # runs ldapi service container + container with hurl
     parameters:
