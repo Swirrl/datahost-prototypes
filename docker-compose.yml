@@ -7,7 +7,7 @@ services:
     ports:
       - "8888:80"
   ldapi:
-    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:bfbcd8a"
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:c5618aa"
     #platform: linux/arm64/v8
     #platform: linux/amd64
     environment:
@@ -19,9 +19,9 @@ services:
       - "8889:80"
 
   frontendapp:
-    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.4448"
     # platform: linux/amd64
     environment:
-      LDAPI_BASE_URL: "http://localhost:8889"
+      LDAPI_SERVICE_URL: "http://localhost:8889"
     ports:
       - "8887:8080"
