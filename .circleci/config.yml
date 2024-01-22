@@ -183,7 +183,7 @@ jobs:
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
-      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
+      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.4448
     steps:
       - checkout
       - await:
@@ -299,7 +299,6 @@ workflows:
             branches:
               only:
                 - /^main$/
-                - /^tr\/deploy-ui$/  #remove
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -334,18 +333,17 @@ workflows:
             branches:
               only:
                 - /^main$/
-                - /^tr\/deploy-ui$/  #remove
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      - pushfrontendapp:
-          context:
-            - swirrl-dockerhub-publisher
-            - gcp-artifact-registry
-            - swirrl-ons-datahost-gcloud
-          name: frontendapp
+      # - pushfrontendapp:
+      #     context:
+      #       - swirrl-dockerhub-publisher
+      #       - gcp-artifact-registry
+      #       - swirrl-ons-datahost-gcloud
+      #     name: frontendapp
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud

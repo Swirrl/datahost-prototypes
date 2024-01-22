@@ -2,9 +2,11 @@
 # 3rd rev + corrections).
 
 # hurl issue-323.hurl --variable series=x-series-on-GCP --variable host_name=dluhc-pmd5-prototype.publishmydata.com --variable scheme=https
+# run locally with docker compose:
+# hurl issue-323.hurl --variable series=x-series-on-GCP --variable host_name=localhost:8889 --variable scheme=http
 
-#DELETE {{scheme}}://{{host_name}}/data/{{series}}
-#HTTP 204
+# DELETE {{scheme}}://{{host_name}}/data/{{series}}
+# HTTP 204
 
 
 PUT {{scheme}}://{{host_name}}/data/{{series}}
@@ -71,7 +73,7 @@ HTTP 201
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 
-HTTP 302
+HTTP 308
 
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
@@ -98,7 +100,7 @@ HTTP 201
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 
-HTTP 302
+HTTP 308
 
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
 Accept: application/json
@@ -129,11 +131,11 @@ HTTP 201
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 
-HTTP 302
+HTTP 308
 [Captures]
 final_location: header "Location"
 
 GET {{scheme}}://{{host_name}}{{final_location}}
 Accept: text/csv
 
-HTTP 200
+HTTP 302

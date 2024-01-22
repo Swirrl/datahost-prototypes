@@ -175,9 +175,6 @@ layout: basic
     }
 
     populatePage = (release, series) => {
-<<<<<<< HEAD
-
-=======
         const humanReadableDate = new Date(release["dcterms:modified"]).toLocaleString('en-GB', {
             day: 'numeric',
             month: 'long',
@@ -186,7 +183,6 @@ layout: basic
             minute: 'numeric',
         })
 
->>>>>>> 0d66762 (building and pushing consumer wireframe in docker)
         document.getElementById('title').innerHTML = release["dcterms:title"]
         document.getElementById('subTitle').innerHTML = series["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
