@@ -15,6 +15,10 @@
    :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"
    "@base" (su/rdf-base-uri system-uris)})
 
+(defn datahost-csvw-context [system-uris]
+  (merge {"@vocab" "http://www.w3.org/ns/csvw#"}
+         (simple-context system-uris)))
+
 (defn simple-collection-context [system-uris]
   "Use this context when the top level payload will be a collection e.g. Series list"
   (merge (simple-context system-uris)

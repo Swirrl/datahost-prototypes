@@ -31,6 +31,9 @@
 (defn- as-json-ld [response]
   (assoc-in response [:headers "content-type"] "application/ld+json"))
 
+(defn- as-csvm [response]
+  (assoc-in response [:headers "content-type"] "application/csvm+json"))
+
 (defn get-api-params [{:keys [path-params query-params]}]
   (-> query-params (update-keys keyword) (merge path-params)))
 
@@ -152,6 +155,26 @@
                                                 (merge (json-ld/simple-context system-uris)
                                                        {"dh:columns" {"@container" "@set"}}))
                                (.toString))}))
+      (errors/not-found-response request))))
+
+(defn get-release-csvw-metadata
+  [triplestore system-uris {path-params :path-params :as request}]
+  (let [release-uri (su/dataset-release-uri* system-uris path-params)
+        matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
+    (if-let [schema-id (get-schema-id matcha-db)]
+      (let [schema-resource (triples->ld-resource matcha-db schema-id)
+            csvw-number-uri (cmp/expand :csvw/number)
+            columns (->> (box (get schema-resource (cmp/expand :dh/columns)))
+                         (map #(triples->ld-resource matcha-db %))
+                         (sort-by #(get % csvw-number-uri)))
+            schema-ld-with-columns (-> (assoc schema-resource
+                                         (cmp/expand :csvw/tableSchema) {(cmp/expand :csvw/columns) columns})
+                                       (dissoc (cmp/expand :dh/columns)))]
+        (as-csvm {:status 200
+                  :body (-> (json-ld/compact schema-ld-with-columns
+                                             (merge (json-ld/datahost-csvw-context system-uris)
+                                                    {"columns" {"@container" "@set"}}))
+                            (.toString))}))
       (errors/not-found-response request))))
 
 (defn- revision-number

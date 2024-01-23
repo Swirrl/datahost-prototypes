@@ -296,14 +296,16 @@ header "Location" == "{{revision2_url}}"
 
 
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1-metadata.json
+GET {{scheme}}://{{host_name}}/doc/{{series}}/release/release-1.csv-metadata.json
 #Accept: application/json
 #Content-Type: application/json
 Authorization: {{auth_token}}
+
 HTTP 200
 [Asserts]
-body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
-
+jsonpath "$.['dcterms:title']" == "Dummy Schema"
+jsonpath "$.['tableSchema'].columns" count == 8
+#jsonpath "$.['dh:appliesToRelease']" endsWith "{{series}}/release/release-1"
 
 #ensure path header contains a URL when requesting revision 2
 GET {{scheme}}://{{host_name}}{{revision2_url}}

@@ -55,13 +55,12 @@ Accept: text/csv
 
 HTTP 200
 
+## TODO: revision CSV metadata
+#GET {{scheme}}://{{host_name}}/doc/{{series}}/release/release-1/revision/1-metadata.json
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revision/1-metadata.json
-
-
-HTTP 200
-[Asserts]
-body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
+#HTTP 200
+#[Asserts]
+#body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
 
 
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
@@ -245,16 +244,6 @@ path: header "Link"
 variable "path" contains "type=\"application/csvm+json\""
 variable "path" contains "rel=\"describedBy\""
 header "Location" == "{{revision2_url}}"
-
-
-
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1-metadata.json
-Accept: application/json 
-Content-Type: application/json
-Authorization: {{auth_token}}
-HTTP 200
-[Asserts]
-body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
 
 
 #ensure path header contains a URL when requesting revision 2

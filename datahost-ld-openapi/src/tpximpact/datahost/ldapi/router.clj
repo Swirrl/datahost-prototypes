@@ -349,6 +349,11 @@ specifications for each route.")
 
     ["/doc" {:muuntaja leave-keys-alone-muuntaja-coercer}
      ["/:series-slug/release"
+
+      ;; /doc/dataset-series/release/:release-id.csv-metadata.json
+      ["/{release-slug}.csv-metadata.{extension}"
+       {:get (routes.rel/get-release-csvw-metadata-config triplestore system-uris)}]
+
       ["/{release-slug}.{extension}"
        {:get (routes.rel/get-release-route-config triplestore change-store system-uris)}]]]]
 
