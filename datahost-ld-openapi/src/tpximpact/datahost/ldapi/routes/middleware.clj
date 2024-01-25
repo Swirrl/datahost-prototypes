@@ -230,7 +230,7 @@
     (if-let [first-accept (find-first-accept-header accept)]
       (if (and (nil? (:extension path-params))
                (contains? accepts->extension first-accept))
-        {:status 308
+        {:status 302
          :headers {"Location" (str path "." (get accepts->extension first-accept))}}
         (handler request))
       (handler request))))
