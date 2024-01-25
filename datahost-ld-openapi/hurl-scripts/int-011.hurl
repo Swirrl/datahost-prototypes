@@ -1,4 +1,4 @@
-# Description: This test ensures appends deletes corrections and their 
+# Description: This test ensures appends deletes corrections and their
 # associated metadata are added and retrieved correctly.
 
 
@@ -39,7 +39,7 @@ HTTP 201
 
 #creates a revision with additional metadata
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
-Accept: application/json 
+Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
 {
@@ -73,7 +73,7 @@ header "Location" endsWith "{{id}}"
 
 #Fetching an existing Revision as default application/json format works
 GET {{scheme}}://{{host_name}}{{revision1_url}}
-Accept: application/json 
+Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
 
@@ -101,7 +101,7 @@ GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Authorization: {{auth_token}}
 
-HTTP 308
+HTTP 302
 Location: /data/{{series}}/release/release-1.json
 
 # Release requested as CSV via ACCEPTS header gets redirected to correct route
@@ -109,7 +109,7 @@ GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 Authorization: {{auth_token}}
 
-HTTP 308
+HTTP 302
 Location: /data/{{series}}/release/release-1.csv
 
 
@@ -250,7 +250,7 @@ Aged 16 to 64 years level 3 or above qualifications,Stroud,2020,63.2,per cent,74
 
 #Create a new revision with description left blank intentionally
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions
-Accept: application/json 
+Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
 {
@@ -683,5 +683,3 @@ title: Final Revisions
 
 
 HTTP 201
-
-
