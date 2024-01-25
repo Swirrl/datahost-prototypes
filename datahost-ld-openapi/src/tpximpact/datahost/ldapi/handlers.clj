@@ -1,6 +1,7 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
    [clojure.string :as str]
+   [clojure.set :as cs]
    [clojure.tools.logging :as log]
    [grafter.matcha.alpha :as matcha]
    [ring.util.io :as ring-io]
@@ -88,7 +89,7 @@
 
 (defn get-release
   [triplestore _change-store system-uris
-   {{:keys [extension] :as path-params} :path-params
+   {{:keys [extension]} :path-params
     {release-uri :dh/Release} :datahost.request/uris
     :as request}]
   (if-let [release (->> release-uri
@@ -163,19 +164,19 @@
   (let [release-uri (su/dataset-release-uri* system-uris path-params)
         matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
     (if-let [schema-id (get-schema-id matcha-db)]
-      (let [schema-resource (triples->csvw-resource matcha-db schema-id)
-            csvw-number-uri (cmp/expand :csvw/number)
-            columns (->> (box (get schema-resource (cmp/expand :dh/columns)))
-                         (map #(triples->csvw-resource matcha-db %))
-                         (sort-by #(get % csvw-number-uri)))
-            schema-ld-with-columns (-> (assoc schema-resource
-                                         (cmp/expand :csvw/tableSchema) {(cmp/expand :csvw/columns) columns})
-                                       (dissoc (cmp/expand :dh/columns))
-                                       (assoc (cmp/expand :csvw/url)
-                                              (str/replace request-uri #"-metadata.json" "")))]
+      (let [csvw-number-uri (cmp/expand :csvw/number)
+            schema-resource (-> (triples->csvw-resource matcha-db schema-id)
+                                (assoc (cmp/expand :csvw/url)
+                                       (str/replace request-uri #"-metadata.json" ""))
+                                (update (cmp/expand :dh/columns)
+                                        (fn [schema-cols]
+                                          (->> (box schema-cols)
+                                               (map #(triples->csvw-resource matcha-db %))
+                                               (sort-by #(get % csvw-number-uri))
+                                               (hash-map (cmp/expand :csvw/columns)))))
+                                (cs/rename-keys {(cmp/expand :dh/columns) (cmp/expand :csvw/tableSchema)}))]
         (as-csvm {:status 200
-                  :body (-> (json-ld/compact schema-ld-with-columns
-                                             json-ld/datahost-csvw-vocab-context)
+                  :body (-> (json-ld/compact schema-resource json-ld/datahost-csvw-vocab-context)
                             (json-ld/update-with-csvw-context)
                             (.toString))}))
       (errors/not-found-response request))))
@@ -315,7 +316,6 @@
    change-kind
    {router :reitit.core/router
     {:keys [series-slug release-slug revision-id] :as path-params} :path-params
-    query-params :query-params
     appends :body
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
