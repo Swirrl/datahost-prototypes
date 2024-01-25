@@ -42,7 +42,7 @@
   triplestore) and returning a malli schema for the column's value.
 
   At the moment only the simplest cases are supported, and the
-  \"csvw:datatype\" field can be set to \"string\",\"double\",
+  \"csvw:datatype\" field can be set to \"string\",\"double\", \"int\",
   \"integer\". Additionally, the schema can contain
   \"csvw:required\".
 
