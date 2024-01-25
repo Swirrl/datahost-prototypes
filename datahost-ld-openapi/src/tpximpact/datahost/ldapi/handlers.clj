@@ -1,5 +1,6 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
+   [clojure.string :as str]
    [clojure.tools.logging :as log]
    [grafter.matcha.alpha :as matcha]
    [ring.util.io :as ring-io]
@@ -19,7 +20,7 @@
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
    [tpximpact.datahost.ldapi.util.triples
-    :refer [triples->ld-resource triples->ld-resource-collection]]
+    :refer [triples->ld-resource triples->ld-resource-collection triples->csvw-resource]]
    [clojure.java.io :as io])
   (:import
    (java.net URI)
@@ -158,22 +159,24 @@
       (errors/not-found-response request))))
 
 (defn get-release-csvw-metadata
-  [triplestore system-uris {path-params :path-params :as request}]
+  [triplestore system-uris {path-params :path-params request-uri :uri :as request}]
   (let [release-uri (su/dataset-release-uri* system-uris path-params)
         matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
     (if-let [schema-id (get-schema-id matcha-db)]
-      (let [schema-resource (triples->ld-resource matcha-db schema-id)
+      (let [schema-resource (triples->csvw-resource matcha-db schema-id)
             csvw-number-uri (cmp/expand :csvw/number)
             columns (->> (box (get schema-resource (cmp/expand :dh/columns)))
-                         (map #(triples->ld-resource matcha-db %))
+                         (map #(triples->csvw-resource matcha-db %))
                          (sort-by #(get % csvw-number-uri)))
             schema-ld-with-columns (-> (assoc schema-resource
                                          (cmp/expand :csvw/tableSchema) {(cmp/expand :csvw/columns) columns})
-                                       (dissoc (cmp/expand :dh/columns)))]
+                                       (dissoc (cmp/expand :dh/columns))
+                                       (assoc (cmp/expand :csvw/url)
+                                              (str/replace request-uri #"-metadata.json" "")))]
         (as-csvm {:status 200
                   :body (-> (json-ld/compact schema-ld-with-columns
-                                             (merge (json-ld/datahost-csvw-context system-uris)
-                                                    {"columns" {"@container" "@set"}}))
+                                             json-ld/datahost-csvw-vocab-context)
+                            (json-ld/update-with-csvw-context)
                             (.toString))}))
       (errors/not-found-response request))))
 

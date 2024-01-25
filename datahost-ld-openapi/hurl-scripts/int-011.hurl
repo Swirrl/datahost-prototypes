@@ -303,9 +303,10 @@ Authorization: {{auth_token}}
 
 HTTP 200
 [Asserts]
-jsonpath "$.['dcterms:title']" == "Dummy Schema"
+jsonpath "$.['http://purl.org/dc/terms/title']" == "Dummy Schema"
 jsonpath "$.['tableSchema'].columns" count == 8
-#jsonpath "$.['dh:appliesToRelease']" endsWith "{{series}}/release/release-1"
+jsonpath "$.['url']" == "/doc/{{series}}/release/release-1.csv"
+
 
 #ensure path header contains a URL when requesting revision 2
 GET {{scheme}}://{{host_name}}{{revision2_url}}
