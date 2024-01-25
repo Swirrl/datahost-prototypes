@@ -1,2 +1,2 @@
 Year,Double,Other Double,Comment
-1999,100,10.0,this row has a double without a decimal point
+1999,nan,10.0,this row has an incorrectly formatted xsd:double NaN value in it

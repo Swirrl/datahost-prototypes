@@ -46,6 +46,17 @@
   (when (tc/has-column? ds :$error)
     (str (tc/column ds :$error))))
 
+(deftest parse-double-test
+  (testing "xsd-double-parsing"
+    (is (= Double/POSITIVE_INFINITY (data.validation/parse-double* "INF")))
+    (is (= Double/NEGATIVE_INFINITY (data.validation/parse-double* "-INF")))
+
+    ;; +INF is currently not supported but is a valid xsd:double
+    ;; https://github.com/eclipse-rdf4j/rdf4j/issues/4881
+    ;;(is (= Double/POSITIVE_INFINITY (data.validation/parse-double* "+INF")))
+    (is (= 10000.0 (data.validation/parse-double* "10E3")))
+    (is (Double/isNaN (data.validation/parse-double* "NaN")))))
+
 (deftest validation-test
   (let [repo (repo/sail-repo)
         t (time/parse "2023-07-20T11:00:00Z")
@@ -67,10 +78,10 @@
 
     (db/upsert-release-schema! clock repo system-uris ld-schema slugs)
     (db/upsert-release-schema! clock repo system-uris schema-int-double-double slugs2)
-    
+
     (let [schema (db/get-release-schema repo (su/dataset-release-uri* system-uris slugs2))
           cols ["Year" "Double" "Other Double"]]
-      
+
       (testing "Creating malli row schemas from JSON-LD schema"
         (is (= cols
                (-> (data.validation/make-row-schema schema cols)
@@ -89,7 +100,7 @@
 
     (let [schema (db/get-release-schema repo (su/dataset-release-uri* system-uris slugs2))
           row-schema (data.validation/make-row-schema schema ["Year" "Double"])]
-      
+
       (testing "Create a dataset with well formatted double values"
         (let [ds (-> (io/resource "test-inputs/revision/valid-double-column.csv")
                      (data.validation/as-dataset {:enforce-schema row-schema}))
@@ -117,4 +128,4 @@
           (let [ex (try (data.validation/as-dataset csv {:enforce-schema row-schema})
                         (catch clojure.lang.ExceptionInfo ex
                           ex))]
-            (is (= {"Double" ["100"]} (:error-samples (ex-data ex))))))))))
+            (is (= {"Double" ["nan"]} (:error-samples (ex-data ex))))))))))
