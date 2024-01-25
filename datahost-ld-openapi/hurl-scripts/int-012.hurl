@@ -55,13 +55,6 @@ Accept: text/csv
 
 HTTP 200
 
-## TODO: revision CSV metadata
-#GET {{scheme}}://{{host_name}}/doc/{{series}}/release/release-1/revision/1-metadata.json
-
-#HTTP 200
-#[Asserts]
-#body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
-
 
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
 Content-Type: application/json
