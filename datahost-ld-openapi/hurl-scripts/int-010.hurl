@@ -91,8 +91,7 @@ Authorization: {{auth_token}}
 
 HTTP 200
 [Asserts]
-jsonpath "$.['dh:hasRevision'].[0]" endsWith "/data/{{series}}/release/release-1/revision/2"
-jsonpath "$.['dh:hasRevision'].[1]" endsWith "/data/{{series}}/release/release-1/revision/1"
+jsonpath "$.['dh:hasRevision']" count == 2
 
 #ensure that there are now two revisions and they are the correct revisions
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revisions

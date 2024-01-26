@@ -6,3 +6,22 @@ services:
     #platform: linux/amd64
     ports:
       - "8888:80"
+  ldapi:
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:bfbcd8a"
+    #platform: linux/arm64/v8
+    #platform: linux/amd64
+    environment:
+      CI: "true"
+      GCLOUD_PROJECT: "required_but_not_used"
+      BASIC_AUTH_PASSWORD_SECRET_NAME: "required_but_not_used"
+      LD_API_RDF_BASE_URL: "https://dluhc-pmd5-prototype.publishmydata.com"
+    ports:
+      - "8889:80"
+    
+  frontendapp:
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982"
+    # platform: linux/amd64
+    environment:
+      LDAPI_BASE_URL: "http://localhost:8889"
+    ports:
+      - "8887:8080"

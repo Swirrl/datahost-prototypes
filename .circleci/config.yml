@@ -4,7 +4,7 @@ version: 2.1
 
 orbs:
   aws-cli: circleci/aws-cli@3.1.5
-  gcp-cli: circleci/gcp-cli@3.1.0
+  gcp-cli: circleci/gcp-cli@3.1.1
   terraform: circleci/terraform@3.2.1
 
 commands:
@@ -13,10 +13,13 @@ commands:
     parameters:
       service:
         type: string
+      tries:
+        type: integer
+        default: 30
     steps:
       - run:
           name: await service
-          command: wget -nv -O - --retry-connrefused --tries 30 --waitretry=2 << parameters.service >>
+          command: wget -nv -O - --retry-connrefused --tries << parameters.tries >> --waitretry=2 << parameters.service >>
 
 executors:
   clojure-executor:
@@ -28,6 +31,14 @@ executors:
   hurl-executor:
     docker:
       - image: ghcr.io/orange-opensource/hurl:latest
+  docker-builder-executor:
+    docker:
+      - image: cimg/base:2022.09
+        auth:
+          username: $DOCKERHUB_USERNAME # can specify string literal values
+          password: $DOCKERHUB_PASSWORD # or project environment variable reference
+          # username: _json_key
+          # password: $GCLOUD_SERVICE_KEY
 
 
 # Define a job to be invoked later in a workflow.
@@ -119,7 +130,6 @@ jobs:
   live-service-test:
     # this job is intended to run against a running instance
     # of the service.
-    #
     # Requiremens:
     # - 'HURL_auth_token' environment variable is set
     parameters:
@@ -153,6 +163,7 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
+
   ci-docker-hurl-test:
     # runs ldapi service container + container with hurl
     parameters:
@@ -166,15 +177,22 @@ jobs:
       - image: rosado/ci-clojure-hurl:1.11.1.1
       - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:<< parameters.commit_sha >>
         environment:
+          LD_API_RDF_BASE_URI: https://dluhc-pmd5-prototype.publishmydata.com/data/
           LD_API_DATA_DIR: ./DATA
           LD_API_FILE_DIR: ./FILES
           CI: true
           GCLOUD_PROJECT: none
           BASIC_AUTH_PASSWORD_SECRET_NAME: none
+      - image: europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:0.1.3982
     steps:
       - checkout
       - await:
           service: http://localhost
+      - await:
+          service: http://localhost:8080
+      - run:
+          name: "Run the hurl smoke test for the frontend"
+          command: hurl consumer-wireframes/hurl-scripts/issue-318.hurl --variable scheme=http --variable host-name=localhost:8080
       - run:
           name: "Run the hurl scripts"
           working_directory: << parameters.project_dir >>
@@ -184,6 +202,7 @@ jobs:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
+
 
   integration-test:
     # Runs hurl scripts via unit test in the project.
@@ -207,39 +226,6 @@ jobs:
           path: << parameters.project_dir >>/test-results
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
-
-  uiWireframe:
-    #Builds UI wireframe and caches deps
-    docker:
-      - image: node:14
-    parameters:
-      project_dir:
-        description: Wireframes directory
-        type: string
-    steps:
-      - checkout
-      - restore_cache:
-           keys:
-              - npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
-      - run:
-          name: Install Dependencies
-          working_directory: << parameters.project_dir >>
-          command: |
-              if [ ! -d node_modules ]; then
-                npm ci
-              else
-                echo "Dependencies unchanged. Using cache"
-              fi
-      - run:
-          name: Run Eleventy.js
-          working_directory: << parameters.project_dir >>
-          command: npx @11ty/eleventy
-      - save_cache:
-          key: npm-packages-{{ checksum "<< parameters.project_dir >>/package-lock.json" }}
-          paths:
-            - << parameters.project_dir >>/node_modules
-
- 
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -291,7 +277,9 @@ workflows:
             # tags:
             #   only: /^v.*/
             branches:
-              only: main
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/  #remove
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -324,15 +312,14 @@ workflows:
             - build-docker-image-ldapi
           filters:
             branches:
-              only: main
+              only:
+                - /^main$/
+                - /^tr\/deploy-ui$/  #remove
       - integration-test:
           project_dir: datahost-ld-openapi
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      - uiWireframe:  
-          name: uiWireframe
-          project_dir: consumer-wireframes
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
