@@ -21,8 +21,15 @@
 (defmethod ig/halt-key! :tpximpact.datahost.ldapi.test/sqlite-connection [_ connection]
   (.close connection))
 
+(defmethod ig/init-key :tpximpact.datahost.ldapi.test/data-source [_ {:keys [connection]}]
+  (reify javax.sql.DataSource
+    (getConnection [this]
+      connection)))
+
+(defmethod ig/halt-key! :tpximpact.datahost.ldapi.test/data-source [_ _])
+
 (defmethod ig/halt-key! :tpximpact.datahost.ldapi.test/sql-db [_ {{:keys [spec user password]} :db-config conn :connection}]
-  (with-open [conn (java.sql.DriverManager/getConnection spec user password)]
+  (with-open [conn (jdbc/get-connection spec user password)]
     (try 
       ;;(.execute (.createStatement conn) "SHUTDOWN")
       (catch RuntimeException ex

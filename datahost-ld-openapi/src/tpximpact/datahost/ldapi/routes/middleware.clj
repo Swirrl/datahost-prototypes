@@ -57,15 +57,26 @@
 
 (defn release-schema
   "If found, puts the schema under [:datahost.request/entities :release-schema],
-  short-circuits with TODO response otherwise."
+  short-circuits with 422 response otherwise."
   [triplestore system-uris handler _id]
-  (fn inner [{:keys [path-params] {release-uri :dh/Release} :datahost.request/entities :as request}]
+  (fn inner [{:keys [path-params] {release-uri :dh/Release} :datahost.request/uris :as request}]
     (let [{:keys [series-slug release-slug]} path-params]
       (if-let [schema (db/get-release-schema triplestore release-uri)]
-        (handler (assoc-in request [:datahost.request/entities :relase-schema] schema))
+        (handler (assoc-in request [:datahost.request/entities :release-schema] schema))
         {:status 422
          :body {:message "No schema found for the release"
                 :release-uri (str release-uri)}}))))
+
+(defn release-schema-or-not-found
+  "If found, puts the schema under [:datahost.request/entities :release-schema],
+  short-circuits with 422 response otherwise."
+  [triplestore system-uris handler id]
+  (let [f (release-schema triplestore system-uris handler id)]
+    (fn inner [req]
+      (let [resp (f req)]
+        (if (= 422 (:status resp))
+          (errors/not-found-response req)
+          resp)))))
 
 (defn resource-exist?
   "Checks whether resource exists and short-circuits with 404 response if

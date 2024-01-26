@@ -82,4 +82,16 @@ manchester,16-20,invalid_double
 leeds,16-20,99.2
 ```
 
-HTTP 400
+HTTP 201
+
+GET {{scheme}}://{{host_name}}{{revision_url}}
+Accept: text/csv
+
+# Let's ensure the double '100' does not get turned into an integer
+
+HTTP 200
+[Asserts]
+body matches /manchester,16-20,100.0/
+
+
+

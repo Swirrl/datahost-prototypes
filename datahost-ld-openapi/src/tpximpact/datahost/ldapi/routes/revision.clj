@@ -8,7 +8,7 @@
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
-(defn get-revision-route-config [triplestore change-store system-uris]
+(defn get-revision-route-config [{:keys [triplestore change-store system-uris] :as system}]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
    :description "A revision represents a named set of updates to a
  dataset release.
@@ -22,7 +22,7 @@ Release](#/Consumer%20API/get_data__series_slug__releases__release_slug_)
 for a summary of the versioning model.
 "
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-revision triplestore change-store system-uris)
+   :handler (partial handlers/get-revision system)
    :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
                 [(partial middleware/entity-or-not-found triplestore system-uris :dh/Revision)
                  :entity-or-not-found]

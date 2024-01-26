@@ -77,12 +77,15 @@ _Note: Setting this parameter will override the value of `dcterms:description` i
                            [:message string?]]}}
    :tags ["Publisher API"]})
 
-(defn delete-series-route-config [triplestore change-store system-uris]
+(defn delete-series-route-config
+  [{:keys [triplestore change-store system-uris] :as system}]
   {:summary "Delete a series and all its child resources"
    :description "Deletes the given dataset-series and all of its child resources, i.e. releases, schemas, revisions, and commits.
 
 **WARNING: This route is highly destructive and should not be used as part of a standard workflow, as it will break commitments to dataset consumers.**"
-   :handler (partial handlers/delete-dataset-series triplestore change-store system-uris)
+   :handler (partial handlers/delete-dataset-series system)
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/DatasetSeries}) :entity-uris]
+                [(partial middleware/entity-or-not-found triplestore system-uris :dh/DatasetSeries) :entities]]
    :parameters {:path [:map routes-shared/series-slug-param-spec]}
    :responses {204 {:description "Series existed and was successfully deleted"}
                404 {:description "Series does not exist"}}

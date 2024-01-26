@@ -300,7 +300,7 @@ specifications for each route.")
      ["/:series-slug"
       {:get (routes.s/get-series-route-config triplestore system-uris)
        :put (routes.s/put-series-route-config clock triplestore system-uris)
-       :delete (routes.s/delete-series-route-config triplestore change-store system-uris)}]
+       :delete (routes.s/delete-series-route-config system)}]
 
      ["/:series-slug/releases"
       {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
@@ -328,7 +328,7 @@ specifications for each route.")
       ["/:release-slug/revision"
        ["/:revision-id"
         {:name ::revision
-         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)
+         :get (routes.rev/get-revision-route-config system)
          :post (routes.rev/post-revision-delta-config {:triplestore triplestore
                                                        :change-store change-store
                                                        :clock clock

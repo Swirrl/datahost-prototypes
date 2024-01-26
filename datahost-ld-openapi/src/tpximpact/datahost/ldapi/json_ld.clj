@@ -32,9 +32,9 @@
   "Takes an EDN JSON-LD data structure and converts them to a compacted
   jakarta.json.JsonObject, which can be further manipulated or written
   to a string via .toString"
-  [json-ld context]
-  (-> (->json-document json-ld)
-      (JsonLd/compact (->json-document context))
-      (.compactArrays true)
-      (.compactToRelative true)
-      (.get)))
+  (^jakarta.json.JsonObject [json-ld context]
+   (-> (->json-document json-ld)
+       (JsonLd/compact (->json-document context))
+       (.compactArrays true)
+       (.compactToRelative true)
+       (.get))))

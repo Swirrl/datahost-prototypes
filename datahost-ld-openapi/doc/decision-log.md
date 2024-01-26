@@ -29,3 +29,11 @@ The latest agreements about the entity/update model are these:
 **Re: Fuseki**
 - We'll stick with the RDF4J native store mounted on its own volume as the triplestore for now
 - We realized fuseki/JENA likely won't be the correct solution for the full production system anyway, and the RDF4J native store can meet our needs for this phase, so there is no point in adding more complexity to our deployment and development by adding a separate db right now
+
+## December 14, 2023
+
+**Re: Using SQL for dataset storage**
+- Tablecloth provides an in-memory data structures are convenient but are obviously limit the size of the ingested data.
+- We used generated data (see [issue #314](https://github.com/Swirrl/datahost-prototypes/issues/314)) to import up to 10mil rows
+  using H2 and SQLite databases in a spike (TC couldn't go beyond 3mil on M2 MB Pro with 16GB RAM).
+  

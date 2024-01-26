@@ -131,4 +131,5 @@
   {:row-schema row-schema
    :datahost.change/kind change-kind
    :coords-columns (row-schema--extract-component-column-names row-schema)
-   :measure-column (row-schema--extract-measure-column-name row-schema)})
+   :measure-column (row-schema--extract-measure-column-name row-schema)
+   :hasher (make-columnwise-hasher)})

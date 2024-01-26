@@ -1,3 +1,6 @@
+# Description: Deleting a series with associated schema worked incorrectly and did not enrirely remove the schema. 
+# Future schemas could be polluted with the old shcemas.
+
 #Create series
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json

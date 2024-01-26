@@ -697,7 +697,7 @@
   {:message STRING} when an insert could not be performed."
   [triplestore
    system-uris
-   {:keys [api-params ld-root store-key datahost.change/kind]
+   {:keys [api-params store-key datahost.change/kind]
     {rev-uri :dh/Revision} :datahost.request/uris}]
   {:pre [(some? kind) (some? store-key) (some? rev-uri)]}
   (time!
@@ -708,6 +708,7 @@
            change-uri (su/commit-uri* system-uris (assoc api-params :commit-id change-id))
            _ (log/debug (format "will insert-change for '%s', new change id = %s"
                                 (.getPath ^URI rev-uri) change-id))
+           ld-root (su/rdf-base-uri system-uris)
            change (request->change kind api-params ld-root rev-uri change-uri)
            change (resource/set-property1 change (compact/expand :dh/updates) store-key)
            {:keys [before after]} (do
@@ -720,27 +721,11 @@
           :inserted-jsonld-doc (resource/->json-ld change (output-context ["dh" "dcterms" "rdf"] ld-root))}
          {:message "Change already exists."})))))
 
-(defn- previous-change-coords
-  "Given revision and change id, tries to find the preceding change's
-  revision and change ids. If not possible, indicates an extra DB
-  lookup is needed.
-
-  Returns a [:new :new] | [rev-id change-id] | [rev-id :find]."
-  [revision-id change-id]
-  {:pre [(pos? revision-id) (pos? change-id)]}
-  (cond
-    (and (= revision-id 1) (= 1 change-id)) [:new :new]
-
-    (< 1 change-id) [revision-id (dec change-id)]
-
-    ;; we need to find the last change-id in previous revision
-    :else [(dec revision-id) :find]))
-
 (defn get-previous-change
   "Returns the previous change (as Quads), nil when no previous change exists."
   [triplestore system-uris  {:keys [revision-id change-id] :as params}]
   (let [revision-uri ^URI (su/dataset-revision-uri* system-uris params)
-        [prev-rev-id c] (previous-change-coords revision-id change-id)]
+        [prev-rev-id c] (su/previous-commit-coords revision-id change-id)]
     (log/debug (format "get-previous-change: '%s'" (.getPath revision-uri)) [prev-rev-id c])
     (cond
       (= :new c)                        ; the given revision+change is the first
