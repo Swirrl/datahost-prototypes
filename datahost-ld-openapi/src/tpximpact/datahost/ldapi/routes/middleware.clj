@@ -6,6 +6,7 @@
    [reitit.coercion :as coercion]
    [reitit.impl :as impl]
    [reitit.spec :as rs]
+   [muuntaja.parse :as m.parse]
    [ring.middleware.multipart-params :as multipart-params]
    [ring.util.http-status :as status]
    [tpximpact.datahost.ldapi.db :as db]
@@ -197,27 +198,6 @@
 (def accepts->extension {"text/csv" "csv"
                          "application/json" "json"})
 
-(defn- find-first-accept-header
-  "Simple selection of single accept http header mime type. Significant
-  assumptions are made; most notably that the accept headers are already
-  sorted such that the most desired accept type is first in the collection.
-
-  Risk of incorrect mime type selection is greatly reduced because it's
-  quite likely that only one accept header type will ever be sent by API
-  clients.
-
-  Q values are ignored."
-  [accept-headers]
-  (let [prioritized-accept-mimes (str/split accept-headers #",")]
-    (some->> prioritized-accept-mimes
-             (filter (fn [prioritized-mime]
-                       (some #(.contains prioritized-mime %)
-                             (keys accepts->extension))))
-
-             (first)
-             (#(str/split % #";"))
-             (first))))
-
 (defn accepts->file-doc-middleware
   "When a route using this middleware receives an allowed Accept: text/csv header, for
   example, instead of serving the content from its route it redirects users to the same
@@ -227,7 +207,7 @@
   (fn [{{:strs [accept]} :headers
         {:keys [path path-params]} :reitit.core/match
         :as request}]
-    (if-let [first-accept (find-first-accept-header accept)]
+    (if-let [first-accept (first (m.parse/parse-accept accept))]
       (if (and (nil? (:extension path-params))
                (contains? accepts->extension first-accept))
         {:status 302
