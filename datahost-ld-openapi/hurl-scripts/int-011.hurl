@@ -297,12 +297,11 @@ header "Location" == "{{revision2_url}}"
 
 
 GET {{scheme}}://{{host_name}}/doc/{{series}}/release/release-1.csv-metadata.json
-#Accept: application/json
-#Content-Type: application/json
 Authorization: {{auth_token}}
 
 HTTP 200
 [Asserts]
+jsonpath "$.['@context']" == "http://www.w3.org/ns/csvw"
 jsonpath "$.['http://purl.org/dc/terms/title']" == "Dummy Schema"
 jsonpath "$.['tableSchema'].columns" count == 8
 jsonpath "$.['url']" == "/doc/{{series}}/release/release-1.csv"

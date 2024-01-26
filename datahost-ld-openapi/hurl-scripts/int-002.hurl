@@ -115,3 +115,14 @@ Accept: text/csv
 HTTP 200
 [Asserts]
 body matches /max,44/
+
+
+GET {{scheme}}://{{host_name}}/doc/{{series}}/release/release-1.csv-metadata.json
+Authorization: {{auth_token}}
+
+HTTP 200
+[Asserts]
+jsonpath "$.['@context']" == "http://www.w3.org/ns/csvw"
+jsonpath "$.['http://purl.org/dc/terms/title']" == "Fun schema"
+jsonpath "$.['tableSchema'].columns" count == 2
+jsonpath "$.['url']" == "/doc/{{series}}/release/release-1.csv"
