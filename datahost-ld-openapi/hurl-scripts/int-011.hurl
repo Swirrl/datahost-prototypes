@@ -102,7 +102,7 @@ Accept: application/json
 Authorization: {{auth_token}}
 
 HTTP 302
-Location: /data/{{series}}/release/release-1.json
+Location: /doc/{{series}}/release/release-1.json
 
 # Release requested as CSV via ACCEPTS header gets redirected to correct route
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
@@ -110,7 +110,7 @@ Accept: text/csv
 Authorization: {{auth_token}}
 
 HTTP 302
-Location: /data/{{series}}/release/release-1.csv
+Location: /doc/{{series}}/release/release-1.csv
 
 
 #appends to the revision
@@ -296,13 +296,15 @@ header "Location" == "{{revision2_url}}"
 
 
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1-metadata.json
-#Accept: application/json
-#Content-Type: application/json
+GET {{scheme}}://{{host_name}}/doc/{{series}}/release/release-1.csv-metadata.json
 Authorization: {{auth_token}}
+
 HTTP 200
 [Asserts]
-body == "{\"@context\": [\"http://www.w3.org/ns/csvw\", {\"@language\": \"en\"}]}"
+jsonpath "$.['@context']" == "http://www.w3.org/ns/csvw"
+jsonpath "$.['http://purl.org/dc/terms/title']" == "Dummy Schema"
+jsonpath "$.['tableSchema'].columns" count == 8
+jsonpath "$.['url']" == "/doc/{{series}}/release/release-1.csv"
 
 
 #ensure path header contains a URL when requesting revision 2

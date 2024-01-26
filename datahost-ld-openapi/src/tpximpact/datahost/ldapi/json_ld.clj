@@ -3,6 +3,8 @@
             [tpximpact.datahost.system-uris :as su])
   (:import (com.apicatalog.jsonld JsonLd)
            (com.apicatalog.jsonld.document JsonDocument)
+           (com.apicatalog.jsonld.json JsonMapBuilder JsonUtils)
+           (jakarta.json JsonObject)
            (java.io StringReader)))
 
 (defn simple-context [system-uris]
@@ -21,6 +23,12 @@
          {:contents {"@id" "dh:collection-contents",
                      "@container" "@set"}}))
 
+(def datahost-csvw-vocab-context
+  "Default CSVW @vocab, used during JSON-LD processing steps & later replaced by
+  correct CSVW @context during final stages of processing, because CSVW isn't JSON-LD"
+  {"@vocab" "http://www.w3.org/ns/csvw#"
+   "columns" {"@container" "@set"}})
+
 (defn ->json-document
   ^JsonDocument [edn]
   (-> edn
@@ -38,3 +46,10 @@
       (.compactArrays true)
       (.compactToRelative true)
       (.get)))
+
+(defn update-with-csvw-context
+  "Once JSON-LD processing is complete. @context can be updated with legal CSVW context."
+  [^JsonObject json-obj]
+  (let [builder (JsonMapBuilder/create json-obj)]
+    (.put builder "@context" (JsonUtils/toJsonValue "http://www.w3.org/ns/csvw"))
+    (.build builder)))

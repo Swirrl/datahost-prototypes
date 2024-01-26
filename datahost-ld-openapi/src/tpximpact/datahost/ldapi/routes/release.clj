@@ -22,7 +22,7 @@
   {:summary (str "Retrieve data or metadata for an existing release via ACCEPT header."
                  "Redirects to correct file route with file extension when allowed ACCEPT"
                  "header is provided. e.g. text/csv")
-   :middleware [[(partial middleware/accepts->extension-redirect-middleware) :accepts-redirect]]
+   :middleware [[(partial middleware/accepts->file-doc-middleware) :accepts-redirect]]
    :handler identity
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
@@ -74,8 +74,7 @@ It is currently considered an error to put data into a revision which
 has been succeeded by another.
 "
    :handler (partial handlers/get-release triplestore change-store system-uris)
-   :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
-                [(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]]
    :coercion (rcm/create {:transformers {}, :validate false})
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
@@ -131,13 +130,26 @@ set `dcterms:modified` times for you."
   {:summary "Retrieve release schema"
    :description "Returns the Datahost TableSchema associated with the release.
 
-NOTE: Datahost tableschemas are extended subsets of CSVW:TableSchema."
+NOTE: Datahost tableSchemas are extended subsets of CSVW:TableSchema."
    :handler (partial handlers/get-release-schema triplestore system-uris)
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
                        routes-shared/release-slug-param-spec]}
    :responses {200 {:description "Release schema successfully retrieved"
                     :content {"application/ld+json" string?}}
+               404 {:body routes-shared/NotFoundErrorBody}}
+   :tags ["Consumer API"]})
+
+(defn get-release-csvw-metadata-config
+  [triplestore system-uris]
+  {:summary "Retrieve release CSVW metadata as JSON"
+   :description "Returns the Datahost CSVW metadata schema associated with the release."
+   :handler (partial handlers/get-release-csvw-metadata triplestore system-uris)
+   :parameters {:path [:map
+                       routes-shared/series-slug-param-spec
+                       routes-shared/release-slug-param-spec]}
+   :responses {200 {:description "Release CSVW metadata schema successfully retrieved"
+                    :content {"application/csvm+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}
    :tags ["Consumer API"]})
 

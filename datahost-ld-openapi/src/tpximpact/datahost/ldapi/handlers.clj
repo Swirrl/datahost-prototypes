@@ -1,5 +1,7 @@
 (ns tpximpact.datahost.ldapi.handlers
   (:require
+   [clojure.string :as str]
+   [clojure.set :as cs]
    [clojure.tools.logging :as log]
    [grafter.matcha.alpha :as matcha]
    [ring.util.io :as ring-io]
@@ -19,7 +21,7 @@
    [tpximpact.datahost.ldapi.schemas.api :as s.api]
    [tpximpact.datahost.ldapi.util.data.validation :as data.validation]
    [tpximpact.datahost.ldapi.util.triples
-    :refer [triples->ld-resource triples->ld-resource-collection]]
+    :refer [triples->ld-resource triples->ld-resource-collection triples->csvw-resource]]
    [clojure.java.io :as io])
   (:import
    (java.net URI)
@@ -30,6 +32,9 @@
 
 (defn- as-json-ld [response]
   (assoc-in response [:headers "content-type"] "application/ld+json"))
+
+(defn- as-csvm [response]
+  (assoc-in response [:headers "content-type"] "application/csvm+json"))
 
 (defn get-api-params [{:keys [path-params query-params]}]
   (-> query-params (update-keys keyword) (merge path-params)))
@@ -84,7 +89,7 @@
 
 (defn get-release
   [triplestore _change-store system-uris
-   {{:keys [extension] :as path-params} :path-params
+   {{:keys [extension]} :path-params
     {release-uri :dh/Release} :datahost.request/uris
     :as request}]
   (if-let [release (->> release-uri
@@ -100,7 +105,7 @@
           :else (let [rev-uri ^URI (:rev change-info)]
                   (-> (.getPath rev-uri)
                       (util.response/redirect)
-                      (shared/set-csvm-header request)))))
+                      (shared/set-csvm-link-header request)))))
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
                              (.toString))}))
@@ -154,6 +159,28 @@
                                (.toString))}))
       (errors/not-found-response request))))
 
+(defn get-release-csvw-metadata
+  [triplestore system-uris {path-params :path-params request-uri :uri :as request}]
+  (let [release-uri (su/dataset-release-uri* system-uris path-params)
+        matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
+    (if-let [schema-id (get-schema-id matcha-db)]
+      (let [csvw-number-uri (cmp/expand :csvw/number)
+            schema-resource (-> (triples->csvw-resource matcha-db schema-id)
+                                (assoc (cmp/expand :csvw/url)
+                                       (str/replace request-uri #"-metadata.json" ""))
+                                (update (cmp/expand :dh/columns)
+                                        (fn [schema-cols]
+                                          (->> (box schema-cols)
+                                               (map #(triples->csvw-resource matcha-db %))
+                                               (sort-by #(get % csvw-number-uri))
+                                               (hash-map (cmp/expand :csvw/columns)))))
+                                (cs/rename-keys {(cmp/expand :dh/columns) (cmp/expand :csvw/tableSchema)}))]
+        (as-csvm {:status 200
+                  :body (-> (json-ld/compact schema-resource json-ld/datahost-csvw-vocab-context)
+                            (json-ld/update-with-csvw-context)
+                            (.toString))}))
+      (errors/not-found-response request))))
+
 (defn- revision-number
   "Returns a number or throws."
   [rev-id]
@@ -185,7 +212,7 @@
                       (when (nil? key)
                         (throw (ex-info "No snapshot reference for revision" {:revision revision})))
                       (ring-io/piped-input-stream (partial change-store-to-ring-io-writer change-store key)))))}
-          (shared/set-csvm-header request))
+          (shared/set-csvm-link-header request))
 
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))
@@ -289,7 +316,6 @@
    change-kind
    {router :reitit.core/router
     {:keys [series-slug release-slug revision-id] :as path-params} :path-params
-    query-params :query-params
     appends :body
     {release-uri :dh/Release :as request-uris} :datahost.request/uris
     :as request}]
