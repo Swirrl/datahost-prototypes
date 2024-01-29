@@ -235,8 +235,9 @@
                                                                         :import_id (int import-id)
                                                                         :column-names munged-col-names
                                                                         :observations (seq batch)})
-                                     (log/debug (format "writing observations: table=import_%s batch=%s"
-                                                        munged-release-id (.incrementAndGet batch-counter))))))
+                                     (let [num-batch (.incrementAndGet batch-counter)]
+                                       (log/debug (format "writing observations: table=import_%s batch=%s"
+                                                          munged-release-id num-batch))))))
                     
                     (recur (.take q)))))
 
@@ -318,12 +319,13 @@
             (submit
              #(do
                 (try
-                  (log/debugf "complete-import--copy-records commit-path=%s affected: %s rows"
-                              (.getPath commit-uri)
-                              (m.release/complete-import--copy-records
-                               db
-                               (merge base-params {:insert-columns (:munged-col-names store) :op op})
-                               {:store store}))
+                  (let [result (m.release/complete-import--copy-records
+                                db
+                                (merge base-params {:insert-columns (:munged-col-names store) :op op})
+                                {:store store})]
+                   (log/debugf "complete-import--copy-records commit-path=%s affected: %s rows"
+                               (.getPath commit-uri)
+                               result))
                   (m.release/complete-import--delete-import-records db base-params {:store store})
                   (m.release/update-import-status db {:status "completed"
                                                       :import-id (m.release/import-id base-params)})
@@ -405,10 +407,12 @@
                           :commit-uri ^java.net.URI (java.net.URI. commit-uid)}]]
       (cond
         (= op 1)
-        (log/debug (format "replay-commits/commit(append): %s" (.getPath commit-uri)) (m.release/commit-op-append tx params opts))
+        (let [append-result (m.release/commit-op-append tx params opts)]
+          (log/debug (format "replay-commits/commit(append): %s" (.getPath commit-uri)) append-result))
 
         (= op 2)
-        (log/debug (format "replay-commits/commit(retraction): %s" (.getPath commit-uri)) (m.release/commit-op-retract tx params opts))
+        (let [retraction-result (m.release/commit-op-retract tx params opts)]
+          (log/debug (format "replay-commits/commit(retraction): %s" (.getPath commit-uri)) retraction-result))
 
         (= op 3)
         (let [temp-table (str "scratch_" (java.util.UUID/randomUUID))]
