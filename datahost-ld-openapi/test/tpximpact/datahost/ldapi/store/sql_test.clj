@@ -1,4 +1,4 @@
-(ns tpximpact.datahost.ldapi.store.sql-test
+(ns ^:sql tpximpact.datahost.ldapi.store.sql-test
   (:require
    [clojure.test :refer [deftest is testing use-fixtures]]
    [clojure.tools.logging :as log]
@@ -133,7 +133,7 @@
 
               commit-uri-4 (java.net.URI. "http://localhost/data/series1/release/REL1/revision/1/commit/4")
               _ (commit conn ostore commit-uri-4 :dh/ChangeKindCorrect (java.io.ByteArrayInputStream. CSV3))
-
+              
               materialise-opts {:store ostore :builder-fn as-unqualified-maps}]
 
           ;; materialise the dataset snapshots to different tables
