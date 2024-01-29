@@ -101,7 +101,6 @@ with import_ids as :snip:import-id
 update imports
 set status = :status, updated = CURRENT_TIMESTAMP
 where id = (select id from import_ids)
---where id = (select id from imports where import_uid = :import-uid and release_uri = :release-uri)
 and status != 'completed'
 
 -- :name create-commits-table :! :1
