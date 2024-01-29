@@ -1,6 +1,3 @@
-# Description: We try to append a data with incorrectly formatted 'double' value,
-# and that should be rejected by the API.
-
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Content-Type: application/json
 {"dcterms:description": "Crimes Data - Float coercion test",
@@ -64,34 +61,3 @@ revision_url: header "Location"
 
 GET {{scheme}}://{{host_name}}{{revision_url}}
 Accept: application/json
-
-HTTP 200
-
-## One append
-
-POST {{scheme}}://{{host_name}}{{revision_url}}/appends
-Accept: application/json
-Content-Type: text/csv
-[QueryStringParams]
-description: Add data for liverpool
-format: text/csv
-```
-area,age_range,estimate
-liverpool,16-20,103.5
-manchester,16-20,invalid_double
-leeds,16-20,99.2
-```
-
-HTTP 201
-
-GET {{scheme}}://{{host_name}}{{revision_url}}
-Accept: text/csv
-
-# Let's ensure the double '100' does not get turned into an integer
-
-HTTP 200
-[Asserts]
-body matches /manchester,16-20,100.0/
-
-
-
