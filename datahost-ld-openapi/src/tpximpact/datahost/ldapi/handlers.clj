@@ -69,9 +69,6 @@
       (log/warn ex "Failure to write CSV response" commit-uri)
       (throw ex))))
 
-(defn- make-row
-  (^String [arr] (string/join "," (map str arr))))
-
 (defn- make-row-vec
   [row]
   (into [] (map #(str (nth row %))) (range (count row))))
@@ -105,23 +102,10 @@
                    (.flush out)))))))
     (catch Exception ex
       (log/warn ex "Failure to write CSV response" commit-uri)
-      (throw ex)))
-  
-  ;; (try
-  ;;   (let [out ^BufferedWriter (BufferedWriter. (java.io.OutputStreamWriter. out-stream))]
-  ;;     (when (seq arrays)
-  ;;       (.write out (make-row (map name (first arrays))))
-  ;;       (.newLine out))
-  ;;     (doseq [arr (next arrays)]
-  ;;       (log/debug "writing: " (make-row arr))
-  ;;       (.write out (make-row arr))
-  ;;       (.newLine out))
-  ;;     (.flush out))
-  ;;   (catch Exception ex
-  ;;     (log/warn ex "Failure to write CSV response" commit-uri)
-  ;;     (throw ex)))
-  )
+      (throw ex))))
 
+(defn commit-data-to-ring-io-writer
+  [data-source executor ])
 
 (defn csv-file-location->dataset [change-store key]
   (with-open [^java.io.Closeable in (store/get-data change-store key)]
@@ -406,7 +390,7 @@
     tmp))
 
 (defn post-change
-  [{:keys [triplestore change-store system-uris db-executor data-source store-factory] :as sys}
+  [{:keys [triplestore system-uris data-source store-factory] :as sys}
    change-kind
    {router :reitit.core/router
     {:keys [series-slug release-slug revision-id]} :path-params
@@ -446,7 +430,7 @@
               (jdbc/with-transaction [tx (if (instance? java.sql.Connection db-obj)
                                            db-obj
                                            ;; TODO(rosado): we should inject options that allow streaming the results here.
-                                           ;; Different databases need different optinons.
+                                           ;; Different databases need different options.
                                            (jdbc/get-connection data-source))]
                 (let [tx-store (assoc obs-store :db tx)
                       insert-req (assoc insert-req :commit-uri change-uri)
@@ -480,10 +464,12 @@
 
 (defn change->csv-stream [change-store change]
   (let [appends (get change (cmp/expand :dh/updates))]
+    (tap> {:change change})
     (when-let [dataset (csv-file-location->dataset change-store appends)]
       (write-dataset-to-outputstream dataset))))
 
 (defn get-change
+  "Returns data for commit (and not the snapshot dataset)."
   [triplestore
    change-store
    system-uris

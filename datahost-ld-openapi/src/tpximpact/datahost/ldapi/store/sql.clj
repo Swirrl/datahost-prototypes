@@ -126,9 +126,8 @@
   (let [validator! (fn validator* [full-row]
                      (if (validator full-row)
                        full-row
-                       ;;TODO: derive this error in errrors.clj
                        (throw (ex-info "Row does not conform to schema."
-                                       {:type :dataset.validation/error
+                                       {:type :tpximpact.datahost.ldapi.errors/validation-failure
                                         :import-id (nth row-prefix 0)
                                         :extracted-row (drop (count row-prefix) full-row)
                                         :malli/explanation (m.error/humanize (m/explain row-schema* full-row))}))))
@@ -175,12 +174,12 @@
                                                    (assoc col-indices :hasher hasher))))
           (.addAndGet row-counter (count rows))
           (.put q rows)))
-      (log/debug (format "terminating producer thread (table=%s)" munged-release-id))
+      (log/debug (format "producer thread done (table=%s)" munged-release-id))
       (.put q ::done))
     (catch Exception ex
       (let [msg "ObservationStore: terminating producer thread due to error"]
         (log/warn ex msg)
-        (.put q (ex-info msg {:import-id import-id :request request} ex))))
+        (.put q (ex-info msg {:import-id import-id :insert-request request} ex))))
     (catch AssertionError err
       (log/error "row-producer: assertion error:" (ex-message err))
       (.put q err))))
@@ -261,10 +260,11 @@
     (catch Exception ex
       (log/warn (or (ex-cause ex) ex)
                 "execute-insert-request*: Data insert failed, marking import as 'failed', import-uid: " import-uid)
-      (.get (submit executor #(m.release/update-import-status (jdbc/get-connection data-source)
-                                                              {:release-uri release-uri
-                                                               :import-uid import-uid
-                                                               :status "failed"})))
+      (.get (submit executor #(m.release/update-import-status
+                               (jdbc/get-connection data-source)
+                               {:import-id (m.release/import-id {:release-uri release-uri
+                                                                 :import-uid import-uid})
+                                :status "failed"})))
       (throw ex))))
 
 (defprotocol ObservationRepo
