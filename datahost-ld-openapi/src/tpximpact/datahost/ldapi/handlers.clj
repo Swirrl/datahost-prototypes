@@ -160,7 +160,7 @@
     (log/infof "delete-dataset-series: series-path=%s  %s associated releases"
                (.getPath ^URI series-uri) (count release-uris))
     ;; potentially delete the DB tables
-    (when (seq release-uris)
+    (when (and data-source (seq release-uris))
       ;; TODO(rosado): replace `jdbc/get-connection` with a wrapper that accepts release-uri
       (with-open [conn (jdbc/get-connection data-source)]
         (try
@@ -232,11 +232,12 @@
         api-params (get-api-params request)
         insert-result (db/upsert-release-schema! clock triplestore system-uris incoming-jsonld-doc api-params)
         row-schema (data.validation/make-row-schema-from-json incoming-jsonld-doc)]
-    (with-open [conn (jdbc/get-connection data-source)]
-      (-> db-executor
-          (sql.interface/submit
-           #(m.release/create-release-tables conn {:release-uri release-uri :row-schema row-schema} {}))
-          (.get)))
+    (when data-source
+      (with-open [conn (jdbc/get-connection data-source)]
+        (-> db-executor
+            (sql.interface/submit
+             #(m.release/create-release-tables conn {:release-uri release-uri :row-schema row-schema} {}))
+            (.get))))
     (as-json-ld {:status (op->response-code (:op insert-result))
                  :body (:jsonld-doc insert-result)})))
 
@@ -423,26 +424,27 @@
         (do
           ;; store the change
           (log/debug (format "post-change: '%s' stored-change: '%s'" (.getPath change-uri) (:key insert-req)))
-          (let [row-schema (data.validation/make-row-schema release-schema)
-                obs-store (store-factory release-uri row-schema)]
-            (try
-              (jdbc/with-transaction [tx (jdbc/get-connection data-source)]
-                (let [tx-store (assoc obs-store :db tx)
-                      insert-req (assoc insert-req :commit-uri change-uri)
-                      {import-status :status} (store.sql/execute-insert-request tx-store insert-req)]
-                  (log/debug "import-status: " import-status)
-                  ;; TODO(rosado): complete-import should probably take :status 
+          (let [row-schema (data.validation/make-row-schema release-schema)]
+            (when (and data-source store-factory)
+              (try
+                (jdbc/with-transaction [tx (jdbc/get-connection data-source)]
+                  (let [obs-store (store-factory release-uri row-schema)
+                        tx-store (assoc obs-store :db tx)
+                        insert-req (assoc insert-req :commit-uri change-uri)
+                        {import-status :status} (store.sql/execute-insert-request tx-store insert-req)]
+                    (log/debug "import-status: " import-status)
+                    ;; TODO(rosado): complete-import should probably take :status 
 
-                  (when (= :import.status/success import-status)
-                    (store.sql/complete-import tx-store insert-req))
+                    (when (= :import.status/success import-status)
+                      (store.sql/complete-import tx-store insert-req))
 
-                  (if (store.sql/create-commit? import-status)
-                    (store.sql/create-commit tx-store insert-req)
-                    (throw (ex-info (format "Could not create commit: %s" change-uri)
-                                    {:commit-uri change-uri :import-status import-status})))))
-              (catch Exception ex
-                ;; TODO(rosado): handle error, tag the change entity as failed/error in the triplestore (or delete it)
-                (throw ex)))
+                    (if (store.sql/create-commit? import-status)
+                      (store.sql/create-commit tx-store insert-req)
+                      (throw (ex-info (format "Could not create commit: %s" change-uri)
+                                      {:commit-uri change-uri :import-status import-status})))))
+                (catch Exception ex
+                  ;; TODO(rosado): handle error, tag the change entity as failed/error in the triplestore (or delete it)
+                  (throw ex))))
             (db/tag-with-snapshot triplestore change-uri {:new-snapshot-key (str change-uri)})
             
             (as-json-ld {:status 201

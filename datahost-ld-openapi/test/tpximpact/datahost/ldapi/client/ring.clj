@@ -52,7 +52,7 @@
                                                            {"dcterms:title" "title"
                                                             "dcterms:description" "description"}))
                      :headers {"content-type" "text/csv"}
-                     :body data}
+                     :body (clojure.java.io/input-stream (.getBytes data))}
             response (handler request)]
         (if (= 201 (:status response))
           (resources/on-created change response)
