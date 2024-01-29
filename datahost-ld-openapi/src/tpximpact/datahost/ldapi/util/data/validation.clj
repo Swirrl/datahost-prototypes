@@ -15,7 +15,8 @@
    [tpximpact.datahost.ldapi.schemas.common :as s.common])
   (:import (clojure.lang ExceptionInfo)
            (java.io ByteArrayInputStream File)
-           (java.net URI URL)))
+           (java.net URI URL)
+           (org.eclipse.rdf4j.model.datatypes XMLDatatypeUtil)))
 
 (def MakeRowSchemaOptions
   [:map])
@@ -42,7 +43,7 @@
   triplestore) and returning a malli schema for the column's value.
 
   At the moment only the simplest cases are supported, and the
-  \"csvw:datatype\" field can be set to \"string\",\"double\",
+  \"csvw:datatype\" field can be set to \"string\",\"double\", \"int\",
   \"integer\". Additionally, the schema can contain
   \"csvw:required\".
 
@@ -234,11 +235,13 @@
 (defn dataset-ctor-opts [value]
   (-dataset-ctor-opts value))
 
-(defn- parse-double*
+(defn parse-double*
   "Returns a double or nil."
   [v]
-  (when (re-find #"^\-{0,1}\d+\.\d+$" v)
-    (clojure.core/parse-double v)))
+  (try
+    (XMLDatatypeUtil/parseDouble v)
+    (catch NumberFormatException ex
+      nil)))
 
 (defn- datatype+parse-fn
   "Returns a tuple of [datatype parse-fn] as required
@@ -250,17 +253,17 @@
                       (= "" v) :tech.v3.dataset/missing
                       :else (or (parse-fn v) :tech.v3.dataset/parse-failure)))]
     [name
-     (cond 
+     (cond
        (= :int datatype)
        [datatype (partial parse-col #(clojure.core/parse-long %))]
 
        (= :double datatype)
        [datatype (partial parse-col parse-double*)]
-       
+
 
        (= :string datatype)
        [datatype (partial parse-col str)]
-       
+
        :else
        (throw (ex-info (str "Unsupported datatype: " datatype)
                        {:props props})))]))
@@ -404,7 +407,7 @@
   to a particular schema. The value should have an implementation of
   `-dataset-ctor-opts`. When the data does not conform to the schema,
   an exception with :type ::dataset-creation is thrown.
-  
+
   The value can be:
   - `java.io.File`
   - `java.net.URL` (e.g. a resource)
@@ -431,7 +434,7 @@
                          {:type ::dataset-creation
                           :error-samples err-samples
                           :options opts})))))
-    
+
     (cond-> ds
       convert-opts (convert-dataset-types (:row-schema convert-opts)))))
 

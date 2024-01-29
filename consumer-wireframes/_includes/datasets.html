@@ -15,7 +15,7 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold pr-5">Data catalogue</h1>
+                    <h1  class="font-weight-bold pr-5">Data catalogue</h1>
                     <p class="lead"></p>
                 </div>
             </div>
@@ -48,8 +48,9 @@ layout: basic
 </main>
 <script>
     // let url = window.location.href
-    let uri = domain + '/data'
-
+    
+    const envDomain = document.getElementById("getDomain").innerHTML;
+    let uri = envDomain + '/data';
     const settings = {
         method: 'GET',
         headers: {

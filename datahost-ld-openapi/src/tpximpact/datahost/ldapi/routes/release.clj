@@ -27,7 +27,7 @@
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
                        routes-shared/release-slug-param-spec]}
-   :responses {308 {}}
+   :responses {302 {}}
    :tags ["Consumer API"]})
 
 (defn get-release-route-config [triplestore change-store system-uris]

@@ -101,7 +101,7 @@ GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: application/json
 Authorization: {{auth_token}}
 
-HTTP 308
+HTTP 302
 Location: /data/{{series}}/release/release-1.json
 
 # Release requested as CSV via ACCEPTS header gets redirected to correct route
@@ -109,7 +109,7 @@ GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
 Accept: text/csv
 Authorization: {{auth_token}}
 
-HTTP 308
+HTTP 302
 Location: /data/{{series}}/release/release-1.csv
 
 
