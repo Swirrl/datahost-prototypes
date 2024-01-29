@@ -424,14 +424,9 @@
           ;; store the change
           (log/debug (format "post-change: '%s' stored-change: '%s'" (.getPath change-uri) (:key insert-req)))
           (let [row-schema (data.validation/make-row-schema release-schema)
-                obs-store (store-factory release-uri row-schema)
-                db-obj (:db obs-store)]
+                obs-store (store-factory release-uri row-schema)]
             (try
-              (jdbc/with-transaction [tx (if (instance? java.sql.Connection db-obj)
-                                           db-obj
-                                           ;; TODO(rosado): we should inject options that allow streaming the results here.
-                                           ;; Different databases need different options.
-                                           (jdbc/get-connection data-source))]
+              (jdbc/with-transaction [tx (jdbc/get-connection data-source)]
                 (let [tx-store (assoc obs-store :db tx)
                       insert-req (assoc insert-req :commit-uri change-uri)
                       {import-status :status} (store.sql/execute-insert-request tx-store insert-req)]
