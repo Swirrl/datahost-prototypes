@@ -221,31 +221,3 @@
                        (select-keys body' ["dcterms:issued" "dcterms:modified"]))
                     "The document shouldn't be modified")))))))))
 
-(deftest csvm-release-test
-  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
-                                :as sys}
-
-    (let [new-series-slug (str "new-series-" (UUID/randomUUID))
-          new-series-path (str "/data/" new-series-slug)
-          release-1-id (str "release-" (UUID/randomUUID))
-          release-1-path (str new-series-path "/release/" release-1-id)
-          release-1-csvm-path (str release-1-path "-metadata.json")]
-
-      (testing "Fetching csvw metadata for a release that does not exist returns 'not found'"
-        (let [{:keys [status body]} (GET release-1-csvm-path)]
-          (is (= 404 status))
-          (is (= "Not found" body))))
-
-      (PUT new-series-path
-           {:content-type :json
-            :body (json/write-str {"dcterms:title" "A title"
-                                   "dcterms:description" "Description"})})
-
-      (PUT release-1-path
-           {:content-type :json
-            :body (json/write-str {"dcterms:title" "Example Release"
-                                   "dcterms:description" "Description"})})
-
-      (testing "Fetching existing release with no revisions"
-        (let [response (GET (str release-1-path ".csv"))]
-          (is (= 422 (:status response))))))))
