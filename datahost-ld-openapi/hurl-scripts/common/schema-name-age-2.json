@@ -1,0 +1,20 @@
+{
+	"@type": "dh:TableSchema",
+	"appropriate-csvw:modeling-of-dialect": "UTF-8,RFC4180",
+	"dh:appliesToRelease": "http://localhost:3000/data/test-032/releases/release-1",
+	"dcterms:title": "Fun schema, different title",
+	"dh:columns": [
+		{
+			"@type": "dh:DimensionColumn",
+			"csvw:datatype": "string",
+			"csvw:name": "name",
+            "csvw:titles": "name"
+        },
+        {
+			"@type": "dh:MeasureColumn",
+			"csvw:datatype": "int",
+			"csvw:name": "age",
+            "csvw:titles": "age"
+        }
+	]
+}

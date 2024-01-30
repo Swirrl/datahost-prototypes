@@ -8,7 +8,7 @@
    [tpximpact.datahost.ldapi.routes.middleware :as middleware]
    [tpximpact.datahost.ldapi.routes.shared :as routes-shared]))
 
-(defn get-revision-route-config [triplestore change-store system-uris]
+(defn get-revision-route-config [{:keys [triplestore change-store system-uris] :as system}]
   {:summary "Retrieve metadata or CSV contents for an existing revision"
    :description "A revision represents a named set of updates to a
  dataset release.
@@ -22,7 +22,7 @@ Release](#/Consumer%20API/get_data__series_slug__releases__release_slug_)
 for a summary of the versioning model.
 "
    :coercion (rcm/create {:transformers {}, :validate false})
-   :handler (partial handlers/get-revision triplestore change-store system-uris)
+   :handler (partial handlers/get-revision system)
    :middleware [[(partial middleware/csvm-request-response triplestore system-uris) :csvm-response]
                 [(partial middleware/entity-or-not-found triplestore system-uris :dh/Revision)
                  :entity-or-not-found]
@@ -92,10 +92,11 @@ that make up that revision.
                            [:message string?]]}}
    :tags ["Publisher API"]})
 
-(defn commit-route-base [triplestore change-store system-uris change-kind]
-  {:handler (partial handlers/post-change triplestore change-store system-uris change-kind)
+(defn commit-route-base [{:keys [triplestore change-store system-uris] :as sys} change-kind]
+  {:handler (partial handlers/post-change sys change-kind)
    :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release :dh/Revision}) :entity-uris]
                 [(partial middleware/resource-exist? triplestore system-uris :dh/Revision) :resource-exists?]
+                [(partial middleware/release-schema triplestore system-uris) :release-schema]
                 ;; don't allow changes to revision N when revision N+1 already exists
                 [(partial middleware/resource-already-created?
                           triplestore system-uris
@@ -124,20 +125,20 @@ that make up that revision.
                            [:status [:enum "error"]]
                            [:message string?]]}}})
 
-(defn post-revision-appends-route-config [triplestore change-store system-uris]
-  (merge (commit-route-base triplestore change-store system-uris :dh/ChangeKindAppend)
+(defn post-revision-appends-route-config [sys]
+  (merge (commit-route-base sys :dh/ChangeKindAppend)
          {:summary "Add appends changes to a Revision via a CSV file."
           :description "Upload a delta of rows to append to a dataset as a CSV file."
           :tags ["Publisher API"]}))
 
-(defn post-revision-retractions-route-config [triplestore change-store system-uris]
-  (merge (commit-route-base triplestore change-store system-uris :dh/ChangeKindRetract)
+(defn post-revision-retractions-route-config [sys]
+  (merge (commit-route-base sys :dh/ChangeKindRetract)
          {:summary "Add retractions changes to a Revision via a CSV file."
           :description "Upload a delta of rows to retract from a dataset as a CSV file."
           :tags ["Publisher API"]}))
 
-(defn post-revision-corrections-route-config [triplestore change-store system-uris]
-  (merge (commit-route-base triplestore change-store system-uris :dh/ChangeKindCorrect)
+(defn post-revision-corrections-route-config [sys]
+  (merge (commit-route-base sys :dh/ChangeKindCorrect)
          {:summary "Add corrections to a Revision via a CSV file."
           :description "Upload a file of rows containing corrected
  'measures' as a CSV file. Datahost will attempt to detect which

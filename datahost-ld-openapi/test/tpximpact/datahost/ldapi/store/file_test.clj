@@ -35,7 +35,7 @@
 (defn- add-to-store [store files m contents]
   (let [f (new-temp-file files "filestore-test")]
     (spit f contents)
-    (let [key (store/insert-data store {:tempfile f :filename (.getName f)})]
+    (let [key (store/request-data-insert store (store/make-insert-request! store f))]
       (assoc m key contents))))
 
 (def file-contents-gen gen/string)

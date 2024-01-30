@@ -113,3 +113,19 @@
   match the typical path params."
   [resource system-uris params]
   (-resource-uri resource system-uris params))
+
+(defn previous-commit-coords
+  "Given revision and commit id, tries to find the preceding commit's
+  revision and change ids. If not possible, indicates an extra DB
+  lookup is needed.
+
+  Returns a [:new :new] | [rev-id change-id] | [rev-id :find]."
+  [revision-id change-id]
+  {:pre [(pos? revision-id) (pos? change-id)]}
+  (cond
+    (and (= revision-id 1) (= 1 change-id)) [:new :new]
+
+    (< 1 change-id) [revision-id (dec change-id)]
+
+    ;; we need to find the last change-id in previous revision
+    :else [(dec revision-id) :find]))

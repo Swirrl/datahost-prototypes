@@ -5,7 +5,10 @@
           :skip-meta   [:hurl]}
          {:id          :integration
           :ns-patterns [".*-test"]
-          :focus-meta  [:hurl]}]
+          :focus-meta  [:hurl]}
+         {:id          :sql
+          :ns-patterns [".*-test"]
+          :focus-meta  [:sql]}]
  :capture-output? false
  :reporter [kaocha.report/documentation]
 ; :plugins [:kaocha.plugin/junit-xml]

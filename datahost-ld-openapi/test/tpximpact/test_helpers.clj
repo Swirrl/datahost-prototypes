@@ -1,6 +1,7 @@
 (ns tpximpact.test-helpers
   (:require [clojure.test :refer :all]
             [integrant.core :as ig]
+            [next.jdbc :as jdbc]
             [tpximpact.datahost.system-uris :as su]
             [tpximpact.db-cleaner :as dc]
             [tpximpact.datahost.sys :as sys]
@@ -10,6 +11,30 @@
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.test/http-client [_ config]
   (http-client/make-client config))
+
+(defmethod ig/init-key :tpximpact.datahost.ldapi.test/sql-db [_ m]
+  m)
+
+(defmethod ig/init-key :tpximpact.datahost.ldapi.test/sqlite-connection [_ {{:keys [spec user password]} :db-config}]
+  (jdbc/get-connection spec user password))
+
+(defmethod ig/halt-key! :tpximpact.datahost.ldapi.test/sqlite-connection [_ connection]
+  (.close connection))
+
+(defmethod ig/init-key :tpximpact.datahost.ldapi.test/data-source [_ {:keys [connection]}]
+  (reify javax.sql.DataSource
+    (getConnection [this]
+      connection)))
+
+(defmethod ig/halt-key! :tpximpact.datahost.ldapi.test/data-source [_ _])
+
+(defmethod ig/halt-key! :tpximpact.datahost.ldapi.test/sql-db [_ {{:keys [spec user password]} :db-config conn :connection}]
+  (with-open [conn (jdbc/get-connection spec user password)]
+    (try 
+      ;;(.execute (.createStatement conn) "SHUTDOWN")
+      (catch RuntimeException ex
+        (when-not (isa? (type (ex-cause ex)) java.sql.SQLException)
+          (throw ex)))))) 
 
 (defn start-system [configs]
   (-> configs

@@ -16,6 +16,7 @@
 (derive ::failure ::exception)
 (derive ::validation-failure ::exception)
 (derive ::not-found ::exception)
+(derive ::input-data-error ::exception)
 
 (defn error-body-base [exception request]
   {:exception (.getClass exception)
@@ -31,8 +32,8 @@
 (defn validation-error-handler [exception-info request]
   {:status status/unprocessable-entity
    :body (assoc (error-body-base exception-info request)
-           :status "validation-error"
-           :message (ex-message exception-info))})
+                :status "validation-error"
+                :message (str "Submitted data is invalid: " (ex-message exception-info)))})
 
 (def exception-middleware
   (exception/create-exception-middleware
@@ -45,6 +46,8 @@
        ::exception (partial default-error-handler "Exception")
 
        ::validation-failure validation-error-handler
+
+       ::input-data-error validation-error-handler
 
        ;; example of dispatch by class type
        ;java.lang.ArithmeticException (partial handler "Number Wang")

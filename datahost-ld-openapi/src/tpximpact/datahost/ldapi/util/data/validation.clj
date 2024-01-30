@@ -122,10 +122,9 @@
   (let [validator (m/validator DatasetRow)]
     (fn row-schema-validator [schema]
       (or (validator schema)
-          (throw (java.lang.AssertionError.
-                  "Invalid DatasetRow schema"
-                  (ex-info "Invalid DatasetRow schema"
-                           {:malli/explanation (me/humanize (m/explain DatasetRow schema))})))))))
+          (throw (ex-info "Invalid DatasetRow schema"
+                          {:malli/explanation (me/humanize (m/explain DatasetRow schema))
+                           :schema schema}))))))
 
 
 (defn- set-col-schema-props
@@ -194,13 +193,19 @@
   ([json-ld-schema column-names]
    (make-row-schema json-ld-schema column-names {}))
   ([json-ld-schema column-names options]
-   (make-row-schema* (schema-columns json-ld-schema)
-                     column-names
-                     {:name-key (:name column-uri-keys)
-                      :type-key (:type column-uri-keys)
-                      :column-datatype-extractor ld-column-datatype-extractor
-                      :uri-lookup first
-                      :unpack? true} )))
+   (let [col-number-key (URI. "http://www.w3.org/ns/csvw#number")
+         key-fn #(first (get % col-number-key))
+         ordered-cols (sort-by key-fn (schema-columns json-ld-schema))
+         col-name-key (URI. "http://www.w3.org/ns/csvw#name")
+         get-col-name #(first (get % col-name-key))
+         col-names (map get-col-name ordered-cols)]
+     (make-row-schema* ordered-cols
+                       col-names
+                       {:name-key (:name column-uri-keys)
+                        :type-key (:type column-uri-keys)
+                        :column-datatype-extractor ld-column-datatype-extractor
+                        :uri-lookup first
+                        :unpack? true} ))))
 
 (defn make-row-schema-from-json
   "Make a malli schema for a tuple of row values specified by
@@ -214,11 +219,22 @@
    (when-not (validate-ld-release-schema-input-valid? json)
      (throw (ex-info "Invalid input release schema" {:release-schema json})))
    (make-row-schema* (get json "dh:columns")
-                     column-names
+                     column-names       ;TODO(rosado): ensure col names are passed
                      {:name-key "csvw:name"
                       :type-key "@type"
                       :column-datatype-extractor json-column-datatype-extractor
                       :uri-lookup uris/json-column-types})))
+
+(defn row-schema-indices
+  "Returns {:measure-column int :coords-columns seq<int>}"
+  [row-schema]
+  (let [{:keys [measure]} uris/column-types]
+   (reduce (fn [m [index props]]
+             (if (= measure (:dataset.column/type props))
+               (assoc m :measure-column index)
+               (update m :coords-columns conj index)))
+           {:coords-columns []}
+           (map-indexed (fn [i child] [i (m/properties child)]) (m/children row-schema)))))
 
 (defn parsing-errors [column]
   (assert (instance? tech.v3.dataset.impl.column.Column column))

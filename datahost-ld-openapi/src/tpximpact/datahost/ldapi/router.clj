@@ -264,7 +264,7 @@ In Datahost it's possible for some resources to only have metadata or
 data representations available. This should be documented in the API
 specifications for each route.")
 
-(defn router [{:keys [clock triplestore change-store auth system-uris]}]
+(defn router [{:keys [clock triplestore change-store auth system-uris] :as system}]
   (ring/router
    [["/openapi.json"
      {:get {:no-doc true
@@ -300,7 +300,7 @@ specifications for each route.")
      ["/:series-slug"
       {:get (routes.s/get-series-route-config triplestore system-uris)
        :put (routes.s/put-series-route-config clock triplestore system-uris)
-       :delete (routes.s/delete-series-route-config triplestore change-store system-uris)}]
+       :delete (routes.s/delete-series-route-config system)}]
 
      ["/:series-slug/releases"
       {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
@@ -319,7 +319,7 @@ specifications for each route.")
 
       ["/{release-slug}/schema"
        {:get (routes.rel/get-release-ld-schema-config triplestore system-uris)
-        :post (routes.rel/post-release-ld-schema-config clock triplestore system-uris)}]
+        :post (routes.rel/post-release-ld-schema-config system)}]
 
       ["/{release-slug}/revisions"
        {:post (routes.rev/post-revision-route-config triplestore system-uris)
@@ -328,7 +328,7 @@ specifications for each route.")
       ["/:release-slug/revision"
        ["/:revision-id"
         {:name ::revision
-         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)
+         :get (routes.rev/get-revision-route-config system)
          :post (routes.rev/post-revision-delta-config {:triplestore triplestore
                                                        :change-store change-store
                                                        :clock clock
@@ -339,13 +339,13 @@ specifications for each route.")
          :get (routes.rev/get-revision-commit-route-config triplestore change-store system-uris)}]
 
        ["/:revision-id/appends"
-        {:post (routes.rev/post-revision-appends-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-appends-route-config system)}]
 
        ["/:revision-id/retractions"
-        {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
+        {:post (routes.rev/post-revision-retractions-route-config system)}]
 
        ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]]
+        {:post (routes.rev/post-revision-corrections-route-config system)}]]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
@@ -416,7 +416,7 @@ specifications for each route.")
                                wrap-request-base-uri]))))
 
 (defmethod ig/pre-init-spec :tpximpact.datahost.ldapi.router/handler [_]
-  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::base-path]
+  (s/keys :req-un [::clock ::triplestore ::change-store ::system-uris ::base-path ::store-factory]
           :opt-un [::auth]))
 
 (defmethod ig/init-key :tpximpact.datahost.ldapi.router/handler [_ opts]

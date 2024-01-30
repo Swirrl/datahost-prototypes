@@ -133,6 +133,8 @@ set `dcterms:modified` times for you."
 
 NOTE: Datahost tableschemas are extended subsets of CSVW:TableSchema."
    :handler (partial handlers/get-release-schema triplestore system-uris)
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :release-uri]
+                [(partial middleware/release-schema-or-not-found triplestore system-uris) :release-schema-or-not-found]]
    :parameters {:path [:map
                        routes-shared/series-slug-param-spec
                        routes-shared/release-slug-param-spec]}
@@ -142,12 +144,14 @@ NOTE: Datahost tableschemas are extended subsets of CSVW:TableSchema."
    :tags ["Consumer API"]})
 
 (defn post-release-ld-schema-config
-  [clock triplestore system-uris]
+  [{:keys [clock triplestore system-uris] :as system}]
   {:summary "Create schema for a release"
    :description "Associates a Datahost TableSchema with the specified release.
 
 The supplied document should conform to the Datahost TableSchema."
-   :handler (partial handlers/post-release-schema clock triplestore system-uris)
+   :handler (partial handlers/post-release-schema system)
+   :middleware [[(partial middleware/entity-uris-from-path system-uris #{:dh/Release}) :entity-uris]
+                [(partial middleware/resource-exist? triplestore system-uris :dh/Release) :release-exists?]]
    ;; NOTE: file schema JSON content string is validated within the handler itself
    :parameters {:body routes-shared/LdSchemaInput
                 :path [:map

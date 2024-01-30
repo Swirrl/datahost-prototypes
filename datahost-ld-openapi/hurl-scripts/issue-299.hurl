@@ -1,3 +1,6 @@
+# Description: Deleting a series with associated schema worked incorrectly and did not enrirely remove the schema. 
+# Future schemas could be polluted with the old shcemas.
+
 #Create series
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
@@ -9,8 +12,6 @@ Authorization: {{auth_token}}
 }
 
 HTTP 201
-[Captures]
-dataset: jsonpath "$['dh:baseEntity']"
 
 #Create release
 PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
@@ -23,7 +24,6 @@ Authorization: {{auth_token}}
 }
 
 HTTP 201
-
 
 #Add schema to release
 POST {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/schema
@@ -73,7 +73,8 @@ DELETE {{scheme}}://{{host_name}}/data/{{series}}
 
 HTTP 204
 
-#Create series
+#Create series (with the same name as the one we just deleted)
+
 PUT {{scheme}}://{{host_name}}/data/{{series}}
 Accept: application/json
 Content-Type: application/json
@@ -84,9 +85,6 @@ Authorization: {{auth_token}}
 }
 
 HTTP 201
-[Captures]
-dataset: jsonpath "$['dh:baseEntity']"
-
 
 #Create release
 PUT {{scheme}}://{{host_name}}/data/{{series}}/release/release-1

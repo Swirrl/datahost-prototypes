@@ -25,7 +25,6 @@
     (assoc row "datahost.row/id" id data.internal/coords-column-name coords)))
 
 (defn- make-column-names
-  "Returns a map of {:coords {:left ... :right ...} :measure {:left ... right ...} :id RIGHT-ID-COL-NAME}"
   [right-ds-name measure-column-name coord-column-names]
   (let [right-measure-column-name (data.internal/r-joinable-name right-ds-name measure-column-name)
         right-coord-column-names (map #(data.internal/r-joinable-name right-ds-name %)

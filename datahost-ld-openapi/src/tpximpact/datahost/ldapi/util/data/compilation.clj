@@ -22,7 +22,7 @@
 ;;; use content hash (a store key) to get the data
 
 (defmethod -as-dataset String [v {:keys [store] :as opts}]
-  (assert (= 64 (count v)))
+  (assert (or (= 64 (count v) (and (string? v) (.startsWith v "http")))) (format "got: '%s'" v))
   (assert store)
   (with-open [is (store/get-data store v)]
    (as-dataset is opts)))
@@ -101,6 +101,8 @@
   (-apply-change context base-ds change-ds))
 
 (def ^:private compile-dataset-opts-valid? (m/validator CompileDatasetOptions))
+
+(def make-change-context internal/make-change-context)
 
 (defn- compile-reducer
   "Reducer function for creating a dataset out of a seq of [[ChangeInfo]]s"

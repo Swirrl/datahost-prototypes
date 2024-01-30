@@ -2,6 +2,12 @@
  :tpximpact.datahost.ldapi/drafter-base-uri "https://idp-beta-drafter.publishmydata.com/"
  :tpximpact.datahost.ldapi.jetty/http-port 3000
 
+ :tpximpact.datahost.ldapi.store.sql/db-config {;;:spec "jdbc:h2:./tmp/h2.observationdb"
+                                                :spec "jdbc:sqlite:./tmp/sqlite.observationdb"
+                                                :dbtype "sqlite"
+                                                :user "SA"
+                                                :password ""}
+ 
  ;; Base URI should end in a trailing slash
  :tpximpact.datahost.system-uris/uris {:rdf-base-uri #uri "https://example.org/data/"}
 
@@ -17,18 +23,35 @@
   :ide-path "/ld-api"
   :default-subscriptions-path "/ws"}
 
+ :tpximpact.datahost.ldapi.models.release/queries {}
  :tpximpact.datahost.ldapi.native-datastore/repo {:data-directory "./tmp/ld-dev-db"}
  :tpximpact.datahost.ldapi.store.file/store {:directory "./tmp/file-store"}
-
+ :tpximpact.datahost.ldapi.store.sql/executor {:config {}}
+ :tpximpact.datahost.ldapi.store.sql/data-source {:db-config #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config}
+ :tpximpact.datahost.ldapi.store.sql/store-factory
+ {:db-config   #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config
+  :data-source #ig/ref :tpximpact.datahost.ldapi.store.sql/data-source
+  :db-executor #ig/ref :tpximpact.datahost.ldapi.store.sql/executor}
+ 
  :tpximpact.datahost.ldapi.router/handler
  {:triplestore #ig/ref :tpximpact.datahost.ldapi.native-datastore/repo
   :clock #ig/ref :tpximpact.datahost.time/system-clock
   :change-store #ig/ref :tpximpact.datahost.ldapi.store.file/store
   :system-uris #ig/ref :tpximpact.datahost.system-uris/uris
-  :base-path #ig/ref :tpximpact.datahost.ldapi/base-path}
+  :base-path #ig/ref :tpximpact.datahost.ldapi/base-path
+  :store-factory #ig/ref :tpximpact.datahost.ldapi.store.sql/store-factory
+  :db-config #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config
+  :db-executor #ig/ref :tpximpact.datahost.ldapi.store.sql/executor
+  :data-source #ig/ref :tpximpact.datahost.ldapi.store.sql/data-source}
 
  :tpximpact.datahost.time/system-clock {}
 
  :tpximpact.datahost.ldapi.metrics/reporter {:enabled? false
                                              :period 20 :time-unit :seconds}
+
+ ;; TODO: move the below into a 'dev.edn' config - it's a development convenience
+ ;; and should not be present in the deployed app.
+ :tpximpact.datahost.ldapi.models.release/common-tables
+ {:db {:db-config   #ig/ref :tpximpact.datahost.ldapi.store.sql/db-config
+       :db-executor #ig/ref :tpximpact.datahost.ldapi.store.sql/executor}}
  }

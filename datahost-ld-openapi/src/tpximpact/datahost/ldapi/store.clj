@@ -3,13 +3,6 @@
 
 (defprotocol ChangeStore
   "Represents a repository for document changes"
-  (-insert-data [this data]
-    "Inserts a ring file upload into this store. Returns a key value which
-     can be used to retrieve the append data from this store using `-get-data`.
-
-     The file parameter should be a map with at least the following keys:
-     :tempfile - An IOFactory instance containing the append data
-     :filename - The name of the uploaded file on the request")
 
   (-insert-data-with-request [this request]
     "Because call to `-data-key` may be relatively expensive and
@@ -28,10 +21,6 @@
 
   (-delete [this data-key]
     "Deletes the data associated with data-key from this store"))
-
-(defn insert-data
-  [store data]
-  (-insert-data store data))
 
 (deftype InsertRequest [data key]
   clojure.lang.ILookup

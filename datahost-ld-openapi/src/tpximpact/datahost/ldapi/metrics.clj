@@ -39,6 +39,8 @@
 (deftimer reg ["db" "read" "get-changes-info"])
 (deftimer reg ["db" "write" "delete-series!"])
 
+(deftimer reg ["import" "write" "insert-observations"])
+
 ;; 77 get-dataset-series - read
 ;; 112 get-release-schema-statements - read
 ;; 133 get-revision - read
