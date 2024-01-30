@@ -1,10 +1,10 @@
-# Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions, 
+# Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions,
 # 3rd rev + corrections).
 
 # hurl dataUploader.hurl --variable series=English-Indices-of-Deprivation --variable host_name=dluhc-pmd5-prototype.publishmydata.com --variable scheme=https
 # run locally with docker compose:
 # hurl dataUploader.hurl --variable series=English-Indices-of-Deprivation --variable host_name=localhost:8889 --variable scheme=http
- 
+
 # DELETE {{scheme}}://{{host_name}}/data/{{series}}
 # [BasicAuth]
 # idp: {{admin_password}}
@@ -85,9 +85,7 @@ description: change for {{series}}
 format: text/csv
 file,English-Indices-of-Deprivation-2019.csv;
 
-HTTP 400
-[Asserts]
-body == ""
+HTTP 201
 
 
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
