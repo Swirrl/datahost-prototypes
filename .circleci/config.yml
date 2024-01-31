@@ -298,7 +298,7 @@ workflows:
             #   only: /^v.*/
             branches:
               only:
-                - /^main$/
+                - /^(main|dluhc-integration)$/
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
