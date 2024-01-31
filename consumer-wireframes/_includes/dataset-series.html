@@ -18,7 +18,7 @@ layout: basic
                 <div class="col-lg-8">
                     <h1 class="font-weight-bold pr-5"><span id="title"></span>
                     </h1>
-                    <p class="lead"><strong>Last modified:</strong> <span id="modified"></span> </br><strong> Next
+                    <p class="lead"><strong>Last modified:</strong> <span id="modified"></span> </br><strong id="nextUpdateTitle"> Next
                             update: </strong><span id="nextupdate"> </span></p>
                     <p><span id="description"></span></p>
                 </div>
@@ -69,7 +69,7 @@ layout: basic
         </div>
         <div class="row">
             <div class="col-lg-8 pb-5">
-                <h2 class="pt-5">Related datasets</h2>
+                <!-- <h2 class="pt-5">Related datasets</h2> -->
             </div>
         </div>
     </div>
@@ -79,8 +79,11 @@ layout: basic
 <script>
     const envDomain = document.getElementById("getDomain").innerHTML;
     let url = window.location.href
-    uri = envDomain + url.split('?')[1]
+    const urlParams = new URLSearchParams(window.location.search);
+    const series = urlParams.get('series')
+    uri = envDomain + '/data/' + series
     document.getElementById('apiLink').href = uri
+
 
     const settings = {
         method: 'GET',
@@ -112,20 +115,73 @@ layout: basic
         document.getElementById('title').innerHTML = data["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = data["dcterms:title"]
         document.getElementById('modified').innerHTML = humanReadableDate + " <i class='text-muted font-weight-light'>(" + data["dcterms:modified"] + ")</i>"
-        document.getElementById('nextupdate').innerHTML = data["dh:nextUpdate"]
-        document.getElementById('description').innerHTML = data["dcterms:description"]
-        document.getElementById('descriptionMetadata').innerHTML = data["dcterms:description"]
+        
+        
+        
+        
+        const description = data["dcterms:description"];
+        const maxDescriptionLength = 300;
+        if (data["rdfs:comment"] != null){
+                document.getElementById('description').innerHTML = data["rdfs:comment"]
+        }
+        
+        if (description.length > maxDescriptionLength) {
+            const truncatedDescription = description.substring(0, maxDescriptionLength) + "...";
+            const remainingDescription = description.substring(maxDescriptionLength);
+            if (data["rdfs:comment"] == null){
+                document.getElementById('description').innerHTML = truncatedDescription
+            }
+
+            document.getElementById('descriptionMetadata').innerHTML = 
+            `<span id="truncatedDescription">${truncatedDescription}</span><span id="remainingDescription" style="display:none">${remainingDescription}</span>
+            <button id="expandDescription" class="btn btn-sm breadcrumb-item btn-link">(Show more)</button><button id="collapseDescription" class="btn btn-sm btn-link" style="display:none">(Show less)</button>`
+            
+            document.getElementById('expandDescription').addEventListener('click', () => {
+                document.getElementById('truncatedDescription').innerHTML = truncatedDescription.substring(0, maxDescriptionLength);
+                document.getElementById('remainingDescription').style.display = 'inline';
+                document.getElementById('expandDescription').style.display = 'none';
+                document.getElementById('collapseDescription').style.display = 'inline';
+            });
+            
+            document.getElementById('collapseDescription').addEventListener('click', () => {
+                document.getElementById('truncatedDescription').style.display = 'inline';
+                document.getElementById('truncatedDescription').innerHTML = truncatedDescription;
+                document.getElementById('remainingDescription').style.display = 'none';
+                document.getElementById('expandDescription').style.display = 'inline';
+                document.getElementById('collapseDescription').style.display = 'none';
+            });
+            
+        } else {
+            if (data["rdfs:comment"] == null){
+            document.getElementById('description').innerHTML = data["dcterms:description"]
+            }
+            document.getElementById('descriptionMetadata').innerHTML = description;
+        }
+            
         if (data["dcterms:publisher"] != null) {
             document.getElementById('publisher').innerHTML = data["dcterms:publisher"]
+        } else {
+        document.getElementById('publisher').parentNode.style.display = 'none';
         }
         if (data["dcat:theme"] != null) {
             document.getElementById('theme').innerHTML = data["dcat:theme"]
+        } else {
+        document.getElementById('theme').parentNode.style.display = 'none';
         }
         if (data["dcterms:license"] != null) {
             document.getElementById('license').innerHTML = data["dcterms:license"]
+        } else {
+        document.getElementById('license').parentNode.style.display = 'none';
         }
         if (data["dcat:keywords"] != null) {
             document.getElementById('keywords').innerHTML = data["dcat:keywords"]
+        } else {
+        document.getElementById('keywords').parentNode.style.display = 'none';
+        }
+        if (data["dh:nextUpdate"] != null){
+            document.getElementById('nextupdate').innerHTML = data["dh:nextUpdate"]
+        } else {
+            document.getElementById('nextUpdateTitle').style.display = 'none';
         }
             document.getElementById('id').innerHTML = data["@id"]
         
@@ -143,21 +199,23 @@ layout: basic
         });
 
     populateReleases = data => {
+        console.log(data)
         let contents = data.contents
         let list = document.getElementById("releases")
         if (contents.length == 0) {
             releases.innerHTML = "<p class='h3'>No releases created yet</p>"
         } else {
             for (i = 0; i < contents.length; i++) {
+                const release = contents[i]["@id"].split('/').pop()
+                const link =  `<h3><a href="./dataset-release?series=${series}&release=${release}">${contents[i]["dcterms:title"]}</a></h3>`
                 let releases = document.createElement("div")
                 if (i == contents.length-1) {
+                    console.log(contents[i])
                     releases.innerHTML =
-                        `<h3><a href="./dataset-release?/data/${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a></h3><hr>`
-                } else {
+                        link + '<hr>'
+                } else if (contents[i]["dh:reasonForChange"] != undefined){
                     releases.innerHTML =
-                        `<h3>
-                            <a href="./dataset-release?/data/${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a>
-                        </h3>
+                        `${link}
                         <p>
                             <a class="" data-bs-toggle="collapse" href="#${contents[i]["@id"]}explain" role="button" aria-expanded="false"
                                 aria-controls="collapseExample">
@@ -165,9 +223,13 @@ layout: basic
                             </a>
                         </p>
                         <div class="collapse" id="${contents[i]["@id"]}explain">
-                            <p>${contents[i]["dcterms:description"]}</p>
+                            <p>${contents[i]["dh:reasonForChange"]}</p>
                         </div>
                         <hr>`
+                } else {
+                    releases.innerHTML =
+
+                    link + '<hr>'
                 }
                 list.appendChild(releases);
             }

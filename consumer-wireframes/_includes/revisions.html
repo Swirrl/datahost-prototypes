@@ -58,8 +58,11 @@ layout: basic
     const envDomain = document.getElementById("getDomain").innerHTML;
 
     let url = window.location.href
-    let uri = envDomain + url.split('?')[1]
-    let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
+    const urlParams = new URLSearchParams(window.location.search);
+    const seriesID = urlParams.get('series')
+    const releaseID = urlParams.get('release')
+    uri = envDomain + '/data/' + seriesID + '/release/' + releaseID
+    let seriesUri = envDomain + '/data/' + seriesID
 
     const tableStructure = [{
         "name": "dcterms:title"
@@ -108,9 +111,9 @@ layout: basic
         document.getElementById('subTitle').innerHTML = series["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
         document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
-        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?series=${seriesID}`
         document.getElementById('releaseBreadcrumbID').href =
-            `/datasets/dataset-series/dataset-release/?/data/${release["@id"]}`
+            `/datasets/dataset-series/dataset-release?series=${seriesID}&release=${releaseID}`
 
         getRevision(release)
     }
@@ -134,12 +137,13 @@ layout: basic
             for (i = 0; i < revision.length; i++) {
                 let newRow = tableRef.insertRow(-1);
                 for (j = 0; j < tableStructure.length; j++) {
+                    const revisionID = revision[i]["@id"].split('/').pop()
                     if (tableStructure[j].name == "@id") {
                             let cellValue = `View ${revision[i]["dcterms:title"]}`
                             let cell = newRow.insertCell(j);
                             let text = document.createTextNode(cellValue);
                             let a = document.createElement('a');
-                            a.href = `/datasets/dataset-series/dataset-release/dataset-revision?/data/${revision[i]["@id"]}`;
+                            a.href = `/datasets/dataset-series/dataset-release/dataset-revision?series=${seriesID}&release=${releaseID}&revision=${revisionID}`;
                             a.appendChild(text);
                             cell.appendChild(a);
                         } else {

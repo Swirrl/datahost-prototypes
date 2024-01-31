@@ -34,7 +34,7 @@ layout: basic
                 <h2 class="pt-4">Latest data</h2>
 
 
-                <h3 class="h4 pt-3"><a class="btn btn-primary" onclick="downloadCSV(uri,'release')">Download dataset (CSV)</a>
+                <h3 id = "downloadButton" class="h4 pt-3"><a class="btn btn-primary" id = "downloadButtonMain" onclick="downloadCSV(uri,'release')">Download dataset (CSV)</a>
                     <!-- <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a> -->
                 </h3>
                 <h3 class="h5 pt-3">
@@ -46,7 +46,7 @@ layout: basic
                 <div class="collapse" id="1986-2010explain">
                     <div class="card card-body">
                         <strong><span id="revisionReason"></span></strong><br>
-                        <h5>Download changes since last revision:</h5>
+                        <h5 id="changesTitle">Download changes since last revision:</h5>
                         <span id="changes"></span>
                         <!-- <p><a href="#">Appends.csv</a> (100 rows)</p>
                         <p><a href="#">Corrections.csv</a> (20 rows)</p>
@@ -125,11 +125,17 @@ layout: basic
 <script>
     const envDomain = document.getElementById("getDomain").innerHTML;
     let url = window.location.href
-    let uri = envDomain + url.split('?')[1];
-    let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
-    let releaseUri = (uri + "/").match(/^((?:[^\/]*\/){6}[^\/]*)\//)[1];
-    console.log('release uri ' + releaseUri)
+    const urlParams = new URLSearchParams(window.location.search);
+    const seriesID = urlParams.get('series')
+    const releaseID = urlParams.get('release')
+    uri = envDomain + '/data/' + seriesID + '/release/' + releaseID
+    let seriesUri = envDomain + '/data/' + seriesID
+    let releaseUri = envDomain + '/data/' + seriesID + '/release/' + releaseID
     let schemaUri = releaseUri + '/schema'
+    let revisions = [];
+    let revision = '';
+    let latestRevisionWithChangeURL = '';
+
     document.getElementById('apiLink').href = uri
 
     const tableStructure = [{
@@ -187,31 +193,81 @@ layout: basic
         document.getElementById('subTitle').innerHTML = series["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = release["dcterms:title"]
         document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
-        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?series=${seriesID}`
         document.getElementById('modified').innerHTML = humanReadableDate + " <i class='text-muted font-weight-light'>(" + release["dcterms:modified"] + ")</i>"
-        document.getElementById('description').innerHTML = series["dcterms:description"]
-        document.getElementById('descriptionMetadata').innerHTML = release["dcterms:description"]
+        const description = release["dcterms:description"];
+        const maxDescriptionLength = 200;
+        if (series["rdfs:comment"] != null){
+                document.getElementById('description').innerHTML = series["rdfs:comment"]
+            }
+        if (description.length > maxDescriptionLength) {
+            const truncatedDescription = description.substring(0, maxDescriptionLength) + "...";
+            const remainingDescription = description.substring(maxDescriptionLength);
+            if (series["rdfs:comment"] == null){
+                document.getElementById('description').innerHTML = truncatedDescription
+            }
+            document.getElementById('descriptionMetadata').innerHTML = 
+            `<span id="truncatedDescription">${truncatedDescription}</span><span id="remainingDescription" style="display:none">${remainingDescription}</span>
+            <button id="expandDescription" class="btn btn-sm breadcrumb-item btn-link">(Show more)</button><button id="collapseDescription" class="btn btn-sm btn-link" style="display:none">(Show less)</button>`
+            
+            document.getElementById('expandDescription').addEventListener('click', () => {
+                document.getElementById('truncatedDescription').innerHTML = truncatedDescription.substring(0, maxDescriptionLength);
+                document.getElementById('remainingDescription').style.display = 'inline';
+                document.getElementById('expandDescription').style.display = 'none';
+                document.getElementById('collapseDescription').style.display = 'inline';
+            });
+            
+            document.getElementById('collapseDescription').addEventListener('click', () => {
+                document.getElementById('truncatedDescription').style.display = 'inline';
+                document.getElementById('truncatedDescription').innerHTML = truncatedDescription;
+                document.getElementById('remainingDescription').style.display = 'none';
+                document.getElementById('expandDescription').style.display = 'inline';
+                document.getElementById('collapseDescription').style.display = 'none';
+            });
+            
+        } else {
+            if (series["rdfs:comment"] == null){
+            document.getElementById('description').innerHTML = series["dcterms:description"]
+            }
+            document.getElementById('descriptionMetadata').innerHTML = description;
+        }
+
         if (release["dcterms:license"]){
             document.getElementById('license').innerHTML = release["dcterms:license"]
+        } else {
+        document.getElementById('license').parentNode.style.display = 'none';
         }
         if (release["dh:coverage"]){
             document.getElementById('coverage').innerHTML = release["dh:coverage"]
+        } else {
+        document.getElementById('coverage').parentNode.style.display = 'none';
         }
         if (release["dh:geographicalCoverageDefinition"]){
             document.getElementById('geodef').innerHTML = release["dh:geographyDefinition"]
+        } else {
+        document.getElementById('geodef').parentNode.style.display = 'none';
         }
         if (release["dh:reasonForChange"]){
             document.getElementById('reason').innerHTML = release["dh:reasonForChange"]
+        } else {
+        document.getElementById('reason').parentNode.style.display = 'none';
         }
         document.getElementById('id').innerHTML = release["@id"]
 
 
 
-        document.getElementById('revisions').href = `./revisions?/data/${release["@id"]}`
+        document.getElementById('revisions').href = `./revisions?series=${seriesID}&release=${releaseID}`
 
-
-        const latestRevision = release["dh:hasRevision"].length
-        const latestRevisionUri = `${releaseUri}/revision/${latestRevision}`
+        let latestRevisionUri = ""
+        if (Array.isArray(release["dh:hasRevision"])){
+            revisions = release["dh:hasRevision"]
+            const latestRevision = release["dh:hasRevision"].length
+            latestRevisionUri = `${releaseUri}/revision/${latestRevision}`
+        } else 
+        {
+            revision = release["dh:hasRevision"]
+            latestRevisionUri = `${releaseUri}/revision/1`
+        }
         console.log('latest revision uri: ' + latestRevisionUri);
         getRevision(latestRevisionUri, release)
     }
@@ -231,19 +287,50 @@ layout: basic
 
     populateRevision = (data, release) => {
         document.getElementById('revisionReason').innerHTML = data["dcterms:description"]
+        console.log(data)
+       
         let changes = ""
         let changeURI = ""
-        if (typeof data["dh:hasChange"] != "string") {
+        if (!data["dh:hasChange"] ){
+            console.log('no changes')
+            changes = document.getElementById("changesTitle")
+            changes.innerHTML = "There are no changes in this revision yet."
+            if (revisions.length == 0){
+                console.log('no revisions')
+                document.getElementById('downloadButton').innerHTML = "This release has no data yet.";
+                document.getElementById('downloadButton').classList.remove('btn-primary');
+                document.getElementById('downloadButton').classList.add('btn-secondary');
+                document.getElementById('downloadButton').removeAttribute('onclick');
+            } else {
+                for (i=revisions.length-1; i>0; i--){
+                    const revisionURL = uri + '/revision/' + i
+                    fetch(revisionURL, settings)
+                        .then((response) => {
+                            response.json().then(data => {
+                                if (data["dh:hasChange"]){
+                                    latestRevisionWithChangeURL = revisionURL
+                                    console.log(latestRevisionWithChangeURL)
+                                    return
+                                }
+                            })
+                })
+            }}
+
+        } else if (typeof data["dh:hasChange"] != "string") {
             html = ""
             for (i=0; i<data["dh:hasChange"].length; i++){
-                changeURI = data["dh:hasChange"][i]
+                changeID = data["dh:hasChange"][i].split('/').slice(8)
+            changeURI = uri + '/revision/' + changeID.join('/')
                 changes = document.getElementById("changes")
                 html += `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
 
             }
             changes.innerHTML = html
         } else {
-            changeURI = data["dh:hasChange"]
+            changeID = data["dh:hasChange"].split('/').slice(8)
+            console.log(changeID)
+            changeURI = uri + '/revision/' + changeID.join('/')
+            console.log('CHANGE URI: ' + changeURI)
             changes = document.getElementById("changes")
             changes.innerHTML = `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
         }
@@ -292,5 +379,6 @@ layout: basic
         };
 
         request.send();
+
     }
 </script>

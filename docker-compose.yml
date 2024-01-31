@@ -7,7 +7,7 @@ services:
     ports:
       - "8888:80"
   ldapi:
-    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:c5618aa"
+    image: "europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-ld-openapi:467f066"
     #platform: linux/arm64/v8
     #platform: linux/amd64
     environment:

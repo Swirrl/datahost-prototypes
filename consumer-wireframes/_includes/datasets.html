@@ -76,10 +76,41 @@ layout: basic
         document.getElementById("count").innerHTML=contents.length
         document.getElementById('apiLink').href = uri
         for (i = 0; i < contents.length; i++) {
+
             let dataset = document.createElement("div")
-            dataset.innerHTML =
-                `<h3><a href="./dataset-series/?/data/${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a></h3><p>${contents[i]["dcterms:description"]}</p><hr>`
+            let description = contents[i]["dcterms:description"]
+            let subtitle = ''
+            const title = contents[i]["dcterms:title"]
+            const seriesid = contents[i]["@id"]
+            const seriesURI = uri + "/" + contents[i]["@id"]
+
+            fetch(seriesURI, settings)
+                .then((response) => {
+                    return response.json();
+                })
+                .then((series) => {
+                    if (series["rdfs:comment"] != undefined) {
+                        subtitle = series["rdfs:comment"]
+                    } else if (description.length > 300) {
+                        subtitle = description.substring(0, 300) + "..."
+                    } else {
+                        subtitle = description
+                    }
+                    dataset.innerHTML =
+                        `<h3><a href="./dataset-series?series=${seriesid}">${title}</a></h3><p>${subtitle}</p><hr>`
+                    // `<h3><a href="./dataset-series/?/data/${seriesid}">${title}</a></h3><p>${subtitle}</p><hr>`
+                })
+
+            if (contents[i]["dcterms:description"].length > 300) {
+                const description = [i]["dcterms:description"] = contents[i]["dcterms:description"].substring(0, 300) + "..."
+                dataset.innerHTML =
+                    `<h3><a href="./dataset-series?series=${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a></h3><p>${description}</p><hr>`
+            } else {
+                dataset.innerHTML =
+                    `<h3><a href="./dataset-series?series=${contents[i]["@id"]}">${contents[i]["dcterms:title"]}</a></h3><p>${contents[i]["dcterms:description"]}</p><hr>`
+            }
             list.appendChild(dataset);
+
         }
     }
 </script>

@@ -48,7 +48,7 @@ layout: basic
                 <div class="collapse" id="1986-2010explain">
                     <div class="card card-body">
                         <strong><span id="revisionReason"></span></strong><br>
-                        <h5>Download changes since last revision:</h5>
+                        <h5 id="changesTitle">Download changes since last revision:</h5>
                         <span id="changes"></span>
                         <!-- <p><a href="#">Appends.csv</a> (100 rows)</p>
                         <p><a href="#">Corrections.csv</a> (20 rows)</p>
@@ -105,9 +105,13 @@ layout: basic
 <script>
     const envDomain = document.getElementById("getDomain").innerHTML;
     let url = window.location.href
-    uri = envDomain + url.split('?')[1]
-    let seriesUri = uri.match(/^((?:[^\/]*\/){4}[^\/]*)\//)[1];
-    let releaseUri = uri.match(/^((?:[^\/]*\/){6}[^\/]*)\//)[1];
+    const urlParams = new URLSearchParams(window.location.search);
+    const seriesID = urlParams.get('series')
+    const releaseID = urlParams.get('release')
+    const revisionID = urlParams.get('revision')
+    uri = envDomain + '/data/' + seriesID + '/release/' + releaseID + '/revision/' + revisionID
+    let seriesUri = envDomain + '/data/' + seriesID
+    let releaseUri = envDomain + '/data/' + seriesID + '/release/' + releaseID
     document.getElementById('apiLink').href = uri
     console.log(releaseUri)
     console.log(seriesUri)
@@ -151,25 +155,36 @@ layout: basic
         document.getElementById('title').innerHTML = revision["dcterms:title"]
         document.getElementById('titleBreadcrumb').innerHTML = revision["dcterms:title"]
         document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
-        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?series=${seriesID}`
         document.getElementById('description').innerHTML = revision["dcterms:description"]
         document.getElementById('revisionReason').innerHTML = revision["dcterms:description"]
         document.getElementById('descriptionMetadata').innerHTML = revision["dcterms:description"]
         if (revision["dh:publicationDate"]) {
             document.getElementById('pubdate').innerHTML = revision["dh:publicationDate"]
+        } else {
+        document.getElementById('pubdate').parentNode.style.display = 'none';
         }
         if (revision["dcterms:license"]) {
             document.getElementById('license').innerHTML = revision["dcterms:license"]
+        } else {
+        document.getElementById('license').parentNode.style.display = 'none';
         }
         if (revision["dh:reasonForChange"]) {
             document.getElementById('reason').innerHTML = revision["dh:reasonForChange"]
+        } else {
+        document.getElementById('reason').parentNode.style.display = 'none';
         }
         document.getElementById('id').innerHTML = revision["@id"]
 
 
         let changes = ""
         let changeURI = ""
-        if (typeof revision["dh:hasChange"] != "string") {
+        if (revision["dh:hasChange"] == undefined) {
+            document.getElementById("changes").innerHTML = ""
+            changes = document.getElementById("changesTitle")
+            changes.innerHTML = "There are no changes in this revision yet."
+        }
+        else if (typeof revision["dh:hasChange"] != "string") {
             html = ""
             for (i = 0; i < revision["dh:hasChange"].length; i++) {
                 changeURI = revision["dh:hasChange"][i]
@@ -187,11 +202,11 @@ layout: basic
         }
 
         document.getElementById('releaseBreadcrumb').innerHTML = release["dcterms:title"]
-        document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?/data/${release["@id"]}`
+        document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?series=${seriesID}&release=${releaseID}`
         document.getElementById('releaseTitle').innerHTML = release["dcterms:title"]
 
         document.getElementById('seriesBreadcrumb').innerHTML = series["dcterms:title"]
-        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${series["@id"]}`
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?series=${seriesID}`
         document.getElementById('seriesTitle').innerHTML = series["dcterms:title"]
 
 
@@ -213,7 +228,7 @@ layout: basic
 
     populateRelease = data => {
         document.getElementById('releaseBreadcrumb').innerHTML = data["dcterms:title"]
-        document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?/data/${data["@id"]}`
+        document.getElementById('releaseBreadcrumbID').href = `/datasets/dataset-series/dataset-release?series=${seriesID}&release=${releaseID}`
         document.getElementById('releaseTitle').innerHTML = data["dcterms:title"]
         series = data["dcat:inSeries"]
         console.log("series" + series)
@@ -236,12 +251,13 @@ layout: basic
 
     populateSeries = data => {
         document.getElementById('seriesBreadcrumb').innerHTML = data["dcterms:title"]
-        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?/data/${data["@id"]}`
+        document.getElementById('seriesBreadcrumbID').href = `/datasets/dataset-series?series=${seriesID}`
         document.getElementById('seriesTitle').innerHTML = data["dcterms:title"]
     }
 
 
     downloadCSV = (url, type) => {
+        console.log('downloading ' +    url)
         let request = new XMLHttpRequest();
         request.open("GET", url, true);
         request.setRequestHeader("Accept", "text/csv")
