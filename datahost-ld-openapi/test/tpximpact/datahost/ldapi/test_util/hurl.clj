@@ -95,7 +95,7 @@
 
   Parameters:
 
-  - dir-path - path to a direcotry (string | File| Path)
+  - dir-path - path to a directory (string | File| Path)
   - options
     - variables - map in which values can be strings or
       keywords for which `-instantiate-value` implementation
@@ -105,7 +105,7 @@
   [dir-path opts]
   (let [file-root (fs/path dir-path)
         paths (fs/match dir-path "regex:(issue-.*|pr-.*|int-.*)"
-                {:max-depth 1 :recursive false})]
+                        {:max-depth 1 :recursive false})]
     (println)
     (doall
      (for [p ^Path paths
@@ -135,7 +135,7 @@
            ret))))))
 
 (defn success?
-  "Did all scripts execute succesfully?
+  "Did all scripts execute successfully?
 
   Expects a seq of values returned by [[shell/sh]]"
   [results]

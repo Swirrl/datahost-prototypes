@@ -89,14 +89,28 @@ jsonpath "$.['dh:reasonForChange']" == "Comment..."
 
 
 #Associated Release gets the Revision inverse triple
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 200
 [Asserts]
 jsonpath "$.['dh:hasRevision']" endsWith "{{revision1_url}}"
+
+# Release requested as JSON via ACCEPTS header gets redirected to correct route
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: application/json
+Authorization: {{auth_token}}
+
+HTTP 302
+Location: /data/{{series}}/release/release-1.json
+
+# Release requested as CSV via ACCEPTS header gets redirected to correct route
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+Accept: text/csv
+Authorization: {{auth_token}}
+
+HTTP 302
+Location: /data/{{series}}/release/release-1.csv
 
 
 #appends to the revision
@@ -270,7 +284,7 @@ jsonpath "$.['@id']" endsWith "commit/1"
 
 #ensure path header contains a URL when requesting the release
 #and redirects to revision 2
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.csv
 Accept: text/csv
 Authorization: {{auth_token}}
 HTTP 302
@@ -283,8 +297,8 @@ header "Location" == "{{revision2_url}}"
 
 
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1-metadata.json
-Accept: application/json 
-Content-Type: application/json
+#Accept: application/json
+#Content-Type: application/json
 Authorization: {{auth_token}}
 HTTP 200
 [Asserts]

@@ -71,7 +71,7 @@
         (is (= nil missing))
 
         (testing "The release was updated with a reference to the schema"
-          (let [{body :body} (GET (format "/data/my-series-%s/release/release-%s" n n))
+          (let [{body :body} (GET (format "/data/my-series-%s/release/release-%s.json" n n))
                 body (json/read-str body)]
             (is (= schema-uri (get body "dh:hasSchema")))))
 

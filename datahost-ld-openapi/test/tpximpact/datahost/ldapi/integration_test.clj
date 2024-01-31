@@ -1,7 +1,6 @@
 (ns ^:hurl tpximpact.datahost.ldapi.integration-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [clojure.java.shell :as shell]
    [tpximpact.test-helpers :as th]
    [tpximpact.datahost.ldapi.test-util.hurl :as hurl :refer [hurl]]))
 

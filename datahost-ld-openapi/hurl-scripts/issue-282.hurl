@@ -17,7 +17,7 @@ Content-Type: application/json
 {"dcterms:description": "Release: {{release}}",
 "dcterms:title": "{{release}}"}
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/{{release}}.json
 
 HTTP 200
 
@@ -78,7 +78,7 @@ format: text/csv
 ```
 area,age_range,estimate
 liverpool,16-20,103.5
-manchester,16-20,100
+manchester,16-20,invalid_double
 leeds,16-20,99.2
 ```
 

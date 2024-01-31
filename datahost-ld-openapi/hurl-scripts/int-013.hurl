@@ -67,18 +67,16 @@ HTTP 200
 body == "{{initial_doc}}"
 
 
-#check that a release added to a non existant series returns 404
-GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-1
-Accept: application/json
-Content-Type: application/json
+#check that a release added to a non existent series returns 404
+GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 404
 [Asserts]
-body == "{\"message\":\"Not found\"}"
+body == "Not found"
 
 #getting a release that doesnt exists returns 404
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release1231
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release1231.json
 Accept: application/json
 Content-Type: application/json
 Authorization: {{auth_token}}
@@ -148,11 +146,11 @@ jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/
 jsonpath "$['@context'].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/"
 
 #Fetching a release that does exist works
-GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-1.json
 Authorization: {{auth_token}}
+
 HTTP 200
+
 [Asserts]
 jsonpath "$['dcterms:title']" == "Example Release"
 jsonpath "$['dcterms:description']" == "Description"
@@ -188,9 +186,7 @@ jsonpath "$['dcterms:description']" == "Description 2"
 [Captures]
 Release2Modified: jsonpath "$['dcterms:modified']"
 
-GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-2
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}2/release/release-2.json
 Authorization: {{auth_token}}
 {
     "dcterms:title": "A Second Release",
@@ -238,7 +234,6 @@ jsonpath "$['dcterms:modified']" == "{{Release2Modified2}}"
 #"Fetching csvw metadata for a release that does not exist returns 'not found'"
 
 GET {{scheme}}://{{host_name}}/data/{{series}}3/release/release-1-metadata.json
-Accept: text/csv
 Content-Type: application/json
 Authorization: {{auth_token}}
 
@@ -269,10 +264,7 @@ Authorization: {{auth_token}}
 
 HTTP 201
 
-GET {{scheme}}://{{host_name}}/data/{{series}}3/release/release-1
-Accept: text/csv
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}3/release/release-1.csv
 Authorization: {{auth_token}}
-
 
 HTTP 422

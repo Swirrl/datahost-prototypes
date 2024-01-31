@@ -91,6 +91,7 @@
   (let [^URI base-uri (su/rdf-base-uri system-uris)
         rel-path (.replaceFirst location "/data/" "")]
     (.resolve base-uri rel-path)))
+
 (defmethod resource-uri :dh/Revision [system-uris {:keys [location] :as _revision}]
   (location->resource-uri system-uris location))
 

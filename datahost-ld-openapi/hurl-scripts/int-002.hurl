@@ -51,8 +51,7 @@ file,common/name-age-01.csv;
 
 HTTP 201
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: text/csv
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.csv
 
 HTTP 302
 
@@ -78,8 +77,7 @@ file,common/name-age-02.csv;
 
 HTTP 201
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: text/csv
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.csv
 
 HTTP 302
 
@@ -105,8 +103,7 @@ file,common/name-age-03.csv;
 
 HTTP 201
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: text/csv
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.csv
 
 HTTP 302
 [Captures]

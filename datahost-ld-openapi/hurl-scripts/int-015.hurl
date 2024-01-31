@@ -95,9 +95,7 @@ jsonpath "$['dcterms:title']" == "Dummy Schema"
 
 #"The release was updated with a reference to the schema"
 
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 200

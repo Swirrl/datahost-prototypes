@@ -86,9 +86,7 @@ jsonpath "$.['dcterms:description']" == "Another test revision"
 jsonpath "$.['dh:appliesToRelease']" endsWith "data/{{series}}/release/release-1"
 
 #Get metadata of all revisions in a release and ensure that two revisions are listed
-GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
-Accept: application/json
-Content-Type: application/json
+GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1.json
 Authorization: {{auth_token}}
 
 HTTP 200

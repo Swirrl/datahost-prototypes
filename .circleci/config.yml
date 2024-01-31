@@ -227,7 +227,7 @@ jobs:
       - store_artifacts:
           path: << parameters.project_dir >>/test-report
 
-  pushfrontendapp:
+  build-front-end-docker-image:
     executor: docker-builder-executor
     steps:
       - checkout
@@ -298,7 +298,7 @@ workflows:
             #   only: /^v.*/
             branches:
               only:
-                - /^main$/
+                - /^(main|dluhc-integration)$/
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
@@ -338,12 +338,11 @@ workflows:
           name: integration-test-ldapi
           requires:
             - unit-test-ldapi
-      # - pushfrontendapp:
-      #     context:
-      #       - swirrl-dockerhub-publisher
-      #       - gcp-artifact-registry
-      #       - swirrl-ons-datahost-gcloud
-      #     name: frontendapp
+      - build-front-end-docker-image:
+          context:
+            - swirrl-dockerhub-publisher
+            - gcp-artifact-registry
+            - swirrl-ons-datahost-gcloud
       - deploy-service:
           context:
             - swirrl-ons-datahost-gcloud
