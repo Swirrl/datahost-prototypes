@@ -240,12 +240,14 @@ jobs:
           command: |
             cd consumer-wireframes
             TAG=0.1.$CIRCLE_BUILD_NUM
-            docker build -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG .
+            BRANCH=dluhc-integration
+            docker build -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$BRANCH -t europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG .
       - run:
           name: Push application Docker image
           command: |
             TAG=0.1.$CIRCLE_BUILD_NUM
-            docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype:$TAG
+            BRANCH=dluhc-integration
+            docker push europe-west2-docker.pkg.dev/swirrl-devops-infrastructure-1/public/datahost-fe-prototype --all-tags
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -293,12 +295,12 @@ workflows:
             - swirrl-s3-jars-consumer
             - swirrl-dockerhub-consumer
             - gcp-artifact-registry
-          filters:
+          # filters:
             # tags:
             #   only: /^v.*/
-            branches:
-              only:
-                - /^(main|dluhc-integration)$/
+          #   branches:
+          #     only:
+          #       - /^(main|dluhc-integration)$/
           requires:
             - unit-test-ldapi
             - integration-test-ldapi
