@@ -1,0 +1,47 @@
+{
+	"@type": "dh:TableSchema",
+	"dcterms:title": "Planning Decisions Major and Minor Developmets by Development Type Schema",
+    "dh:columns": [
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "FeatureCode",
+          "csvw:titles": "FeatureCode"
+        },
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "DateCode",
+          "csvw:titles": "DateCode"
+        },
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Measurement",
+          "csvw:titles": "Measurement"
+        },
+
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Units",
+          "csvw:titles": "Units"
+        },
+
+        {
+          "@type": "dh:MeasureColumn",
+          "csvw:datatype": "integer",
+          "csvw:name": "Value",
+          "csvw:titles": "Value"
+        },
+    
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "DCLG Planning Decisions Major and Minor Developmets by Development Type",
+          "csvw:titles": "DCLG Planning Decisions Major and Minor Developmets by Development Type"
+        }
+ ]}

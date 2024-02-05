@@ -1,0 +1,40 @@
+{
+	"@type": "dh:TableSchema",
+	"dcterms:title": "Index of Multiple Deprivation 2010 Schema",
+    "dh:columns": [
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "FeatureCode",
+          "csvw:titles": "FeatureCode"
+        },
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "integer",
+          "csvw:name": "DateCode",
+          "csvw:titles": "DateCode"
+        },
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Measurement",
+          "csvw:titles": "Measurement"
+        },
+
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Units",
+          "csvw:titles": "Units"
+        },
+
+        {
+          "@type": "dh:MeasureColumn",
+          "csvw:datatype": "double",
+          "csvw:name": "Value",
+          "csvw:titles": "Value"
+        }
+ ]}
