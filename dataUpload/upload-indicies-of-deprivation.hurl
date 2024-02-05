@@ -91,7 +91,7 @@ Content-Type: application/json
 idp: {{admin_password}}
 {
 	"dcterms:title": "2007 - Rank",
-	"dcterms:description": "This dataset contains the main ranking for the Index of Multiple Deprivation, 2007. This dataset puts the 32,482 LSOAs into a rank order based on their 2007 IMD score. A rank of 1 is the most deprived.",
+	"dcterms:description": "This dataset contains the main ranking for the Index of Multiple Deprivation, 2007. This dataset puts the 32,482 LSOAs into rank order based on their 2007 IMD score. A rank of 1 is the most deprived.",
 	"dcterms:license": "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
 	"rdfs:comment": "A range of measures which form the Indices of Deprivation 2007.",
 	"dh:reasonForChange": "Changes between Indices may mean that care should be taken when comparing iterations over time."

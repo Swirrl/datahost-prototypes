@@ -25,7 +25,7 @@
         },
 
         {
-          "@type": "dh:DimensionColumn",
+          "@type": "dh:AttributeColumn",
           "csvw:datatype": "string",
           "csvw:name": "Units",
           "csvw:titles": "Units"
