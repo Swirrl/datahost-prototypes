@@ -200,11 +200,14 @@
              :construct (conj bgps
                               ['?release :dh/hasRevision '?revision]
                               ['?release :dh/hasSchema '?schema]
-                              ['?release :dcterms/description '?description])
+                              ['?release :dcterms/description '?description]
+                              ['?release :dh/reasonForChange '?reason])
              :where (conj bgps
                           [:optional [['?release :dh/hasRevision '?revision]]]
                           [:optional [['?release :dh/hasSchema '?schema]]]
-                          [:optional [['?release :dcterms/description '?description]]])
+                          [:optional [['?release :dcterms/description '?description]]]
+                          [:optional [['?release :dh/reasonForChange '?reason]]]
+                          )
              :order-by '[(asc ?release)]})]
     (datastore/eager-query triplestore
                            (f/format-query q :pretty? true))))
