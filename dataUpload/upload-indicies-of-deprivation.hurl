@@ -1,9 +1,9 @@
 # Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions, 
 # 3rd rev + corrections).
 
-# hurl upload-indicies-of-deprivation.hurl --variable admin_password=loadmewithdata3250 --variable series=English-Indices-of-Deprivation --variable datahost-base-url=https://dluhc-pmd5-prototype.publishmydata.com
+# hurl upload-indicies-of-deprivation.hurl  --variable series=English-Indices-of-Deprivation --variable datahost-base-url=https://dluhc-pmd5-prototype.publishmydata.com --variable admin_password= <PASSWORD> 
 # run locally with docker compose:
-# hurl upload-indicies-of-deprivation.hurl --variable admin_password=loadmewithdata3250 --variable series=English-Indices-of-Deprivation --variable datahost-base-url=http://localhost:8889
+# hurl upload-indicies-of-deprivation.hurl  --variable series=English-Indices-of-Deprivation --variable datahost-base-url=http://localhost:8889 --variable admin_password= <PASSWORD> 
  
 DELETE {{datahost-base-url}}/data/{{series}}
 [BasicAuth]
