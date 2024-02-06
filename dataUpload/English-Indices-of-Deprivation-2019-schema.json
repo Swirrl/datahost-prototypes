@@ -1,0 +1,47 @@
+{
+	"@type": "dh:TableSchema",
+	"dcterms:title": "English Indices of Deprivation 2019 Schema",
+    "dh:columns": [
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "FeatureCode",
+          "csvw:titles": "FeatureCode"
+        },
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "integer",
+          "csvw:name": "DateCode",
+          "csvw:titles": "DateCode"
+        },
+        
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Measurement",
+          "csvw:titles": "Measurement"
+        },
+
+        {
+          "@type": "dh:AttributeColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Units",
+          "csvw:titles": "Units"
+        },
+
+        {
+          "@type": "dh:MeasureColumn",
+          "csvw:datatype": "double",
+          "csvw:name": "Value",
+          "csvw:titles": "Value"
+        },
+    
+        {
+          "@type": "dh:DimensionColumn",
+          "csvw:datatype": "string",
+          "csvw:name": "Indices of Deprivation",
+          "csvw:titles": "Indices of Deprivation"
+        }
+ ]}
