@@ -68,8 +68,16 @@
                :exec-fn kaocha.runner/exec-fn
                :exec-args {:watch? true
 	                          :skip-meta [:pending]
-	                          :fail-fast? true}}
-  :test/unit {:exec-args {:tests [{:id :unit 
+	                   :fail-fast? true}}
+
+  :hash/password {;; Run:
+                  ;;
+                  ;; clojure -X:hash/password :password \"the-password\"
+                  ;;
+                  ;; to generate a hashed password for storing in google secrets manager
+                  :exec-fn tpximpact.datahost.ldapi.secrets/hash-password}
+
+  :test/unit {:exec-args {:tests [{:id :unit
   	                                :skip-meta [:hurl]}]}}
   :test/integration {:exec-args {:tests [{:id :integration
               																			:focus-meta [:hurl]}]
