@@ -183,8 +183,7 @@ layout: basic
         } else {
             document.getElementById('nextUpdateTitle').style.display = 'none';
         }
-            document.getElementById('id').innerHTML = data["@id"]
-        
+            document.getElementById('id').innerHTML = data["@context"]["@base"] + data["@id"]
     }
 
     fetch(`${uri}/releases`, settings)
