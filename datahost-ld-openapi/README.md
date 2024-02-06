@@ -123,6 +123,13 @@ profile, E.G.,
 $ clojure -X:auth/basic:dev
 ```
 
+If you are deploying a live instance you can generate a hashed
+password for storing in google secrets manager by running:
+
+```clojure
+clojure -X:hash/password :password \"the-password\"
+```
+
 ## License
 
 Copyright © 2023 TPXimpact Ltd

@@ -1,7 +1,8 @@
 (ns tpximpact.datahost.ldapi.secrets
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]
-            [integrant.core :as ig])
+            [integrant.core :as ig]
+            [buddy.hashers :as hash])
   (:import (com.google.cloud.secretmanager.v1
             SecretManagerServiceClient SecretVersionName)))
 
@@ -19,3 +20,6 @@
       (let [secret-version (SecretVersionName/of gcloud-project secret-name version)
             latest (.accessSecretVersion client secret-version)]
         (-> latest .getPayload .getData .toByteArray (String. "UTF-8"))))))
+
+(defn hash-password [{:keys [password]}]
+  (println (hash/derive password)))
