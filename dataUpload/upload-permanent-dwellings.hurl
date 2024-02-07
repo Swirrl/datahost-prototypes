@@ -1,9 +1,9 @@
 # Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions, 
 # 3rd rev + corrections).
 
-# hurl upload-permanent-dwellings.hurl --variable series=Permanent-dwellings-completed --variable datahost-base-url=https://dluhc-pmd5-prototype.publishmydata.com --variable admin_password= <PASSWORD> 
+# hurl upload-permanent-dwellings.hurl --variable series=Permanent-dwellings-completed --variable datahost-base-url=https://dluhc-pmd5-prototype.publishmydata.com --variable admin_password=$DLUHC_ADMIN_PASSWORD 
 # run locally with docker compose:
-# hurl upload-permanent-dwellings.hurl --variable series=Permanent-dwellings-completed --variable datahost-base-url=http://localhost:8889 --variable admin_password= <PASSWORD> 
+# hurl upload-permanent-dwellings.hurl --variable series=Permanent-dwellings-completed --variable datahost-base-url=http://localhost:8889 --variable admin_password=password
 
 DELETE {{datahost-base-url}}/data/{{series}}
 [BasicAuth]
@@ -82,6 +82,8 @@ HTTP 201
 POST {{datahost-base-url}}/data/{{series}}/release/Permanent-Dwellings/revisions
 Accept: application/json
 Content-Type: application/json
+[Options]
+delay: 5000
 [BasicAuth]
 idp: {{admin_password}}
 {
