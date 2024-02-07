@@ -90,7 +90,8 @@
   (if-let [release (->> release-uri
                         (db/get-release-by-uri triplestore)
                         (matcha/index-triples)
-                        (triples->ld-resource))]
+                        (triples->ld-resource)
+                        (shared/add-dcat:distribution-formats request))]
     (if (= extension "csv")
       (let [change-info (db/get-latest-change-info triplestore release-uri)]
         (cond
@@ -102,7 +103,7 @@
                       (util.response/redirect)
                       (shared/set-csvm-header request)))))
       (as-json-ld {:status 200
-                   :body (-> (json-ld/compact release (json-ld/simple-context system-uris))
+                   :body (-> (json-ld/compact release (json-ld/dcat-distribution-context system-uris))
                              (.toString))}))
     (errors/not-found-response request)))
 
@@ -172,7 +173,9 @@
     {release-uri :dh/Release} :datahost.request/uris
     {:strs [accept]} :headers
     :as request}]
-  (let [revision-ld (->> revision matcha/index-triples triples->ld-resource)]
+  (let [revision-ld (->> (matcha/index-triples revision)
+                         (triples->ld-resource)
+                         (shared/add-dcat:distribution-formats request))]
     (if (= accept "text/csv")
       (-> {:status 200
            :headers {"content-type" "text/csv"
@@ -188,13 +191,13 @@
           (shared/set-csvm-header request))
 
       (as-json-ld {:status 200
-                   :body (-> (json-ld/compact revision-ld (json-ld/simple-context system-uris))
+                   :body (-> (json-ld/compact revision-ld (json-ld/dcat-distribution-context system-uris))
                              (.toString))}))))
 
 (defn- wrap-ld-collection-contents [coll]
   {"https://publishmydata.com/def/datahost/collection-contents" coll})
 
-(defn get-series-list [triplestore system-uris _request]
+(defn get-series-list [triplestore system-uris request]
   (let [issued-uri (cmp/expand :dcterms/issued)
         series (->> (db/get-all-series triplestore)
                     (matcha/index-triples)
@@ -206,26 +209,30 @@
     (as-json-ld {:status 200
                  :body response-body})))
 
-(defn get-revision-list [triplestore system-uris {path-params :path-params}]
+(defn get-revision-list [triplestore system-uris {path-params :path-params :as request}]
   (let [revisions (->> (su/dataset-release-uri* system-uris path-params)
                        (db/get-revisions triplestore)
                        (matcha/index-triples)
                        (triples->ld-resource-collection)
+                       (map (partial shared/add-dcat:distribution-formats request))
                        (sort-by (comp str (keyword "@id")) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents revisions)
-                          (json-ld/compact (json-ld/simple-collection-context system-uris))
+                          (json-ld/compact
+                           (json-ld/dcat-distribution-collection-context system-uris))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))
 
-(defn get-release-list [triplestore system-uris {{:keys [series-slug]} :path-params}]
+(defn get-release-list [triplestore system-uris {{:keys [series-slug]} :path-params :as request}]
   (let [issued-uri (cmp/expand :dcterms/issued)
         releases (->> (db/get-releases triplestore (su/dataset-series-uri system-uris series-slug))
                       (matcha/index-triples)
                       (triples->ld-resource-collection)
+                      (map (partial shared/add-dcat:distribution-formats request))
                       (sort-by #(get % issued-uri) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents releases)
-                          (json-ld/compact (json-ld/simple-collection-context system-uris))
+                          (json-ld/compact
+                           (json-ld/dcat-distribution-collection-context system-uris))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))

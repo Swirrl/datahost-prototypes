@@ -1,6 +1,8 @@
 (ns tpximpact.datahost.ldapi.routes.shared
   (:require
    [clojure.string :as string]
+   [grafter.vocabularies.dcat :refer :all]
+   [grafter.vocabularies.dcterms :refer :all]
    [malli.core :as m]
    [malli.util :as mu]
    [tpximpact.datahost.ldapi.schemas.common :as s.common]
@@ -150,12 +152,31 @@
 (defn base-url [request]
   (request/request-url (select-keys request [:scheme :headers :uri])))
 
-(defn resource-format-uri [request format]
-  (let [suffix (case format
-                 "application/csvm+json" "-metadata.json"
-                 "application/json"      ".json"
-                 "text/csv"              ".csv")]
+(defn media-type-suffix [media-type]
+  (case media-type
+    "application/csvm+json" "-metadata.json"
+    "application/json"      ".json"
+    "text/csv"              ".csv"))
+
+(defn resource-format-uri [{:keys [uri] :as request} format]
+  (let [suffix (media-type-suffix format)]
     (-> request (update :uri str suffix) base-url)))
+
+(defn dcat-distribution-format [request media-type id]
+  (let [uri (str id (media-type-suffix media-type))]
+    {"@index" media-type
+     "@id" uri
+     dcat:mediaType media-type
+     dcat:accessURL uri}))
+
+(defn add-dcat:distribution-formats [request ld-resource]
+  (when ld-resource
+    (let [id (get ld-resource (keyword "@id"))]
+      (assoc ld-resource
+             (dcat "distribution")
+             [(dcat-distribution-format request "text/csv" id)
+              (dcat-distribution-format request "application/json" id)
+              (dcat-distribution-format request "application/csvm+json" id)]))))
 
 (defn set-csvm-header [response request]
   (let [csvm-url (resource-format-uri request "application/csvm+json")]

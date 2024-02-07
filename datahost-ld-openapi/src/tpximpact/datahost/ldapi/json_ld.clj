@@ -22,6 +22,20 @@
          {:contents {"@id" "dh:collection-contents",
                      "@container" "@set"}}))
 
+(defn dcat-distribution-context
+  "Use this context when the top level payload will be a collection e.g. Series list"
+  [system-uris]
+  (assoc (simple-context system-uris)
+         :dcat:distribution {"@id" "http://www.w3.org/ns/dcat#distribution"
+                             "@container" "@index"}))
+
+(defn dcat-distribution-collection-context
+  "Use this context when the top level payload will be a collection e.g. Series list"
+  [system-uris]
+  (assoc (simple-collection-context system-uris)
+         :dcat:distribution {"@id" "http://www.w3.org/ns/dcat#distribution"
+                             "@container" "@index"}))
+
 (defn ->json-document
   ^JsonDocument [edn]
   (-> edn
