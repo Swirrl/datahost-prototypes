@@ -150,8 +150,15 @@
 (defn base-url [request]
   (request/request-url (select-keys request [:scheme :headers :uri])))
 
+(defn resource-format-uri [request format]
+  (let [suffix (case format
+                 "application/csvm+json" "-metadata.json"
+                 "application/json"      ".json"
+                 "text/csv"              ".csv")]
+    (-> request (update :uri str suffix) base-url)))
+
 (defn set-csvm-header [response request]
-  (let [csvm-url (-> request (update :uri str "-metadata.json") base-url)]
+  (let [csvm-url (resource-format-uri request "application/csvm+json")]
     (update response :headers assoc "link" (str "<" csvm-url ">; "
                                                 "rel=\"describedBy\"; "
                                                 "type=\"application/csvm+json\""))))
