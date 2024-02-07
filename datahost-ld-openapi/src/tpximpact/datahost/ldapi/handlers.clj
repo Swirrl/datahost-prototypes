@@ -199,8 +199,7 @@
         series (->> (db/get-all-series triplestore)
                     (matcha/index-triples)
                     (triples->ld-resource-collection)
-                    (sort-by #(get % issued-uri))
-                    (reverse))
+                    (sort-by #(get % issued-uri) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents series)
                           (json-ld/compact (json-ld/simple-collection-context system-uris))
                           (.toString))]
@@ -212,8 +211,7 @@
                        (db/get-revisions triplestore)
                        (matcha/index-triples)
                        (triples->ld-resource-collection)
-                       (sort-by (comp str (keyword "@id")))
-                       (reverse))
+                       (sort-by (comp str (keyword "@id")) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents revisions)
                           (json-ld/compact (json-ld/simple-collection-context system-uris))
                           (.toString))]
@@ -225,8 +223,7 @@
         releases (->> (db/get-releases triplestore (su/dataset-series-uri system-uris series-slug))
                       (matcha/index-triples)
                       (triples->ld-resource-collection)
-                      (sort-by #(get % issued-uri))
-                      (reverse))
+                      (sort-by #(get % issued-uri) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents releases)
                           (json-ld/compact (json-ld/simple-collection-context system-uris))
                           (.toString))]
