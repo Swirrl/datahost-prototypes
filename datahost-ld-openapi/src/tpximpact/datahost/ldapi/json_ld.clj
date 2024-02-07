@@ -15,8 +15,9 @@
    :appropriate-csvw "https://publishmydata.com/def/appropriate-csvw/"
    "@base" (su/rdf-base-uri system-uris)})
 
-(defn simple-collection-context [system-uris]
+(defn simple-collection-context
   "Use this context when the top level payload will be a collection e.g. Series list"
+  [system-uris]
   (merge (simple-context system-uris)
          {:contents {"@id" "dh:collection-contents",
                      "@container" "@set"}}))
