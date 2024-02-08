@@ -161,7 +161,11 @@
                               "dcterms:license" "http://license-link"
                               "dh:coverage" "http://some-geo-reference"
                               "dh:geographyDefinition" "http://geo-definition"
-                              "dh:reasonForChange" "Comment about change"}]
+                              "dh:reasonForChange" "Comment about change"}
+            dcat-normalised-ednld (assoc-in normalised-ednld
+                                            ["@context" "dcat:distribution"]
+                                            {"@id" "http://www.w3.org/ns/dcat#distribution"
+                                             "@container" "@index"})]
 
         (testing "Creating a release for a series that does exist works"
           (let [response (PUT release-1-path
@@ -177,7 +181,11 @@
           (let [response (GET (str release-1-path ".json"))
                 body (json/read-str (:body response))]
             (is (= 200 (:status response)))
-            (is (= normalised-ednld (dissoc body "dcterms:issued" "dcterms:modified")))))
+            (is (= dcat-normalised-ednld
+                   (dissoc body
+                           "dcterms:issued"
+                           "dcterms:modified"
+                           "dcat:distribution")))))
 
         (testing "Multiple releases can be can be retrieved via the API"
           (PUT (str new-series-path "/release/release-2")
