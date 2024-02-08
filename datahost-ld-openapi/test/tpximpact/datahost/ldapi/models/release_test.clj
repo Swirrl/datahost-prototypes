@@ -257,3 +257,49 @@
       (testing "Fetching existing release with no revisions"
         (let [response (GET (str release-1-path ".csv"))]
           (is (= 422 (:status response))))))))
+
+(deftest dcat-distribution-release-test
+  (th/with-system-and-clean-up {{:keys [GET PUT]} :tpximpact.datahost.ldapi.test/http-client
+                                :as sys}
+
+    (let [new-series-slug (str "new-series-" (UUID/randomUUID))
+          new-series-path (str "/data/" new-series-slug)
+          releases-path (str new-series-path "/releases")
+          release-1-id (str "release-" (UUID/randomUUID))
+          release-1-path (str new-series-path "/release/" release-1-id)
+          release-1-csvm-path (str release-1-path "-metadata.json")
+          path-id (str new-series-slug "/release/" release-1-id)]
+
+      (PUT new-series-path
+           {:content-type :json
+            :body (json/write-str {"dcterms:title" "A title"
+                                   "dcterms:description" "Description"})})
+
+      (PUT release-1-path
+           {:content-type :json
+            :body (json/write-str {"dcterms:title" "Example Release"
+                                   "dcterms:description" "Description"})})
+
+      (testing "Fetching release list returns metadata"
+        (let [response (GET releases-path)
+              body (json/read-str (:body response))
+              first-release (get-in body ["contents" 0])
+              distribution (get first-release "dcat:distribution")
+              csv (distribution "text/csv")
+              json (distribution "application/json")
+              csvm (distribution "application/csvm+json")]
+          (is (= 200 (:status response)))
+          (is (= (str path-id ".csv") (csv "@id")))
+          ;; Is this ^^ right? compacting seems to drop http://localhost:3400/data
+          (is (= (str "http://localhost:3400" release-1-path ".csv")
+                 (csv "dcat:accessURL")))
+
+          (is (= (str path-id ".json") (json "@id")))
+          ;; Is this ^^ right? compacting seems to drop http://localhost:3400/data
+          (is (= (str "http://localhost:3400" release-1-path ".json")
+                 (json "dcat:accessURL")))
+
+          (is (= (str path-id "-metadata.json") (csvm "@id")))
+          ;; Is this ^^ right? compacting seems to drop http://localhost:3400/data
+          (is (= (str "http://localhost:3400" release-1-path "-metadata.json")
+                 (csvm "dcat:accessURL"))))))))
