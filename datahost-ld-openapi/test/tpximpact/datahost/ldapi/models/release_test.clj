@@ -290,16 +290,13 @@
               csvm (distribution "application/csvm+json")]
           (is (= 200 (:status response)))
           (is (= (str path-id ".csv") (csv "@id")))
-          ;; Is this ^^ right? compacting seems to drop http://localhost:3400/data
           (is (= (str "http://localhost:3400" release-1-path ".csv")
-                 (csv "dcat:accessURL")))
+                 (csv "dcat:downloadURL")))
 
           (is (= (str path-id ".json") (json "@id")))
-          ;; Is this ^^ right? compacting seems to drop http://localhost:3400/data
           (is (= (str "http://localhost:3400" release-1-path ".json")
-                 (json "dcat:accessURL")))
+                 (json "dcat:downloadURL")))
 
           (is (= (str path-id "-metadata.json") (csvm "@id")))
-          ;; Is this ^^ right? compacting seems to drop http://localhost:3400/data
           (is (= (str "http://localhost:3400" release-1-path "-metadata.json")
-                 (csvm "dcat:accessURL"))))))))
+                 (csvm "dcat:downloadURL"))))))))

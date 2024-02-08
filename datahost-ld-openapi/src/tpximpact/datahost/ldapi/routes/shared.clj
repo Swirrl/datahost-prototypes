@@ -167,7 +167,7 @@
     {"@index" media-type
      "@id" uri
      dcat:mediaType media-type
-     dcat:accessURL uri}))
+     dcat:downloadURL uri}))
 
 (defn add-dcat:distribution-formats [request ld-resource]
   (when ld-resource
