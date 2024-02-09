@@ -115,9 +115,9 @@ HTTP 200
 #jsonpath "$['@context'].['dcterms']" == "http://purl.org/dc/terms/"
 #jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 #jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].[1].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/"
+jsonpath "$['@context'].[1].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/{{series}}/release/release-1/"
 
-jsonpath "$['@id']" == "{{series}}/release/release-1/schema"
+jsonpath "$['@id']" == "schema"
 jsonpath "$['dh:appliesToRelease']" == "{{expected_scheme}}://{{expected_uri_root}}/data/{{series}}/release/release-1"
 jsonpath "$['appropriate-csvw:modeling-of-dialect']" == "UTF-8,RFC4180"
 jsonpath "$['dh:columns'].[0].['@type']" == "dh:DimensionColumn"
