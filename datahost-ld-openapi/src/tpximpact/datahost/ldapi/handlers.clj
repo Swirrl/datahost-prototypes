@@ -84,7 +84,7 @@
 
 (defn get-release
   [triplestore _change-store system-uris
-   {{:keys [extension] :as path-params} :path-params
+   {{:keys [extension series-slug] :as _path-params} :path-params
     {release-uri :dh/Release} :datahost.request/uris
     :as request}]
   (if-let [release (->> release-uri
@@ -102,7 +102,7 @@
                       (util.response/redirect)
                       (shared/set-csvm-header request)))))
       (as-json-ld {:status 200
-                   :body (-> (json-ld/compact release (json-ld/context system-uris))
+                   :body (-> (json-ld/compact release (json-ld/context system-uris (format "%s/release/" series-slug)))
                              (.toString))}))
     (errors/not-found-response request)))
 
@@ -137,7 +137,7 @@
    matcha-db))
 
 (defn get-release-schema
-  [triplestore system-uris {path-params :path-params :as request}]
+  [triplestore system-uris {{:keys [series-slug release-slug] :as path-params} :path-params :as request}]
   (let [release-uri (su/dataset-release-uri* system-uris path-params)
         matcha-db (matcha/index-triples (db/get-release-schema-statements triplestore release-uri))]
     (if-let [schema-id (get-schema-id matcha-db)]
@@ -148,7 +148,7 @@
                          (sort-by #(get % csvw-number-uri)))
             schema-ld-with-columns (assoc schema-resource (cmp/expand :dh/columns) columns)]
         (as-json-ld {:status 200
-                     :body (-> (json-ld/compact schema-ld-with-columns (json-ld/context system-uris))
+                     :body (-> (json-ld/compact schema-ld-with-columns (json-ld/context system-uris (format "%s/release/%s/" series-slug release-slug)))
                                (.toString))}))
       (errors/not-found-response request))))
 
@@ -169,6 +169,7 @@
    {{revision :dh/Revision} :datahost.request/entities
     {release-uri :dh/Release} :datahost.request/uris
     {:strs [accept]} :headers
+    {:keys [series-slug release-slug]} :path-params
     :as request}]
   (let [revision-ld (->> revision matcha/index-triples triples->ld-resource)]
     (if (= accept "text/csv")
@@ -186,7 +187,9 @@
           (shared/set-csvm-header request))
 
       (as-json-ld {:status 200
-                   :body (-> (json-ld/compact revision-ld (json-ld/context system-uris))
+                   :body (-> (json-ld/compact revision-ld (json-ld/context 
+                                                            system-uris
+                                                            (format "%s/release/%s/revision/" series-slug release-slug)))
                              (.toString))}))))
 
 (defn- wrap-ld-collection-contents [coll]
@@ -205,7 +208,7 @@
     (as-json-ld {:status 200
                  :body response-body})))
 
-(defn get-revision-list [triplestore system-uris {path-params :path-params}]
+(defn get-revision-list [triplestore system-uris {{:keys [series-slug release-slug] :as path-params} :path-params}]
   (let [revisions (->> (su/dataset-release-uri* system-uris path-params)
                        (db/get-revisions triplestore)
                        (matcha/index-triples)
@@ -213,7 +216,9 @@
                        (sort-by (comp str (keyword "@id")))
                        (reverse))
         response-body (-> (wrap-ld-collection-contents revisions)
-                          (json-ld/compact (json-ld/context system-uris))
+                          (json-ld/compact (json-ld/context
+                                             system-uris
+                                             (format "%s/release/%s/revision/" series-slug release-slug)))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))
@@ -226,7 +231,7 @@
                       (sort-by #(get % issued-uri))
                       (reverse))
         response-body (-> (wrap-ld-collection-contents releases)
-                          (json-ld/compact (json-ld/context system-uris))
+                          (json-ld/compact (json-ld/context system-uris (format "%s/release/" series-slug)))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))
