@@ -174,7 +174,7 @@ layout: basic
         } else {
         document.getElementById('reason').parentNode.style.display = 'none';
         }
-        document.getElementById('id').innerHTML = revision["@context"]["@base"] + revision["@id"]
+        document.getElementById('id').innerHTML = revision["@context"][1]["@base"] + revision["@id"]
 
 
         let changes = ""

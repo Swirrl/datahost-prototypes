@@ -252,7 +252,7 @@ layout: basic
         } else {
         document.getElementById('reason').parentNode.style.display = 'none';
         }
-        document.getElementById('id').innerHTML = release["@context"]["@base"] + release["@id"]
+        document.getElementById('id').innerHTML = release["@context"][1]["@base"] + release["@id"]
 
 
 
