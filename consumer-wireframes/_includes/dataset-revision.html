@@ -184,21 +184,16 @@ layout: basic
             changes = document.getElementById("changesTitle")
             changes.innerHTML = "There are no changes in this revision yet."
         }
-        else if (typeof revision["dh:hasChange"] != "string") {
+        else {
             html = ""
             for (i = 0; i < revision["dh:hasChange"].length; i++) {
                 changeURI = revision["dh:hasChange"][i]
                 changes = document.getElementById("changes")
                 html +=
-                    `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
+                    `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${revision["dh:hasChange"].length-i} (CSV)</a>`
 
             }
             changes.innerHTML = html
-        } else {
-            changeURI = revision["dh:hasChange"]
-            changes = document.getElementById("changes")
-            changes.innerHTML =
-                `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
         }
 
         document.getElementById('releaseBreadcrumb').innerHTML = release["dcterms:title"]

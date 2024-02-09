@@ -7,11 +7,11 @@
 
 
 #comment out the next 5 lines if the dataset doesn't exist (after the service is reset)
-DELETE {{datahost-base-url}}/data/{{series}}
-[BasicAuth]
-idp: {{admin_password}}
+#DELETE {{datahost-base-url}}/data/{{series}}
+#[BasicAuth]
+#idp: {{admin_password}}
 
-HTTP 204
+#HTTP 204
 
 
 PUT {{datahost-base-url}}/data/{{series}}
@@ -59,8 +59,8 @@ Content-Type: application/json
 [BasicAuth]
 idp: {{admin_password}}
 {
-	"dcterms:title": "Planning Applications Decisions - Major and Minor Developments , England, District by Development Type",
-	"dcterms:description": "Initial append",
+	"dcterms:title": "District by Development Type",
+	"dcterms:description": "Initial append of historical data",
 	"dh:publicationDate": "December 19, 2013 16:3",
 	"dcterms:license": "http://www.nationalarchives.gov.uk/doc/open-government-licence/"
 }
