@@ -5,17 +5,27 @@
            (com.apicatalog.jsonld.document JsonDocument)
            (java.io StringReader)))
 
-(defn context [system-uris]
-  ;; Serve the context file with an application/json header from jsdelvir (free CDN)
-  ;; See here for instructions: https://www.jsdelivr.com/?docs=gh
-  ;;
-  ;; The context file cannot be served directly from raw.githubusercontent.com because
-  ;; Github serves all files as text/plain, and the com.apicatalog.jsonld requires that
-  ;; the file has the correct header.
-  ;;
-  ;; NOTE: This should be updated to track the dluhc-integration branch
-  ["https://cdn.jsdelivr.net/gh/Swirrl/datahost-prototypes@6a3ab99/datahost-ld-openapi/resources/jsonld-context.json"
-   {"@base" (su/rdf-base-uri system-uris)}])
+;; Serve the context file with an application/json header from jsdelvir (free CDN)
+;; See here for instructions: https://www.jsdelivr.com/?docs=gh
+;;
+;; The context file cannot be served directly from raw.githubusercontent.com because
+;; Github serves all files as text/plain, and the com.apicatalog.jsonld requires that
+;; the file has the correct header.
+;;
+;; NOTE: This should be updated to track the dluhc-integration branch
+(defn context
+  "Return a context map to be used in e.g. json-ld/compact.
+   Referrs to the external context in `jsonld-context.json` and
+    allows a dynamically-generated `@base` to be included.
+   `extended-base` allows you to extend the base provided in :rdf-base-uri 
+    in the system map, to specify e.g. a release or revision slug"
+  ([system-uris extended-base]
+   (let [base (cond-> (su/rdf-base-uri system-uris)
+                (some? extended-base) (.resolve extended-base))]
+     ["https://cdn.jsdelivr.net/gh/Swirrl/datahost-prototypes@6a3ab99/datahost-ld-openapi/resources/jsonld-context.json"
+      {"@base" base}]))
+  ([system-uris]
+   (context system-uris nil)))
 
 (defn ->json-document
   ^JsonDocument [edn]
