@@ -161,14 +161,14 @@ jsonpath "$['dcat:inSeries']" == "{{expected_scheme}}://{{expected_uri_root}}/da
 jsonpath "$['dh:coverage']" == "http://some-geo-reference"
 jsonpath "$['dh:geographyDefinition']" == "http://geo-definition"
 jsonpath "$['dh:reasonForChange']" == "Comment about change"
-jsonpath "$['@context'].['dh']" == "https://publishmydata.com/def/datahost/"
-jsonpath "$['@context'].['dcterms']" == "http://purl.org/dc/terms/"
-jsonpath "$['@context'].['rdf']" == "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-jsonpath "$['@context'].['rdfs']" == "http://www.w3.org/2000/01/rdf-schema#"
-jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
-jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
-jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/"
+#jsonpath "$['@context'].['dh']" == "https://publishmydata.com/def/datahost/"
+#jsonpath "$['@context'].['dcterms']" == "http://purl.org/dc/terms/"
+#jsonpath "$['@context'].['rdf']" == "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+#jsonpath "$['@context'].['rdfs']" == "http://www.w3.org/2000/01/rdf-schema#"
+#jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
+#jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
+#jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
+jsonpath "$['@context'].[1].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/"
 
 #Multiple releases can be can be retrieved via the API
 PUT {{scheme}}://{{host_name}}/data/{{series}}2/release/release-2

@@ -94,7 +94,7 @@ Authorization: {{auth_token}}
 
 HTTP 200
 [Asserts]
-jsonpath "$.['dh:hasRevision']" endsWith "{{revision1_url}}"
+jsonpath "$.['dh:hasRevision'].[0]" endsWith "{{revision1_url}}"
 
 # Release requested as JSON via ACCEPTS header gets redirected to correct route
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1
