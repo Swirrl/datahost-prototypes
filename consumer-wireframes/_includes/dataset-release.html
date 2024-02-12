@@ -252,22 +252,17 @@ layout: basic
         } else {
         document.getElementById('reason').parentNode.style.display = 'none';
         }
-        document.getElementById('id').innerHTML = release["@context"]["@base"] + release["@id"]
+        document.getElementById('id').innerHTML = release["@context"][1]["@base"] + release["@id"]
 
 
 
         document.getElementById('revisions').href = `./revisions?series=${seriesID}&release=${releaseID}`
 
-        let latestRevisionUri = ""
-        if (Array.isArray(release["dh:hasRevision"])){
-            revisions = release["dh:hasRevision"]
-            const latestRevision = release["dh:hasRevision"].length
-            latestRevisionUri = `${releaseUri}/revision/${latestRevision}`
-        } else 
-        {
-            revision = release["dh:hasRevision"]
-            latestRevisionUri = `${releaseUri}/revision/1`
-        }
+        
+        revisions = release["dh:hasRevision"]
+        const latestRevision = release["dh:hasRevision"].length
+        let latestRevisionUri = `${releaseUri}/revision/${latestRevision}`
+        
         console.log('latest revision uri: ' + latestRevisionUri);
         getRevision(latestRevisionUri, release)
     }
