@@ -63,7 +63,7 @@
                        (matcha/index-triples)
                        (triples->ld-resource))]
     (as-json-ld {:status 200
-                 :body (-> (json-ld/compact series (json-ld/simple-context system-uris))
+                 :body (-> (json-ld/compact series (json-ld/context system-uris))
                            (.toString))})
     (errors/not-found-response request)))
 
@@ -103,7 +103,7 @@
                       (util.response/redirect)
                       (shared/set-csvm-header request)))))
       (as-json-ld {:status 200
-                   :body (-> (json-ld/compact release (json-ld/dcat-distribution-context system-uris))
+                   :body (-> (json-ld/compact release (json-ld/context system-uris))
                              (.toString))}))
     (errors/not-found-response request)))
 
@@ -149,9 +149,7 @@
                          (sort-by #(get % csvw-number-uri)))
             schema-ld-with-columns (assoc schema-resource (cmp/expand :dh/columns) columns)]
         (as-json-ld {:status 200
-                     :body (-> (json-ld/compact schema-ld-with-columns
-                                                (merge (json-ld/simple-context system-uris)
-                                                       {"dh:columns" {"@container" "@set"}}))
+                     :body (-> (json-ld/compact schema-ld-with-columns (json-ld/context system-uris))
                                (.toString))}))
       (errors/not-found-response request))))
 
@@ -191,7 +189,7 @@
           (shared/set-csvm-header request))
 
       (as-json-ld {:status 200
-                   :body (-> (json-ld/compact revision-ld (json-ld/dcat-distribution-context system-uris))
+                   :body (-> (json-ld/compact revision-ld (json-ld/context system-uris))
                              (.toString))}))))
 
 (defn- wrap-ld-collection-contents [coll]
@@ -204,7 +202,7 @@
                     (triples->ld-resource-collection)
                     (sort-by #(get % issued-uri) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents series)
-                          (json-ld/compact (json-ld/simple-collection-context system-uris))
+                          (json-ld/compact (json-ld/context system-uris))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))
@@ -217,8 +215,7 @@
                        (map (partial shared/add-dcat:distribution-formats request))
                        (sort-by (comp str (keyword "@id")) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents revisions)
-                          (json-ld/compact
-                           (json-ld/dcat-distribution-collection-context system-uris))
+                          (json-ld/compact (json-ld/context system-uris))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))
@@ -231,8 +228,7 @@
                       (map (partial shared/add-dcat:distribution-formats request))
                       (sort-by #(get % issued-uri) #(compare %2 %1)))
         response-body (-> (wrap-ld-collection-contents releases)
-                          (json-ld/compact
-                           (json-ld/dcat-distribution-collection-context system-uris))
+                          (json-ld/compact (json-ld/context system-uris))
                           (.toString))]
     (as-json-ld {:status 200
                  :body response-body})))

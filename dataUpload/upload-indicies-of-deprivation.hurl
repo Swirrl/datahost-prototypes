@@ -1,15 +1,15 @@
 # Description: This test creates three revisions, 1 commit in each (1st rev + append, 2nd rev + retractions, 
 # 3rd rev + corrections).
 
-# hurl upload-indicies-of-deprivation.hurl  --variable series=English-Indices-of-Deprivation --variable datahost-base-url=https://dluhc-pmd5-prototype.publishmydata.com --variable admin_password= <PASSWORD> 
+# hurl upload-indicies-of-deprivation.hurl  --variable series=English-Indices-of-Deprivation --variable datahost-base-url=https://dluhc-pmd5-prototype.publishmydata.com --variable admin_password=$DLUHC_ADMIN_PASSWORD 
 # run locally with docker compose:
-# hurl upload-indicies-of-deprivation.hurl  --variable series=English-Indices-of-Deprivation --variable datahost-base-url=http://localhost:8889 --variable admin_password= <PASSWORD> 
+# hurl upload-indicies-of-deprivation.hurl  --variable series=English-Indices-of-Deprivation --variable datahost-base-url=http://localhost:8889 --variable admin_password=password
  
-DELETE {{datahost-base-url}}/data/{{series}}
-[BasicAuth]
-idp: {{admin_password}}
+#DELETE {{datahost-base-url}}/data/{{series}}
+#[BasicAuth]
+#idp: {{admin_password}}
 
-HTTP 204
+#HTTP 204
 
 
 PUT {{datahost-base-url}}/data/{{series}}
@@ -73,6 +73,8 @@ HTTP 201
 
 POST {{datahost-base-url}}{{2007score_url}}/appends
 Content-Type: text/csv
+[Options]
+delay: 5000
 [BasicAuth]
 idp: {{admin_password}}
 [QueryStringParams]
@@ -87,6 +89,8 @@ HTTP 201
 PUT {{datahost-base-url}}/data/{{series}}/release/2007-rank
 Accept: application/json
 Content-Type: application/json
+[Options]
+delay: 10000
 [BasicAuth]
 idp: {{admin_password}}
 {
@@ -96,6 +100,7 @@ idp: {{admin_password}}
 	"rdfs:comment": "A range of measures which form the Indices of Deprivation 2007.",
 	"dh:reasonForChange": "Changes between Indices may mean that care should be taken when comparing iterations over time."
 }
+
 HTTP 201
 
 
@@ -140,6 +145,8 @@ HTTP 201
 PUT {{datahost-base-url}}/data/{{series}}/release/2010-score
 Accept: application/json
 Content-Type: application/json
+[Options]
+delay: 10000
 [BasicAuth]
 idp: {{admin_password}}
 {
@@ -194,6 +201,8 @@ HTTP 201
 PUT {{datahost-base-url}}/data/{{series}}/release/2010-rank
 Accept: application/json
 Content-Type: application/json
+[Options]
+delay: 10000
 [BasicAuth]
 idp: {{admin_password}}
 {
@@ -248,6 +257,8 @@ HTTP 201
 PUT {{datahost-base-url}}/data/{{series}}/release/2015
 Accept: application/json
 Content-Type: application/json
+[Options]
+delay: 10000
 [BasicAuth]
 idp: {{admin_password}}
 {
@@ -304,6 +315,8 @@ HTTP 201
 PUT {{datahost-base-url}}/data/{{series}}/release/2019
 Accept: application/json
 Content-Type: application/json
+[Options]
+delay: 10000
 [BasicAuth]
 idp: {{admin_password}}
 {
@@ -344,6 +357,8 @@ revision1_url: header "Location"
 
 POST {{datahost-base-url}}{{revision1_url}}/appends
 Content-Type: text/csv
+[Options]
+delay: 10000
 [BasicAuth]
 idp: {{admin_password}}
 [QueryStringParams]

@@ -82,7 +82,7 @@
             {:keys [status] :as response} (handler request)
             series-doc (json/read-str (:body response))]
         (t/is (= 200 status))
-        (t/is (= new-series-doc series-doc)))
+        (t/is (= (dissoc new-series-doc "@context") (dissoc series-doc "@context"))))
 
       (let [series2-slug "new-series-without-description"
             request (create-put-request series2-slug
