@@ -154,7 +154,7 @@ HTTP 200
 [Asserts]
 jsonpath "$['dcterms:title']" == "Example Release"
 jsonpath "$['dcterms:description']" == "Description"
-jsonpath "$['@id']" == "{{series}}2/release/release-1"
+jsonpath "$['@id']" == "release-1"
 jsonpath "$['@type']" == "dh:Release"
 jsonpath "$['dcterms:license']" == "http://license-link"
 jsonpath "$['dcat:inSeries']" == "{{expected_scheme}}://{{expected_uri_root}}/data/{{series}}2"
@@ -168,7 +168,7 @@ jsonpath "$['dh:reasonForChange']" == "Comment about change"
 #jsonpath "$['@context'].['dcat']" == "http://www.w3.org/ns/dcat#"
 #jsonpath "$['@context'].['csvw']" == "http://www.w3.org/ns/csvw#"
 #jsonpath "$['@context'].['appropriate-csvw']" == "https://publishmydata.com/def/appropriate-csvw/"
-jsonpath "$['@context'].[1].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/"
+jsonpath "$['@context'].[1].['@base']" == "{{expected_scheme}}://{{expected_uri_root}}/data/{{series}}2/release/"
 
 #Multiple releases can be can be retrieved via the API
 PUT {{scheme}}://{{host_name}}/data/{{series}}2/release/release-2
