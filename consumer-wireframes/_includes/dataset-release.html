@@ -311,24 +311,17 @@ layout: basic
                 })
             }}
 
-        } else if (typeof data["dh:hasChange"] != "string") {
+        } else  {
+            console.log('has change:' + data)
             html = ""
             for (i=0; i<data["dh:hasChange"].length; i++){
                 changeID = data["dh:hasChange"][i].split('/').slice(8)
             changeURI = uri + '/revision/' + changeID.join('/')
                 changes = document.getElementById("changes")
-                html += `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a>`
-
+                html += `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a></div>`
             }
             changes.innerHTML = html
-        } else {
-            changeID = data["dh:hasChange"].split('/').slice(8)
-            console.log(changeID)
-            changeURI = uri + '/revision/' + changeID.join('/')
-            console.log('CHANGE URI: ' + changeURI)
-            changes = document.getElementById("changes")
-            changes.innerHTML = `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes (CSV)</a>`
-        }
+        } 
 
         getSchema(schemaUri)
     }
