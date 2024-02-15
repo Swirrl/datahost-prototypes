@@ -39,8 +39,10 @@ layout: basic
                     <thead class="table-light">
                         <tr>
                             <th class="fixed" scope="col">Revision</th>
-                            <th scope="col">Description</th>
+                            <th scope="col">Title</th>
                             <th class="fixed" scope="col">Link</th>
+                            <th class="col-lg-3" scope="col">Dataset</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -65,11 +67,13 @@ layout: basic
     let seriesUri = envDomain + '/data/' + seriesID
 
     const tableStructure = [{
+        "name": "index"
+    }, {
         "name": "dcterms:title"
     }, {
-        "name": "dcterms:description"
-    }, {
         "name": "@id"
+    }, {
+        "name": "download"
     }]
     const tableRef = document.getElementById("table");
     const tr = tableRef.getElementsByTagName("tr");
@@ -133,21 +137,48 @@ layout: basic
 
 
     populateRevision = data => {
-            revision = data.contents
-            for (i = 0; i < revision.length; i++) {
+            revisions = data.contents
+            for (i = 0; i < revisions.length; i++) {
                 let newRow = tableRef.insertRow(-1);
                 for (j = 0; j < tableStructure.length; j++) {
-                    const revisionID = revision[i]["@id"].split('/').pop()
+                    const revisionID = revisions[i]["@id"].split('/').pop()
+                    const link = `/datasets/dataset-series/dataset-release/dataset-revision?series=${seriesID}&release=${releaseID}&revision=${revisionID}`
+                    
+                    console.log(revisions[i])
+                    console.log(revisions[i]['dh:hasChange'][0])
+                    const beLink = revisions[i]['dh:hasChange'][0]
                     if (tableStructure[j].name == "@id") {
-                            let cellValue = `View ${revision[i]["dcterms:title"]}`
+                            let cellValue = `View ${revisions[i]["dcterms:title"]}`
                             let cell = newRow.insertCell(j);
                             let text = document.createTextNode(cellValue);
                             let a = document.createElement('a');
                             a.href = `/datasets/dataset-series/dataset-release/dataset-revision?series=${seriesID}&release=${releaseID}&revision=${revisionID}`;
                             a.appendChild(text);
                             cell.appendChild(a);
+                        } else if (tableStructure[j].name == "index") {
+                            let cellValue = revisions.length - i 
+                            let cell = newRow.insertCell(j);
+                            let text = document.createTextNode(cellValue);
+                            cell.appendChild(text);
+                        } else if (tableStructure[j].name == "download") {
+                            let cell = newRow.insertCell(j);
+                            let h3 = document.createElement('h3');
+                            h3.classList.add( 'text-center');
+                            let a = document.createElement('a');
+                            a.classList.add('btn', 'btn-primary', 'btn-sm', 'col-12');
+                            a.textContent = 'Download (CSV)';
+                            a.onclick = function() {
+                                downloadCSV(beLink, 'revision');
+                            };
+                            h3.appendChild(a);
+                            cell.appendChild(h3);
+                        } else if (tableStructure[j].name == "changes") {
+                            let cellValue = 'swag'
+                            let cell = newRow.insertCell(j);
+                            let text = document.createTextNode(cellValue);
+                            cell.appendChild(text);
                         } else {
-                            let cellValue = revision[i][tableStructure[j].name]
+                            let cellValue = revisions[i][tableStructure[j].name]
                             let cell = newRow.insertCell(j);
                             let text = document.createTextNode(cellValue);
                             cell.appendChild(text);
@@ -156,4 +187,22 @@ layout: basic
                     }
                 }
             }
+
+        downloadCSV = (url, type) => {
+        console.log('downloading ' +    url)
+        let request = new XMLHttpRequest();
+        request.open("GET", url, true);
+        request.setRequestHeader("Accept", "text/csv")
+        request.responseType = "blob";
+        request.onload = function () {
+            let blob = request.response;
+            let fileName = `${type}.csv`
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        };
+
+        request.send();
+    }
 </script>
