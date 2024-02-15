@@ -177,4 +177,5 @@ The supplied document should conform to the Datahost TableSchema."
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]
-                           [:message string?]]}}})
+                           [:message string?]]}}
+   :tags ["Publisher API"]})

@@ -155,7 +155,7 @@ that make up that revision.
                        routes-shared/series-slug-param-spec
                        routes-shared/release-slug-param-spec
                        routes-shared/revision-id-param-spec
-                       routes-shared/change-id-param-spec]}
+                       routes-shared/commit-id-param-spec]}
    :responses {200 {:content
                     {"text/csv" any?}}
                404 {:body routes-shared/NotFoundErrorBody}}
@@ -176,4 +176,5 @@ that make up that revision.
                500 {:description "Internal server error"
                     :body [:map
                            [:status [:enum "error"]]
-                           [:message string?]]}}})
+                           [:message string?]]}}
+   :tags ["Publisher API"]})

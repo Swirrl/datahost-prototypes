@@ -23,8 +23,8 @@
 (def revision-id-param-spec
   [:revision-id [:int {:description "The revision identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])
 
-(def change-id-param-spec
-  [:change-id [:int {:description "The change or commit identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])
+(def commit-id-param-spec
+  [:commit-id [:int {:description "The change or commit identifier.  _Note: Consuming applications should not make any assumptions about the format of this identifier and should treat it as opaque._"}]])
 
 (def NotFoundErrorBody
   "Default body for 404 errors, for 'application/[ld+]json and others."
