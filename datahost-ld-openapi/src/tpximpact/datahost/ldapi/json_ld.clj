@@ -14,7 +14,7 @@
   ;; the file has the correct header.
   ;;
   ;; NOTE: This should be updated to track the dluhc-integration branch
-  ["https://cdn.jsdelivr.net/gh/Swirrl/datahost-prototypes@6a3ab99/datahost-ld-openapi/resources/jsonld-context.json"
+  ["https://cdn.jsdelivr.net/gh/Swirrl/datahost-prototypes@1282114/datahost-ld-openapi/resources/jsonld-context.json"
    {"@base" (su/rdf-base-uri system-uris)}])
 
 (defn ->json-document
