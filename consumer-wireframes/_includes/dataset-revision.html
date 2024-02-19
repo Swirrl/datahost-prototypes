@@ -190,7 +190,7 @@ layout: basic
                 changeURI = revision["dh:hasChange"][i]
                 changes = document.getElementById("changes")
                 html +=
-                    `<a class="btn btn-primary" onclick="downloadCSV('${changeURI}','change')">Download changes ${revision["dh:hasChange"].length-i} (CSV)</a>`
+                    `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${revision["dh:hasChange"].length-i} (CSV)</a></div>`
 
             }
             changes.innerHTML = html
