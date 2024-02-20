@@ -148,7 +148,7 @@ layout: basic
                     console.log(revisions[i]['dh:hasChange'][0])
                     const beLink = revisions[i]['dh:hasChange'][0]
                     if (tableStructure[j].name == "@id") {
-                            let cellValue = `View ${revisions[i]["dcterms:title"]}`
+                            let cellValue = `View`
                             let cell = newRow.insertCell(j);
                             let text = document.createTextNode(cellValue);
                             let a = document.createElement('a');

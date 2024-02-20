@@ -18,7 +18,8 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold h3 pr-5"><span id="subTitle"></span>
+                    <h1 class="h3 text-muted pb-2"><span>Release</span>
+                    <h1 class="font-weight-bold h2 pr-5"><span id="subTitle"></span>
                     </h1>
                     <h1 class="font-weight-bold pr-5">
                         <span id="title"></span></h1>
@@ -318,7 +319,7 @@ layout: basic
                 changeID = data["dh:hasChange"][i].split('/').slice(8)
             changeURI = uri + '/revision/' + changeID.join('/')
                 changes = document.getElementById("changes")
-                html += `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a></div>`
+                html += `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${i+1} (CSV)</a></div>`
             }
             changes.innerHTML = html
         } 

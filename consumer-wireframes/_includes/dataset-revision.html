@@ -20,7 +20,8 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold h3 pr-5"><span id="seriesTitle"></span>: <span id="releaseTitle"></span></h1>
+                    <h1 class="h3 text-muted pb-2"><span>Revision</span>
+                    <h1 class="font-weight-bold h2 pr-5"><span id="seriesTitle"></span>: <span id="releaseTitle"></span></h1>
                     <h1 class="font-weight-bold pr-5"><span id="title"></span></h1>
                     <!-- <p class="lead"><strong>Last update:</strong> <span id="modified"></span> | <strong> Next
                             update:</strong> </p> -->
@@ -190,7 +191,7 @@ layout: basic
                 changeURI = revision["dh:hasChange"][i]
                 changes = document.getElementById("changes")
                 html +=
-                    `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${revision["dh:hasChange"].length-i} (CSV)</a></div>`
+                    `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${i+1} (CSV)</a></div>`
 
             }
             changes.innerHTML = html
