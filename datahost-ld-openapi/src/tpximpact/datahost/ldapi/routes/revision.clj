@@ -157,7 +157,8 @@ that make up that revision.
                        routes-shared/revision-id-param-spec
                        routes-shared/commit-id-param-spec]}
    :responses {200 {:content
-                    {"text/csv" any?}}
+                    {"text/csv" any?
+                     "application/ld+json" string?}}
                404 {:body routes-shared/NotFoundErrorBody}}
    :tags ["Consumer API"]})
 

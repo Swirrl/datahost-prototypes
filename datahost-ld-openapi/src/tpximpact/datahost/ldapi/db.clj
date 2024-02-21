@@ -219,7 +219,8 @@
                                    [change-uri :dcterms/description '?description]
                                    [change-uri :dcterms/format '?format]
                                    [change-uri :dh/updates '?updates]
-                                   [change-uri :dh/appliesToRevision '?revision]]
+                                   [change-uri :dh/appliesToRevision '?revision]
+                                   [change-uri :dh/changeKind '?changeKind]]
                              snapshot-csv-tri [change-uri :dh/revisionSnapshotCSV '?snapshot]]
                          {:prefixes default-prefixes
                           :construct (conj bgps snapshot-csv-tri)
