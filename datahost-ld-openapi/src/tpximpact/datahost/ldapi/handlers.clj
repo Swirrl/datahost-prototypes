@@ -373,9 +373,9 @@
                        matcha/index-triples
                        triples->ld-resource)]
     (if (= accept "application/json")
-      {:status 200
+       (as-json-ld{:status 200
        :body (-> (json-ld/compact change (json-ld/context system-uris))
-                             (.toString))}
+                             (.toString))})
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=change.csv"}

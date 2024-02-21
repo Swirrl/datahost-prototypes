@@ -148,7 +148,20 @@ layout: basic
     });
 
 
-    populatePage = (series, release, revision) => {
+    fetchCommit = commit => {
+        return fetch(commit, settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                return data
+            })
+            .catch(error => {
+                throw error
+            });
+    }
+
+    populatePage = async (series, release, revision) => {
         console.log(revision)
         console.log(release)
         console.log(series)
@@ -179,6 +192,7 @@ layout: basic
 
         let changes = ""
         let changeURI = ""
+        let changeType = ''
         if (revision["dh:hasChange"] == undefined) {
             document.getElementById("changes").innerHTML = ""
             changes = document.getElementById("changesTitle")
@@ -188,9 +202,17 @@ layout: basic
             html = ""
             for (i = 0; i < revision["dh:hasChange"].length; i++) {
                 changeURI = revision["dh:hasChange"][i]
+                const changeURL = envDomain + '/' + changeURI.split('/').slice(3).join('/')
+                await fetchCommit(changeURL).then(data => {
+                    changeType = data["dh:changeKind"].split('/').pop().slice(10)
+                    if (changeType != 'Append') {
+                        changeType += 'ion'
+                    }
+                })
                 changes = document.getElementById("changes")
+                let buttonText = `${revision["dh:hasChange"].length-i}: ${changeType}s (CSV)`
                 html +=
-                    `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${revision["dh:hasChange"].length-i} (CSV)</a></div>`
+                `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURL}','change')">${buttonText}</a></div>`
 
             }
             changes.innerHTML = html
@@ -207,6 +229,8 @@ layout: basic
 
 
     }
+
+    
 
     fetchRelease = release => {
         fetch(release, settings)

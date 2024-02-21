@@ -280,12 +280,27 @@ layout: basic
             });
     }
 
-    populateRevision = (data, release) => {
+    fetchCommit = commit => {
+        return fetch(commit, settings)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                return data
+            })
+            .catch(error => {
+                throw error
+            });
+    }
+
+    populateRevision = async (data, release) => {
         document.getElementById('revisionReason').innerHTML = data["dcterms:description"]
         console.log(data)
        
         let changes = ""
         let changeURI = ""
+        let changeType = ''
+
         if (!data["dh:hasChange"] ){
             console.log('no changes')
             changes = document.getElementById("changesTitle")
@@ -314,11 +329,20 @@ layout: basic
         } else  {
             console.log('has change:' + data)
             html = ""
-            for (i=0; i<data["dh:hasChange"].length; i++){
-                changeID = data["dh:hasChange"][i].split('/').slice(8)
-            changeURI = uri + '/revision/' + changeID.join('/')
+            for (i = 0; i < data["dh:hasChange"].length; i++) {
+                changeURI = data["dh:hasChange"][i]
+                const changeURL = envDomain + '/' + changeURI.split('/').slice(3).join('/')
+                await fetchCommit(changeURL).then(commit => {
+                    changeType = commit["dh:changeKind"].split('/').pop().slice(10)
+                    if (changeType != 'Append') {
+                        changeType += 'ion'
+                    }
+                })
                 changes = document.getElementById("changes")
-                html += `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURI}','change')">Download changes ${data["dh:hasChange"].length-i} (CSV)</a></div>`
+                let buttonText = `${data["dh:hasChange"].length-i}: ${changeType}s (CSV)`
+                html +=
+                `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURL}','change')">${buttonText}</a></div>`
+
             }
             changes.innerHTML = html
         } 
