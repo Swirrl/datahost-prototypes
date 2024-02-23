@@ -18,7 +18,8 @@ layout: basic
         <div class="container">
             <div class="row">
                 <div class="col-lg-8">
-                    <h1 class="font-weight-bold h3 pr-5"><span id="subTitle"></span>
+                    <h1 class="h3 text-muted pb-2"><span>Release</span>
+                    <h1 class="font-weight-bold h2 pr-5"><span id="subTitle"></span>
                     </h1>
                     <h1 class="font-weight-bold pr-5">
                         <span id="title"></span></h1>
@@ -342,7 +343,6 @@ layout: basic
                 let buttonText = `${data["dh:hasChange"].length-i}: ${changeType}s (CSV)`
                 html +=
                 `<div><a class="btn btn-primary mt-2" onclick="downloadCSV('${changeURL}','change')">${buttonText}</a></div>`
-
             }
             changes.innerHTML = html
         } 
