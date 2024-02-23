@@ -372,13 +372,15 @@
                        (db/get-change triplestore)
                        matcha/index-triples
                        triples->ld-resource)]
-    (if (= accept "text/csv")
+    (if (= accept "application/json")
+       (as-json-ld{:status 200
+       :body (-> (json-ld/compact change (json-ld/context system-uris))
+                             (.toString))})
       {:status 200
        :headers {"content-type" "text/csv"
                  "content-disposition" "attachment ; filename=change.csv"}
        :body (or (change->csv-stream change-store change) "")}
 
-      {:status 406
-       :headers {}
-       :body "Only text/csv format is available at this time."})
+      
+      )
     (errors/not-found-response request)))
