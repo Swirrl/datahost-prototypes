@@ -100,7 +100,6 @@
                                  (util.response/header "content-type" "text/plain"))
           :else (let [rev-uri ^URI (:rev change-info)]
                   (-> (util.response/redirect (str (.getPath rev-uri) ".csv"))
-                      (assoc-in [:headers "Accept"] "text/csv")
                       (shared/set-csvm-header request)))))
       (as-json-ld {:status 200
                    :body (-> (json-ld/compact release (json-ld/context system-uris))
