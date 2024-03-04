@@ -47,7 +47,7 @@ HTTP 201
 revision1_url: header "Location"
 
 GET {{scheme}}://{{host_name}}/data/{{series}}/release/release-1/revision/1
-Accept: applicatin/json
+Accept: application/json
 
 HTTP 200
 [Asserts]

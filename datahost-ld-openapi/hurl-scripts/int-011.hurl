@@ -292,7 +292,7 @@ HTTP 302
 path: header "Link"
 [Asserts]
 variable "path" matches /<http:\/\/(.+)(:\d+){0,1}(\S+)>; rel="describedBy"; type="application\/csvm\+json"/
-header "Location" == "{{revision2_url}}"
+header "Location" == "{{revision2_url}}.csv"
 
 
 

@@ -244,7 +244,7 @@ path: header "Link"
 [Asserts]
 variable "path" contains "type=\"application/csvm+json\""
 variable "path" contains "rel=\"describedBy\""
-header "Location" == "{{revision2_url}}"
+header "Location" == "{{revision2_url}}.csv"
 
 
 

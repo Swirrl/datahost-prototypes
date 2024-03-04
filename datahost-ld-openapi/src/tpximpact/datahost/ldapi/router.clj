@@ -306,9 +306,42 @@ specifications for each route.")
       {:get (routes.rel/get-release-list-route-config triplestore system-uris)}]
 
      ["/:series-slug/release"
+
+      ;; Need to declare this block before 1) "/{release-slug}.{extension}"
+      ;; otherwise 2) "/{release-slug}/revision/{revision-id}.{extension}" won't
+      ;; ever get matched. 1) will match anything with a `.{extension}`.
+      ["/{release-slug}/revision"
+       ["/{revision-id}.csv"
+        {:name ::revision.csv
+         :get (-> (routes.rev/get-revision-route-config triplestore change-store system-uris)
+                  (update :handler (fn [handler]
+                                     (fn [request]
+                                       (-> request
+                                           (assoc-in [:headers "accept"] "text/csv")
+                                           (handler))))))}]
+       ["/{revision-id}"
+        {:name ::revision
+         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)
+         :post (routes.rev/post-revision-delta-config {:triplestore triplestore
+                                                       :change-store change-store
+                                                       :clock clock
+                                                       :system-uris system-uris})}]
+
+       ["/{revision-id}/commit/:commit-id"
+        {:name ::commit
+         :get (routes.rev/get-revision-commit-route-config triplestore change-store system-uris)}]
+
+       ["/{revision-id}/appends"
+        {:post (routes.rev/post-revision-appends-route-config triplestore change-store system-uris)}]
+
+       ["/{revision-id}/retractions"
+        {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
+
+       ["/{revision-id}/corrections"
+        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]
+
       ["/{release-slug}.{extension}"
        {:get (routes.rel/get-release-route-config triplestore change-store system-uris)}]
-
       ["/{release-slug}"
        {:put (routes.rel/put-release-route-config clock triplestore system-uris)
         :post (routes.rel/post-release-delta-config {:triplestore triplestore
@@ -323,29 +356,7 @@ specifications for each route.")
 
       ["/{release-slug}/revisions"
        {:post (routes.rev/post-revision-route-config triplestore system-uris)
-        :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]
-
-      ["/:release-slug/revision"
-       ["/:revision-id"
-        {:name ::revision
-         :get (routes.rev/get-revision-route-config triplestore change-store system-uris)
-         :post (routes.rev/post-revision-delta-config {:triplestore triplestore
-                                                       :change-store change-store
-                                                       :clock clock
-                                                       :system-uris system-uris})}]
-
-       ["/:revision-id/commit/:commit-id"
-        {:name ::commit
-         :get (routes.rev/get-revision-commit-route-config triplestore change-store system-uris)}]
-
-       ["/:revision-id/appends"
-        {:post (routes.rev/post-revision-appends-route-config triplestore change-store system-uris)}]
-
-       ["/:revision-id/retractions"
-        {:post (routes.rev/post-revision-retractions-route-config triplestore change-store system-uris)}]
-
-       ["/:revision-id/corrections"
-        {:post (routes.rev/post-revision-corrections-route-config triplestore change-store system-uris)}]]]]]
+        :get (routes.rev/get-revision-list-route-config triplestore system-uris)}]]]]
 
    {;;:reitit.middleware/transform dev/print-request-diffs ;; pretty diffs
     ;;:validate spec/validate ;; enable spec validation for route data
