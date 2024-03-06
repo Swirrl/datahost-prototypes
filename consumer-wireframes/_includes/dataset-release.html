@@ -34,10 +34,15 @@ layout: basic
             <div class="col-lg-8">
                 <h2 class="pt-4">Latest data</h2>
 
-
-                <h3 id = "downloadButton" class="h4 pt-3"><a class="btn btn-primary" id = "downloadButtonMain" onclick="downloadCSV(uri,'release')">Download dataset (CSV)</a>
-                    <!-- <a a class="btn btn-secondary " href="#">Download metadata (JSON, 20Kb)</a> -->
-                </h3>
+                <div class="d-inline-block">
+                    <a class="btn btn-primary " id="downloadButtonMain1" onclick="downloadCSV(uri,'release')">Download dataset (CSV)</a>
+                </div>
+                <div class="d-inline-block">
+                    <a class="btn btn-primary bg-light text-dark" id="downloadButtonMain2" onclick="copyToClipboard(uri+'.csv')">Direct link (CSV)
+                         <img src="/assets/copyicon3black.png" alt="Copy Icon" class="pb-1" width="22" height="22">
+                    </a>
+                </div>
+                
                 <h3 class="h5 pt-3">
                     <a class="" data-bs-toggle="collapse" href="#1986-2010explain" role="button" aria-expanded="false"
                         aria-controls="collapseExample">
@@ -393,4 +398,18 @@ layout: basic
         request.send();
 
     }
+    function copyToClipboard(text) {
+    var textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    
+    textarea.select();
+    
+    document.execCommand('copy');
+    
+    document.body.removeChild(textarea);
+    
+    alert('Link copied to clipboard: ' + text);
+}
+
 </script>
