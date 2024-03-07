@@ -1,8 +1,8 @@
 FeatureCode,DateCode,Measurement,Units,Value,DCLG Planning Decisions Major and Minor Developmets by Development Type
-E06000021,Year ending 2019-03-31,Decisions,,17,Retail distribution servicing
-E06000021,Year ending 2018-03-31,Decisions,,4,Offices research and development / light industry
-E06000021,Year ending 2019-12-31,Decisions,,15,Offices research and development / light industry
-E06000021,Year ending 2014-09-30,Decisions,,0,Gypsy and traveller pitches
-E06000021,Year ending 2016-12-31,Decisions,,101,Other Major and Minor Developments
-E06000021,Year ending 2014-09-30,Decisions,,67,Retail distribution servicing
-E06000021,Year ending 2017-06-30,Decisions,,118,Dwellings
+E06000021,Year ending 2019-03-31,Decisions,application-decisions,17,Retail distribution servicing
+E06000021,Year ending 2018-03-31,Decisions,application-decisions,4,Offices research and development / light industry
+E06000021,Year ending 2019-12-31,Decisions,application-decisions,15,Offices research and development / light industry
+E06000021,Year ending 2014-09-30,Decisions,application-decisions,0,Gypsy and traveller pitches
+E06000021,Year ending 2016-12-31,Decisions,application-decisions,101,Other Major and Minor Developments
+E06000021,Year ending 2014-09-30,Decisions,application-decisions,67,Retail distribution servicing
+E06000021,Year ending 2017-06-30,Decisions,application-decisions,118,Dwellings

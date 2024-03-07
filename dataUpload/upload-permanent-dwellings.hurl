@@ -5,11 +5,11 @@
 # run locally with docker compose:
 # hurl upload-permanent-dwellings.hurl --variable series=Permanent-dwellings-completed --variable datahost-base-url=http://localhost:8889 --variable admin_password=password
 
-# DELETE {{datahost-base-url}}/data/{{series}}
-# [BasicAuth]
-# idp: {{admin_password}}
+DELETE {{datahost-base-url}}/data/{{series}}
+ [BasicAuth]
+ idp: {{admin_password}}
 
-# HTTP 204
+ HTTP 204
 
 
 PUT {{datahost-base-url}}/data/{{series}}
